@@ -1,25 +1,13 @@
 CREATE EXTENSION unaccent;
 CREATE EXTENSION hstore;
 
-CREATE FUNCTION assert_min_length(input text, minlength integer)
-  RETURNS boolean AS $$
-  DECLARE
-    length integer;
-  BEGIN
-    length := char_length(trim(input));
-    IF (length IS NULL) OR (length >= minlength)
-      THEN RETURN TRUE;
-    ELSE
-      RETURN FALSE;
-    END IF;
-   END;
-  $$ LANGUAGE plpgsql;
+CREATE FUNCTION assert_min_length(input text, minlength integer) RETURNS boolean AS $$ DECLARE length integer; BEGIN length := char_length(trim(input)); IF (length IS NULL) OR (length >= minlength) THEN RETURN TRUE; ELSE RETURN FALSE; END IF; END; $$ LANGUAGE plpgsql;
 
 
 CREATE TABLE vocabulary(
   key serial NOT NULL PRIMARY KEY,
   namespace text CHECK (assert_min_length(namespace, 1)),
-  name text NOT NULL CHECK (assert_min_length(name, 1)),
+  name text NOT NULL UNIQUE CHECK (assert_min_length(name, 1)),
   label hstore,
   definition hstore,
   external_definition_urls text[],
@@ -60,10 +48,10 @@ CREATE TABLE concept(
   vocabulary_key integer NOT NULL REFERENCES vocabulary(key),
   parent_key integer REFERENCES concept(key),
   replaced_by_key integer REFERENCES concept(key),
-  name text NOT NULL CHECK (assert_min_length(name, 1)),
+  name text NOT NULL UNIQUE CHECK (assert_min_length(name, 1)),
   label hstore,
-  alternative_label hstore,
-  misspelt_label hstore,
+  alternative_labels hstore,
+  misspelt_labels hstore,
   definition hstore,
   external_definition_urls text[],
   same_as_uris text[],
@@ -85,8 +73,8 @@ $conceptchange$
       NEW.fulltext_search :=
 				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(NEW.name,''))) ||
 				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(avals(NEW.label), ' '),''))) ||
-				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(avals(NEW.alternative_label), ' '),''))) ||
-				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(avals(NEW.misspelt_label), ' '),''))) ||
+				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(avals(NEW.alternative_labels), ' '),''))) ||
+				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(avals(NEW.misspelt_labels), ' '),''))) ||
 				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(avals(NEW.definition), ' '),''))) ||
 				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.external_definition_urls, ' '),''))) ||
 				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.same_as_uris, ' '),''))) ||

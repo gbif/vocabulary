@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import javax.validation.constraints.NotNull;
 
 public class Vocabulary implements Auditable {
 
@@ -15,6 +16,7 @@ public class Vocabulary implements Auditable {
 
   private Integer key;
   private String namespace;
+  @NotNull
   private String name;
   private Map<Language, String> label;
   private Map<Language, String> definition;

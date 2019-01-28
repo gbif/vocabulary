@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import javax.validation.constraints.NotNull;
 
 public class Concept implements Auditable {
 
@@ -17,10 +18,11 @@ public class Concept implements Auditable {
   private Integer vocabularyKey;
   private Integer parentKey;
   private Integer replacedByKey;
+  @NotNull
   private String name;
   private Map<Language, String> label;
-  private Map<Language, String> alternativeLabel;
-  private Map<Language, String> misspeltLabel;
+  private Map<Language, List<String>> alternativeLabels;
+  private Map<Language, List<String>> misspeltLabels;
   private Map<Language, String> definition;
   private List<URI> externalDefinitions;
   private List<URI> sameAsUris;
@@ -81,20 +83,20 @@ public class Concept implements Auditable {
     this.label = label;
   }
 
-  public Map<Language, String> getAlternativeLabel() {
-    return alternativeLabel;
+  public Map<Language, List<String>> getAlternativeLabels() {
+    return alternativeLabels;
   }
 
-  public void setAlternativeLabel(Map<Language, String> alternativeLabel) {
-    this.alternativeLabel = alternativeLabel;
+  public void setAlternativeLabels(Map<Language, List<String>> alternativeLabels) {
+    this.alternativeLabels = alternativeLabels;
   }
 
-  public Map<Language, String> getMisspeltLabel() {
-    return misspeltLabel;
+  public Map<Language, List<String>> getMisspeltLabels() {
+    return misspeltLabels;
   }
 
-  public void setMisspeltLabel(Map<Language, String> misspeltLabel) {
-    this.misspeltLabel = misspeltLabel;
+  public void setMisspeltLabels(Map<Language, List<String>> misspeltLabels) {
+    this.misspeltLabels = misspeltLabels;
   }
 
   public Map<Language, String> getDefinition() {
@@ -190,8 +192,8 @@ public class Concept implements Auditable {
         && Objects.equals(replacedByKey, concept.replacedByKey)
         && Objects.equals(name, concept.name)
         && Objects.equals(label, concept.label)
-        && Objects.equals(alternativeLabel, concept.alternativeLabel)
-        && Objects.equals(misspeltLabel, concept.misspeltLabel)
+        && Objects.equals(alternativeLabels, concept.alternativeLabels)
+        && Objects.equals(misspeltLabels, concept.misspeltLabels)
         && Objects.equals(definition, concept.definition)
         && Objects.equals(externalDefinitions, concept.externalDefinitions)
         && Objects.equals(sameAsUris, concept.sameAsUris)
@@ -212,8 +214,8 @@ public class Concept implements Auditable {
         replacedByKey,
         name,
         label,
-        alternativeLabel,
-        misspeltLabel,
+        alternativeLabels,
+        misspeltLabels,
         definition,
         externalDefinitions,
         sameAsUris,
@@ -234,8 +236,8 @@ public class Concept implements Auditable {
         .add("replacedByKey=" + replacedByKey)
         .add("name='" + name + "'")
         .add("label=" + label)
-        .add("alternativeLabel=" + alternativeLabel)
-        .add("misspeltLabel=" + misspeltLabel)
+        .add("alternativeLabel=" + alternativeLabels)
+        .add("misspeltLabel=" + misspeltLabels)
         .add("definition=" + definition)
         .add("externalDefinitions=" + externalDefinitions)
         .add("sameAsUris=" + sameAsUris)

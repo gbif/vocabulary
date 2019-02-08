@@ -2,6 +2,7 @@ package org.gbif.vocabulary.model;
 
 import java.time.LocalDateTime;
 
+/** Defines the minimun fields that an entity must have in order to be auditable. */
 public interface Auditable {
 
   LocalDateTime getCreated();

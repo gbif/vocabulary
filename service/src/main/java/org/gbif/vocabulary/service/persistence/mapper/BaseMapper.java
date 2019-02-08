@@ -1,12 +1,19 @@
 package org.gbif.vocabulary.service.persistence.mapper;
 
 import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.vocabulary.model.VocabularyEntity;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-public interface BaseMapper<T> {
+/**
+ * Base mapper for {@link VocabularyEntity} entities.
+ *
+ * @param <T>
+ */
+public interface BaseMapper<T extends VocabularyEntity> {
 
   T get(@Param("key") Integer key);
 
@@ -19,4 +26,6 @@ public interface BaseMapper<T> {
   List<T> deleted(@Param("page") Pageable page);
 
   long countDeleted();
+
+  List<KeyNameResult> suggest(@Param("query") String query);
 }

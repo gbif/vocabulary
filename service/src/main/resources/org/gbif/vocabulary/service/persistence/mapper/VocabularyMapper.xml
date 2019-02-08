@@ -6,16 +6,15 @@
     <id property="key" column="key"/>
     <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler" />
     <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler" />
-    <result property="external_definition_urls" column="externalDefinitions" typeHandler="UriArrayTypeHandler" />
-    <result property="editorial_notes" column="editorialNotes" typeHandler="StringArrayTypeHandler" />
+    <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler" />
+    <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler" />
   </resultMap>
 
   <sql id="VOCABULARY_WRITE_FIELDS">
-    key, namespace, name, label, definition, external_definition_urls, editorial_notes, created_by, modified_by, created, modified
+    namespace, name, label, definition, external_definition_urls, editorial_notes, created_by, modified_by, created, modified
   </sql>
 
   <sql id="VOCABULARY_PARAMS_CREATE">
-    #{key,jdbcType=INTEGER},
     #{namespace,jdbcType=VARCHAR},
     #{name,jdbcType=VARCHAR},
     #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
@@ -46,7 +45,7 @@
     query @@ fulltext_search
   </sql>
 
-  <insert id="create">
+  <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
     INSERT INTO vocabulary(<include refid="VOCABULARY_WRITE_FIELDS"/>)
     VALUES(<include refid="VOCABULARY_PARAMS_CREATE"/>)
   </insert>
@@ -73,9 +72,15 @@
     SELECT *
     FROM vocabulary v
     <if test="query != null" >
-      JOIN plainto_tsquery('english',unaccent(#{query})) AS query ON  <include refid="SIMPLE_SEARCH"/>
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON <include refid="SIMPLE_SEARCH"/>
     </if>
     WHERE v.deleted IS NULL
+    <if test="name != null">
+      AND v.name = #{name}
+    </if>
+    <if test="namespace != null">
+      AND v.namespace = #{namespace}
+    </if>
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>
@@ -85,12 +90,18 @@
     SELECT COUNT(*)
     FROM vocabulary v
     <if test="query != null" >
-      JOIN plainto_tsquery('english',unaccent(#{query})) AS query ON  <include refid="SIMPLE_SEARCH"/>
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON <include refid="SIMPLE_SEARCH"/>
     </if>
     WHERE v.deleted IS NULL
+    <if test="name != null">
+      AND v.name = #{name}
+    </if>
+    <if test="namespace != null">
+      AND v.namespace = #{namespace}
+    </if>
   </select>
 
-  <select id="deleted" resultType="Vocabulary" resultMap="VOCABULARY_MAP">
+  <select id="deleted" resultType="Vocabulary" resultMap="VOCABULARY_MAP" parameterType="Pageable">
     SELECT *
     FROM vocabulary v
     WHERE v.deleted IS NOT NULL
@@ -106,6 +117,13 @@
     WHERE deleted IS NOT NULL
   </select>
 
-  <!-- TODO: suggest -->
+  <select id="suggest" resultType="KeyNameResult">
+    SELECT key, name
+    FROM (
+      (SELECT key, name FROM vocabulary WHERE name ilike #{query}||'%' ORDER BY name LIMIT 20)
+      UNION ALL
+      (SELECT key, name FROM vocabulary WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' ORDER BY name LIMIT 20)
+    ) t1 LIMIT 20
+  </select>
 
 </mapper>

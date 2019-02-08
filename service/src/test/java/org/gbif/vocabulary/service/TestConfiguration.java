@@ -1,5 +1,6 @@
 package org.gbif.vocabulary.service;
 
+import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.mybatis.type.StringArrayTypeHandler;
 import org.gbif.mybatis.type.UriArrayTypeHandler;
 
@@ -26,6 +27,7 @@ public class TestConfiguration {
         configuration
             .getTypeAliasRegistry()
             .registerAlias("StringArrayTypeHandler", StringArrayTypeHandler.class);
+        configuration.getTypeAliasRegistry().registerAlias("Pageable", Pageable.class);
       };
     }
   }

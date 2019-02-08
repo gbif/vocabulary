@@ -9,7 +9,7 @@
     <artifactId>vocabulary-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  
+
   <artifactId>service</artifactId>
   <version>1.0-SNAPSHOT</version>
 

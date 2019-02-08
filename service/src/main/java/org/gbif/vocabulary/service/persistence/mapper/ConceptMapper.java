@@ -2,7 +2,6 @@ package org.gbif.vocabulary.service.persistence.mapper;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
 
 import java.util.List;
 import javax.annotation.Nullable;
@@ -14,7 +13,7 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ConceptMapper extends BaseMapper<Concept> {
 
-  List<Vocabulary> list(
+  List<Concept> list(
       @Nullable @Param("query") String query,
       @Nullable @Param("vocabularyKey") Integer vocabularyKey,
       @Nullable @Param("parentKey") Integer parentKey,

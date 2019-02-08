@@ -20,8 +20,6 @@ import javax.validation.constraints.NotNull;
  */
 public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
 
-  // TODO: validations
-
   private Integer key;
   private String namespace;
   @NotNull private String name;

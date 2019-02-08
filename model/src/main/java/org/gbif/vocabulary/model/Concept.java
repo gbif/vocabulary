@@ -21,9 +21,8 @@ import javax.validation.constraints.NotNull;
  */
 public class Concept implements VocabularyEntity, LenientEquals<Concept> {
 
-  // TODO: validations
-
   private Integer key;
+  @NotNull
   private Integer vocabularyKey;
   private Integer parentKey;
   private Integer replacedByKey;

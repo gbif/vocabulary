@@ -5,7 +5,7 @@ import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.persistence.mapper.ConceptMapper;
+import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.service.ConceptService;
 
 import org.springframework.beans.factory.annotation.Autowired;

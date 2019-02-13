@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.persistence.mapper;
+package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.VocabularyEntity;
@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * Base mapper for {@link VocabularyEntity} entities.
+ * Base mappers for {@link VocabularyEntity} entities.
  *
  * @param <T>
  */

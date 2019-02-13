@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.persistence.mapper;
+package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Concept;

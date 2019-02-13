@@ -1,8 +1,7 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.persistence.mapper.ConceptMapper;
+import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 
 import javax.validation.ConstraintViolationException;
 

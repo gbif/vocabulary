@@ -5,7 +5,7 @@ import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.persistence.mapper.VocabularyMapper;
+import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import org.springframework.beans.factory.annotation.Autowired;

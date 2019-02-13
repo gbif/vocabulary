@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.persistence.mapper;
+package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;

@@ -1,7 +1,7 @@
 package org.gbif.vocabulary.service;
 
-import org.gbif.vocabulary.persistence.mapper.ConceptMapper;
-import org.gbif.vocabulary.persistence.mapper.VocabularyMapper;
+import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
+import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
 import javax.sql.DataSource;
 

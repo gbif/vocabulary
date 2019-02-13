@@ -5,8 +5,8 @@ spring:
     change-log: classpath:/liquibase/master.xml
 
 mybatis:
-  type-handlers-package: org.gbif.vocabulary.persistence.handler
-  type-aliases-package: org.gbif.vocabulary.model;org.gbif.vocabulary.persistence.handler
+  type-handlers-package: org.gbif.vocabulary.persistence.handlers
+  type-aliases-package: org.gbif.vocabulary.model;org.gbif.vocabulary.persistence.handlers
   configuration:
     map-underscore-to-camel-case: true
 

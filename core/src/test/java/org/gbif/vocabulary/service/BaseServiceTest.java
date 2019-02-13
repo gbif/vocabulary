@@ -1,7 +1,7 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.VocabularyEntity;
-import org.gbif.vocabulary.persistence.mapper.BaseMapper;
+import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 
 import java.time.LocalDateTime;
 import javax.validation.ConstraintViolationException;

@@ -1,7 +1,7 @@
 package org.gbif.vocabulary.service.impl;
 
 import org.gbif.vocabulary.model.VocabularyEntity;
-import org.gbif.vocabulary.persistence.mapper.BaseMapper;
+import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.service.BaseService;
 
 import org.springframework.transaction.annotation.Transactional;

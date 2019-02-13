@@ -1,20 +1,17 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.persistence.mapper.VocabularyMapper;
+import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
 import javax.validation.ConstraintViolationException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doAnswer;
 
 /** Tests the {@link VocabularyService}. */
 @Execution(ExecutionMode.SAME_THREAD)

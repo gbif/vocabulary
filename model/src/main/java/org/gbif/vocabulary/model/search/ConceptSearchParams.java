@@ -1,7 +1,5 @@
 package org.gbif.vocabulary.model.search;
 
-import org.gbif.api.model.common.paging.Pageable;
-
 import java.io.Serializable;
 
 /** Holder for the concept search parameters. */
@@ -12,21 +10,18 @@ public class ConceptSearchParams implements Serializable {
   private Integer parentKey;
   private Integer replacedByKey;
   private final String name;
-  private final Pageable page;
 
   private ConceptSearchParams(
       String query,
       Integer vocabularyKey,
       Integer parentKey,
       Integer replacedByKey,
-      String name,
-      Pageable page) {
+      String name) {
     this.query = query;
     this.vocabularyKey = vocabularyKey;
     this.parentKey = parentKey;
     this.replacedByKey = replacedByKey;
     this.name = name;
-    this.page = page;
   }
 
   public String getQuery() {
@@ -49,10 +44,6 @@ public class ConceptSearchParams implements Serializable {
     return name;
   }
 
-  public Pageable getPage() {
-    return page;
-  }
-
   /**
    * Creates a builder to create instances of {@link ConceptSearchParams}.
    *
@@ -68,40 +59,34 @@ public class ConceptSearchParams implements Serializable {
     private Integer parentKey;
     private Integer replacedByKey;
     private String name;
-    private Pageable page;
 
-    Builder query(String query) {
+    public Builder query(String query) {
       this.query = query;
       return this;
     }
 
-    Builder name(String name) {
+    public Builder name(String name) {
       this.name = name;
       return this;
     }
 
-    Builder vocabularyKey(Integer vocabularyKey) {
+    public Builder vocabularyKey(Integer vocabularyKey) {
       this.vocabularyKey = vocabularyKey;
       return this;
     }
 
-    Builder parentKey(Integer parentKey) {
+    public Builder parentKey(Integer parentKey) {
       this.parentKey = parentKey;
       return this;
     }
 
-    Builder replacedByKey(Integer replacedByKey) {
+    public Builder replacedByKey(Integer replacedByKey) {
       this.replacedByKey = replacedByKey;
       return this;
     }
 
-    Builder page(Pageable page) {
-      this.page = page;
-      return this;
-    }
-
-    ConceptSearchParams build() {
-      return new ConceptSearchParams(query, vocabularyKey, parentKey, replacedByKey, name, page);
+    public ConceptSearchParams build() {
+      return new ConceptSearchParams(query, vocabularyKey, parentKey, replacedByKey, name);
     }
   }
 }

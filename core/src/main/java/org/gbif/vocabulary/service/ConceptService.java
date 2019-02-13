@@ -5,6 +5,8 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 
+import javax.annotation.Nullable;
+
 /** Services for a {@link Concept}. */
 public interface ConceptService extends BaseService<Concept> {
 
@@ -12,9 +14,10 @@ public interface ConceptService extends BaseService<Concept> {
    * Retrieves pages of {@link Concept} that match with the {@link ConceptSearchParams} received.
    *
    * @param params to do the search.
+   * @param page paging parameters
    * @return a list of {@link Concept} ordered by their creation date, newest coming first
    */
-  PagingResponse<Concept> list(ConceptSearchParams params);
+  PagingResponse<Concept> list(@Nullable ConceptSearchParams params, @Nullable Pageable page);
 
   /**
    * Retrieves pages of {@link Concept} that are deleted.

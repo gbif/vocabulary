@@ -1,6 +1,7 @@
 package org.gbif.vocabulary.model;
 
 import java.time.LocalDateTime;
+import javax.validation.constraints.NotNull;
 
 /** Defines the minimun fields that an entity must have in order to be auditable. */
 public interface Auditable {
@@ -9,6 +10,7 @@ public interface Auditable {
 
   void setCreated(LocalDateTime created);
 
+  @NotNull
   String getCreatedBy();
 
   void setCreatedBy(String createdBy);
@@ -17,6 +19,7 @@ public interface Auditable {
 
   void setModified(LocalDateTime modified);
 
+  @NotNull
   String getModifiedBy();
 
   void setModifiedBy(String modifiedBy);

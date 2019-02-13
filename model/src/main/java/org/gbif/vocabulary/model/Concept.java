@@ -22,11 +22,10 @@ import javax.validation.constraints.NotNull;
 public class Concept implements VocabularyEntity, LenientEquals<Concept> {
 
   private Integer key;
-  @NotNull
   private Integer vocabularyKey;
   private Integer parentKey;
   private Integer replacedByKey;
-  @NotNull private String name;
+  private String name;
   private Map<Language, String> label = new EnumMap<>(Language.class);
   private Map<Language, List<String>> alternativeLabels = new EnumMap<>(Language.class);
   private Map<Language, List<String>> misspeltLabels = new EnumMap<>(Language.class);
@@ -52,6 +51,7 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
     this.key = key;
   }
 
+  @NotNull
   public Integer getVocabularyKey() {
     return vocabularyKey;
   }

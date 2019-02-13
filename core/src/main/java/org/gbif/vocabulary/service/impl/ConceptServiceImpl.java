@@ -10,9 +10,11 @@ import org.gbif.vocabulary.service.ConceptService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 /** Default implementation for {@link ConceptService}. */
 @Service
+@Validated
 public class ConceptServiceImpl extends AbstractBaseService<Concept> implements ConceptService {
 
   private final ConceptMapper conceptMapper;
@@ -24,8 +26,8 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
   }
 
   @Override
-  public PagingResponse<Concept> list(ConceptSearchParams params) {
-    Pageable page = params.getPage() != null ? params.getPage() : new PagingResponse<>();
+  public PagingResponse<Concept> list(ConceptSearchParams params, Pageable page) {
+    page = page != null ? page : new PagingResponse<>();
 
     return new PagingResponse<>(
         page,

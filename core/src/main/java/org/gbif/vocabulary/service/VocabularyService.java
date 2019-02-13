@@ -5,16 +5,20 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
+import javax.annotation.Nullable;
+
 /** Services for a {@link Vocabulary}. */
 public interface VocabularyService extends BaseService<Vocabulary> {
 
   /**
-   * Retrieves pages of {@link Vocabulary} that match with the {@link VocabularySearchParams} received.
+   * Retrieves pages of {@link Vocabulary} that match with the {@link VocabularySearchParams}
+   * received.
    *
    * @param params to do the search.
+   * @param page paging parameters
    * @return a list of {@link Vocabulary} ordered by their creation date, newest coming first
    */
-  PagingResponse<Vocabulary> list(VocabularySearchParams params);
+  PagingResponse<Vocabulary> list(@Nullable VocabularySearchParams params, @Nullable Pageable page);
 
   /**
    * Retrieves pages of {@link Vocabulary} that are deleted.

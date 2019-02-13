@@ -1,21 +1,18 @@
 package org.gbif.vocabulary.service;
 
-import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.persistence.mapper.BaseMapper;
 
 import java.time.LocalDateTime;
-import javax.sql.DataSource;
+import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,16 +28,13 @@ import static org.mockito.Mockito.when;
  */
 @TestPropertySource(properties = "spring.liquibase.enabled=false")
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {MockConfiguration.class})
+@SpringBootTest
 abstract class BaseServiceTest<T extends VocabularyEntity> {
 
-  private static final int TEST_KEY = 1;
+  protected static final int TEST_KEY = 1;
 
   private final BaseService<T> baseService;
   private final BaseMapper<T> baseMapper;
-
-  @MockBean private DataSource dataSource;
-  @MockBean private PlatformTransactionManager platformTransactionManager;
 
   BaseServiceTest(BaseService<T> baseService, BaseMapper<T> baseMapper) {
     this.baseService = baseService;
@@ -52,14 +46,7 @@ abstract class BaseServiceTest<T extends VocabularyEntity> {
     T entity = createNewEntity("name");
 
     // mock
-    doAnswer(
-            invocation -> {
-              Vocabulary vocab = invocation.getArgument(0);
-              vocab.setKey(TEST_KEY);
-              return vocab;
-            })
-        .when(baseMapper)
-        .create(entity);
+    mockCreateEntity(entity);
 
     baseService.create(entity);
 
@@ -68,7 +55,7 @@ abstract class BaseServiceTest<T extends VocabularyEntity> {
 
   @Test
   public void createNullEntityTest() {
-    assertThrows(NullPointerException.class, () -> baseService.create(null));
+    assertThrows(ConstraintViolationException.class, () -> baseService.create(null));
   }
 
   @Test
@@ -93,15 +80,15 @@ abstract class BaseServiceTest<T extends VocabularyEntity> {
     entity.setKey(TEST_KEY);
 
     // mock
+    when(baseMapper.get(TEST_KEY)).thenReturn(entity).thenReturn(entity);
     doNothing().when(baseMapper).update(entity);
-    when(baseMapper.get(TEST_KEY)).thenReturn(entity);
 
     assertEquals(entity, baseService.update(entity));
   }
 
   @Test
   public void updateNullEntityTest() {
-    assertThrows(NullPointerException.class, () -> baseService.update(null));
+    assertThrows(ConstraintViolationException.class, () -> baseService.update(null));
     // null key
     assertThrows(NullPointerException.class, () -> baseService.update(createNewEntity("name")));
   }
@@ -126,7 +113,8 @@ abstract class BaseServiceTest<T extends VocabularyEntity> {
     entity.setKey(TEST_KEY);
 
     // mock
-    when(baseMapper.get(TEST_KEY)).thenReturn(entity).thenReturn(entity);
+    when(baseMapper.get(TEST_KEY)).thenReturn(entity);
+    doNothing().when(baseMapper).update(entity);
 
     entity.setDeleted(LocalDateTime.now());
     assertThrows(IllegalArgumentException.class, () -> baseService.update(entity));
@@ -158,4 +146,15 @@ abstract class BaseServiceTest<T extends VocabularyEntity> {
   }
 
   abstract T createNewEntity(String name);
+
+  protected void mockCreateEntity(T entity) {
+    doAnswer(
+      invocation -> {
+        T createdEntity = invocation.getArgument(0);
+        createdEntity.setKey(TEST_KEY);
+        return createdEntity;
+      })
+      .when(baseMapper)
+      .create(entity);
+  }
 }

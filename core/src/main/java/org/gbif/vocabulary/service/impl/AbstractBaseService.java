@@ -4,9 +4,6 @@ import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.persistence.mapper.BaseMapper;
 import org.gbif.vocabulary.service.BaseService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Objects.requireNonNull;
@@ -28,8 +25,7 @@ abstract class AbstractBaseService<T extends VocabularyEntity> implements BaseSe
 
   @Transactional
   @Override
-  public int create(@NotNull @Valid T entity) {
-    requireNonNull(entity);
+  public int create(T entity) {
     checkArgument(entity.getKey() == null, "Can't create an entity which already has a key");
 
     baseMapper.create(entity);
@@ -45,7 +41,6 @@ abstract class AbstractBaseService<T extends VocabularyEntity> implements BaseSe
   @Transactional
   @Override
   public T update(T entity) {
-    requireNonNull(entity);
     requireNonNull(entity.getKey());
 
     T oldEntity = baseMapper.get(entity.getKey());

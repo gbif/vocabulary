@@ -10,9 +10,11 @@ import org.gbif.vocabulary.service.VocabularyService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 /** Default implementation for {@link VocabularyService}. */
 @Service
+@Validated
 public class VocabularyServiceImpl extends AbstractBaseService<Vocabulary>
     implements VocabularyService {
 
@@ -25,8 +27,8 @@ public class VocabularyServiceImpl extends AbstractBaseService<Vocabulary>
   }
 
   @Override
-  public PagingResponse<Vocabulary> list(VocabularySearchParams params) {
-    Pageable page = params.getPage() != null ? params.getPage() : new PagingResponse<>();
+  public PagingResponse<Vocabulary> list(VocabularySearchParams params, Pageable page) {
+    page = page != null ? page : new PagingResponse<>();
 
     return new PagingResponse<>(
         page,

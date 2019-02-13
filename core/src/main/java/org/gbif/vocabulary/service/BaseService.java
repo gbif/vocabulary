@@ -2,6 +2,11 @@ package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.VocabularyEntity;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.validation.annotation.Validated;
+
 /**
  * Base interface for the services of {@link VocabularyEntity}.
  *
@@ -15,7 +20,7 @@ public interface BaseService<T extends VocabularyEntity> {
    * @param entity to create
    * @return key of the newly created entity
    */
-  int create(T entity);
+  int create(@NotNull @Valid T entity);
 
   /**
    * Retrieves an entity by its key.
@@ -31,7 +36,7 @@ public interface BaseService<T extends VocabularyEntity> {
    * @param entity to be updated.
    * @return entity updated.
    */
-  T update(T entity);
+  T update(@NotNull @Valid T entity);
 
   /**
    * Deletes a entity by its key.

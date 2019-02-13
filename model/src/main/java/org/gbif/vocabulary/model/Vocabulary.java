@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
-import javax.validation.constraints.NotNull;
 
 /**
  * Models a Vocabulary.
@@ -22,7 +21,7 @@ public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
 
   private Integer key;
   private String namespace;
-  @NotNull private String name;
+  private String name;
   private Map<Language, String> label = new EnumMap<>(Language.class);
   private Map<Language, String> definition = new EnumMap<>(Language.class);
   private List<URI> externalDefinitions = new ArrayList<>();

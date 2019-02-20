@@ -6,22 +6,25 @@ import java.io.Serializable;
 public class ConceptSearchParams implements Serializable {
 
   private final String query;
-  private Integer vocabularyKey;
-  private Integer parentKey;
-  private Integer replacedByKey;
+  private final Integer vocabularyKey;
+  private final Integer parentKey;
+  private final Integer replacedByKey;
   private final String name;
+  private final Boolean deprecated;
 
   private ConceptSearchParams(
       String query,
       Integer vocabularyKey,
       Integer parentKey,
       Integer replacedByKey,
-      String name) {
+      String name,
+      Boolean deprecated) {
     this.query = query;
     this.vocabularyKey = vocabularyKey;
     this.parentKey = parentKey;
     this.replacedByKey = replacedByKey;
     this.name = name;
+    this.deprecated = deprecated;
   }
 
   public String getQuery() {
@@ -44,6 +47,10 @@ public class ConceptSearchParams implements Serializable {
     return name;
   }
 
+  public Boolean getDeprecated() {
+    return deprecated;
+  }
+
   /**
    * Creates a builder to create instances of {@link ConceptSearchParams}.
    *
@@ -53,20 +60,18 @@ public class ConceptSearchParams implements Serializable {
     return new Builder();
   }
 
-  private static class Builder {
+  public static class Builder {
     private String query;
     private Integer vocabularyKey;
     private Integer parentKey;
     private Integer replacedByKey;
+    private Boolean deprecated;
     private String name;
+
+    private Builder() {}
 
     public Builder query(String query) {
       this.query = query;
-      return this;
-    }
-
-    public Builder name(String name) {
-      this.name = name;
       return this;
     }
 
@@ -85,8 +90,19 @@ public class ConceptSearchParams implements Serializable {
       return this;
     }
 
+    public Builder name(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder deprecated(boolean deprecated) {
+      this.deprecated = deprecated;
+      return this;
+    }
+
     public ConceptSearchParams build() {
-      return new ConceptSearchParams(query, vocabularyKey, parentKey, replacedByKey, name);
+      return new ConceptSearchParams(
+          query, vocabularyKey, parentKey, replacedByKey, name, deprecated);
     }
   }
 }

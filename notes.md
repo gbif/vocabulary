@@ -20,6 +20,7 @@
 
   ?? When a deleted vocabulary is restored, there is an option to restore all its deleted concepts -> only if we finally do the previous point of deleting concepts
 
+// TODO: do deprecations for vocabularies too
 
 ### Concept  
 - Validity check for concepts 
@@ -42,3 +43,5 @@
   - Fields deprecated, deprecatedBy and replacedBy are set to null.    
   - If the restored concept has a parent deprecated, we update it with the current replacement.
   - There is an option to restore a concept and all its deprecated children.
+
+// TODO: deprecation without replacement with children -> now it's not allowed but should be if we deprecate all the children too

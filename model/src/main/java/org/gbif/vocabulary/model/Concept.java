@@ -33,6 +33,8 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
   private List<URI> externalDefinitions = new ArrayList<>();
   private List<URI> sameAsUris = new ArrayList<>();
   private List<String> editorialNotes = new ArrayList<>();
+  private LocalDateTime deprecated;
+  private String deprecatedBy;
 
   // audit fields
   private LocalDateTime created;
@@ -150,6 +152,22 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
     this.editorialNotes = editorialNotes;
   }
 
+  public LocalDateTime getDeprecated() {
+    return deprecated;
+  }
+
+  public void setDeprecated(LocalDateTime deprecated) {
+    this.deprecated = deprecated;
+  }
+
+  public String getDeprecatedBy() {
+    return deprecatedBy;
+  }
+
+  public void setDeprecatedBy(String deprecatedBy) {
+    this.deprecatedBy = deprecatedBy;
+  }
+
   @Override
   public LocalDateTime getCreated() {
     return created;
@@ -217,6 +235,8 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
         && Objects.equals(externalDefinitions, concept.externalDefinitions)
         && Objects.equals(sameAsUris, concept.sameAsUris)
         && Objects.equals(editorialNotes, concept.editorialNotes)
+        && Objects.equals(deprecated, concept.deprecated)
+        && Objects.equals(deprecatedBy, concept.deprecatedBy)
         && Objects.equals(created, concept.created)
         && Objects.equals(createdBy, concept.createdBy)
         && Objects.equals(modified, concept.modified)
@@ -239,6 +259,8 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
         externalDefinitions,
         sameAsUris,
         editorialNotes,
+        deprecated,
+        deprecatedBy,
         created,
         createdBy,
         modified,
@@ -261,6 +283,8 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
         .add("externalDefinitions=" + externalDefinitions)
         .add("sameAsUris=" + sameAsUris)
         .add("editorialNotes=" + editorialNotes)
+        .add("deprecated=" + deprecated)
+        .add("deprecatedBy=" + deprecatedBy)
         .add("created=" + created)
         .add("createdBy='" + createdBy + "'")
         .add("modified=" + modified)
@@ -285,6 +309,8 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
         && Objects.equals(externalDefinitions, other.externalDefinitions)
         && Objects.equals(sameAsUris, other.sameAsUris)
         && Objects.equals(editorialNotes, other.editorialNotes)
+        && Objects.equals(deprecated, other.deprecated)
+        && Objects.equals(deprecatedBy, other.deprecatedBy)
         && Objects.equals(deleted, other.deleted);
   }
 }

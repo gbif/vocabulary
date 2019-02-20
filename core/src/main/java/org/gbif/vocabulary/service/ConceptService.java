@@ -6,6 +6,7 @@ import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotBlank;
 
 /** Services for a {@link Concept}. */
 public interface ConceptService extends BaseService<Concept> {
@@ -20,10 +21,29 @@ public interface ConceptService extends BaseService<Concept> {
   PagingResponse<Concept> list(@Nullable ConceptSearchParams params, @Nullable Pageable page);
 
   /**
-   * Retrieves pages of {@link Concept} that are deleted.
+   * Deprecates a concept with a replacement.
    *
-   * @param page paging parameters
-   * @return a list of deleted {@link Concept}
+   * @param key key of the concept to be deprecated
+   * @param deprecatedBy name of the actor who deprecates the concept
+   * @param replacementKey key of the replacement
+   * @param deprecateChildren if true the children of the concept are deprecated too
    */
-  PagingResponse<Concept> listDeleted(Pageable page);
+  void deprecate(
+      int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateChildren);
+
+  /**
+   * Deprecates a concept without replacement.
+   *
+   * @param key key of the concept to be deprecated
+   * @param deprecatedBy name of the actor who deprecates the concept
+   */
+  void deprecate(int key, @NotBlank String deprecatedBy);
+
+  /**
+   * Restores a deprecated concept.
+   *
+   * @param key key of the concept to undeprecate.
+   * @param restoreDeprecatedChildren if true it restores the deprecated children of the concept
+   */
+  void restoreDeprecated(int key, boolean restoreDeprecatedChildren);
 }

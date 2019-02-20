@@ -36,6 +36,7 @@
     <guava.version>27.0.1-jre</guava.version>
     <postgresql-embedded.version>2.10</postgresql-embedded.version>
     <junit-vintage.version>5.3.2</junit-vintage.version>
+    <jjwt.version>0.9.1</jjwt.version>
   </properties>
 
   <dependencyManagement>
@@ -79,6 +80,16 @@
         <groupId>org.gbif.vocabulary</groupId>
         <artifactId>model</artifactId>
         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt</artifactId>
+        <version>${jjwt.version}</version>
       </dependency>
 
       <!-- tests -->

@@ -16,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -80,23 +79,6 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
     baseMapper.update(entityUpdated);
     entityUpdated = baseMapper.get(entitySaved.getKey());
     assertTrue(entityUpdated.getDefinition().isEmpty());
-
-    // delete
-    assertEquals(0, baseMapper.countDeleted());
-    assertEquals(0, baseMapper.deleted(DEFAULT_PAGE).size());
-
-    baseMapper.delete(entityUpdated.getKey());
-    assertEquals(1, baseMapper.countDeleted());
-    assertEquals(1, baseMapper.deleted(DEFAULT_PAGE).size());
-
-    T entityDeleted = baseMapper.get(entityUpdated.getKey());
-    assertNotNull(entityDeleted.getDeleted());
-
-    // restore deleted
-    entityDeleted.setDeleted(null);
-    baseMapper.update(entityDeleted);
-    assertEquals(0, baseMapper.countDeleted());
-    assertEquals(0, baseMapper.deleted(DEFAULT_PAGE).size());
   }
 
   @Test
@@ -121,11 +103,6 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
     assertEquals(1, baseMapper.suggest("22").size());
     assertEquals(0, baseMapper.suggest("zz").size());
     assertEquals(0, baseMapper.suggest(null).size());
-  }
-
-  @Test
-  public void deleteNonExixstingEntityTest() {
-    assertDoesNotThrow(() -> baseMapper.delete(Integer.MAX_VALUE));
   }
 
   @Test

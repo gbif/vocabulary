@@ -1,8 +1,11 @@
 package org.gbif.vocabulary.service.impl;
 
 import org.gbif.vocabulary.model.VocabularyEntity;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.service.BaseService;
+
+import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,9 @@ abstract class AbstractBaseService<T extends VocabularyEntity> implements BaseSe
   public int create(T entity) {
     checkArgument(entity.getKey() == null, "Can't create an entity which already has a key");
 
+    // checking if there is another similar entity.
+    checkSimilarities(entity);
+
     baseMapper.create(entity);
 
     return entity.getKey();
@@ -38,30 +44,17 @@ abstract class AbstractBaseService<T extends VocabularyEntity> implements BaseSe
     return baseMapper.get(key);
   }
 
-  @Transactional
   @Override
-  public T update(T entity) {
-    requireNonNull(entity.getKey());
-
-    T oldEntity = baseMapper.get(entity.getKey());
-    requireNonNull(oldEntity, "Couldn't find entity with key: " + entity.getKey());
-
-    if (oldEntity.getDeleted() != null) {
-      checkArgument(
-          entity.getDeleted() == null,
-          "Unable to update a previously deleted entity unless you clear the deletion timestamp");
-    } else {
-      checkArgument(entity.getDeleted() == null, "Can't delete a entity when updating");
-    }
-
-    baseMapper.update(entity);
-
-    return baseMapper.get(entity.getKey());
+  public List<KeyNameResult> suggest(String query) {
+    return baseMapper.suggest(query);
   }
 
-  @Transactional
-  @Override
-  public void delete(int key) {
-    baseMapper.delete(key);
+  private void checkSimilarities(T entity) {
+    List<KeyNameResult> similarities = baseMapper.findSimilarities(entity);
+    if (!similarities.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Cannot create entity because it conflicts with other entities, e.g.: "
+              + similarities.toString());
+    }
   }
 }

@@ -13,15 +13,14 @@
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler" />
   </resultMap>
 
-  <sql id="CONCEPT_WRITE_FIELDS">
-    vocabulary_key, parent_key, replaced_by_key, name, label, alternative_labels, misspelt_labels, definition,
+  <sql id="CONCEPT_INSERT_FIELDS">
+    vocabulary_key, parent_key, name, label, alternative_labels, misspelt_labels, definition,
     external_definition_urls, same_as_uris, editorial_notes, created_by, modified_by, created, modified
   </sql>
 
-  <sql id="CONCEPT_PARAMS_CREATE">
+  <sql id="CONCEPT_INSERT_PARAMS">
     #{vocabularyKey,jdbcType=INTEGER},
     #{parentKey,jdbcType=INTEGER},
-    #{replacedByKey,jdbcType=INTEGER},
     #{name,jdbcType=VARCHAR},
     #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
     #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::hstore,
@@ -36,7 +35,7 @@
     now() <!-- modified -->
   </sql>
 
-  <sql id="CONCEPT_PARAMS_UPDATE">
+  <sql id="CONCEPT_UPDATE_PARAMS">
     vocabulary_key = #{vocabularyKey,jdbcType=INTEGER},
     parent_key = #{parentKey,jdbcType=INTEGER},
     replaced_by_key = #{replacedByKey,jdbcType=INTEGER},
@@ -55,19 +54,17 @@
     deleted = null <!-- if we're updating it can't be deleted -->
   </sql>
 
-  <sql id="SIMPLE_SEARCH">
-    query @@ fulltext_search
-  </sql>
+  <!-- QUERIES FROM HERE -->
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO concept(<include refid="CONCEPT_WRITE_FIELDS"/>)
-    VALUES(<include refid="CONCEPT_PARAMS_CREATE"/>)
+    INSERT INTO concept(<include refid="CONCEPT_INSERT_FIELDS"/>)
+    VALUES(<include refid="CONCEPT_INSERT_PARAMS"/>)
   </insert>
 
   <update id="update">
     UPDATE concept
-    SET <include refid="CONCEPT_PARAMS_UPDATE" />
-    WHERE key = #{key,jdbcType=OTHER}
+    SET <include refid="CONCEPT_UPDATE_PARAMS" />
+    WHERE key = #{key,jdbcType=INTEGER}
   </update>
 
   <update id="delete">
@@ -79,16 +76,65 @@
   <select id="get" resultMap="CONCEPT_MAP">
     SELECT *
     FROM concept c
-    WHERE c.key = #{key,jdbcType=OTHER}
+    WHERE c.key = #{key,jdbcType=INTEGER}
   </select>
+
+  <update id="deprecate">
+    UPDATE concept
+    SET deprecated = now(),
+    deprecated_by = #{deprecatedBy,jdbcType=VARCHAR}
+    <choose>
+      <when test="replacementKey != null">
+        ,replaced_by_key=#{replacementKey,jdbcType=INTEGER}
+      </when>
+      <otherwise>
+        ,replaced_by_key=null
+      </otherwise>
+    </choose>
+    WHERE key = #{key,jdbcType=INTEGER}
+  </update>
+
+  <update id="deprecateInBulk">
+    UPDATE concept
+    SET deprecated = now(),
+    deprecated_by = #{deprecatedBy,jdbcType=VARCHAR}
+    <choose>
+      <when test="replacementKey != null">
+        ,replaced_by_key=#{replacementKey,jdbcType=INTEGER}
+      </when>
+      <otherwise>
+        ,replaced_by_key=null
+      </otherwise>
+    </choose>
+    WHERE key IN
+    <foreach collection="keys" item="key" separator="," open="(" close=")">
+      #{key}
+    </foreach>
+  </update>
+
+  <update id="restoreDeprecated">
+    UPDATE concept
+    SET deprecated = null, deprecated_by = null, replaced_by_key = null
+    WHERE key = #{key,jdbcType=INTEGER}
+  </update>
+
+  <update id="restoreDeprecatedInBulk">
+    UPDATE concept
+    SET deprecated = null, deprecated_by = null, replaced_by_key = null
+    WHERE key IN
+    <foreach collection="keys" item="key" separator="," open="(" close=")">
+      #{key}
+    </foreach>
+  </update>
 
   <select id="list" resultType="Concept" resultMap="CONCEPT_MAP">
     SELECT *
     FROM concept c
     <if test="query != null" >
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON <include refid="SIMPLE_SEARCH"/>
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
-    WHERE c.deleted IS NULL
+    WHERE
+    c.deleted IS NULL
     <if test="vocabularyKey != null">
       AND c.vocabulary_key = #{vocabularyKey}
     </if>
@@ -101,7 +147,10 @@
     <if test="name != null">
       AND c.name = #{name}
     </if>
-    ORDER BY <if test="query != null" >ts_rank_cd(c.fulltext_search, query) DESC, </if>c.created DESC, c.key
+    <if test="deprecated != null">
+      AND c.deprecated IS <if test="deprecated">NOT</if> NULL
+    </if>
+    ORDER BY <if test="query != null" >ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>
@@ -111,7 +160,7 @@
     SELECT COUNT(*)
     FROM concept c
     <if test="query != null" >
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON <include refid="SIMPLE_SEARCH"/>
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     WHERE c.deleted IS NULL
     <if test="vocabularyKey != null">
@@ -128,29 +177,42 @@
     </if>
   </select>
 
-  <select id="deleted" resultType="Concept" resultMap="CONCEPT_MAP" parameterType="Pageable">
-    SELECT *
-    FROM concept c
-    WHERE c.deleted IS NOT NULL
-    ORDER BY c.created DESC, c.key
-    <if test="page != null" >
-      LIMIT #{page.limit} OFFSET #{page.offset}
-    </if>
-  </select>
-
-  <select id="countDeleted" resultType="Long">
-    SELECT count(*)
-    FROM concept
-    WHERE deleted IS NOT NULL
-  </select>
-
   <select id="suggest" resultType="KeyNameResult">
     SELECT key, name
     FROM (
-      (SELECT key, name FROM concept WHERE name ilike #{query}||'%' ORDER BY name LIMIT 20)
-      UNION ALL
-      (SELECT key, name FROM concept WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' ORDER BY name LIMIT 20)
+    (SELECT key, name FROM concept WHERE name ilike #{query}||'%' ORDER BY name LIMIT 20)
+    UNION ALL
+    (SELECT key, name FROM concept WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' ORDER BY name LIMIT 20)
     ) t1 LIMIT 20
+  </select>
+
+  <update id="updateParent">
+    UPDATE concept
+    SET parent_key = #{parentKey}
+    WHERE key IN
+    <foreach collection="keys" item="key" separator="," open="(" close=")">
+      #{key}
+    </foreach>
+  </update>
+
+  <select id="findSimilarities" resultType="KeyNameResult">
+    SELECT key, name
+    FROM concept
+    WHERE #{name} = ANY(avals(label)) OR #{name} = ANY(avals(alternative_labels)) OR #{name} = ANY(avals(misspelt_labels))
+    LIMIT 5
+  </select>
+
+  <select id="findReplacement" resultType="Integer">
+    WITH RECURSIVE t(key, replaced, deprecated) AS (
+      SELECT root.key, root.replaced_by_key, root.deprecated
+      FROM concept root
+      WHERE key = #{key,jdbcType=INTEGER} AND deprecated IS NOT NULL AND replaced_by_key IS NOT NULL
+    UNION
+      SELECT replacement.key, replacement.replaced_by_key, replacement.deprecated
+      FROM t conc, concept replacement
+      WHERE conc.replaced = replacement.key
+    )
+    SELECT key FROM t WHERE deprecated IS NULL;
   </select>
 
 </mapper>

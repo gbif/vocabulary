@@ -41,9 +41,7 @@
     deleted = null <!-- if we're updating it can't be deleted -->
   </sql>
 
-  <sql id="SIMPLE_SEARCH">
-    query @@ fulltext_search
-  </sql>
+  <!-- QUERIES FROM HERE -->
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
     INSERT INTO vocabulary(<include refid="VOCABULARY_WRITE_FIELDS"/>)
@@ -53,35 +51,39 @@
   <update id="update">
     UPDATE vocabulary
     SET <include refid="VOCABULARY_PARAMS_UPDATE" />
-    WHERE key = #{key,jdbcType=OTHER}
+    WHERE key = #{key,jdbcType=INTEGER}
   </update>
 
   <update id="delete">
     UPDATE vocabulary
     SET deleted = now()
-    WHERE key = #{key,jdbcType=OTHER}
+    WHERE key = #{key,jdbcType=INTEGER}
   </update>
 
   <select id="get" resultMap="VOCABULARY_MAP">
     SELECT *
     FROM vocabulary v
-    WHERE v.key = #{key,jdbcType=OTHER}
+    WHERE v.key = #{key,jdbcType=INTEGER}
   </select>
 
   <select id="list" resultType="Vocabulary" resultMap="VOCABULARY_MAP">
     SELECT *
     FROM vocabulary v
     <if test="query != null" >
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON <include refid="SIMPLE_SEARCH"/>
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
-    WHERE v.deleted IS NULL
-    <if test="name != null">
-      AND v.name = #{name}
-    </if>
-    <if test="namespace != null">
-      AND v.namespace = #{namespace}
-    </if>
-    ORDER BY <if test="query != null" >ts_rank_cd(v.fulltext_search, query) DESC, </if>v.created DESC, v.key
+    <where>
+      <if test="deleted != null">
+        v.deleted IS <if test="deleted">NOT</if> NULL
+      </if>
+      <if test="name != null">
+        AND v.name = #{name}
+      </if>
+      <if test="namespace != null">
+        AND v.namespace = #{namespace}
+      </if>
+    </where>
+    ORDER BY <if test="query != null" >ts_rank_cd(v.fulltext_search, query) DESC,</if> v.created DESC, v.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>
@@ -91,31 +93,19 @@
     SELECT COUNT(*)
     FROM vocabulary v
     <if test="query != null" >
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON <include refid="SIMPLE_SEARCH"/>
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
-    WHERE v.deleted IS NULL
-    <if test="name != null">
-      AND v.name = #{name}
-    </if>
-    <if test="namespace != null">
-      AND v.namespace = #{namespace}
-    </if>
-  </select>
-
-  <select id="deleted" resultType="Vocabulary" resultMap="VOCABULARY_MAP" parameterType="Pageable">
-    SELECT *
-    FROM vocabulary v
-    WHERE v.deleted IS NOT NULL
-    ORDER BY v.created DESC, v.key
-    <if test="page != null" >
-      LIMIT #{page.limit} OFFSET #{page.offset}
-    </if>
-  </select>
-
-  <select id="countDeleted" resultType="Long">
-    SELECT count(*)
-    FROM vocabulary
-    WHERE deleted IS NOT NULL
+    <where>
+      <if test="deleted != null">
+        v.deleted IS <if test="deleted">NOT</if> NULL
+      </if>
+      <if test="name != null">
+        AND v.name = #{name}
+      </if>
+      <if test="namespace != null">
+        AND v.namespace = #{namespace}
+      </if>
+    </where>
   </select>
 
   <select id="suggest" resultType="KeyNameResult">
@@ -125,6 +115,12 @@
       UNION ALL
       (SELECT key, name FROM vocabulary WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' ORDER BY name LIMIT 20)
     ) t1 LIMIT 20
+  </select>
+
+  <select id="findSimilarities" resultType="KeyNameResult">
+    SELECT key, name
+    FROM vocabulary where #{name} = ANY(avals(label))
+    LIMIT 5
   </select>
 
 </mapper>

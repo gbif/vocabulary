@@ -1,11 +1,11 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.VocabularyEntity;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 
+import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-
-import org.springframework.validation.annotation.Validated;
 
 /**
  * Base interface for the services of {@link VocabularyEntity}.
@@ -34,14 +34,15 @@ public interface BaseService<T extends VocabularyEntity> {
    * Updates an entity.
    *
    * @param entity to be updated.
-   * @return entity updated.
    */
-  T update(@NotNull @Valid T entity);
+  void update(@NotNull @Valid T entity);
 
   /**
-   * Deletes a entity by its key.
+   * Returns suggestions for the given query. It only checks for matches in the name field of the
+   * entity.
    *
-   * @param key of the entity to delete
+   * @param query suggestion
+   * @return a list of up to 20 suggested entities
    */
-  void delete(int key);
+  List<KeyNameResult> suggest(@NotNull String query);
 }

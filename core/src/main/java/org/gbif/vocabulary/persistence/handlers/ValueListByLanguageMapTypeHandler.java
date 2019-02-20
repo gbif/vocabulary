@@ -24,7 +24,8 @@ import org.postgresql.util.HStoreConverter;
 public class ValueListByLanguageMapTypeHandler
     extends BaseTypeHandler<Map<Language, List<String>>> {
 
-  private static final Pattern SEPARATOR = Pattern.compile(",");
+  private static final String SEPARATOR_CHAR = ",";
+  private static final Pattern SEPARATOR = Pattern.compile(SEPARATOR_CHAR);
 
   @Override
   public void setNonNullParameter(
@@ -57,7 +58,10 @@ public class ValueListByLanguageMapTypeHandler
   private String toString(Map<Language, List<String>> languageStringListMap) {
     return HStoreConverter.toString(
         languageStringListMap.entrySet().stream()
-            .collect(Collectors.toMap(e -> e.getKey().getIso2LetterCode(), Map.Entry::getValue)));
+            .collect(
+                Collectors.toMap(
+                    e -> e.getKey().getIso2LetterCode(),
+                    e -> String.join(SEPARATOR_CHAR, e.getValue()))));
   }
 
   private Map<Language, List<String>> fromString(String hstring) {

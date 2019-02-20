@@ -13,14 +13,19 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface VocabularyMapper extends BaseMapper<Vocabulary> {
 
+  // FIXME: create an object for params
   List<Vocabulary> list(
       @Nullable @Param("query") String query,
       @Nullable @Param("name") String name,
       @Nullable @Param("namespace") String namespace,
+      @Nullable @Param("deleted") Boolean deleted,
       @Nullable @Param("page") Pageable page);
 
   long count(
       @Nullable @Param("query") String query,
       @Nullable @Param("name") String name,
-      @Nullable @Param("namespace") String namespace);
+      @Nullable @Param("namespace") String namespace,
+      @Nullable @Param("deleted") Boolean deleted);
+
+  void delete(@Param("key") int key);
 }

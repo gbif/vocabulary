@@ -21,10 +21,13 @@ public interface VocabularyService extends BaseService<Vocabulary> {
   PagingResponse<Vocabulary> list(@Nullable VocabularySearchParams params, @Nullable Pageable page);
 
   /**
-   * Retrieves pages of {@link Vocabulary} that are deleted.
+   * Deletes a {@link Vocabulary}.
    *
-   * @param page paging parameters
-   * @return a list of deleted {@link Vocabulary}
+   * <p>A vocabulary that has concepts associated cannot be deleted. If specified, this method will
+   * delete all the concepts too.
+   *
+   * @param key key of the vocabulary to delete.
    */
-  PagingResponse<Vocabulary> listDeleted(Pageable page);
+  // TODO: let delete concepts too??
+  void delete(int key);
 }

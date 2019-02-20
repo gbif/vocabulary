@@ -10,17 +10,19 @@
   This also checks deleted and replaced vocabularies, it doesn't make sense to create a vocabulary that was already deleted.
 
 - Deleting a vocabulary
-  
-  A vocabulary that has concepts cannot be deleted - if we don't do so the concepts will still appear in the searches.
-  
-  
-  ?? There is an option to delete a vocabulary and all its concepts -> this implies that we have to allow the deletion of concepts
-  
-- Restoring a vocabulary
 
-  ?? When a deleted vocabulary is restored, there is an option to restore all its deleted concepts -> only if we finally do the previous point of deleting concepts
-
-// TODO: do deprecations for vocabularies too
+  A vocabulary cannot be deleted, only deprecated.
+  
+- Deprecate a vocabulary
+  - A vocabulary that has concepts cannot be deprecated - if we don't do so the concepts will still appear in the searches.
+  - There is an option to deprecate a vocabulary and all its concepts.
+  - A vocabulary can be deprecated with or without replacement.
+  - When deprecating a vocabulary with replacement, its concepts will NOT be reassigned to the replacement - if we would reassign them it will be like 
+    a duplicate of the vocabulary
+  
+- Restoring a deprecated vocabulary
+  - Fields deprecated, deprecatedBy and replacedBy are set to null.    
+  - There is an option to restored a deprecated vocabulary and all its deprecated concepts.
 
 ### Concept  
 - Validity check for concepts 
@@ -36,12 +38,11 @@
 - Deprecating a concept
   - A concept can be deprecated with or without replacement.
   - Any children of the concept being deprecated will be reassigned as children of the target.
-  - A concept can be deprecated with no replacement only if it has no children.
+  - A concept can be deprecated with no replacement only if it has no children or if we deprecate all the children too.
   - There is an option to deprecate a concept and all its children - children will be deprecated without replacement.
     
 - Restore a deprecated concept
   - Fields deprecated, deprecatedBy and replacedBy are set to null.    
   - If the restored concept has a parent deprecated, we update it with the current replacement.
   - There is an option to restore a concept and all its deprecated children.
-
-// TODO: deprecation without replacement with children -> now it's not allowed but should be if we deprecate all the children too
+  - A deprecated concept cannot be restored if its vocabulary is deprecated.

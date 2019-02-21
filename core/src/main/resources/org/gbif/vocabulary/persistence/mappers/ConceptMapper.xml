@@ -223,4 +223,10 @@
     SELECT key FROM t WHERE deprecated IS NULL;
   </select>
 
+  <select id="getVocabularyKey" resultType="Integer">
+    SELECT vocabulary_key
+    FROM concept
+    WHERE key = #{key,jdbcType=INTEGER}
+  </select>
+
 </mapper>

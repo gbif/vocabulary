@@ -4,7 +4,7 @@ import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.persistence.PostgresDBExtension;
+import org.gbif.vocabulary.PostgresDBExtension;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -219,6 +219,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     // not deprecated, so no need to find replacement
     conceptMapper.restoreDeprecated(concept3.getKey());
     assertNull(conceptMapper.findReplacement(concept3.getKey()));
+  }
+
+  @Test
+  public void getVocabularyKeyTest() {
+    Concept concept1 = createNewEntity("r1");
+    assertEquals(
+        defaultVocabularyKey, conceptMapper.getVocabularyKey(concept1.getKey()).intValue());
   }
 
   private void assertList(

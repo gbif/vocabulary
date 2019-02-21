@@ -48,4 +48,6 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * @return the key of the current replacement
    */
   Integer findReplacement(@Param("key") int key);
+
+  Integer getVocabularyKey(@Param("key") int conceptKey);
 }

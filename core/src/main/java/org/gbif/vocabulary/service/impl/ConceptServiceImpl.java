@@ -11,6 +11,9 @@ import org.gbif.vocabulary.service.ConceptService;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,56 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
     super(conceptMapper);
     this.conceptMapper = conceptMapper;
     this.vocabularyMapper = vocabularyMapper;
+  }
+
+  @Transactional
+  @Override
+  public int create(@NotNull @Valid Concept concept) {
+    checkArgument(concept.getKey() == null, "Can't create a concept which already has a key");
+
+    // checking if there is another similar concept.
+    checkSimilarities(concept);
+
+    if (concept.getParentKey() != null) {
+      checkArgument(
+          concept.getVocabularyKey().equals(conceptMapper.getVocabularyKey(concept.getParentKey())),
+          "A concept and its parent must belong to the same vocabulary");
+    }
+
+    conceptMapper.create(concept);
+
+    return concept.getKey();
+  }
+
+  @Transactional
+  @Override
+  public void update(@NotNull @Valid Concept concept) {
+    requireNonNull(concept.getKey());
+
+    Concept oldConcept = conceptMapper.get(concept.getKey());
+    requireNonNull(oldConcept, "Couldn't find concept with key: " + concept.getKey());
+
+    if (!Objects.equals(oldConcept.getParentKey(), concept.getParentKey())) {
+      // parent is being updated
+      checkArgument(
+          concept.getVocabularyKey().equals(conceptMapper.getVocabularyKey(concept.getParentKey())),
+          "A concept and its parent must belong to the same vocabulary");
+    }
+
+    checkArgument(oldConcept.getDeprecated() == null, "Cannot update a deprecated entity");
+    checkArgument(
+        Objects.equals(oldConcept.getDeprecated(), concept.getDeprecated()),
+        "Cannot deprecate or restore a deprecated concept while updating");
+    checkArgument(Objects.equals(oldConcept.getDeprecatedBy(), concept.getDeprecatedBy()));
+    checkArgument(Objects.equals(oldConcept.getReplacedByKey(), concept.getReplacedByKey()));
+
+    checkArgument(oldConcept.getDeleted() == null, "Cannot update a deleted entity");
+    checkArgument(
+        Objects.equals(oldConcept.getDeleted(), concept.getDeleted()),
+        "Cannot delete or restore an entity while updating");
+
+    // update the concept
+    conceptMapper.update(concept);
   }
 
   @Override
@@ -62,9 +115,11 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
   @Transactional
   @Override
   public void deprecate(
-      int key, String deprecatedBy, int replacementKey, boolean deprecateChildren) {
-    // deprecate concept
-    conceptMapper.deprecate(key, deprecatedBy, replacementKey);
+      int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateChildren) {
+
+    checkArgument(
+        conceptMapper.getVocabularyKey(key).equals(conceptMapper.getVocabularyKey(replacementKey)),
+        "A concept and its replacement must belong to the same vocabulary");
 
     // find children
     List<Integer> children = findChildrenKeys(key, false);
@@ -77,11 +132,14 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
         conceptMapper.updateParent(children, replacementKey);
       }
     }
+
+    // deprecate concept
+    conceptMapper.deprecate(key, deprecatedBy, replacementKey);
   }
 
   @Transactional
   @Override
-  public void deprecate(int key, String deprecatedBy, boolean deprecateChildren) {
+  public void deprecate(int key, @NotBlank String deprecatedBy, boolean deprecateChildren) {
     List<Integer> children = findChildrenKeys(key, false);
     if (!children.isEmpty()) {
       if (!deprecateChildren) {

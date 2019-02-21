@@ -3,7 +3,7 @@ package org.gbif.vocabulary.persistence.mappers;
 import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.persistence.PostgresDBExtension;
+import org.gbif.vocabulary.PostgresDBExtension;
 
 import java.net.URI;
 import java.util.ArrayList;

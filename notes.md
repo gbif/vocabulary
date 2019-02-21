@@ -14,7 +14,7 @@
   A vocabulary cannot be deleted, only deprecated.
   
 - Deprecate a vocabulary
-  - A vocabulary that has concepts cannot be deprecated - if we don't do so the concepts will still appear in the searches.
+  - A vocabulary that has concepts cannot be deprecated unless we deprecate its concepts too- if we don't do so the concepts will still appear in the searches.
   - There is an option to deprecate a vocabulary and all its concepts.
   - A vocabulary can be deprecated with or without replacement.
   - When deprecating a vocabulary with replacement, its concepts will NOT be reassigned to the replacement - if we would reassign them it will be like 

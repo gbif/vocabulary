@@ -18,14 +18,14 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
       @Nullable @Param("query") String query,
       @Nullable @Param("name") String name,
       @Nullable @Param("namespace") String namespace,
-      @Nullable @Param("deleted") Boolean deleted,
+      @Nullable @Param("deprecated") Boolean deprecated,
       @Nullable @Param("page") Pageable page);
 
   long count(
       @Nullable @Param("query") String query,
       @Nullable @Param("name") String name,
       @Nullable @Param("namespace") String namespace,
-      @Nullable @Param("deleted") Boolean deleted);
+      @Nullable @Param("deprecated") Boolean deprecated);
 
-  void delete(@Param("key") int key);
+  boolean isDeprecated(@Param("key") int key);
 }

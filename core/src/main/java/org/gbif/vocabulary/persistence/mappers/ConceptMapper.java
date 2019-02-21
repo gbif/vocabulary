@@ -31,17 +31,10 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Nullable @Param("name") String name,
       @Nullable @Param("deprecated") Boolean deprecated);
 
-  void deprecate(
-      @Param("key") int key,
-      @Param("deprecatedBy") String deprecatedBy,
-      @Nullable @Param("replacementKey") Integer replacementKey);
-
   void deprecateInBulk(
       @Param("keys") List<Integer> keys,
       @Param("deprecatedBy") String deprecatedBy,
       @Nullable @Param("replacementKey") Integer replacementKey);
-
-  void restoreDeprecated(@Param("key") int key);
 
   void restoreDeprecatedInBulk(@Param("keys") List<Integer> keys);
 

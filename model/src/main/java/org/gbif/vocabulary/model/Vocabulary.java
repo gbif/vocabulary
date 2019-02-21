@@ -27,6 +27,11 @@ public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
   private List<URI> externalDefinitions = new ArrayList<>();
   private List<String> editorialNotes = new ArrayList<>();
 
+  // deprecation fields
+  private Integer replacedByKey;
+  private LocalDateTime deprecated;
+  private String deprecatedBy;
+
   // audit fields
   private LocalDateTime created;
   private String createdBy;
@@ -103,6 +108,36 @@ public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
   }
 
   @Override
+  public Integer getReplacedByKey() {
+    return replacedByKey;
+  }
+
+  @Override
+  public void setReplacedByKey(Integer replacedByKey) {
+    this.replacedByKey = replacedByKey;
+  }
+
+  @Override
+  public LocalDateTime getDeprecated() {
+    return deprecated;
+  }
+
+  @Override
+  public void setDeprecated(LocalDateTime deprecated) {
+    this.deprecated = deprecated;
+  }
+
+  @Override
+  public String getDeprecatedBy() {
+    return deprecatedBy;
+  }
+
+  @Override
+  public void setDeprecatedBy(String deprecatedBy) {
+    this.deprecatedBy = deprecatedBy;
+  }
+
+  @Override
   public LocalDateTime getCreated() {
     return created;
   }
@@ -164,6 +199,9 @@ public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
         && Objects.equals(definition, that.definition)
         && Objects.equals(externalDefinitions, that.externalDefinitions)
         && Objects.equals(editorialNotes, that.editorialNotes)
+        && Objects.equals(replacedByKey, that.replacedByKey)
+        && Objects.equals(deprecated, that.deprecated)
+        && Objects.equals(deprecatedBy, that.deprecatedBy)
         && Objects.equals(created, that.created)
         && Objects.equals(createdBy, that.createdBy)
         && Objects.equals(modified, that.modified)
@@ -181,6 +219,9 @@ public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
         definition,
         externalDefinitions,
         editorialNotes,
+        replacedByKey,
+        deprecated,
+        deprecatedBy,
         created,
         createdBy,
         modified,
@@ -198,6 +239,9 @@ public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
         .add("definition=" + definition)
         .add("externalDefinitions=" + externalDefinitions)
         .add("editorialNotes=" + editorialNotes)
+        .add("replacedByKey=" + replacedByKey)
+        .add("deprecated=" + deprecated)
+        .add("deprecatedBy='" + deprecatedBy + "'")
         .add("created=" + created)
         .add("createdBy='" + createdBy + "'")
         .add("modified=" + modified)
@@ -217,6 +261,9 @@ public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
         && Objects.equals(definition, other.definition)
         && Objects.equals(externalDefinitions, other.externalDefinitions)
         && Objects.equals(editorialNotes, other.editorialNotes)
+        && Objects.equals(replacedByKey, other.replacedByKey)
+        && Objects.equals(deprecated, other.deprecated)
+        && Objects.equals(deprecatedBy, other.deprecatedBy)
         && Objects.equals(deleted, other.deleted);
   }
 }

@@ -3,6 +3,7 @@ package org.gbif.vocabulary.model;
 import org.gbif.api.vocabulary.Language;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
@@ -34,4 +35,17 @@ public interface VocabularyEntity extends Auditable {
   List<String> getEditorialNotes();
 
   void setEditorialNotes(List<String> editorialNotes);
+
+  // TODO: create interface for deprecation fields??
+  Integer getReplacedByKey();
+
+  void setReplacedByKey(Integer replacedByKey);
+
+  LocalDateTime getDeprecated();
+
+  void setDeprecated(LocalDateTime deprecated);
+
+  String getDeprecatedBy();
+
+  void setDeprecatedBy(String deprecatedBy);
 }

@@ -5,13 +5,13 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
+import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.ConceptService;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.assertj.core.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +27,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class ConceptServiceImpl extends AbstractBaseService<Concept> implements ConceptService {
 
   private final ConceptMapper conceptMapper;
+  private final VocabularyMapper vocabularyMapper;
 
   @Autowired
-  public ConceptServiceImpl(ConceptMapper conceptMapper) {
+  public ConceptServiceImpl(ConceptMapper conceptMapper, VocabularyMapper vocabularyMapper) {
     super(conceptMapper);
     this.conceptMapper = conceptMapper;
+    this.vocabularyMapper = vocabularyMapper;
   }
 
   @Override
@@ -57,48 +59,6 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
             page));
   }
 
-  /**
-   * Updates a concept.
-   *
-   * <p>It takes into consideration the following cases:
-   *
-   * <ul>
-   *   <li>When restoring a concept, if it has a parent replaced by another concept, we update it
-   *       with the current replacement.
-   *   <li>When restoring a concept, if it has a replacement replaced by another concept, we update
-   *       it with the current replacement.
-   *   <li>When replacing a concept, if it has children we reassign them to the new replacement.
-   *   <li>When replacing a concept, if there are concepts that were replaced by this concept, we
-   *       set their replacement to the new one.
-   *       <ul/>
-   *
-   * @param concept new concept
-   * @return concept updated.
-   */
-  @Transactional
-  @Override
-  public void update(Concept concept) {
-    requireNonNull(concept.getKey());
-
-    Concept oldConcept = conceptMapper.get(concept.getKey());
-    requireNonNull(oldConcept, "Couldn't find entity with key: " + concept.getKey());
-
-    // deffensive checks... the mapper won't update deprecation fields in the DB anyway
-    checkArgument(Objects.equals(oldConcept.getDeprecated(), concept.getDeprecated()));
-    checkArgument(Objects.equals(oldConcept.getDeprecatedBy(), concept.getDeprecatedBy()));
-    checkArgument(Objects.equals(oldConcept.getReplacedByKey(), concept.getReplacedByKey()));
-
-    // cannot update deleted concept
-    checkArgument(oldConcept.getDeleted() == null, "Cannot update a deleted concept");
-    // delete and restoring a concept here is not allowed
-    checkArgument(
-        Objects.equals(oldConcept.getDeleted(), concept.getDeleted()),
-        "Cannot delete or restore concept while updating");
-
-    // update the concept
-    conceptMapper.update(concept);
-  }
-
   @Transactional
   @Override
   public void deprecate(
@@ -121,10 +81,16 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
 
   @Transactional
   @Override
-  public void deprecate(int key, String deprecatedBy) {
-    if (hasChildren(key)) {
-      throw new IllegalArgumentException(
-          "A concept can be deprecated without replacement only if it has no children");
+  public void deprecate(int key, String deprecatedBy, boolean deprecateChildren) {
+    List<Integer> children = findChildrenKeys(key, false);
+    if (!children.isEmpty()) {
+      if (!deprecateChildren) {
+        throw new IllegalArgumentException(
+            "A concept can be deprecated without replacement only if it has no children");
+      }
+
+      // deprecate children
+      conceptMapper.deprecateInBulk(children, deprecatedBy, null);
     }
 
     conceptMapper.deprecate(key, deprecatedBy, null);
@@ -133,11 +99,16 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
   @Transactional
   @Override
   public void restoreDeprecated(int key, boolean restoreDeprecatedChildren) {
+    // get the concept
+    Concept concept = Objects.requireNonNull(conceptMapper.get(key));
+
+    // check if the vocabulary is not deprecated
+    if (vocabularyMapper.isDeprecated(concept.getVocabularyKey())) {
+      throw new IllegalArgumentException("Cannot restore a concept whose vocabulary is deprecated");
+    }
+
     // restore the concept
     conceptMapper.restoreDeprecated(key);
-
-    // get the concept
-    Concept concept = conceptMapper.get(key);
 
     // set the parent. If the parent is deprecated we look for its replacement
     concept.setParentKey(conceptMapper.findReplacement(concept.getParentKey()));
@@ -152,9 +123,5 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
     return conceptMapper.list(null, null, parentKey, null, null, deprecated, null).stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
-  }
-
-  private boolean hasChildren(int parentKey) {
-    return conceptMapper.count(null, null, parentKey, null, null, false) > 0;
   }
 }

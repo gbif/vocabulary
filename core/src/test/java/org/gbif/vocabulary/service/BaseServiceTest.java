@@ -1,7 +1,5 @@
 package org.gbif.vocabulary.service;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 
@@ -16,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doAnswer;
@@ -103,6 +102,36 @@ abstract class BaseServiceTest<T extends VocabularyEntity> {
     T updatedEntity = createNewEntity("e1");
     BeanUtils.copyProperties(entityDB, updatedEntity);
     updatedEntity.setDeleted(LocalDateTime.now());
+
+    // mock
+    when(baseMapper.get(TEST_KEY)).thenReturn(entityDB);
+
+    assertThrows(IllegalArgumentException.class, () -> baseService.update(updatedEntity));
+  }
+
+  @Test
+  public void deprecatingWhenUpdatingTest() {
+    T entityDB = createNewEntity("e1");
+    entityDB.setKey(TEST_KEY);
+    T updatedEntity = createNewEntity("e1");
+    BeanUtils.copyProperties(entityDB, updatedEntity);
+    updatedEntity.setReplacedByKey(2);
+
+    // mock
+    when(baseMapper.get(TEST_KEY)).thenReturn(entityDB);
+
+    assertThrows(IllegalArgumentException.class, () -> baseService.update(updatedEntity));
+  }
+
+  @Test
+  public void restoringDeprecatedWhenUpdatingTest() {
+    T entityDB = createNewEntity("e1");
+    entityDB.setKey(TEST_KEY);
+    entityDB.setDeprecated(LocalDateTime.now());
+    entityDB.setDeprecatedBy("test");
+    T updatedEntity = createNewEntity("e1");
+    BeanUtils.copyProperties(entityDB, updatedEntity);
+    updatedEntity.setDeprecated(null);
 
     // mock
     when(baseMapper.get(TEST_KEY)).thenReturn(entityDB);

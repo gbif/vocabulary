@@ -21,7 +21,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the {@link VocabularyMapper} class
@@ -92,52 +93,21 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   }
 
   @Test
-  public void deleteTest() {
-    Vocabulary vocabulary1 = createNewEntity("v1");
-    vocabulary1.setNamespace("n1");
+  public void listDeprecatedTest() {
+    Vocabulary vocabulary1 = createNewEntity("dp1");
     vocabularyMapper.create(vocabulary1);
 
-    Vocabulary vocabulary2 = createNewEntity("v2");
-    vocabulary2.setNamespace("n1");
+    Vocabulary vocabulary2 = createNewEntity("dp2");
     vocabularyMapper.create(vocabulary2);
 
-    Vocabulary vocabulary3 = createNewEntity("v3");
-    vocabulary3.setNamespace("n3");
-    vocabularyMapper.create(vocabulary3);
-
-    // delete
     assertList(null, null, null, true, 0);
+    assertList("dp", null, null, true, 0);
+    assertList("dp", null, null, null, 2);
+    assertList("dp", null, null, false, 2);
 
-    vocabularyMapper.delete(vocabulary1.getKey());
+    vocabularyMapper.deprecate(vocabulary1.getKey(), DEPRECATED_BY, null);
     assertList(null, null, null, true, 1);
-    assertList("v", "v1", null, true, 1);
-
-    // test deleted param
-    assertList("n1", null, null, true, 1);
-    assertList("n1", null, null, false, 1);
-    assertList("n1", null, null, null, 2);
-
-    assertList("z", null, null, true, 0);
-    assertList(null, null, "n3", true, 0);
-
-    vocabularyMapper.delete(vocabulary2.getKey());
-    assertList(null, null, null, true, 2);
-    assertList("v", null, null, true, 2);
-    assertList("n1", null, null, true, 2);
-    assertList("z", null, null, true, 0);
-    assertList(null, null, "n3", true, 0);
-
-    Vocabulary vocabularyDeleted = vocabularyMapper.get(vocabulary2.getKey());
-    assertNotNull(vocabularyDeleted.getDeleted());
-
-    // restore deleted
-    vocabularyDeleted.setDeleted(null);
-    vocabularyMapper.update(vocabularyDeleted);
-    assertList(null, null, null, true, 1);
-    assertList("v", null, null, true, 1);
-    assertList("n1", null, null, true, 1);
-    assertList("z", null, null, true, 0);
-    assertList(null, null, "n3", true, 0);
+    assertList("dp", null, null, true, 1);
   }
 
   @Test
@@ -159,11 +129,21 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   }
 
   private void assertList(
-      String query, String name, String namespace, Boolean deleted, int expectedResult) {
+      String query, String name, String namespace, Boolean deprecated, int expectedResult) {
     assertEquals(
         expectedResult,
-        vocabularyMapper.list(query, name, namespace, deleted, DEFAULT_PAGE).size());
-    assertEquals(expectedResult, vocabularyMapper.count(query, name, namespace, deleted));
+        vocabularyMapper.list(query, name, namespace, deprecated, DEFAULT_PAGE).size());
+    assertEquals(expectedResult, vocabularyMapper.count(query, name, namespace, deprecated));
+  }
+
+  @Test
+  public void isDeprecatedTest() {
+    Vocabulary vocabulary1 = createNewEntity("similar");
+    vocabularyMapper.create(vocabulary1);
+    assertFalse(vocabularyMapper.isDeprecated(vocabulary1.getKey()));
+
+    vocabularyMapper.deprecate(vocabulary1.getKey(), DEPRECATED_BY, null);
+    assertTrue(vocabularyMapper.isDeprecated(vocabulary1.getKey()));
   }
 
   /**

@@ -24,7 +24,6 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
   private Integer key;
   private Integer vocabularyKey;
   private Integer parentKey;
-  private Integer replacedByKey;
   private String name;
   private Map<Language, String> label = new EnumMap<>(Language.class);
   private Map<Language, List<String>> alternativeLabels = new EnumMap<>(Language.class);
@@ -33,6 +32,9 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
   private List<URI> externalDefinitions = new ArrayList<>();
   private List<URI> sameAsUris = new ArrayList<>();
   private List<String> editorialNotes = new ArrayList<>();
+
+  // deprecation fields
+  private Integer replacedByKey;
   private LocalDateTime deprecated;
   private String deprecatedBy;
 
@@ -70,10 +72,12 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
     this.parentKey = parentKey;
   }
 
+  @Override
   public Integer getReplacedByKey() {
     return replacedByKey;
   }
 
+  @Override
   public void setReplacedByKey(Integer replacedByKey) {
     this.replacedByKey = replacedByKey;
   }
@@ -152,18 +156,22 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
     this.editorialNotes = editorialNotes;
   }
 
+  @Override
   public LocalDateTime getDeprecated() {
     return deprecated;
   }
 
+  @Override
   public void setDeprecated(LocalDateTime deprecated) {
     this.deprecated = deprecated;
   }
 
+  @Override
   public String getDeprecatedBy() {
     return deprecatedBy;
   }
 
+  @Override
   public void setDeprecatedBy(String deprecatedBy) {
     this.deprecatedBy = deprecatedBy;
   }
@@ -300,7 +308,6 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
     return Objects.equals(key, other.key)
         && Objects.equals(vocabularyKey, other.vocabularyKey)
         && Objects.equals(parentKey, other.parentKey)
-        && Objects.equals(replacedByKey, other.replacedByKey)
         && Objects.equals(name, other.name)
         && Objects.equals(label, other.label)
         && Objects.equals(alternativeLabels, other.alternativeLabels)
@@ -309,6 +316,7 @@ public class Concept implements VocabularyEntity, LenientEquals<Concept> {
         && Objects.equals(externalDefinitions, other.externalDefinitions)
         && Objects.equals(sameAsUris, other.sameAsUris)
         && Objects.equals(editorialNotes, other.editorialNotes)
+        && Objects.equals(replacedByKey, other.replacedByKey)
         && Objects.equals(deprecated, other.deprecated)
         && Objects.equals(deprecatedBy, other.deprecatedBy)
         && Objects.equals(deleted, other.deleted);

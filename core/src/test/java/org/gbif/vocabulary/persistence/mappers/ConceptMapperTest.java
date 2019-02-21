@@ -38,8 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @ContextConfiguration(initializers = {ConceptMapperTest.ContexInitializer.class})
 public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
-  private static final String DEPRECATED_BY = "deprecator";
-
   /**
    * This is not in the base class because when running tests in parallel it uses the same DB for
    * all the children.
@@ -109,18 +107,18 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept3.setEditorialNotes(Collections.singletonList("editorial notes"));
     conceptMapper.create(concept3);
 
-    assertList("concept1", null, null, null, null, 1);
-    assertList("conc", null, null, null, null, 3);
-    assertList("example", null, null, null, null, 2);
-    assertList("altern ex", null, null, null, null, 1);
-    assertList("oncept", null, null, null, null, 0);
-    assertList(null, defaultVocabularyKey, null, null, null, 3);
-    assertList(null, null, concept1.getKey(), null, null, 2);
-    assertList(null, null, concept2.getKey(), null, null, 0);
-    assertList(null, null, null, null, "concept1", 1);
-    assertList(null, null, null, null, "concepto", 0);
-    assertList("exa", defaultVocabularyKey, null, null, null, 2);
-    assertList(null, null, concept1.getKey(), null, "concept3", 1);
+    assertList("concept1", null, null, null, null, null, 1);
+    assertList("conc", null, null, null, null, null, 3);
+    assertList("example", null, null, null, null, null, 2);
+    assertList("altern ex", null, null, null, null, null, 1);
+    assertList("oncept", null, null, null, null, null, 0);
+    assertList(null, defaultVocabularyKey, null, null, null, null, 3);
+    assertList(null, null, concept1.getKey(), null, null, null, 2);
+    assertList(null, null, concept2.getKey(), null, null, null, 0);
+    assertList(null, null, null, null, "concept1", null, 1);
+    assertList(null, null, null, null, "concepto", null, 0);
+    assertList("exa", defaultVocabularyKey, null, null, null, null, 2);
+    assertList(null, null, concept1.getKey(), null, "concept3", null, 1);
   }
 
   @Test
@@ -145,7 +143,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   }
 
   @Test
-  public void deprecationTest() {
+  public void deprecationInBulkTest() {
     Concept concept1 = createNewEntity("deprecated");
     conceptMapper.create(concept1);
     assertNull(concept1.getDeprecated());
@@ -153,34 +151,6 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept concept2 = createNewEntity("deprecated2");
     conceptMapper.create(concept2);
     assertNull(concept2.getDeprecated());
-
-    // deprecate
-    conceptMapper.deprecate(concept1.getKey(), DEPRECATED_BY, null);
-    Concept conceptDeprecated = conceptMapper.get(concept1.getKey());
-    assertNotNull(conceptDeprecated.getDeprecated());
-    assertEquals(DEPRECATED_BY, conceptDeprecated.getDeprecatedBy());
-    assertNull(conceptDeprecated.getReplacedByKey());
-
-    // undeprecate
-    conceptMapper.restoreDeprecated(concept1.getKey());
-    Concept conceptUndeprecated = conceptMapper.get(concept1.getKey());
-    assertNull(conceptUndeprecated.getDeprecated());
-    assertNull(conceptUndeprecated.getDeprecatedBy());
-    assertNull(conceptUndeprecated.getReplacedByKey());
-
-    // deprecate with replacement
-    conceptMapper.deprecate(concept1.getKey(), DEPRECATED_BY, concept2.getKey());
-    conceptDeprecated = conceptMapper.get(concept1.getKey());
-    assertNotNull(conceptDeprecated.getDeprecated());
-    assertEquals(DEPRECATED_BY, conceptDeprecated.getDeprecatedBy());
-    assertEquals(concept2.getKey(), conceptDeprecated.getReplacedByKey());
-
-    // undeprecate with replacement
-    conceptMapper.restoreDeprecated(concept1.getKey());
-    conceptUndeprecated = conceptMapper.get(concept1.getKey());
-    assertNull(conceptUndeprecated.getDeprecated());
-    assertNull(conceptUndeprecated.getDeprecatedBy());
-    assertNull(conceptUndeprecated.getReplacedByKey());
 
     // deprecate in bulk
     conceptMapper.deprecateInBulk(
@@ -257,15 +227,16 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
       Integer parentKey,
       Integer replacedByKey,
       String name,
+      Boolean deprecated,
       int expectedResult) {
     assertEquals(
         expectedResult,
         conceptMapper
-            .list(query, vocabularyKey, parentKey, replacedByKey, name, null, DEFAULT_PAGE)
+            .list(query, vocabularyKey, parentKey, replacedByKey, name, deprecated, DEFAULT_PAGE)
             .size());
     assertEquals(
         expectedResult,
-        conceptMapper.count(query, vocabularyKey, parentKey, replacedByKey, name, null));
+        conceptMapper.count(query, vocabularyKey, parentKey, replacedByKey, name, deprecated));
   }
 
   /**

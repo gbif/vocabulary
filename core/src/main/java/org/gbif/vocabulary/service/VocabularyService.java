@@ -6,6 +6,7 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotBlank;
 
 /** Services for a {@link Vocabulary}. */
 public interface VocabularyService extends BaseService<Vocabulary> {
@@ -21,13 +22,30 @@ public interface VocabularyService extends BaseService<Vocabulary> {
   PagingResponse<Vocabulary> list(@Nullable VocabularySearchParams params, @Nullable Pageable page);
 
   /**
-   * Deletes a {@link Vocabulary}.
+   * Deprecates a vocabulary with a replacement.
    *
-   * <p>A vocabulary that has concepts associated cannot be deleted. If specified, this method will
-   * delete all the concepts too.
-   *
-   * @param key key of the vocabulary to delete.
+   * @param key key of the vocabulary to be deprecated
+   * @param deprecatedBy name of the actor who deprecates the vocabulary
+   * @param replacementKey key of the replacement
+   * @param deprecateConcepts if true the concepts of the vocabulary will be deprecated too
    */
-  // TODO: let delete concepts too??
-  void delete(int key);
+  void deprecate(
+    int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateConcepts);
+
+  /**
+   * Deprecates a concept without replacement.
+   *
+   * @param key key of the concept to be deprecated
+   * @param deprecatedBy name of the actor who deprecates the concept
+   * @param deprecateConcepts if true the concepts of the concept will be deprecated too
+   */
+  void deprecate(int key, @NotBlank String deprecatedBy, boolean deprecateConcepts);
+
+  /**
+   * Restores a deprecated concept.
+   *
+   * @param key key of the concept to undeprecate.
+   * @param restoreDeprecatedConcepts if true it restores the deprecated concepts of the vocabulary
+   */
+  void restoreDeprecated(int key, boolean restoreDeprecatedConcepts);
 }

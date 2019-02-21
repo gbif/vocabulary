@@ -6,6 +6,7 @@ import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.service.BaseService;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,30 @@ abstract class AbstractBaseService<T extends VocabularyEntity> implements BaseSe
     baseMapper.create(entity);
 
     return entity.getKey();
+  }
+
+  @Transactional
+  @Override
+  public void update(T entity) {
+    requireNonNull(entity.getKey());
+
+    T oldEntity = baseMapper.get(entity.getKey());
+    requireNonNull(oldEntity, "Couldn't find entity with key: " + entity.getKey());
+
+    checkArgument(oldEntity.getDeprecated() == null, "Cannot update a deprecated entity");
+    checkArgument(
+        Objects.equals(oldEntity.getDeprecated(), entity.getDeprecated()),
+        "Cannot deprecate or restore a deprecated entity while updating");
+    checkArgument(Objects.equals(oldEntity.getDeprecatedBy(), entity.getDeprecatedBy()));
+    checkArgument(Objects.equals(oldEntity.getReplacedByKey(), entity.getReplacedByKey()));
+
+    checkArgument(oldEntity.getDeleted() == null, "Cannot update a deleted entity");
+    checkArgument(
+        Objects.equals(oldEntity.getDeleted(), entity.getDeleted()),
+        "Cannot delete or restore an entity while updating");
+
+    // update the concept
+    baseMapper.update(entity);
   }
 
   @Override

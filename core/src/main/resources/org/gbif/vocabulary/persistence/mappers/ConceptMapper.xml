@@ -64,7 +64,7 @@
   <update id="update">
     UPDATE concept
     SET <include refid="CONCEPT_UPDATE_PARAMS" />
-    WHERE key = #{key,jdbcType=INTEGER}
+    WHERE key = #{key,jdbcType=INTEGER} AND deleted IS NULL
   </update>
 
   <update id="delete">
@@ -91,7 +91,7 @@
         ,replaced_by_key=null
       </otherwise>
     </choose>
-    WHERE key = #{key,jdbcType=INTEGER}
+    WHERE key = #{key,jdbcType=INTEGER} AND deleted IS NULL
   </update>
 
   <update id="deprecateInBulk">
@@ -106,7 +106,7 @@
         ,replaced_by_key=null
       </otherwise>
     </choose>
-    WHERE key IN
+    WHERE deleted IS NULL AND key IN
     <foreach collection="keys" item="key" separator="," open="(" close=")">
       #{key}
     </foreach>
@@ -115,13 +115,13 @@
   <update id="restoreDeprecated">
     UPDATE concept
     SET deprecated = null, deprecated_by = null, replaced_by_key = null
-    WHERE key = #{key,jdbcType=INTEGER}
+    WHERE key = #{key,jdbcType=INTEGER} AND deleted IS NULL
   </update>
 
   <update id="restoreDeprecatedInBulk">
     UPDATE concept
     SET deprecated = null, deprecated_by = null, replaced_by_key = null
-    WHERE key IN
+    WHERE deleted IS NULL AND key IN
     <foreach collection="keys" item="key" separator="," open="(" close=")">
       #{key}
     </foreach>
@@ -180,9 +180,17 @@
   <select id="suggest" resultType="KeyNameResult">
     SELECT key, name
     FROM (
-    (SELECT key, name FROM concept WHERE name ilike #{query}||'%' ORDER BY name LIMIT 20)
+      (SELECT key, name
+       FROM concept
+       WHERE name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+       ORDER BY name LIMIT 20
+      )
     UNION ALL
-    (SELECT key, name FROM concept WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' ORDER BY name LIMIT 20)
+      (SELECT key, name
+       FROM concept
+       WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+       ORDER BY name LIMIT 20
+      )
     ) t1 LIMIT 20
   </select>
 
@@ -206,7 +214,7 @@
     WITH RECURSIVE t(key, replaced, deprecated) AS (
       SELECT root.key, root.replaced_by_key, root.deprecated
       FROM concept root
-      WHERE key = #{key,jdbcType=INTEGER} AND deprecated IS NOT NULL AND replaced_by_key IS NOT NULL
+      WHERE key = #{key,jdbcType=INTEGER} AND deprecated IS NOT NULL AND replaced_by_key IS NOT NULL AND deleted IS NULL
     UNION
       SELECT replacement.key, replacement.replaced_by_key, replacement.deprecated
       FROM t conc, concept replacement

@@ -51,13 +51,7 @@
   <update id="update">
     UPDATE vocabulary
     SET <include refid="VOCABULARY_PARAMS_UPDATE" />
-    WHERE key = #{key,jdbcType=INTEGER}
-  </update>
-
-  <update id="delete">
-    UPDATE vocabulary
-    SET deleted = now()
-    WHERE key = #{key,jdbcType=INTEGER}
+    WHERE key = #{key,jdbcType=INTEGER} AND deleted IS NULL
   </update>
 
   <select id="get" resultMap="VOCABULARY_MAP">
@@ -72,17 +66,16 @@
     <if test="query != null" >
       JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
-    <where>
-      <if test="deleted != null">
-        v.deleted IS <if test="deleted">NOT</if> NULL
-      </if>
-      <if test="name != null">
-        AND v.name = #{name}
-      </if>
-      <if test="namespace != null">
-        AND v.namespace = #{namespace}
-      </if>
-    </where>
+    WHERE v.deleted IS NULL
+    <if test="deprecated != null">
+      AND v.deprecated IS <if test="deprecated">NOT</if> NULL
+    </if>
+    <if test="name != null">
+      AND v.name = #{name}
+    </if>
+    <if test="namespace != null">
+      AND v.namespace = #{namespace}
+    </if>
     ORDER BY <if test="query != null" >ts_rank_cd(v.fulltext_search, query) DESC,</if> v.created DESC, v.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
@@ -95,25 +88,32 @@
     <if test="query != null" >
       JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
-    <where>
-      <if test="deleted != null">
-        v.deleted IS <if test="deleted">NOT</if> NULL
-      </if>
-      <if test="name != null">
-        AND v.name = #{name}
-      </if>
-      <if test="namespace != null">
-        AND v.namespace = #{namespace}
-      </if>
-    </where>
+    WHERE v.deleted IS NULL
+    <if test="deprecated != null">
+      AND v.deprecated IS <if test="deprecated">NOT</if> NULL
+    </if>
+    <if test="name != null">
+      AND v.name = #{name}
+    </if>
+    <if test="namespace != null">
+      AND v.namespace = #{namespace}
+    </if>
   </select>
 
   <select id="suggest" resultType="KeyNameResult">
     SELECT key, name
     FROM (
-      (SELECT key, name FROM vocabulary WHERE name ilike #{query}||'%' ORDER BY name LIMIT 20)
+      (SELECT key, name
+       FROM vocabulary
+       WHERE name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+       ORDER BY name LIMIT 20
+      )
       UNION ALL
-      (SELECT key, name FROM vocabulary WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' ORDER BY name LIMIT 20)
+      (SELECT key, name
+       FROM vocabulary
+       WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+       ORDER BY name LIMIT 20
+      )
     ) t1 LIMIT 20
   </select>
 
@@ -121,6 +121,33 @@
     SELECT key, name
     FROM vocabulary where #{name} = ANY(avals(label))
     LIMIT 5
+  </select>
+
+  <update id="deprecate">
+    UPDATE vocabulary
+    SET deprecated = now(),
+    deprecated_by = #{deprecatedBy,jdbcType=VARCHAR}
+    <choose>
+      <when test="replacementKey != null">
+        ,replaced_by_key=#{replacementKey,jdbcType=INTEGER}
+      </when>
+      <otherwise>
+        ,replaced_by_key=null
+      </otherwise>
+    </choose>
+    WHERE key = #{key,jdbcType=INTEGER} AND deleted IS NULL
+  </update>
+
+  <update id="restoreDeprecated">
+    UPDATE vocabulary
+    SET deprecated = null, deprecated_by = null, replaced_by_key = null
+    WHERE key = #{key,jdbcType=INTEGER} AND deleted IS NULL
+  </update>
+
+  <select id="isDeprecated" resultType="Boolean">
+    SELECT case when count(*) > 0 then 1 else 0 end
+    FROM vocabulary
+    WHERE key = #{key,jdbcType=INTEGER} AND deprecated IS NOT NULL
   </select>
 
 </mapper>

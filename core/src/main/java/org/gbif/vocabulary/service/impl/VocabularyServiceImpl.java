@@ -8,14 +8,11 @@ import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.VocabularyService;
 
+import javax.validation.constraints.NotBlank;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import static java.util.Objects.requireNonNull;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /** Default implementation for {@link VocabularyService}. */
 @Service
@@ -33,25 +30,6 @@ public class VocabularyServiceImpl extends AbstractBaseService<Vocabulary>
     this.conceptMapper = conceptMapper;
   }
 
-  @Transactional
-  @Override
-  public void update(Vocabulary vocabulary) {
-    requireNonNull(vocabulary.getKey());
-
-    Vocabulary oldVocabulary = vocabularyMapper.get(vocabulary.getKey());
-    requireNonNull(oldVocabulary, "Couldn't find entity with key: " + oldVocabulary.getKey());
-
-    if (oldVocabulary.getDeleted() != null) {
-      checkArgument(
-          vocabulary.getDeleted() == null,
-          "Unable to update a previously deleted vocabulary unless you clear the deletion timestamp");
-    } else {
-      checkArgument(vocabulary.getDeleted() == null, "Can't delete a vocabulary when updating");
-    }
-
-    vocabularyMapper.update(vocabulary);
-  }
-
   @Override
   public PagingResponse<Vocabulary> list(VocabularySearchParams params, Pageable page) {
     page = page != null ? page : new PagingResponse<>();
@@ -65,12 +43,20 @@ public class VocabularyServiceImpl extends AbstractBaseService<Vocabulary>
   }
 
   @Override
-  public void delete(int key) {
-    if (hasConcepts(key)) {
-      throw new IllegalArgumentException("Cannot delete a vocabulary that has concepts");
-    }
+  public void deprecate(
+    int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateConcepts
+  ) {
+    // TODO
+  }
 
-    vocabularyMapper.delete(key);
+  @Override
+  public void deprecate(int key, @NotBlank String deprecatedBy, boolean deprecateConcepts) {
+    // TODO
+  }
+
+  @Override
+  public void restoreDeprecated(int key, boolean restoreDeprecatedConcepts) {
+    // TODO
   }
 
   private boolean hasConcepts(int vocabularyKey) {

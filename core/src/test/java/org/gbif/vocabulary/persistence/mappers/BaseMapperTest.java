@@ -49,6 +49,7 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
           };
 
   static final Pageable DEFAULT_PAGE = PAGE_FN.apply(10, 0L);
+  static final String DEPRECATED_BY = "deprecator";
 
   private final BaseMapper<T> baseMapper;
 
@@ -108,6 +109,45 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
   @Test
   public void getNonExistingEntityTest() {
     assertNull(baseMapper.get(Integer.MAX_VALUE));
+  }
+
+  @Test
+  public void deprecationTest() {
+    T entity1 = createNewEntity("deprecated");
+    baseMapper.create(entity1);
+    assertNull(entity1.getDeprecated());
+
+    T entity2 = createNewEntity("deprecated2");
+    baseMapper.create(entity2);
+    assertNull(entity2.getDeprecated());
+
+    // deprecate
+    baseMapper.deprecate(entity1.getKey(), DEPRECATED_BY, null);
+    T entityDeprecated = baseMapper.get(entity1.getKey());
+    assertNotNull(entityDeprecated.getDeprecated());
+    assertEquals(DEPRECATED_BY, entityDeprecated.getDeprecatedBy());
+    assertNull(entityDeprecated.getReplacedByKey());
+
+    // undeprecate
+    baseMapper.restoreDeprecated(entity1.getKey());
+    T entityUndeprecated = baseMapper.get(entity1.getKey());
+    assertNull(entityUndeprecated.getDeprecated());
+    assertNull(entityUndeprecated.getDeprecatedBy());
+    assertNull(entityUndeprecated.getReplacedByKey());
+
+    // deprecate with replacement
+    baseMapper.deprecate(entity1.getKey(), DEPRECATED_BY, entity2.getKey());
+    entityDeprecated = baseMapper.get(entity1.getKey());
+    assertNotNull(entityDeprecated.getDeprecated());
+    assertEquals(DEPRECATED_BY, entityDeprecated.getDeprecatedBy());
+    assertEquals(entity2.getKey(), entityDeprecated.getReplacedByKey());
+
+    // undeprecate with replacement
+    baseMapper.restoreDeprecated(entity1.getKey());
+    entityUndeprecated = baseMapper.get(entity1.getKey());
+    assertNull(entityUndeprecated.getDeprecated());
+    assertNull(entityUndeprecated.getDeprecatedBy());
+    assertNull(entityUndeprecated.getReplacedByKey());
   }
 
   abstract T createNewEntity(String name);

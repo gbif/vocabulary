@@ -26,7 +26,7 @@ public interface ConceptService extends BaseService<Concept> {
    * @param key key of the concept to be deprecated
    * @param deprecatedBy name of the actor who deprecates the concept
    * @param replacementKey key of the replacement
-   * @param deprecateChildren if true the children of the concept are deprecated too
+   * @param deprecateChildren if true the children of the concept will be deprecated too
    */
   void deprecate(
       int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateChildren);
@@ -36,8 +36,9 @@ public interface ConceptService extends BaseService<Concept> {
    *
    * @param key key of the concept to be deprecated
    * @param deprecatedBy name of the actor who deprecates the concept
+   * @param deprecateChildren if true the children of the concept will be deprecated too
    */
-  void deprecate(int key, @NotBlank String deprecatedBy);
+  void deprecate(int key, @NotBlank String deprecatedBy, boolean deprecateChildren);
 
   /**
    * Restores a deprecated concept.

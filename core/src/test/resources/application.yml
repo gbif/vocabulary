@@ -9,6 +9,3 @@ mybatis:
   type-aliases-package: org.gbif.vocabulary.model;org.gbif.vocabulary.persistence.handlers
   configuration:
     map-underscore-to-camel-case: true
-
-
-

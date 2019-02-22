@@ -1,6 +1,7 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 
 import javax.validation.ConstraintViolationException;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,15 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Execution(ExecutionMode.SAME_THREAD)
 public class ConceptServiceTest extends BaseServiceTest<Concept> {
 
-  private final ConceptService conceptService;
-  private final ConceptMapper conceptMapper;
-
-  @Autowired
-  ConceptServiceTest(ConceptService conceptService, ConceptMapper conceptMapper) {
-    super(conceptService, conceptMapper);
-    this.conceptService = conceptService;
-    this.conceptMapper = conceptMapper;
-  }
+  @Autowired private ConceptService conceptService;
+  @MockBean private ConceptMapper conceptMapper;
 
   @Test
   public void invalidVocabularyTest() {
@@ -50,13 +45,14 @@ public class ConceptServiceTest extends BaseServiceTest<Concept> {
   }
 
   // TODO: convert to IT test
-//  @Test
-//  public void deprecateWithoutReplacementButWithChildrenTest() {
-//    when(conceptMapper.list(null, null, TEST_KEY, null, null, false, null)).thenReturn(1L);
-//    assertThrows(
-//        IllegalArgumentException.class, () -> conceptService.deprecate(TEST_KEY, "test", false));
-//    assertDoesNotThrow(() -> conceptService.deprecate(TEST_KEY, "test", true));
-//  }
+  //  @Test
+  //  public void deprecateWithoutReplacementButWithChildrenTest() {
+  //    when(conceptMapper.list(null, null, TEST_KEY, null, null, false, null)).thenReturn(1L);
+  //    assertThrows(
+  //        IllegalArgumentException.class, () -> conceptService.deprecate(TEST_KEY, "test",
+  // false));
+  //    assertDoesNotThrow(() -> conceptService.deprecate(TEST_KEY, "test", true));
+  //  }
 
   @Override
   Concept createNewEntity(String name) {
@@ -66,5 +62,15 @@ public class ConceptServiceTest extends BaseServiceTest<Concept> {
     concept.setCreatedBy("test");
     concept.setModifiedBy("test");
     return concept;
+  }
+
+  @Override
+  BaseMapper<Concept> getMapper() {
+    return conceptMapper;
+  }
+
+  @Override
+  BaseService<Concept> getService() {
+    return conceptService;
   }
 }

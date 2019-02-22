@@ -1,10 +1,10 @@
 package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.vocabulary.Language;
+import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.PostgresDBExtension;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -24,7 +24,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
@@ -224,6 +223,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @Test
   public void getVocabularyKeyTest() {
     Concept concept1 = createNewEntity("r1");
+    conceptMapper.create(concept1);
     assertEquals(
         defaultVocabularyKey, conceptMapper.getVocabularyKey(concept1.getKey()).intValue());
   }

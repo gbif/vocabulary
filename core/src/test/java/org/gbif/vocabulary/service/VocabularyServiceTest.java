@@ -1,6 +1,7 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -18,20 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @Execution(ExecutionMode.SAME_THREAD)
 public class VocabularyServiceTest extends BaseServiceTest<Vocabulary> {
 
-  private final VocabularyService vocabularyService;
-  private final VocabularyMapper vocabularyMapper;
-  private final ConceptMapper conceptMapper;
-
-  @Autowired
-  VocabularyServiceTest(
-      VocabularyService vocabularyService,
-      VocabularyMapper vocabularyMapper,
-      ConceptMapper conceptMapper) {
-    super(vocabularyService, vocabularyMapper);
-    this.vocabularyService = vocabularyService;
-    this.vocabularyMapper = vocabularyMapper;
-    this.conceptMapper = conceptMapper;
-  }
+  @Autowired private VocabularyService vocabularyService;
+  @MockBean private VocabularyMapper vocabularyMapper;
+  @MockBean private ConceptMapper conceptMapper;
 
   @Test
   public void invalidVocabularyTest() {
@@ -58,5 +49,15 @@ public class VocabularyServiceTest extends BaseServiceTest<Vocabulary> {
     vocabulary.setCreatedBy("test");
     vocabulary.setModifiedBy("test");
     return vocabulary;
+  }
+
+  @Override
+  BaseMapper<Vocabulary> getMapper() {
+    return vocabularyMapper;
+  }
+
+  @Override
+  BaseService<Vocabulary> getService() {
+    return vocabularyService;
   }
 }

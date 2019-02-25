@@ -1,3 +1,7 @@
 spring:
   liquibase:
     change-log: classpath:/liquibase/master.xml
+
+logging:
+  level:
+    liquibase: warn

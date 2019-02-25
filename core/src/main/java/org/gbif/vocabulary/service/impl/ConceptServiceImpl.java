@@ -10,7 +10,9 @@ import org.gbif.vocabulary.service.ConceptService;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -53,6 +55,8 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
           "A concept and its parent must belong to the same vocabulary");
     }
 
+    // TODO: check parent and vocabulary are not deprecated?? same for the update method
+
     conceptMapper.create(concept);
 
     return concept.getKey();
@@ -90,8 +94,9 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
   }
 
   @Override
-  public PagingResponse<Concept> list(ConceptSearchParams params, Pageable page) {
+  public PagingResponse<Concept> list(@Nullable ConceptSearchParams params, @Nullable Pageable page) {
     page = page != null ? page : new PagingResponse<>();
+    params = params != null ? params : ConceptSearchParams.builder().build();
 
     return new PagingResponse<>(
         page,
@@ -169,7 +174,8 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
     conceptMapper.restoreDeprecated(key);
 
     // set the parent. If the parent is deprecated we look for its replacement
-    concept.setParentKey(conceptMapper.findReplacement(concept.getParentKey()));
+    Optional.ofNullable(concept.getParentKey())
+        .ifPresent(p -> concept.setParentKey(conceptMapper.findReplacement(p)));
 
     if (restoreDeprecatedChildren) {
       conceptMapper.restoreDeprecatedInBulk(findChildrenKeys(key, true));

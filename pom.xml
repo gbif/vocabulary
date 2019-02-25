@@ -37,6 +37,8 @@
     <postgresql-embedded.version>2.10</postgresql-embedded.version>
     <junit-vintage.version>5.3.2</junit-vintage.version>
     <jjwt.version>0.9.1</jjwt.version>
+    <!-- version limited by gbif-api -->
+    <guava.version>18.0</guava.version>
   </properties>
 
   <dependencyManagement>
@@ -90,6 +92,11 @@
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt</artifactId>
         <version>${jjwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
       </dependency>
 
       <!-- tests -->

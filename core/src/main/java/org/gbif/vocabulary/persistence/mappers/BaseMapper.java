@@ -33,4 +33,6 @@ public interface BaseMapper<T extends VocabularyEntity> {
       @Nullable @Param("replacementKey") Integer replacementKey);
 
   void restoreDeprecated(@Param("key") int key);
+
+  boolean isDeprecated(@Param("key") int key);
 }

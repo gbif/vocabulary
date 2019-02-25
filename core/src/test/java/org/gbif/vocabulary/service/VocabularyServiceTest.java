@@ -7,6 +7,7 @@ import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
 import javax.validation.ConstraintViolationException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -23,6 +24,18 @@ public class VocabularyServiceTest extends BaseServiceTest<Vocabulary> {
   @Autowired private VocabularyService vocabularyService;
   @MockBean private VocabularyMapper vocabularyMapper;
   @MockBean private ConceptMapper conceptMapper;
+
+  @Test
+  public void createTest() {
+    Vocabulary vocabulary = createNewEntity("name");
+
+    // mock
+    mockCreateEntity(vocabulary);
+
+    getService().create(vocabulary);
+
+    Assertions.assertEquals(TEST_KEY, vocabulary.getKey().intValue());
+  }
 
   @Test
   public void invalidVocabularyTest() {

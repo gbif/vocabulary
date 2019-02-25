@@ -232,7 +232,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
   @Test
   public void isDeprecatedTest() {
-    Concept concept1 = createNewEntity("cd1");
+    Concept concept1 = createNewEntity("concept is deprecated");
     conceptMapper.create(concept1);
     assertFalse(conceptMapper.isDeprecated(concept1.getKey()));
 

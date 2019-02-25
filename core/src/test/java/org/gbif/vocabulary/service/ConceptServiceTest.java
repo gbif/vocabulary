@@ -12,7 +12,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Tests the {@link ConceptService}. */
@@ -37,11 +36,6 @@ public class ConceptServiceTest extends BaseServiceTest<Concept> {
     concept.setCreatedBy("test");
     concept.setModifiedBy("test");
     assertThrows(ConstraintViolationException.class, () -> conceptService.create(concept));
-
-    // set vocabulary key
-    concept.setVocabularyKey(TEST_KEY);
-    mockCreateEntity(concept);
-    assertDoesNotThrow(() -> conceptService.create(concept));
   }
 
   @Override

@@ -50,6 +50,4 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   Integer findReplacement(@Param("key") int key);
 
   Integer getVocabularyKey(@Param("key") int conceptKey);
-
-  boolean isDeprecated(@Param("key") int key);
 }

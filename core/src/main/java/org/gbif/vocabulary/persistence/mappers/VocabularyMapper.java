@@ -26,6 +26,4 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
       @Nullable @Param("name") String name,
       @Nullable @Param("namespace") String namespace,
       @Nullable @Param("deprecated") Boolean deprecated);
-
-  boolean isDeprecated(@Param("key") int key);
 }

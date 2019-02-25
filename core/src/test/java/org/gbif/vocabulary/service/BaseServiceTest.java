@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import javax.sql.DataSource;
 import javax.validation.ConstraintViolationException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.BeanUtils;
@@ -36,18 +35,6 @@ abstract class BaseServiceTest<T extends VocabularyEntity> {
 
   @MockBean private DataSource dataSource;
   @MockBean private PlatformTransactionManager platformTransactionManager;
-
-  @Test
-  public void createTest() {
-    T entity = createNewEntity("name");
-
-    // mock
-    mockCreateEntity(entity);
-
-    getService().create(entity);
-
-    Assertions.assertEquals(TEST_KEY, entity.getKey().intValue());
-  }
 
   @Test
   public void createNullEntityTest() {

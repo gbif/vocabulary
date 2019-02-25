@@ -81,6 +81,7 @@ public class ConceptServiceIT {
 
     Concept child = createNewConcept("child", vocabularyKeys[1]);
     child.setParentKey(parentKey);
+    // concept and parent belong to different vocabularies
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(child));
   }
 
@@ -132,7 +133,7 @@ public class ConceptServiceIT {
 
   @Test
   public void deprecatingWhenUpdatingTest() {
-    Concept concept = createNewConcept("to deprecate", vocabularyKeys[0]);
+    Concept concept = createNewConcept("deprecation candidate", vocabularyKeys[0]);
     int key = conceptService.create(concept);
 
     Concept createdConcept = conceptService.get(key);
@@ -142,7 +143,7 @@ public class ConceptServiceIT {
 
   @Test
   public void deletingWhenUpdatingTest() {
-    Concept concept = createNewConcept("to delete", vocabularyKeys[0]);
+    Concept concept = createNewConcept("deletion candidate", vocabularyKeys[0]);
     int key = conceptService.create(concept);
 
     Concept createdConcept = conceptService.get(key);
@@ -275,15 +276,15 @@ public class ConceptServiceIT {
 
     // restore concept and children
     conceptService.restoreDeprecated(key1, true);
-    deprecated = conceptService.get(key1);
-    assertNull(deprecated.getDeprecated());
-    assertNull(deprecated.getReplacedByKey());
-    child1Deprecated = conceptService.get(key3);
-    assertNull(child1Deprecated.getDeprecated());
-    assertNull(child1Deprecated.getReplacedByKey());
-    child2Deprecated = conceptService.get(key4);
-    assertNull(child2Deprecated.getDeprecated());
-    assertNull(child2Deprecated.getReplacedByKey());
+    restored = conceptService.get(key1);
+    assertNull(restored.getDeprecated());
+    assertNull(restored.getReplacedByKey());
+    Concept child1Restored = conceptService.get(key3);
+    assertNull(child1Restored.getDeprecated());
+    assertNull(child1Restored.getReplacedByKey());
+    Concept child2Restored = conceptService.get(key4);
+    assertNull(child2Restored.getDeprecated());
+    assertNull(child2Restored.getReplacedByKey());
   }
 
   @Test

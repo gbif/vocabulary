@@ -1,9 +1,9 @@
 package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.vocabulary.Language;
+import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.PostgresDBExtension;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -116,8 +116,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabulary1.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary1);
 
-    List<KeyNameResult> similarities =
-        vocabularyMapper.findSimilarities(createNewEntity("igual"));
+    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities(createNewEntity("igual"));
     assertEquals(1, similarities.size());
     assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(vocabulary1.getName(), similarities.get(0).getName());
@@ -138,7 +137,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
   @Test
   public void isDeprecatedTest() {
-    Vocabulary vocabulary1 = createNewEntity("similar");
+    Vocabulary vocabulary1 = createNewEntity("vd1");
     vocabularyMapper.create(vocabulary1);
     assertFalse(vocabularyMapper.isDeprecated(vocabulary1.getKey()));
 

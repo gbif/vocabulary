@@ -24,7 +24,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the {@link ConceptMapper} class
@@ -226,6 +228,16 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     conceptMapper.create(concept1);
     assertEquals(
         defaultVocabularyKey, conceptMapper.getVocabularyKey(concept1.getKey()).intValue());
+  }
+
+  @Test
+  public void isDeprecatedTest() {
+    Concept concept1 = createNewEntity("cd1");
+    conceptMapper.create(concept1);
+    assertFalse(conceptMapper.isDeprecated(concept1.getKey()));
+
+    conceptMapper.deprecate(concept1.getKey(), DEPRECATED_BY, null);
+    assertTrue(conceptMapper.isDeprecated(concept1.getKey()));
   }
 
   private void assertList(

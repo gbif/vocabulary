@@ -229,4 +229,10 @@
     WHERE key = #{key,jdbcType=INTEGER}
   </select>
 
+  <select id="isDeprecated" resultType="Boolean">
+    SELECT case when count(*) > 0 then 1 else 0 end
+    FROM concept
+    WHERE key = #{key,jdbcType=INTEGER} AND deprecated IS NOT NULL
+  </select>
+
 </mapper>

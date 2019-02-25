@@ -44,16 +44,6 @@ public class ConceptServiceTest extends BaseServiceTest<Concept> {
     assertDoesNotThrow(() -> conceptService.create(concept));
   }
 
-  // TODO: convert to IT test
-  //  @Test
-  //  public void deprecateWithoutReplacementButWithChildrenTest() {
-  //    when(conceptMapper.list(null, null, TEST_KEY, null, null, false, null)).thenReturn(1L);
-  //    assertThrows(
-  //        IllegalArgumentException.class, () -> conceptService.deprecate(TEST_KEY, "test",
-  // false));
-  //    assertDoesNotThrow(() -> conceptService.deprecate(TEST_KEY, "test", true));
-  //  }
-
   @Override
   Concept createNewEntity(String name) {
     Concept concept = new Concept();

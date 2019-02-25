@@ -49,13 +49,18 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
     // checking if there is another similar concept.
     checkSimilarities(concept);
 
+    checkArgument(
+        !vocabularyMapper.isDeprecated(concept.getVocabularyKey()),
+        "Cannot create a concept for a deprecated vocabulary");
+
     if (concept.getParentKey() != null) {
       checkArgument(
           concept.getVocabularyKey().equals(conceptMapper.getVocabularyKey(concept.getParentKey())),
           "A concept and its parent must belong to the same vocabulary");
+      checkArgument(
+          !conceptMapper.isDeprecated(concept.getParentKey()),
+          "Cannot create a concept with a deprecated parent");
     }
-
-    // TODO: check parent and vocabulary are not deprecated?? same for the update method
 
     conceptMapper.create(concept);
 
@@ -70,11 +75,20 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
     Concept oldConcept = conceptMapper.get(concept.getKey());
     requireNonNull(oldConcept, "Couldn't find concept with key: " + concept.getKey());
 
+    if (!Objects.equals(oldConcept.getVocabularyKey(), concept.getVocabularyKey())) {
+      checkArgument(
+          !vocabularyMapper.isDeprecated(concept.getVocabularyKey()),
+          "Cannot update a concept to a deprecated vocabulary");
+    }
+
     if (!Objects.equals(oldConcept.getParentKey(), concept.getParentKey())) {
       // parent is being updated
       checkArgument(
           concept.getVocabularyKey().equals(conceptMapper.getVocabularyKey(concept.getParentKey())),
           "A concept and its parent must belong to the same vocabulary");
+      checkArgument(
+          !conceptMapper.isDeprecated(concept.getParentKey()),
+          "Cannot update a concept to a deprecated parent");
     }
 
     checkArgument(oldConcept.getDeprecated() == null, "Cannot update a deprecated entity");
@@ -94,7 +108,8 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
   }
 
   @Override
-  public PagingResponse<Concept> list(@Nullable ConceptSearchParams params, @Nullable Pageable page) {
+  public PagingResponse<Concept> list(
+      @Nullable ConceptSearchParams params, @Nullable Pageable page) {
     page = page != null ? page : new PagingResponse<>();
     params = params != null ? params : ConceptSearchParams.builder().build();
 

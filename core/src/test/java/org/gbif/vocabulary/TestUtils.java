@@ -69,7 +69,6 @@ public final class TestUtils {
     vocabulary.setName(UUID.randomUUID().toString());
     vocabulary.setCreatedBy(TEST_USER);
     vocabulary.setModifiedBy(TEST_USER);
-
     return vocabulary;
   }
 

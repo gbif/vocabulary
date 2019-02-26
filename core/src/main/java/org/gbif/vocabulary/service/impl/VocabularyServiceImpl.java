@@ -1,6 +1,7 @@
 package org.gbif.vocabulary.service.impl;
 
 import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -80,14 +81,19 @@ public class VocabularyServiceImpl extends AbstractBaseService<Vocabulary>
 
   @Override
   public PagingResponse<Vocabulary> list(VocabularySearchParams params, Pageable page) {
-    page = page != null ? page : new PagingResponse<>();
+    page = page != null ? page : new PagingRequest();
+    params = params != null ? params : VocabularySearchParams.empty();
 
     return new PagingResponse<>(
         page,
         vocabularyMapper.count(
-            params.getQuery(), params.getName(), params.getNamespace(), params.getDeleted()),
+            params.getQuery(), params.getName(), params.getNamespace(), params.getDeprecated()),
         vocabularyMapper.list(
-            params.getQuery(), params.getName(), params.getNamespace(), params.getDeleted(), page));
+            params.getQuery(),
+            params.getName(),
+            params.getNamespace(),
+            params.getDeprecated(),
+            page));
   }
 
   @Override

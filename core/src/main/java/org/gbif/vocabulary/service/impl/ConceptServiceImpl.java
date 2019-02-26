@@ -1,6 +1,7 @@
 package org.gbif.vocabulary.service.impl;
 
 import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
@@ -110,8 +111,8 @@ public class ConceptServiceImpl extends AbstractBaseService<Concept> implements 
   @Override
   public PagingResponse<Concept> list(
       @Nullable ConceptSearchParams params, @Nullable Pageable page) {
-    page = page != null ? page : new PagingResponse<>();
-    params = params != null ? params : ConceptSearchParams.builder().build();
+    page = page != null ? page : new PagingRequest();
+    params = params != null ? params : ConceptSearchParams.empty();
 
     return new PagingResponse<>(
         page,

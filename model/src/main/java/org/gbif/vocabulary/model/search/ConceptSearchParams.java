@@ -60,6 +60,10 @@ public class ConceptSearchParams implements Serializable {
     return new Builder();
   }
 
+  public static ConceptSearchParams empty() {
+    return builder().build();
+  }
+
   public static class Builder {
     private String query;
     private Integer vocabularyKey;

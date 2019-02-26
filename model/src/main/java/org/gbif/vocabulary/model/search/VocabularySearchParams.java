@@ -8,13 +8,13 @@ public class VocabularySearchParams implements Serializable {
   private final String query;
   private final String name;
   private final String namespace;
-  private final Boolean deleted;
+  private final Boolean deprecated;
 
-  private VocabularySearchParams(String query, String name, String namespace, Boolean deleted) {
+  private VocabularySearchParams(String query, String name, String namespace, Boolean deprecated) {
     this.query = query;
     this.name = name;
     this.namespace = namespace;
-    this.deleted = deleted;
+    this.deprecated = deprecated;
   }
 
   public String getQuery() {
@@ -29,8 +29,8 @@ public class VocabularySearchParams implements Serializable {
     return namespace;
   }
 
-  public Boolean getDeleted() {
-    return deleted;
+  public Boolean getDeprecated() {
+    return deprecated;
   }
 
   /**
@@ -42,11 +42,15 @@ public class VocabularySearchParams implements Serializable {
     return new Builder();
   }
 
+  public static VocabularySearchParams empty() {
+    return builder().build();
+  }
+
   public static class Builder {
     private String query;
     private String name;
     private String namespace;
-    private Boolean deleted;
+    private Boolean deprecated;
 
     private Builder() {}
 
@@ -65,13 +69,13 @@ public class VocabularySearchParams implements Serializable {
       return this;
     }
 
-    public Builder deleted(boolean deleted) {
-      this.deleted = deleted;
+    public Builder deprecated(boolean deprecated) {
+      this.deprecated = deprecated;
       return this;
     }
 
     public VocabularySearchParams build() {
-      return new VocabularySearchParams(query, name, namespace, deleted);
+      return new VocabularySearchParams(query, name, namespace, deprecated);
     }
   }
 }

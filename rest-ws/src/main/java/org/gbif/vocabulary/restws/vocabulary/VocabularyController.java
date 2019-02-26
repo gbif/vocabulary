@@ -86,16 +86,16 @@ public class VocabularyController {
   }
 
   @PutMapping("{key}/deprecate")
-  void deprecate(@PathParam("key") int key, @RequestBody DeprecationAction deprecationAction) {
+  void deprecate(@PathParam("key") int key, @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
     // TODO: set deprecatedBy
-    if (deprecationAction.getReplacementKey() != null) {
+    if (deprecateVocabularyAction.getReplacementKey() != null) {
       vocabularyService.deprecate(
-          key,
-          "TODO",
-          deprecationAction.getReplacementKey(),
-          deprecationAction.isDeprecateConcepts());
+        key,
+        "TODO",
+        deprecateVocabularyAction.getReplacementKey(),
+        deprecateVocabularyAction.isDeprecateConcepts());
     } else {
-      vocabularyService.deprecate(key, "TODO", deprecationAction.isDeprecateConcepts());
+      vocabularyService.deprecate(key, "TODO", deprecateVocabularyAction.isDeprecateConcepts());
     }
   }
 

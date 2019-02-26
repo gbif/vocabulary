@@ -10,10 +10,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
+/**
+ * This class contains the necessary spring configuration to use this module. This configuration
+ * should be imported by all the users of this module.
+ */
 @Configuration
 @PropertySource(value = "classpath:config.properties")
 public class SpringConfig {
 
+  /**
+   * We import only the necessary mybatis config from other modules. We can't import all the class
+   * of the package because some classes are missing a default constructor.
+   */
   @Bean
   ConfigurationCustomizer mybatisConfigCustomizer() {
     return configuration -> {

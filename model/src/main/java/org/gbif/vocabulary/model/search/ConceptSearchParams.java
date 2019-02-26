@@ -99,7 +99,7 @@ public class ConceptSearchParams implements Serializable {
       return this;
     }
 
-    public Builder deprecated(boolean deprecated) {
+    public Builder deprecated(Boolean deprecated) {
       this.deprecated = deprecated;
       return this;
     }

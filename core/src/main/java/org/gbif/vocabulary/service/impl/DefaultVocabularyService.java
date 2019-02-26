@@ -29,14 +29,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 /** Default implementation for {@link VocabularyService}. */
 @Service
 @Validated
-public class VocabularyServiceImpl extends AbstractBaseService<Vocabulary>
+public class DefaultVocabularyService extends AbstractBaseService<Vocabulary>
     implements VocabularyService {
 
   private final VocabularyMapper vocabularyMapper;
   private final ConceptMapper conceptMapper;
 
   @Autowired
-  public VocabularyServiceImpl(VocabularyMapper vocabularyMapper, ConceptMapper conceptMapper) {
+  public DefaultVocabularyService(VocabularyMapper vocabularyMapper, ConceptMapper conceptMapper) {
     super(vocabularyMapper);
     this.vocabularyMapper = vocabularyMapper;
     this.conceptMapper = conceptMapper;

@@ -2,8 +2,12 @@
 
 [![Join the chat at https://gitter.im/vocabularyserver/community](https://badges.gitter.im/vocabularyserver/community.svg)](https://gitter.im/vocabularyserver/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+NOTE: this project is still under development
+
 A simple registry of controlled vocabularies used for terms found in GBIF mediated data.
 
+## Code style
+The code formatting follows the Google Java format https://github.com/google/google-java-format
 
 ## How to run the project
 

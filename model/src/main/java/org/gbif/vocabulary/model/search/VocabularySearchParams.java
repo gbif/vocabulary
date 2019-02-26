@@ -69,7 +69,7 @@ public class VocabularySearchParams implements Serializable {
       return this;
     }
 
-    public Builder deprecated(boolean deprecated) {
+    public Builder deprecated(Boolean deprecated) {
       this.deprecated = deprecated;
       return this;
     }

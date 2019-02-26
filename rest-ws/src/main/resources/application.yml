@@ -1,0 +1,11 @@
+# default config here
+spring:
+  # TODO: take it from pom??
+  datasource:
+    url: jdbc:postgresql://localhost:5432/vocabulary
+    username: rgz522
+    password:
+    hikari:
+      connectionTimeout: 30000
+      idleTimeout: 600000
+      maxLifetime: 1800000

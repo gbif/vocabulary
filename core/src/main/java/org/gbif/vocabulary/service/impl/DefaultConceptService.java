@@ -30,13 +30,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 /** Default implementation for {@link ConceptService}. */
 @Service
 @Validated
-public class ConceptServiceImpl extends AbstractBaseService<Concept> implements ConceptService {
+public class DefaultConceptService extends AbstractBaseService<Concept> implements ConceptService {
 
   private final ConceptMapper conceptMapper;
   private final VocabularyMapper vocabularyMapper;
 
   @Autowired
-  public ConceptServiceImpl(ConceptMapper conceptMapper, VocabularyMapper vocabularyMapper) {
+  public DefaultConceptService(ConceptMapper conceptMapper, VocabularyMapper vocabularyMapper) {
     super(conceptMapper);
     this.conceptMapper = conceptMapper;
     this.vocabularyMapper = vocabularyMapper;

@@ -30,6 +30,7 @@
   A conflict happens when there is already another concept with the same label, including alternative and misspelled labels.
   This also checks deprecated concepts, it doesn't make sense to create a concept that was already deprecated.
   - A concept and its children must belong to the same vocabulary.
+  - A concept cannot be created or updated with a deprecated parent or a deprecated vocabulary.
   
 - Deleting a concept
 

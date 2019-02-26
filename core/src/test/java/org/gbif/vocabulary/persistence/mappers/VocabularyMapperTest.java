@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -20,9 +21,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
+import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the {@link VocabularyMapper} class
@@ -49,32 +51,20 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     this.vocabularyMapper = vocabularyMapper;
   }
 
-  @Override
-  Vocabulary createNewEntity(String name) {
-    Vocabulary entity = new Vocabulary();
-    entity.setName(name);
-    entity.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Label")));
-    entity.setDefinition(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Definition")));
-    entity.setExternalDefinitions(
-        new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
-    entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));
-    entity.setCreatedBy("test");
-    entity.setModifiedBy("test");
-
-    return entity;
-  }
-
   @Test
   public void listVocabulariesTest() {
-    Vocabulary vocabulary1 = createNewEntity("vocab1");
+    Vocabulary vocabulary1 = createNewEntity();
+    vocabulary1.setName("vocab1");
     vocabulary1.setNamespace("namespace1");
     vocabularyMapper.create(vocabulary1);
 
-    Vocabulary vocabulary2 = createNewEntity("vocab2");
+    Vocabulary vocabulary2 = createNewEntity();
+    vocabulary2.setName("vocab2");
     vocabulary2.setNamespace("namespace2");
     vocabularyMapper.create(vocabulary2);
 
-    Vocabulary vocabularyGbif = createNewEntity("vocab gbif");
+    Vocabulary vocabularyGbif = createNewEntity();
+    vocabularyGbif.setName("vocab gbif");
     vocabularyGbif.setNamespace("namespace gbif");
     vocabularyMapper.create(vocabularyGbif);
 
@@ -94,37 +84,43 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
   @Test
   public void listDeprecatedTest() {
-    Vocabulary vocabulary1 = createNewEntity("dp1");
+    Vocabulary vocabulary1 = createNewEntity();
+    vocabulary1.setNamespace("n1");
     vocabularyMapper.create(vocabulary1);
 
-    Vocabulary vocabulary2 = createNewEntity("dp2");
+    Vocabulary vocabulary2 = createNewEntity();
+    vocabulary2.setNamespace("n1");
     vocabularyMapper.create(vocabulary2);
 
     assertList(null, null, null, true, 0);
-    assertList("dp", null, null, true, 0);
-    assertList("dp", null, null, null, 2);
-    assertList("dp", null, null, false, 2);
+    assertList(null, null, "n1", true, 0);
+    assertList(null, null, "n1", null, 2);
+    assertList(null, null, "n1", false, 2);
 
     vocabularyMapper.deprecate(vocabulary1.getKey(), DEPRECATED_BY, null);
     assertList(null, null, null, true, 1);
-    assertList("dp", null, null, true, 1);
+    assertList(null, null, "n1", true, 1);
   }
 
   @Test
   public void findSimilaritiesTest() {
-    Vocabulary vocabulary1 = createNewEntity("similar");
+    Vocabulary vocabulary1 = createNewEntity();
     vocabulary1.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary1);
 
-    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities(createNewEntity("igual"));
+    Vocabulary similar = createNewEntity();
+    similar.setName("igual");
+    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities(similar);
     assertEquals(1, similarities.size());
     assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(vocabulary1.getName(), similarities.get(0).getName());
 
-    Vocabulary vocabulary2 = createNewEntity("similar2");
+    Vocabulary vocabulary2 = createNewEntity();
     vocabulary2.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary2);
-    assertEquals(2, vocabularyMapper.findSimilarities(createNewEntity("igual")).size());
+    Vocabulary similar2 = createNewEntity();
+    similar2.setName("igual");
+    assertEquals(2, vocabularyMapper.findSimilarities(similar2).size());
   }
 
   private void assertList(
@@ -135,14 +131,18 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertEquals(expectedResult, vocabularyMapper.count(query, name, namespace, deprecated));
   }
 
-//  @Test
-  public void isDeprecatedTest() {
-    Vocabulary vocabulary1 = createNewEntity("vocab is deprecated");
-    vocabularyMapper.create(vocabulary1);
-    assertFalse(vocabularyMapper.isDeprecated(vocabulary1.getKey()));
-
-    vocabularyMapper.deprecate(vocabulary1.getKey(), DEPRECATED_BY, null);
-    assertTrue(vocabularyMapper.isDeprecated(vocabulary1.getKey()));
+  @Override
+  Vocabulary createNewEntity() {
+    Vocabulary entity = new Vocabulary();
+    entity.setName(UUID.randomUUID().toString());
+    entity.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Label")));
+    entity.setDefinition(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Definition")));
+    entity.setExternalDefinitions(
+        new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
+    entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));
+    entity.setCreatedBy("test");
+    entity.setModifiedBy("test");
+    return entity;
   }
 
   /**

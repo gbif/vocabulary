@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,12 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
+import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the {@link ConceptMapper} class
@@ -71,39 +74,24 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     defaultVocabularyKey = vocabulary.getKey();
   }
 
-  @Override
-  Concept createNewEntity(String name) {
-    Concept entity = new Concept();
-    entity.setVocabularyKey(defaultVocabularyKey);
-    entity.setName(name);
-    entity.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Label")));
-    entity.setMisspeltLabels(
-        Collections.singletonMap(Language.SPANISH, Arrays.asList("labl", "lbel")));
-    entity.setDefinition(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Definition")));
-    entity.setExternalDefinitions(
-        new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
-    entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));
-    entity.setCreatedBy("test");
-    entity.setModifiedBy("test");
-
-    return entity;
-  }
-
   @Test
   public void listConceptsTest() {
-    Concept concept1 = createNewEntity("concept1");
+    Concept concept1 = createNewEntity();
+    concept1.setName("concept1");
     concept1.setAlternativeLabels(
         Collections.singletonMap(
             Language.ENGLISH, Collections.singletonList("alternative example")));
     conceptMapper.create(concept1);
 
-    Concept concept2 = createNewEntity("concept2");
+    Concept concept2 = createNewEntity();
+    concept2.setName("concept2");
     concept2.setParentKey(concept1.getKey());
     concept2.setMisspeltLabels(
         Collections.singletonMap(Language.ENGLISH, Collections.singletonList("misspelt example")));
     conceptMapper.create(concept2);
 
-    Concept concept3 = createNewEntity("concept3");
+    Concept concept3 = createNewEntity();
+    concept3.setName("concept3");
     concept3.setParentKey(concept1.getKey());
     concept3.setEditorialNotes(Collections.singletonList("editorial notes"));
     conceptMapper.create(concept3);
@@ -124,19 +112,21 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
   @Test
   public void findSimilaritiesTest() {
-    Concept concept1 = createNewEntity("first");
+    Concept concept1 = createNewEntity();
     concept1.setLabel(new HashMap<>(Collections.singletonMap(Language.SPANISH, "primero")));
     concept1.setMisspeltLabels(
         Collections.singletonMap(Language.SPANISH, Collections.singletonList("primeiro")));
     conceptMapper.create(concept1);
 
-    Concept concept2 = createNewEntity("primero");
+    Concept concept2 = createNewEntity();
+    concept2.setName("primero");
     List<KeyNameResult> similarities = conceptMapper.findSimilarities(concept2);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(concept1.getName(), similarities.get(0).getName());
 
-    Concept concept3 = createNewEntity("primeiro");
+    Concept concept3 = createNewEntity();
+    concept3.setName("primeiro");
     similarities = conceptMapper.findSimilarities(concept3);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
@@ -145,13 +135,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
   @Test
   public void deprecationInBulkTest() {
-    Concept concept1 = createNewEntity("deprecated");
+    Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
-    assertNull(concept1.getDeprecated());
+    assertNotDeprecated(concept1);
 
-    Concept concept2 = createNewEntity("deprecated2");
+    Concept concept2 = createNewEntity();
     conceptMapper.create(concept2);
-    assertNull(concept2.getDeprecated());
+    assertNotDeprecated(concept2);
 
     // deprecate in bulk
     conceptMapper.deprecateInBulk(
@@ -165,14 +155,14 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
   @Test
   public void updateParentTest() {
-    Concept concept1 = createNewEntity("updatable");
+    Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
 
-    Concept concept2 = createNewEntity("updatable2");
+    Concept concept2 = createNewEntity();
     concept2.setParentKey(concept1.getKey());
     conceptMapper.create(concept2);
 
-    Concept concept3 = createNewEntity("updatable3");
+    Concept concept3 = createNewEntity();
     conceptMapper.create(concept3);
 
     // assert parent
@@ -187,25 +177,24 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
   @Test
   public void findReplacementTest() {
-    Concept concept1 = createNewEntity("r1");
+    // just created, doesn't have replacement
+    Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
-    // not deprecated
     assertNull(conceptMapper.findReplacement(concept1.getKey()));
 
     // deprecated by concept 1
-    Concept concept2 = createNewEntity("r2");
+    Concept concept2 = createNewEntity();
     conceptMapper.create(concept2);
     conceptMapper.deprecate(concept2.getKey(), DEPRECATED_BY, concept1.getKey());
     assertEquals(concept1.getKey(), conceptMapper.findReplacement(concept2.getKey()));
 
     // deprecated by concept 2 and concept 2 is deprecated by concept 1
-    Concept concept3 = createNewEntity("r3");
+    Concept concept3 = createNewEntity();
     conceptMapper.create(concept3);
     conceptMapper.deprecate(concept3.getKey(), DEPRECATED_BY, concept2.getKey());
     assertEquals(concept1.getKey(), conceptMapper.findReplacement(concept3.getKey()));
 
-    // concept 3 replaced by concept 2 and concept 2 is deprecated without replacement, hence
-    // concept 3 hasn't a non-deprecated replacement
+    // concept 2 deprecated without replacement, hence concept 3 hasn't a non-deprecated replacement
     conceptMapper.deprecate(concept2.getKey(), DEPRECATED_BY, null);
     assertNull(conceptMapper.findReplacement(concept3.getKey()));
 
@@ -224,20 +213,10 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
   @Test
   public void getVocabularyKeyTest() {
-    Concept concept1 = createNewEntity("r1");
+    Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
     assertEquals(
         defaultVocabularyKey, conceptMapper.getVocabularyKey(concept1.getKey()).intValue());
-  }
-
-  @Test
-  public void isDeprecatedTest() {
-    Concept concept1 = createNewEntity("concept is deprecated");
-    conceptMapper.create(concept1);
-    assertFalse(conceptMapper.isDeprecated(concept1.getKey()));
-
-    conceptMapper.deprecate(concept1.getKey(), DEPRECATED_BY, null);
-    assertTrue(conceptMapper.isDeprecated(concept1.getKey()));
   }
 
   private void assertList(
@@ -256,6 +235,23 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(
         expectedResult,
         conceptMapper.count(query, vocabularyKey, parentKey, replacedByKey, name, deprecated));
+  }
+
+  @Override
+  Concept createNewEntity() {
+    Concept entity = new Concept();
+    entity.setVocabularyKey(defaultVocabularyKey);
+    entity.setName(UUID.randomUUID().toString());
+    entity.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Label")));
+    entity.setMisspeltLabels(
+        Collections.singletonMap(Language.SPANISH, Arrays.asList("labl", "lbel")));
+    entity.setDefinition(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Definition")));
+    entity.setExternalDefinitions(
+        new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
+    entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));
+    entity.setCreatedBy("test");
+    entity.setModifiedBy("test");
+    return entity;
   }
 
   /**

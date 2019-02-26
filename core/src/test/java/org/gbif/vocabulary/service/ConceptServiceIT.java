@@ -23,10 +23,15 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+import static org.gbif.vocabulary.TestUtils.assertDeprecated;
+import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
+import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
+import static org.gbif.vocabulary.TestUtils.createBasicConcept;
+import static org.gbif.vocabulary.TestUtils.createBasicVocabulary;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,26 +59,26 @@ public class ConceptServiceIT {
    */
   @BeforeAll
   public static void populateData(@Autowired VocabularyMapper vocabularyMapper) {
-    Vocabulary vocabulary1 = createNewVocabulary("v1");
+    Vocabulary vocabulary1 = createBasicVocabulary();
     vocabularyMapper.create(vocabulary1);
     vocabularyKeys[0] = vocabulary1.getKey();
 
-    Vocabulary vocabulary2 = createNewVocabulary("v2");
+    Vocabulary vocabulary2 = createBasicVocabulary();
     vocabularyMapper.create(vocabulary2);
     vocabularyKeys[1] = vocabulary2.getKey();
   }
 
   @Test
   public void createTest() {
-    Concept concept = createNewConcept("name", vocabularyKeys[0]);
+    Concept concept = createBasicConcept(vocabularyKeys[0]);
     assertDoesNotThrow(() -> conceptService.create(concept));
   }
 
   @Test
   public void createWithIncorrectParentTest() {
-    int parentKey = conceptService.create(createNewConcept("parent v1", vocabularyKeys[0]));
+    int parentKey = conceptService.create(createBasicConcept(vocabularyKeys[0]));
 
-    Concept child = createNewConcept("child v2", vocabularyKeys[1]);
+    Concept child = createBasicConcept(vocabularyKeys[1]);
     child.setParentKey(parentKey);
     // concept and parent belong to different vocabularies
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(child));
@@ -81,10 +86,10 @@ public class ConceptServiceIT {
 
   @Test
   public void createWithDeprecatedParentTest() {
-    int parentKey = conceptService.create(createNewConcept("parent deprecable", vocabularyKeys[0]));
-    conceptService.deprecate(parentKey, "test", false);
+    int parentKey = conceptService.create(createBasicConcept(vocabularyKeys[0]));
+    conceptService.deprecate(parentKey, DEPRECATED_BY, false);
 
-    Concept child = createNewConcept("child with wrong parent", vocabularyKeys[0]);
+    Concept child = createBasicConcept(vocabularyKeys[0]);
     child.setParentKey(parentKey);
     // parent cannot be deprecated
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(child));
@@ -92,29 +97,29 @@ public class ConceptServiceIT {
 
   @Test
   public void createWithDeprecatedVocabularyTest() {
-    Vocabulary vocabulary = createNewVocabulary("v deprecated");
+    Vocabulary vocabulary = createBasicVocabulary();
     int vKey = vocabularyService.create(vocabulary);
-    vocabularyService.deprecate(vKey, "test", false);
+    vocabularyService.deprecate(vKey, DEPRECATED_BY, false);
 
     // vocabulary cannot be deprecated
     assertThrows(
-        IllegalArgumentException.class,
-        () -> conceptService.create(createNewConcept("child with wrong parent", vKey)));
+        IllegalArgumentException.class, () -> conceptService.create(createBasicConcept(vKey)));
   }
 
   @Test
   public void createSimilarConceptTest() {
-    Concept concept = createNewConcept("first", vocabularyKeys[0]);
+    Concept concept = createBasicConcept(vocabularyKeys[0]);
     concept.setLabel(Collections.singletonMap(Language.ENGLISH, "label"));
     conceptService.create(concept);
 
-    Concept similar = createNewConcept("label", vocabularyKeys[0]);
+    Concept similar = createBasicConcept(vocabularyKeys[0]);
+    similar.setName("label");
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar));
   }
 
   @Test
   public void updateTest() {
-    Concept concept = createNewConcept("concept", vocabularyKeys[0]);
+    Concept concept = createBasicConcept(vocabularyKeys[0]);
     int key = conceptService.create(concept);
     concept = conceptService.get(key);
 
@@ -138,11 +143,11 @@ public class ConceptServiceIT {
 
   @Test
   public void updateParentFromOtherVocabularyTest() {
-    Concept concept = createNewConcept("concept v1", vocabularyKeys[0]);
+    Concept concept = createBasicConcept(vocabularyKeys[0]);
     int key = conceptService.create(concept);
 
     // parent with different vocabulary
-    int parentKey = conceptService.create(createNewConcept("concept v2", vocabularyKeys[1]));
+    int parentKey = conceptService.create(createBasicConcept(vocabularyKeys[1]));
     Concept createdConcept = conceptService.get(key);
     createdConcept.setParentKey(parentKey);
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(createdConcept));
@@ -150,12 +155,12 @@ public class ConceptServiceIT {
 
   @Test
   public void updateVocabularyDeprecatedTest() {
-    Concept concept = createNewConcept("concept vocab deprecated", vocabularyKeys[0]);
+    Concept concept = createBasicConcept(vocabularyKeys[0]);
     int key = conceptService.create(concept);
 
-    Vocabulary vocabulary = createNewVocabulary("vocab deprecated");
+    Vocabulary vocabulary = createBasicVocabulary();
     int vDeprecatedKey = vocabularyService.create(vocabulary);
-    vocabularyService.deprecate(vDeprecatedKey, "test", false);
+    vocabularyService.deprecate(vDeprecatedKey, DEPRECATED_BY, false);
 
     Concept createdConcept = conceptService.get(key);
     createdConcept.setVocabularyKey(vDeprecatedKey);
@@ -165,13 +170,13 @@ public class ConceptServiceIT {
 
   @Test
   public void updateParentDeprecatedTest() {
-    Concept concept = createNewConcept("concept with parent deprecated", vocabularyKeys[0]);
+    Concept concept = createBasicConcept(vocabularyKeys[0]);
     int key = conceptService.create(concept);
 
     // parent with different vocabulary
-    Concept deprecated = createNewConcept("deprecated parent", vocabularyKeys[0]);
+    Concept deprecated = createBasicConcept(vocabularyKeys[0]);
     int deprecatedKey = conceptService.create(deprecated);
-    conceptService.deprecate(deprecatedKey, "test", false);
+    conceptService.deprecate(deprecatedKey, DEPRECATED_BY, false);
 
     Concept createdConcept = conceptService.get(key);
     createdConcept.setParentKey(deprecatedKey);
@@ -181,7 +186,7 @@ public class ConceptServiceIT {
 
   @Test
   public void deprecatingWhenUpdatingTest() {
-    Concept concept = createNewConcept("deprecation candidate", vocabularyKeys[0]);
+    Concept concept = createBasicConcept(vocabularyKeys[0]);
     int key = conceptService.create(concept);
 
     Concept createdConcept = conceptService.get(key);
@@ -191,7 +196,7 @@ public class ConceptServiceIT {
 
   @Test
   public void deletingWhenUpdatingTest() {
-    Concept concept = createNewConcept("deletion candidate", vocabularyKeys[0]);
+    Concept concept = createBasicConcept(vocabularyKeys[0]);
     int key = conceptService.create(concept);
 
     Concept createdConcept = conceptService.get(key);
@@ -201,152 +206,131 @@ public class ConceptServiceIT {
 
   @Test
   public void listConceptsTest() {
-    conceptService.create(createNewConcept("concept1", vocabularyKeys[0]));
-    conceptService.create(createNewConcept("concept2", vocabularyKeys[1]));
+    Concept c1 = createBasicConcept(vocabularyKeys[0]);
+    conceptService.create(c1);
+    Concept c2 = createBasicConcept(vocabularyKeys[1]);
+    conceptService.create(c2);
     assertEquals(
         1,
         conceptService
-            .list(ConceptSearchParams.builder().name("concept1").build(), null)
+            .list(ConceptSearchParams.builder().name(c1.getName()).build(), null)
             .getCount()
             .longValue());
     assertEquals(
         0,
         conceptService
             .list(
-                ConceptSearchParams.builder().name("concept1").parentKey(vocabularyKeys[1]).build(),
+                ConceptSearchParams.builder()
+                    .name(c1.getName())
+                    .parentKey(vocabularyKeys[1])
+                    .build(),
                 null)
             .getCount()
             .longValue());
   }
 
   @Test
-  public void deprecateWithReplacementTest() {
-    int key1 = conceptService.create(createNewConcept("cr1", vocabularyKeys[0]));
-    int key2 = conceptService.create(createNewConcept("cr2", vocabularyKeys[1]));
+  public void deprecateWithReplacementFromOtherVocabularyTest() {
+    int c1 = conceptService.create(createBasicConcept(vocabularyKeys[0]));
+    int c2 = conceptService.create(createBasicConcept(vocabularyKeys[1]));
 
     // replacement and deprecated must belong to the same vocabulary
     assertThrows(
-        IllegalArgumentException.class, () -> conceptService.deprecate(key1, "test", key2, false));
+        IllegalArgumentException.class,
+        () -> conceptService.deprecate(c1, DEPRECATED_BY, c2, false));
 
-    Concept concept2 = conceptService.get(key2);
+    Concept concept2 = conceptService.get(c2);
     concept2.setVocabularyKey(vocabularyKeys[0]);
     conceptService.update(concept2);
 
-    assertDoesNotThrow(() -> conceptService.deprecate(key1, "test", key2, false));
+    assertDoesNotThrow(() -> conceptService.deprecate(c1, DEPRECATED_BY, c2, false));
+  }
 
-    Concept deprecated = conceptService.get(key1);
-    assertNotNull(deprecated.getDeprecated());
-    assertEquals(key2, deprecated.getReplacedByKey().intValue());
+  @Test
+  public void deprecateWithReplacementTest() {
+    int key1 = conceptService.create(createBasicConcept(vocabularyKeys[0]));
+    int key2 = conceptService.create(createBasicConcept(vocabularyKeys[0]));
+
+    assertDoesNotThrow(() -> conceptService.deprecate(key1, DEPRECATED_BY, key2, false));
+    assertDeprecatedWithReplacement(conceptService.get(key1), DEPRECATED_BY, key2);
 
     conceptService.restoreDeprecated(key1, false);
-    Concept restored = conceptService.get(key1);
-    assertNull(restored.getDeprecated());
-    assertNull(restored.getReplacedByKey());
+    assertNotDeprecated(conceptService.get(key1));
 
     // add children to the concept
-    Concept child1 = createNewConcept("cr3", vocabularyKeys[0]);
+    Concept child1 = createBasicConcept(vocabularyKeys[0]);
     child1.setParentKey(key1);
     int key3 = conceptService.create(child1);
-    Concept child2 = createNewConcept("cr4", vocabularyKeys[0]);
+    Concept child2 = createBasicConcept(vocabularyKeys[0]);
     child2.setParentKey(key1);
     int key4 = conceptService.create(child2);
 
     // deprecating children too
-    conceptService.deprecate(key1, "test", key2, true);
-    Concept child1Deprecated = conceptService.get(key3);
-    assertNotNull(child1Deprecated.getDeprecated());
-    assertNull(child1Deprecated.getReplacedByKey());
-    Concept child2Deprecated = conceptService.get(key4);
-    assertNotNull(child2Deprecated.getDeprecated());
-    assertNull(child2Deprecated.getReplacedByKey());
+    conceptService.deprecate(key1, DEPRECATED_BY, key2, true);
+    assertDeprecated(conceptService.get(key3), DEPRECATED_BY);
+    assertDeprecated(conceptService.get(key4), DEPRECATED_BY);
 
     // restore concept and children
     conceptService.restoreDeprecated(key1, true);
-    deprecated = conceptService.get(key1);
-    assertNull(deprecated.getDeprecated());
-    assertNull(deprecated.getReplacedByKey());
-    child1Deprecated = conceptService.get(key3);
-    assertNull(child1Deprecated.getDeprecated());
-    assertNull(child1Deprecated.getReplacedByKey());
-    child2Deprecated = conceptService.get(key4);
-    assertNull(child2Deprecated.getDeprecated());
-    assertNull(child2Deprecated.getReplacedByKey());
+    assertNotDeprecated(conceptService.get(key1));
+    assertNotDeprecated(conceptService.get(key3));
+    assertNotDeprecated(conceptService.get(key4));
 
     // children not deprecated but reassigned to the replacement
-    conceptService.deprecate(key1, "test", key2, false);
-    deprecated = conceptService.get(key1);
-    assertNotNull(deprecated.getDeprecated());
-    assertEquals(key2, deprecated.getReplacedByKey().intValue());
-    child1Deprecated = conceptService.get(key3);
-    assertNull(child1Deprecated.getDeprecated());
-    assertNull(child1Deprecated.getReplacedByKey());
-    assertEquals(key2, child1Deprecated.getParentKey().intValue());
-    child2Deprecated = conceptService.get(key4);
-    assertNull(child2Deprecated.getDeprecated());
-    assertNull(child2Deprecated.getReplacedByKey());
-    assertEquals(key2, child2Deprecated.getParentKey().intValue());
+    conceptService.deprecate(key1, DEPRECATED_BY, key2, false);
+    assertDeprecatedWithReplacement(conceptService.get(key1), DEPRECATED_BY, key2);
+    Concept deprecatedChild3 = conceptService.get(key3);
+    assertDeprecated(conceptService.get(key3), DEPRECATED_BY);
+    assertEquals(key2, deprecatedChild3.getParentKey().intValue());
+    Concept deprecatedChild4 = conceptService.get(key4);
+    assertDeprecated(conceptService.get(key4), DEPRECATED_BY);
+    assertEquals(key2, deprecatedChild4.getParentKey().intValue());
   }
 
   @Test
   public void deprecateWithOutReplacementTest() {
-    int key1 = conceptService.create(createNewConcept("cnr1", vocabularyKeys[0]));
-    assertDoesNotThrow(() -> conceptService.deprecate(key1, "test", false));
-
-    Concept deprecated = conceptService.get(key1);
-    assertNotNull(deprecated.getDeprecated());
-    assertNull(deprecated.getReplacedByKey());
+    int key1 = conceptService.create(createBasicConcept(vocabularyKeys[0]));
+    assertDoesNotThrow(() -> conceptService.deprecate(key1, DEPRECATED_BY, false));
+    assertDeprecated(conceptService.get(key1), DEPRECATED_BY);
 
     conceptService.restoreDeprecated(key1, false);
-    Concept restored = conceptService.get(key1);
-    assertNull(restored.getDeprecated());
-    assertNull(restored.getReplacedByKey());
+    assertNotDeprecated(conceptService.get(key1));
 
     // add children to the concept
-    Concept child1 = createNewConcept("cnr3", vocabularyKeys[0]);
+    Concept child1 = createBasicConcept(vocabularyKeys[0]);
     child1.setParentKey(key1);
-    int key3 = conceptService.create(child1);
-    Concept child2 = createNewConcept("cnr4", vocabularyKeys[0]);
+    int key2 = conceptService.create(child1);
+    Concept child2 = createBasicConcept(vocabularyKeys[0]);
     child2.setParentKey(key1);
-    int key4 = conceptService.create(child2);
+    int key3 = conceptService.create(child2);
 
     // deprecating without children is not allowed
     assertThrows(
-        IllegalArgumentException.class, () -> conceptService.deprecate(key1, "test", false));
+        IllegalArgumentException.class, () -> conceptService.deprecate(key1, DEPRECATED_BY, false));
 
     // deprecating children too
-    conceptService.deprecate(key1, "test", true);
-    Concept child1Deprecated = conceptService.get(key3);
-    assertNotNull(child1Deprecated.getDeprecated());
-    assertNull(child1Deprecated.getReplacedByKey());
-    Concept child2Deprecated = conceptService.get(key4);
-    assertNotNull(child2Deprecated.getDeprecated());
-    assertNull(child2Deprecated.getReplacedByKey());
+    conceptService.deprecate(key1, DEPRECATED_BY, true);
+    assertDeprecated(conceptService.get(key2), DEPRECATED_BY);
+    assertDeprecated(conceptService.get(key3), DEPRECATED_BY);
 
     // restore concept and children
     conceptService.restoreDeprecated(key1, true);
-    restored = conceptService.get(key1);
-    assertNull(restored.getDeprecated());
-    assertNull(restored.getReplacedByKey());
-    Concept child1Restored = conceptService.get(key3);
-    assertNull(child1Restored.getDeprecated());
-    assertNull(child1Restored.getReplacedByKey());
-    Concept child2Restored = conceptService.get(key4);
-    assertNull(child2Restored.getDeprecated());
-    assertNull(child2Restored.getReplacedByKey());
+    assertNotDeprecated(conceptService.get(key1));
+    assertNotDeprecated(conceptService.get(key2));
+    assertNotDeprecated(conceptService.get(key3));
   }
 
   @Test
   public void restoreWithDeprecatedVocabularyTest() {
     // create vocabulary
-    Vocabulary vocabulary = createNewVocabulary("name");
+    Vocabulary vocabulary = createBasicVocabulary();
     int vocabularyKey = vocabularyService.create(vocabulary);
 
     // create concept for that vocabulary
-    int key1 = conceptService.create(createNewConcept("deprecable", vocabularyKey));
+    int key1 = conceptService.create(createBasicConcept(vocabularyKey));
     // deprecate vocabulary and concept
-    vocabularyService.deprecate(vocabularyKey, "test", true);
+    vocabularyService.deprecate(vocabularyKey, DEPRECATED_BY, true);
 
-    // TODO: wait for vocabulary tests
     // restore concept -> vocabulary cannot be deprecated
     assertThrows(
         IllegalArgumentException.class, () -> conceptService.restoreDeprecated(key1, false));
@@ -360,18 +344,18 @@ public class ConceptServiceIT {
 
   @Test
   public void restoreWithDeprecatedParentTest() {
-    int root = conceptService.create(createNewConcept("root", vocabularyKeys[0]));
-    int child1 = conceptService.create(createNewConcept("replacement1", vocabularyKeys[0]));
-    int child2 = conceptService.create(createNewConcept("replacement2", vocabularyKeys[0]));
+    int root = conceptService.create(createBasicConcept(vocabularyKeys[0]));
+    int child1 = conceptService.create(createBasicConcept(vocabularyKeys[0]));
+    int child2 = conceptService.create(createBasicConcept(vocabularyKeys[0]));
 
-    Concept mainConcept = createNewConcept("main", vocabularyKeys[0]);
+    Concept mainConcept = createBasicConcept(vocabularyKeys[0]);
     mainConcept.setParentKey(child2);
     int mainConceptKey = conceptService.create(mainConcept);
 
     // deprecate parents and main concept
-    conceptService.deprecate(child2, "test", child1, false);
-    conceptService.deprecate(child1, "test", root, false);
-    conceptService.deprecate(mainConceptKey, "test", root, false);
+    conceptService.deprecate(child2, DEPRECATED_BY, child1, false);
+    conceptService.deprecate(child1, DEPRECATED_BY, root, false);
+    conceptService.deprecate(mainConceptKey, DEPRECATED_BY, root, false);
 
     // restore main concept
     conceptService.restoreDeprecated(mainConceptKey, false);
@@ -379,24 +363,6 @@ public class ConceptServiceIT {
     // parent has to be updated to the root
     mainConcept = conceptService.get(mainConceptKey);
     assertEquals(root, mainConcept.getParentKey().intValue());
-  }
-
-  private Concept createNewConcept(String name, int vocabularyKey) {
-    Concept concept = new Concept();
-    concept.setName(name);
-    concept.setVocabularyKey(vocabularyKey);
-    concept.setCreatedBy("test");
-    concept.setModifiedBy("test");
-    return concept;
-  }
-
-  private static Vocabulary createNewVocabulary(String name) {
-    Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName(name);
-    vocabulary.setCreatedBy("test");
-    vocabulary.setModifiedBy("test");
-
-    return vocabulary;
   }
 
   static class ContexInitializer

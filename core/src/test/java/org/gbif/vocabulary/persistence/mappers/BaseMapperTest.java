@@ -1,13 +1,11 @@
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.registry.LenientEquals;
 import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.util.List;
-import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +14,13 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+import static org.gbif.vocabulary.TestUtils.assertDeprecated;
+import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
+import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,23 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
 
-  static final BiFunction<Integer, Long, Pageable> PAGE_FN =
-      (limit, offset) ->
-          new Pageable() {
-            @Override
-            public int getLimit() {
-              return limit;
-            }
-
-            @Override
-            public long getOffset() {
-              return offset;
-            }
-          };
-
-  static final Pageable DEFAULT_PAGE = PAGE_FN.apply(10, 0L);
-  static final String DEPRECATED_BY = "deprecator";
-
   private final BaseMapper<T> baseMapper;
 
   BaseMapperTest(BaseMapper<T> baseMapper) {
@@ -60,7 +47,7 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
   @Test
   public void crudTest() {
     // create
-    T entity = createNewEntity("name");
+    T entity = createNewEntity();
     baseMapper.create(entity);
     assertNotNull(entity.getKey());
 
@@ -85,11 +72,13 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
   @Test
   public void suggestTest() {
     // create entities for the test
-    T entity1 = createNewEntity("suggest111");
+    T entity1 = createNewEntity();
+    entity1.setName("suggest111");
     baseMapper.create(entity1);
     assertNotNull(entity1.getKey());
 
-    T entity2 = createNewEntity("suggest222");
+    T entity2 = createNewEntity();
+    entity2.setName("suggest222");
     baseMapper.create(entity2);
     assertNotNull(entity2.getKey());
 
@@ -113,42 +102,41 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
 
   @Test
   public void deprecationTest() {
-    T entity1 = createNewEntity("deprecated");
+    T entity1 = createNewEntity();
     baseMapper.create(entity1);
     assertNull(entity1.getDeprecated());
 
-    T entity2 = createNewEntity("deprecated2");
+    T entity2 = createNewEntity();
     baseMapper.create(entity2);
     assertNull(entity2.getDeprecated());
 
     // deprecate
     baseMapper.deprecate(entity1.getKey(), DEPRECATED_BY, null);
-    T entityDeprecated = baseMapper.get(entity1.getKey());
-    assertNotNull(entityDeprecated.getDeprecated());
-    assertEquals(DEPRECATED_BY, entityDeprecated.getDeprecatedBy());
-    assertNull(entityDeprecated.getReplacedByKey());
+    assertDeprecated(baseMapper.get(entity1.getKey()), DEPRECATED_BY);
 
     // undeprecate
     baseMapper.restoreDeprecated(entity1.getKey());
-    T entityUndeprecated = baseMapper.get(entity1.getKey());
-    assertNull(entityUndeprecated.getDeprecated());
-    assertNull(entityUndeprecated.getDeprecatedBy());
-    assertNull(entityUndeprecated.getReplacedByKey());
+    assertNotDeprecated(baseMapper.get(entity1.getKey()));
 
     // deprecate with replacement
     baseMapper.deprecate(entity1.getKey(), DEPRECATED_BY, entity2.getKey());
-    entityDeprecated = baseMapper.get(entity1.getKey());
-    assertNotNull(entityDeprecated.getDeprecated());
-    assertEquals(DEPRECATED_BY, entityDeprecated.getDeprecatedBy());
-    assertEquals(entity2.getKey(), entityDeprecated.getReplacedByKey());
+    assertDeprecatedWithReplacement(
+        baseMapper.get(entity1.getKey()), DEPRECATED_BY, entity2.getKey());
 
     // undeprecate with replacement
     baseMapper.restoreDeprecated(entity1.getKey());
-    entityUndeprecated = baseMapper.get(entity1.getKey());
-    assertNull(entityUndeprecated.getDeprecated());
-    assertNull(entityUndeprecated.getDeprecatedBy());
-    assertNull(entityUndeprecated.getReplacedByKey());
+    assertNotDeprecated(baseMapper.get(entity1.getKey()));
   }
 
-  abstract T createNewEntity(String name);
+  @Test
+  public void isDeprecatedTest() {
+    T entity = createNewEntity();
+    baseMapper.create(entity);
+    assertFalse(baseMapper.isDeprecated(entity.getKey()));
+
+    baseMapper.deprecate(entity.getKey(), DEPRECATED_BY, null);
+    assertTrue(baseMapper.isDeprecated(entity.getKey()));
+  }
+
+  abstract T createNewEntity();
 }

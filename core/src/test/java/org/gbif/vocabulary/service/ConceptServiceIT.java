@@ -288,7 +288,7 @@ public class ConceptServiceIT {
   }
 
   @Test
-  public void deprecateWithOutReplacementTest() {
+  public void deprecateWithoutReplacementTest() {
     int key1 = conceptService.create(createBasicConcept(vocabularyKeys[0]));
     assertDoesNotThrow(() -> conceptService.deprecate(key1, DEPRECATED_BY, false));
     assertDeprecated(conceptService.get(key1), DEPRECATED_BY);

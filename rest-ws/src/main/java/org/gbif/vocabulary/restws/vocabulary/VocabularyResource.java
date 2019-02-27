@@ -2,12 +2,9 @@ package org.gbif.vocabulary.restws.vocabulary;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
@@ -16,6 +13,7 @@ import javax.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,20 +21,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.gbif.vocabulary.restws.vocabulary.VocabularyResource.VOCABULARIES_PATH;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @RestController
-@RequestMapping("vocabularies")
-public class VocabularyController {
+@RequestMapping(VOCABULARIES_PATH)
+public class VocabularyResource {
+
+  public static final String VOCABULARIES_PATH = "vocabularies";
 
   private final VocabularyService vocabularyService;
-  private final ConceptService conceptService;
 
   @Autowired
-  VocabularyController(VocabularyService vocabularyService, ConceptService conceptService) {
+  VocabularyResource(VocabularyService vocabularyService) {
     this.vocabularyService = vocabularyService;
-    this.conceptService = conceptService;
   }
 
   @GetMapping
@@ -73,7 +73,7 @@ public class VocabularyController {
   }
 
   @PutMapping("{key}")
-  void update(@PathParam("key") int key, @RequestBody Vocabulary vocabulary) {
+  void update(@PathVariable("key") int key, @RequestBody Vocabulary vocabulary) {
     checkArgument(
         key == vocabulary.getKey().intValue(),
         "Provided entity must have the same key as the resource in the URL");
@@ -86,14 +86,15 @@ public class VocabularyController {
   }
 
   @PutMapping("{key}/deprecate")
-  void deprecate(@PathParam("key") int key, @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
+  void deprecate(
+      @PathVariable("key") int key, @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
     // TODO: set deprecatedBy
     if (deprecateVocabularyAction.getReplacementKey() != null) {
       vocabularyService.deprecate(
-        key,
-        "TODO",
-        deprecateVocabularyAction.getReplacementKey(),
-        deprecateVocabularyAction.isDeprecateConcepts());
+          key,
+          "TODO",
+          deprecateVocabularyAction.getReplacementKey(),
+          deprecateVocabularyAction.isDeprecateConcepts());
     } else {
       vocabularyService.deprecate(key, "TODO", deprecateVocabularyAction.isDeprecateConcepts());
     }
@@ -101,32 +102,9 @@ public class VocabularyController {
 
   @DeleteMapping("{key}/deprecate")
   void restoreDeprecated(
-      @PathParam("key") int key,
+      @PathVariable("key") int key,
       @RequestParam(value = "restoreDeprecatedConcepts", required = false)
           boolean restoreDeprecatedConcepts) {
     vocabularyService.restoreDeprecated(key, restoreDeprecatedConcepts);
-  }
-
-  @GetMapping("{key}/concepts")
-  PagingResponse<Concept> listConcepts(
-      @PathParam("key") int vocabularyKey,
-      @RequestParam(value = "q", required = false) String query,
-      @RequestParam(value = "name", required = false) String name,
-      @RequestParam(value = "parentKet", required = false) int parentKey,
-      @RequestParam(value = "replacedByKey", required = false) int replacedByKey,
-      @RequestParam(value = "deprecated", required = false) Boolean deprecated,
-      PagingRequest page) {
-    // TODO: add LinkHeader??
-
-    return conceptService.list(
-        ConceptSearchParams.builder()
-            .vocabularyKey(vocabularyKey)
-            .query(query)
-            .name(name)
-            .parentKey(parentKey)
-            .replacedByKey(replacedByKey)
-            .deprecated(deprecated)
-            .build(),
-        page);
   }
 }

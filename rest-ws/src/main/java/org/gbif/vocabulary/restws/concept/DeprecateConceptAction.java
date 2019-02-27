@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.restws.vocabulary;
+package org.gbif.vocabulary.restws.concept;
 
 /** Defines the deprecation action for a {@link org.gbif.vocabulary.model.Concept}. */
 public class DeprecateConceptAction {

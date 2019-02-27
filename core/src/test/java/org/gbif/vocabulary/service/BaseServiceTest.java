@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 abstract class BaseServiceTest<T extends VocabularyEntity> {
 
-  protected static final int TEST_KEY = 1;
+  static final int TEST_KEY = 1;
 
   @MockBean private DataSource dataSource;
   @MockBean private PlatformTransactionManager platformTransactionManager;

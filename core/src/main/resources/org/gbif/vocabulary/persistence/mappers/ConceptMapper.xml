@@ -182,13 +182,13 @@
     FROM (
       (SELECT key, name
        FROM concept
-       WHERE name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+       WHERE vocabulary_key = #{vocabularyKey} AND name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
        ORDER BY name LIMIT 20
       )
     UNION ALL
       (SELECT key, name
        FROM concept
-       WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+       WHERE vocabulary_key = #{vocabularyKey} AND name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
        ORDER BY name LIMIT 20
       )
     ) t1 LIMIT 20
@@ -206,7 +206,13 @@
   <select id="findSimilarities" resultType="KeyNameResult">
     SELECT key, name
     FROM concept
-    WHERE #{name} = ANY(avals(label)) OR #{name} = ANY(avals(alternative_labels)) OR #{name} = ANY(avals(misspelt_labels))
+    WHERE vocabulary_key = #{vocabularyKey} AND
+      (
+        #{name} = name
+        OR #{name} = ANY(avals(label))
+        OR #{name} = ANY(avals(alternative_labels))
+        OR #{name} = ANY(avals(misspelt_labels))
+      )
     LIMIT 5
   </select>
 

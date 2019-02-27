@@ -29,6 +29,7 @@ import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
@@ -48,7 +49,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
    */
   @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
 
-  private static int defaultVocabularyKey;
+  private static int[] vocabularyKeys = new int[2];
 
   private final ConceptMapper conceptMapper;
 
@@ -71,7 +72,14 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     vocabulary.setCreatedBy("test");
     vocabulary.setModifiedBy("test");
     vocabularyMapper.create(vocabulary);
-    defaultVocabularyKey = vocabulary.getKey();
+    vocabularyKeys[0] = vocabulary.getKey();
+
+    Vocabulary vocabulary2 = new Vocabulary();
+    vocabulary2.setName("default2");
+    vocabulary2.setCreatedBy("test");
+    vocabulary2.setModifiedBy("test");
+    vocabularyMapper.create(vocabulary2);
+    vocabularyKeys[1] = vocabulary2.getKey();
   }
 
   @Test
@@ -101,13 +109,50 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertList("example", null, null, null, null, null, 2);
     assertList("altern ex", null, null, null, null, null, 1);
     assertList("oncept", null, null, null, null, null, 0);
-    assertList(null, defaultVocabularyKey, null, null, null, null, 3);
+    assertList(null, vocabularyKeys[0], null, null, null, null, 3);
     assertList(null, null, concept1.getKey(), null, null, null, 2);
     assertList(null, null, concept2.getKey(), null, null, null, 0);
     assertList(null, null, null, null, "concept1", null, 1);
     assertList(null, null, null, null, "concepto", null, 0);
-    assertList("exa", defaultVocabularyKey, null, null, null, null, 2);
+    assertList("exa", vocabularyKeys[0], null, null, null, null, 2);
     assertList(null, null, concept1.getKey(), null, "concept3", null, 1);
+  }
+
+  @Test
+  public void suggestTest() {
+    // create entities for the test
+    Concept c1 = createNewEntity();
+    c1.setName("suggest111");
+    conceptMapper.create(c1);
+    assertNotNull(c1.getKey());
+
+    Concept c2 = createNewEntity();
+    c2.setName("suggest222");
+    conceptMapper.create(c2);
+    assertNotNull(c2.getKey());
+
+    // check result values
+    List<KeyNameResult> result = conceptMapper.suggest("suggest1", c1.getVocabularyKey());
+    assertEquals("suggest111", result.get(0).getName());
+    assertEquals(c1.getKey().intValue(), result.get(0).getKey());
+
+    // assert expected number of results
+    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey()).size());
+    assertEquals(2, conceptMapper.suggest("gge", c1.getVocabularyKey()).size());
+    assertEquals(1, conceptMapper.suggest("22", c1.getVocabularyKey()).size());
+    assertEquals(0, conceptMapper.suggest("zz", c1.getVocabularyKey()).size());
+    assertEquals(0, conceptMapper.suggest(null, c1.getVocabularyKey()).size());
+
+    Concept c3 = createNewEntity();
+    c3.setVocabularyKey(vocabularyKeys[1]);
+    c3.setName("suggest333");
+    conceptMapper.create(c3);
+    assertNotNull(c3.getKey());
+
+    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey()).size());
+    assertEquals(1, conceptMapper.suggest("su", c3.getVocabularyKey()).size());
+    assertEquals(1, conceptMapper.suggest("33", c3.getVocabularyKey()).size());
+    assertEquals(0, conceptMapper.suggest("33", c1.getVocabularyKey()).size());
   }
 
   @Test
@@ -118,19 +163,22 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         Collections.singletonMap(Language.SPANISH, Collections.singletonList("primeiro")));
     conceptMapper.create(concept1);
 
-    Concept concept2 = createNewEntity();
-    concept2.setName("primero");
-    List<KeyNameResult> similarities = conceptMapper.findSimilarities(concept2);
+    Concept similar = createNewEntity();
+    similar.setName("primero");
+    List<KeyNameResult> similarities = conceptMapper.findSimilarities(similar);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(concept1.getName(), similarities.get(0).getName());
 
-    Concept concept3 = createNewEntity();
-    concept3.setName("primeiro");
-    similarities = conceptMapper.findSimilarities(concept3);
+    similar.setName("primeiro");
+    similarities = conceptMapper.findSimilarities(similar);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(concept1.getName(), similarities.get(0).getName());
+
+    // for another vocabulary there should be no match
+    similar.setVocabularyKey(vocabularyKeys[1]);
+    assertEquals(0, conceptMapper.findSimilarities(similar).size());
   }
 
   @Test
@@ -215,8 +263,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void getVocabularyKeyTest() {
     Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
-    assertEquals(
-        defaultVocabularyKey, conceptMapper.getVocabularyKey(concept1.getKey()).intValue());
+    assertEquals(vocabularyKeys[0], conceptMapper.getVocabularyKey(concept1.getKey()).intValue());
   }
 
   private void assertList(
@@ -240,7 +287,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @Override
   Concept createNewEntity() {
     Concept entity = new Concept();
-    entity.setVocabularyKey(defaultVocabularyKey);
+    entity.setVocabularyKey(vocabularyKeys[0]);
     entity.setName(UUID.randomUUID().toString());
     entity.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Label")));
     entity.setMisspeltLabels(

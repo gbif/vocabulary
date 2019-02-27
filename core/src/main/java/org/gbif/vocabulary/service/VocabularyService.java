@@ -3,10 +3,13 @@ package org.gbif.vocabulary.service;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
+import java.util.List;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /** Services for a {@link Vocabulary}. */
 public interface VocabularyService extends BaseService<Vocabulary> {
@@ -22,6 +25,15 @@ public interface VocabularyService extends BaseService<Vocabulary> {
   PagingResponse<Vocabulary> list(@Nullable VocabularySearchParams params, @Nullable Pageable page);
 
   /**
+   * Returns suggestions for the given query. It only checks for matches in the name field of the
+   * vocabulary.
+   *
+   * @param query suggestion
+   * @return a list of up to 20 suggested vocabularies
+   */
+  List<KeyNameResult> suggest(@NotNull String query);
+
+  /**
    * Deprecates a vocabulary with a replacement.
    *
    * @param key key of the vocabulary to be deprecated
@@ -30,7 +42,7 @@ public interface VocabularyService extends BaseService<Vocabulary> {
    * @param deprecateConcepts if true the concepts of the vocabulary will be deprecated too
    */
   void deprecate(
-    int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateConcepts);
+      int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateConcepts);
 
   /**
    * Deprecates a concept without replacement.

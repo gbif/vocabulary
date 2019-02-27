@@ -2,6 +2,7 @@ package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.util.List;
 import javax.annotation.Nullable;
@@ -39,6 +40,9 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   void restoreDeprecatedInBulk(@Param("keys") List<Integer> keys);
 
   void updateParent(@Param("keys") List<Integer> conceptKeys, @Param("parentKey") int parentKey);
+
+  List<KeyNameResult> suggest(
+      @Param("query") String query, @Param("vocabularyKey") int vocabularyKey);
 
   /**
    * Given a deprecated concept, it finds the current replacement, that's to say, the first

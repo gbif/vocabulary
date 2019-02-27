@@ -113,8 +113,14 @@ public class ConceptServiceIT {
     conceptService.create(concept);
 
     Concept similar = createBasicConcept(vocabularyKeys[0]);
+    similar.setName(concept.getName());
+    assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar));
+
     similar.setName("label");
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar));
+
+    similar.setVocabularyKey(vocabularyKeys[1]);
+    assertDoesNotThrow(() -> conceptService.create(similar));
   }
 
   @Test

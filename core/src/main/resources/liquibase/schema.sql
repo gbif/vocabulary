@@ -51,7 +51,7 @@ CREATE TABLE concept(
   vocabulary_key integer NOT NULL REFERENCES vocabulary(key),
   parent_key integer REFERENCES concept(key),
   replaced_by_key integer REFERENCES concept(key),
-  name text NOT NULL UNIQUE CHECK (assert_min_length(name, 1)),
+  name text NOT NULL CHECK (assert_min_length(name, 1)),
   label hstore,
   alternative_labels hstore,
   misspelt_labels hstore,

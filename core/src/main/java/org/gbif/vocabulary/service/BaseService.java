@@ -1,9 +1,7 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.VocabularyEntity;
-import org.gbif.vocabulary.model.search.KeyNameResult;
 
-import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -36,13 +34,4 @@ public interface BaseService<T extends VocabularyEntity> {
    * @param entity to be updated.
    */
   void update(@NotNull @Valid T entity);
-
-  /**
-   * Returns suggestions for the given query. It only checks for matches in the name field of the
-   * entity.
-   *
-   * @param query suggestion
-   * @return a list of up to 20 suggested entities
-   */
-  List<KeyNameResult> suggest(@NotNull String query);
 }

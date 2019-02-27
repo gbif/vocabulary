@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 /**
  * Base class to test a {@link BaseService} that can be reused for all the implemenations.
  *
- * @param <T>
+ * @param <T> {@link VocabularyEntity} to parametrize the class.
  */
 @TestPropertySource(properties = "spring.liquibase.enabled=false")
 @ExtendWith(SpringExtension.class)

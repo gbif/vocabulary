@@ -71,5 +71,4 @@ public final class TestUtils {
     vocabulary.setModifiedBy(TEST_USER);
     return vocabulary;
   }
-
 }

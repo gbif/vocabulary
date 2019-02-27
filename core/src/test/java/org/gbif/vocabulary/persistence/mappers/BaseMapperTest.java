@@ -3,9 +3,6 @@ package org.gbif.vocabulary.persistence.mappers;
 import org.gbif.api.model.registry.LenientEquals;
 import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.VocabularyEntity;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +16,6 @@ import static org.gbif.vocabulary.TestUtils.assertDeprecated;
 import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
 import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -67,32 +63,6 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
     baseMapper.update(entityUpdated);
     entityUpdated = baseMapper.get(entitySaved.getKey());
     assertTrue(entityUpdated.getDefinition().isEmpty());
-  }
-
-  @Test
-  public void suggestTest() {
-    // create entities for the test
-    T entity1 = createNewEntity();
-    entity1.setName("suggest111");
-    baseMapper.create(entity1);
-    assertNotNull(entity1.getKey());
-
-    T entity2 = createNewEntity();
-    entity2.setName("suggest222");
-    baseMapper.create(entity2);
-    assertNotNull(entity2.getKey());
-
-    // check result values
-    List<KeyNameResult> result = baseMapper.suggest("suggest1");
-    assertEquals("suggest111", result.get(0).getName());
-    assertEquals(entity1.getKey().intValue(), result.get(0).getKey());
-
-    // assert expected number of results
-    assertEquals(2, baseMapper.suggest("su").size());
-    assertEquals(2, baseMapper.suggest("gge").size());
-    assertEquals(1, baseMapper.suggest("22").size());
-    assertEquals(0, baseMapper.suggest("zz").size());
-    assertEquals(0, baseMapper.suggest(null).size());
   }
 
   @Test

@@ -4,7 +4,6 @@ import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.util.List;
-
 import javax.annotation.Nullable;
 
 import org.apache.ibatis.annotations.Param;
@@ -21,8 +20,6 @@ public interface BaseMapper<T extends VocabularyEntity> {
   void create(T entity);
 
   void update(T entity);
-
-  List<KeyNameResult> suggest(@Param("query") String query);
 
   /** Searchs for a similar entity. */
   List<KeyNameResult> findSimilarities(T entity);

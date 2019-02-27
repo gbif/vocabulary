@@ -2,6 +2,7 @@ package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.util.List;
 import javax.annotation.Nullable;
@@ -26,4 +27,6 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
       @Nullable @Param("name") String name,
       @Nullable @Param("namespace") String namespace,
       @Nullable @Param("deprecated") Boolean deprecated);
+
+  List<KeyNameResult> suggest(@Param("query") String query);
 }

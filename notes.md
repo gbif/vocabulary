@@ -26,11 +26,13 @@
 
 ### Concept  
 - Validity check for concepts 
-  - A new concept will be created as long as there is no conflict with other concepts.
-  A conflict happens when there is already another concept with the same label, including alternative and misspelled labels.
+  - A new concept will be created as long as there is no conflict with other concepts within the same vocabulary.
+  A conflict happens when there is already another concept with the same name, label, alternative label or misspelled labels within the same vocabulary.
   This also checks deprecated concepts, it doesn't make sense to create a concept that was already deprecated.
   - A concept and its children must belong to the same vocabulary.
-  - A concept cannot be created or updated with a deprecated parent or a deprecated vocabulary.
+  - A concept cannot be created with a deprecated parent or a deprecated vocabulary.
+  - A concept cannot be updated to a deprecated parent.
+  - A concept cannot be transferred to another vocabulary.
   
 - Deleting a concept
 

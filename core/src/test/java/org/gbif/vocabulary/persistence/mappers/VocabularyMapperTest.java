@@ -25,6 +25,7 @@ import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests the {@link VocabularyMapper} class
@@ -103,6 +104,32 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   }
 
   @Test
+  public void suggestTest() {
+    // create entities for the test
+    Vocabulary v1 = createNewEntity();
+    v1.setName("suggest111");
+    vocabularyMapper.create(v1);
+    assertNotNull(v1.getKey());
+
+    Vocabulary v2 = createNewEntity();
+    v2.setName("suggest222");
+    vocabularyMapper.create(v2);
+    assertNotNull(v2.getKey());
+
+    // check result values
+    List<KeyNameResult> result = vocabularyMapper.suggest("suggest1");
+    assertEquals("suggest111", result.get(0).getName());
+    assertEquals(v1.getKey().intValue(), result.get(0).getKey());
+
+    // assert expected number of results
+    assertEquals(2, vocabularyMapper.suggest("su").size());
+    assertEquals(2, vocabularyMapper.suggest("gge").size());
+    assertEquals(1, vocabularyMapper.suggest("22").size());
+    assertEquals(0, vocabularyMapper.suggest("zz").size());
+    assertEquals(0, vocabularyMapper.suggest(null).size());
+  }
+
+  @Test
   public void findSimilaritiesTest() {
     Vocabulary vocabulary1 = createNewEntity();
     vocabulary1.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
@@ -118,9 +145,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     Vocabulary vocabulary2 = createNewEntity();
     vocabulary2.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary2);
-    Vocabulary similar2 = createNewEntity();
-    similar2.setName("igual");
-    assertEquals(2, vocabularyMapper.findSimilarities(similar2).size());
+    assertEquals(2, vocabularyMapper.findSimilarities(similar).size());
   }
 
   private void assertList(

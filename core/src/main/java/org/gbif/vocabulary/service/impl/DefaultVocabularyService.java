@@ -5,6 +5,7 @@ import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
@@ -29,17 +30,20 @@ import static com.google.common.base.Preconditions.checkArgument;
 /** Default implementation for {@link VocabularyService}. */
 @Service
 @Validated
-public class DefaultVocabularyService extends AbstractBaseService<Vocabulary>
-    implements VocabularyService {
+public class DefaultVocabularyService implements VocabularyService {
 
   private final VocabularyMapper vocabularyMapper;
   private final ConceptMapper conceptMapper;
 
   @Autowired
   public DefaultVocabularyService(VocabularyMapper vocabularyMapper, ConceptMapper conceptMapper) {
-    super(vocabularyMapper);
     this.vocabularyMapper = vocabularyMapper;
     this.conceptMapper = conceptMapper;
+  }
+
+  @Override
+  public Vocabulary get(int key) {
+    return vocabularyMapper.get(key);
   }
 
   @Transactional
@@ -48,7 +52,12 @@ public class DefaultVocabularyService extends AbstractBaseService<Vocabulary>
     checkArgument(vocabulary.getKey() == null, "Can't create a vocabulary which already has a key");
 
     // checking if there is another similar vocabulary.
-    checkSimilarities(vocabulary);
+    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities(vocabulary);
+    if (!similarities.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Cannot create vocabulary because it conflicts with other entities, e.g.: "
+              + similarities.toString());
+    }
 
     vocabularyMapper.create(vocabulary);
 
@@ -94,6 +103,11 @@ public class DefaultVocabularyService extends AbstractBaseService<Vocabulary>
             params.getNamespace(),
             params.getDeprecated(),
             page));
+  }
+
+  @Override
+  public List<KeyNameResult> suggest(@NotNull String query) {
+    return vocabularyMapper.suggest(query);
   }
 
   @Override

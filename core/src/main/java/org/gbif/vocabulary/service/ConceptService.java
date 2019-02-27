@@ -4,9 +4,12 @@ import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 
+import java.util.List;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /** Services for a {@link Concept}. */
 public interface ConceptService extends BaseService<Concept> {
@@ -19,6 +22,16 @@ public interface ConceptService extends BaseService<Concept> {
    * @return a list of {@link Concept} ordered by their creation date, newest coming first
    */
   PagingResponse<Concept> list(@Nullable ConceptSearchParams params, @Nullable Pageable page);
+
+  /**
+   * Returns suggestions for the given query. It only checks for matches in the name field of the
+   * concept within the specified vocabulary.
+   *
+   * @param query suggestion
+   * @param vocabularyKey key of the vocabulary
+   * @return a list of up to 20 suggested concepts
+   */
+  List<KeyNameResult> suggest(@NotNull String query, int vocabularyKey);
 
   /**
    * Deprecates a concept with a replacement.

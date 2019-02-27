@@ -51,8 +51,8 @@ public class ValueByLanguageMapTypeHandler extends BaseTypeHandler<Map<Language,
 
   private String toString(Map<Language, String> languageStringMap) {
     return HStoreConverter.toString(
-      languageStringMap.entrySet().stream()
-        .collect(Collectors.toMap(e -> e.getKey().getIso2LetterCode(), Map.Entry::getValue)));
+        languageStringMap.entrySet().stream()
+            .collect(Collectors.toMap(e -> e.getKey().getIso2LetterCode(), Map.Entry::getValue)));
   }
 
   private Map<Language, String> fromString(String hstring) {

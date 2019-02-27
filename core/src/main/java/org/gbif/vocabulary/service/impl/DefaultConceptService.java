@@ -5,6 +5,7 @@ import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.ConceptService;
@@ -30,16 +31,20 @@ import static com.google.common.base.Preconditions.checkArgument;
 /** Default implementation for {@link ConceptService}. */
 @Service
 @Validated
-public class DefaultConceptService extends AbstractBaseService<Concept> implements ConceptService {
+public class DefaultConceptService implements ConceptService {
 
   private final ConceptMapper conceptMapper;
   private final VocabularyMapper vocabularyMapper;
 
   @Autowired
   public DefaultConceptService(ConceptMapper conceptMapper, VocabularyMapper vocabularyMapper) {
-    super(conceptMapper);
     this.conceptMapper = conceptMapper;
     this.vocabularyMapper = vocabularyMapper;
+  }
+
+  @Override
+  public Concept get(int key) {
+    return conceptMapper.get(key);
   }
 
   @Transactional
@@ -48,7 +53,12 @@ public class DefaultConceptService extends AbstractBaseService<Concept> implemen
     checkArgument(concept.getKey() == null, "Can't create a concept which already has a key");
 
     // checking if there is another similar concept.
-    checkSimilarities(concept);
+    List<KeyNameResult> similarities = conceptMapper.findSimilarities(concept);
+    if (!similarities.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Cannot create concept because it conflicts with other entities, e.g.: "
+              + similarities.toString());
+    }
 
     checkArgument(
         !vocabularyMapper.isDeprecated(concept.getVocabularyKey()),
@@ -77,9 +87,7 @@ public class DefaultConceptService extends AbstractBaseService<Concept> implemen
     requireNonNull(oldConcept, "Couldn't find concept with key: " + concept.getKey());
 
     if (!Objects.equals(oldConcept.getVocabularyKey(), concept.getVocabularyKey())) {
-      checkArgument(
-          !vocabularyMapper.isDeprecated(concept.getVocabularyKey()),
-          "Cannot update a concept to a deprecated vocabulary");
+      throw new IllegalArgumentException("A concept cannot be transferred to another vocabulary");
     }
 
     if (!Objects.equals(oldConcept.getParentKey(), concept.getParentKey())) {
@@ -131,6 +139,11 @@ public class DefaultConceptService extends AbstractBaseService<Concept> implemen
             params.getName(),
             params.getDeprecated(),
             page));
+  }
+
+  @Override
+  public List<KeyNameResult> suggest(@NotNull String query, int vocabularyKey) {
+    return conceptMapper.suggest(query, vocabularyKey);
   }
 
   @Transactional

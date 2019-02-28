@@ -52,7 +52,7 @@ public class DefaultVocabularyService implements VocabularyService {
     checkArgument(vocabulary.getKey() == null, "Can't create a vocabulary which already has a key");
 
     // checking if there is another similar vocabulary.
-    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities(vocabulary);
+    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities(vocabulary.getName());
     if (!similarities.isEmpty()) {
       throw new IllegalArgumentException(
           "Cannot create vocabulary because it conflicts with other entities, e.g.: "

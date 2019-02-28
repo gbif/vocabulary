@@ -163,22 +163,18 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         Collections.singletonMap(Language.SPANISH, Collections.singletonList("primeiro")));
     conceptMapper.create(concept1);
 
-    Concept similar = createNewEntity();
-    similar.setName("primero");
-    List<KeyNameResult> similarities = conceptMapper.findSimilarities(similar);
+    List<KeyNameResult> similarities = conceptMapper.findSimilarities("primero", vocabularyKeys[0]);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(concept1.getName(), similarities.get(0).getName());
 
-    similar.setName("primeiro");
-    similarities = conceptMapper.findSimilarities(similar);
+    similarities = conceptMapper.findSimilarities("primeiro", vocabularyKeys[0]);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(concept1.getName(), similarities.get(0).getName());
 
     // for another vocabulary there should be no match
-    similar.setVocabularyKey(vocabularyKeys[1]);
-    assertEquals(0, conceptMapper.findSimilarities(similar).size());
+    assertEquals(0, conceptMapper.findSimilarities("primeiro", vocabularyKeys[1]).size());
   }
 
   @Test

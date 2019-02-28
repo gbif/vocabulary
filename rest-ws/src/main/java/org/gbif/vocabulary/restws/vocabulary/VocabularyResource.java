@@ -8,7 +8,6 @@ import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
-import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,7 +59,7 @@ public class VocabularyResource {
   }
 
   @GetMapping("{key}")
-  Vocabulary get(@PathParam("key") int key) {
+  Vocabulary get(@PathVariable("key") int key) {
     return vocabularyService.get(key);
   }
 
@@ -75,7 +74,7 @@ public class VocabularyResource {
   @PutMapping("{key}")
   void update(@PathVariable("key") int key, @RequestBody Vocabulary vocabulary) {
     checkArgument(
-        key == vocabulary.getKey().intValue(),
+        key == vocabulary.getKey(),
         "Provided entity must have the same key as the resource in the URL");
     vocabularyService.update(vocabulary);
   }
@@ -87,7 +86,8 @@ public class VocabularyResource {
 
   @PutMapping("{key}/deprecate")
   void deprecate(
-      @PathVariable("key") int key, @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
+      @PathVariable("key") int key,
+      @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
     // TODO: set deprecatedBy
     if (deprecateVocabularyAction.getReplacementKey() != null) {
       vocabularyService.deprecate(

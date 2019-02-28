@@ -39,6 +39,10 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   void restoreDeprecatedInBulk(@Param("keys") List<Integer> keys);
 
+  /** Searchs for a similar entity. */
+  List<KeyNameResult> findSimilarities(
+      @Param("name") String name, @Param("vocabularyKey") int vocabularyKey);
+
   void updateParent(@Param("keys") List<Integer> conceptKeys, @Param("parentKey") int parentKey);
 
   List<KeyNameResult> suggest(

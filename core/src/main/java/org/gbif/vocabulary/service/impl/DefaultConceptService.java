@@ -53,7 +53,8 @@ public class DefaultConceptService implements ConceptService {
     checkArgument(concept.getKey() == null, "Can't create a concept which already has a key");
 
     // checking if there is another similar concept.
-    List<KeyNameResult> similarities = conceptMapper.findSimilarities(concept);
+    List<KeyNameResult> similarities =
+        conceptMapper.findSimilarities(concept.getName(), concept.getVocabularyKey());
     if (!similarities.isEmpty()) {
       throw new IllegalArgumentException(
           "Cannot create concept because it conflicts with other entities, e.g.: "

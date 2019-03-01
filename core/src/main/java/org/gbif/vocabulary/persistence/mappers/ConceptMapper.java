@@ -32,16 +32,14 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Nullable @Param("name") String name,
       @Nullable @Param("deprecated") Boolean deprecated);
 
+  Concept getByNameAndVocabulary(@Param("name") String name, @Param("vocabularyName") String vocabularyName);
+
   void deprecateInBulk(
       @Param("keys") List<Integer> keys,
       @Param("deprecatedBy") String deprecatedBy,
       @Nullable @Param("replacementKey") Integer replacementKey);
 
   void restoreDeprecatedInBulk(@Param("keys") List<Integer> keys);
-
-  /** Searchs for a similar entity. */
-  List<KeyNameResult> findSimilarities(
-      @Param("name") String name, @Param("vocabularyKey") int vocabularyKey);
 
   void updateParent(@Param("keys") List<Integer> conceptKeys, @Param("parentKey") int parentKey);
 

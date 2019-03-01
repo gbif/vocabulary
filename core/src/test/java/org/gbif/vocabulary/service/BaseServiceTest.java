@@ -42,6 +42,15 @@ abstract class BaseServiceTest<T extends VocabularyEntity> {
   }
 
   @Test
+  public void createEntityWithInvalidNameTest() {
+    T entity = createNewEntity("na me");
+    assertThrows(IllegalArgumentException.class, () -> getService().create(entity));
+
+    entity.setName("na@me!");
+    assertThrows(IllegalArgumentException.class, () -> getService().create(entity));
+  }
+
+  @Test
   public void createEntityWithKeyTest() {
     T entity = createNewEntity("name");
     entity.setKey(TEST_KEY);
@@ -62,6 +71,22 @@ abstract class BaseServiceTest<T extends VocabularyEntity> {
     assertThrows(ConstraintViolationException.class, () -> getService().update(null));
     // null key
     assertThrows(NullPointerException.class, () -> getService().update(createNewEntity("name")));
+  }
+
+  @Test
+  public void updateWithDifferentNameTest() {
+    T entityDB = createNewEntity("e1");
+    entityDB.setKey(TEST_KEY);
+    entityDB.setKey(TEST_KEY);
+    entityDB.setDeleted(LocalDateTime.now());
+
+    // mock
+    when(getMapper().get(TEST_KEY)).thenReturn(entityDB);
+
+    T newEntity = createNewEntity("name");
+    BeanUtils.copyProperties(entityDB, newEntity);
+    newEntity.setName("e2");
+    assertThrows(IllegalArgumentException.class, () -> getService().update(newEntity));
   }
 
   @Test

@@ -1,7 +1,9 @@
 package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.vocabulary.model.VocabularyEntity;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 
+import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.ibatis.annotations.Param;
@@ -18,6 +20,9 @@ public interface BaseMapper<T extends VocabularyEntity> {
   void create(T entity);
 
   void update(T entity);
+
+  /** Searchs for a similar entity. */
+  List<KeyNameResult> findSimilarities(T entity);
 
   void deprecate(
       @Param("key") int key,

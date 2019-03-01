@@ -4,10 +4,11 @@
 
 ### Vocabulary
 - Validity check for vocabularies 
-  
-  A new vocabulary will be created as long as there is no conflict with other vocabularies.
+  - A new vocabulary will be created as long as there is no conflict with other vocabularies.
   A conflict happens when there is already another vocabulary with the same label.
   This also checks deleted and replaced vocabularies, it doesn't make sense to create a vocabulary that was already deleted.
+  - The name of a vocabulary cannot contain spaces or special characters
+  - The name of a vocabulary cannot be updated, since it's used in URIs.
 
 - Deleting a vocabulary
 
@@ -33,6 +34,8 @@
   - A concept cannot be created with a deprecated parent or a deprecated vocabulary.
   - A concept cannot be updated to a deprecated parent.
   - A concept cannot be transferred to another vocabulary.
+  - The name of a concept cannot contain spaces or special characters
+  - The name of a concept cannot be updated, since it's used in URIs.
   
 - Deleting a concept
 

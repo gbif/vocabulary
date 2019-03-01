@@ -66,7 +66,8 @@ CREATE TABLE concept(
   created timestamp with time zone NOT NULL DEFAULT now(),
   modified timestamp with time zone NOT NULL DEFAULT now(),
   deleted timestamp with time zone NULL,
-  fulltext_search tsvector
+  fulltext_search tsvector,
+  CONSTRAINT unique_concept UNIQUE(vocabulary_key,name)
 );
 
 CREATE INDEX concept_fulltext_search_idx ON concept USING gin(fulltext_search);

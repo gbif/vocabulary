@@ -58,9 +58,9 @@ public class VocabularyResource {
         page);
   }
 
-  @GetMapping("{key}")
-  Vocabulary get(@PathVariable("key") int key) {
-    return vocabularyService.get(key);
+  @GetMapping("{name}")
+  Vocabulary get(@PathVariable("name") String vocabularyName) {
+    return vocabularyService.getByName(vocabularyName);
   }
 
   @PostMapping
@@ -71,11 +71,11 @@ public class VocabularyResource {
     return vocabularyService.create(vocabulary);
   }
 
-  @PutMapping("{key}")
-  void update(@PathVariable("key") int key, @RequestBody Vocabulary vocabulary) {
+  @PutMapping("{name}")
+  void update(@PathVariable("name") String vocabularyName, @RequestBody Vocabulary vocabulary) {
     checkArgument(
-        key == vocabulary.getKey(),
-        "Provided entity must have the same key as the resource in the URL");
+        vocabularyName.equals(vocabulary.getName()),
+        "Provided entity must have the same name as the resource in the URL");
     vocabularyService.update(vocabulary);
   }
 
@@ -84,27 +84,26 @@ public class VocabularyResource {
     return vocabularyService.suggest(query);
   }
 
-  @PutMapping("{key}/deprecate")
+  @PutMapping("{name}/deprecate")
   void deprecate(
-      @PathVariable("key") int key,
+      @PathVariable("name") String vocabularyName,
       @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
+    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+
     // TODO: set deprecatedBy
-    if (deprecateVocabularyAction.getReplacementKey() != null) {
-      vocabularyService.deprecate(
-          key,
-          "TODO",
-          deprecateVocabularyAction.getReplacementKey(),
-          deprecateVocabularyAction.isDeprecateConcepts());
-    } else {
-      vocabularyService.deprecate(key, "TODO", deprecateVocabularyAction.isDeprecateConcepts());
-    }
+    vocabularyService.deprecate(
+        vocabulary.getKey(),
+        "TODO",
+        deprecateVocabularyAction.getReplacementKey(),
+        deprecateVocabularyAction.isDeprecateConcepts());
   }
 
-  @DeleteMapping("{key}/deprecate")
+  @DeleteMapping("{name}/deprecate")
   void restoreDeprecated(
-      @PathVariable("key") int key,
+      @PathVariable("name") String vocabularyName,
       @RequestParam(value = "restoreDeprecatedConcepts", required = false)
           boolean restoreDeprecatedConcepts) {
-    vocabularyService.restoreDeprecated(key, restoreDeprecatedConcepts);
+    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    vocabularyService.restoreDeprecated(vocabulary.getKey(), restoreDeprecatedConcepts);
   }
 }

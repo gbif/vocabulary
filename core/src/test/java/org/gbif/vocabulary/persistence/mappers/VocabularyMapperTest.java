@@ -135,7 +135,9 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabulary1.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary1);
 
-    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities("igual");
+    Vocabulary similar = createNewEntity();
+    similar.setName("igual");
+    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities(similar);
     assertEquals(1, similarities.size());
     assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(vocabulary1.getName(), similarities.get(0).getName());
@@ -143,7 +145,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     Vocabulary vocabulary2 = createNewEntity();
     vocabulary2.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary2);
-    assertEquals(2, vocabularyMapper.findSimilarities("igual").size());
+    assertEquals(2, vocabularyMapper.findSimilarities(similar).size());
   }
 
   private void assertList(
@@ -152,6 +154,15 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
         expectedResult,
         vocabularyMapper.list(query, name, namespace, deprecated, DEFAULT_PAGE).size());
     assertEquals(expectedResult, vocabularyMapper.count(query, name, namespace, deprecated));
+  }
+
+  @Test
+  public void getByNameTest() {
+    Vocabulary vocabulary1 = createNewEntity();
+    vocabularyMapper.create(vocabulary1);
+
+    Vocabulary vocabularyDB = vocabularyMapper.getByName(vocabulary1.getName());
+    assertEquals(vocabulary1.getKey(), vocabularyDB.getKey());
   }
 
   @Override

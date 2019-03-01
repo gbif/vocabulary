@@ -28,8 +28,7 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
       @Nullable @Param("namespace") String namespace,
       @Nullable @Param("deprecated") Boolean deprecated);
 
-  /** Searchs for a similar entity. */
-  List<KeyNameResult> findSimilarities(@Param("name") String name);
+  Vocabulary getByName(@Param("name") String name);
 
   List<KeyNameResult> suggest(@Param("query") String query);
 }

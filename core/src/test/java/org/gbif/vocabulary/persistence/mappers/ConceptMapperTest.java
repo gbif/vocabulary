@@ -49,6 +49,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
    */
   @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
 
+  private static final String DEFAULT_VOCABULARY = "default";
+
   private static int[] vocabularyKeys = new int[2];
 
   private final ConceptMapper conceptMapper;
@@ -68,7 +70,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @BeforeAll
   public static void populateData(@Autowired VocabularyMapper vocabularyMapper) {
     Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName("default");
+    vocabulary.setName(DEFAULT_VOCABULARY);
     vocabulary.setCreatedBy("test");
     vocabulary.setModifiedBy("test");
     vocabularyMapper.create(vocabulary);
@@ -163,18 +165,22 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         Collections.singletonMap(Language.SPANISH, Collections.singletonList("primeiro")));
     conceptMapper.create(concept1);
 
-    List<KeyNameResult> similarities = conceptMapper.findSimilarities("primero", vocabularyKeys[0]);
+    Concept similar = createNewEntity();
+    similar.setName("primero");
+    List<KeyNameResult> similarities = conceptMapper.findSimilarities(similar);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(concept1.getName(), similarities.get(0).getName());
 
-    similarities = conceptMapper.findSimilarities("primeiro", vocabularyKeys[0]);
+    similar.setName("primeiro");
+    similarities = conceptMapper.findSimilarities(similar);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(concept1.getName(), similarities.get(0).getName());
 
     // for another vocabulary there should be no match
-    assertEquals(0, conceptMapper.findSimilarities("primeiro", vocabularyKeys[1]).size());
+    similar.setVocabularyKey(vocabularyKeys[1]);
+    assertEquals(0, conceptMapper.findSimilarities(similar).size());
   }
 
   @Test
@@ -260,6 +266,16 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
     assertEquals(vocabularyKeys[0], conceptMapper.getVocabularyKey(concept1.getKey()).intValue());
+  }
+
+  @Test
+  public void getByNameAndVocabularyTest() {
+    Concept concept1 = createNewEntity();
+    conceptMapper.create(concept1);
+
+    Concept conceptDB =
+        conceptMapper.getByNameAndVocabulary(concept1.getName(), DEFAULT_VOCABULARY);
+    assertEquals(concept1.getKey(), conceptDB.getKey());
   }
 
   private void assertList(

@@ -79,6 +79,13 @@
     WHERE c.key = #{key,jdbcType=INTEGER}
   </select>
 
+  <select id="getByNameAndVocabulary" resultMap="CONCEPT_MAP">
+    SELECT *
+    FROM concept c
+    INNER JOIN vocabulary v on v.key = c.vocabulary_key
+    WHERE c.name = #{name,jdbcType=VARCHAR} and v.name = #{vocabularyName,jdbcType=VARCHAR}
+  </select>
+
   <update id="deprecate">
     UPDATE concept
     SET deprecated = now(),

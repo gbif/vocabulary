@@ -14,6 +14,7 @@ import org.gbif.vocabulary.service.VocabularyService;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -22,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
+import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
 
 import static java.util.Objects.requireNonNull;
 
@@ -46,18 +49,18 @@ public class DefaultVocabularyService implements VocabularyService {
     return vocabularyMapper.get(key);
   }
 
+  @Override
+  public Vocabulary getByName(@NotBlank String name) {
+    return vocabularyMapper.getByName(name);
+  }
+
   @Transactional
   @Override
   public int create(@NotNull @Valid Vocabulary vocabulary) {
     checkArgument(vocabulary.getKey() == null, "Can't create a vocabulary which already has a key");
 
-    // checking if there is another similar vocabulary.
-    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities(vocabulary.getName());
-    if (!similarities.isEmpty()) {
-      throw new IllegalArgumentException(
-          "Cannot create vocabulary because it conflicts with other entities, e.g.: "
-              + similarities.toString());
-    }
+    // checking the validity of the concept.
+    validateEntity(vocabulary, vocabularyMapper::findSimilarities);
 
     vocabularyMapper.create(vocabulary);
 
@@ -71,6 +74,10 @@ public class DefaultVocabularyService implements VocabularyService {
 
     Vocabulary oldVocabulary = vocabularyMapper.get(vocabulary.getKey());
     requireNonNull(oldVocabulary, "Couldn't find vocabulary with key: " + vocabulary.getKey());
+
+    if (!Objects.equals(oldVocabulary.getName(), vocabulary.getName())) {
+      throw new IllegalArgumentException("Cannot modify the name of a vocabulary.");
+    }
 
     checkArgument(oldVocabulary.getDeprecated() == null, "Cannot update a deprecated vocabulary");
     checkArgument(
@@ -112,17 +119,10 @@ public class DefaultVocabularyService implements VocabularyService {
 
   @Override
   public void deprecate(
-      int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateConcepts) {
-    deprecateVocabulary(key, deprecatedBy, replacementKey, deprecateConcepts);
-  }
-
-  @Override
-  public void deprecate(int key, @NotBlank String deprecatedBy, boolean deprecateConcepts) {
-    deprecateVocabulary(key, deprecatedBy, null, deprecateConcepts);
-  }
-
-  private void deprecateVocabulary(
-      int key, String deprecatedBy, Integer replacementKey, boolean deprecateConcepts) {
+      int key,
+      @NotBlank String deprecatedBy,
+      @Nullable Integer replacementKey,
+      boolean deprecateConcepts) {
     List<Integer> concepts = findConceptsKeys(key, false);
     if (!concepts.isEmpty()) {
       if (!deprecateConcepts) {
@@ -135,6 +135,12 @@ public class DefaultVocabularyService implements VocabularyService {
     }
 
     vocabularyMapper.deprecate(key, deprecatedBy, replacementKey);
+  }
+
+  @Override
+  public void deprecateWithoutReplacement(
+      int key, @NotBlank String deprecatedBy, boolean deprecateConcepts) {
+    deprecate(key, deprecatedBy, null, deprecateConcepts);
   }
 
   @Override

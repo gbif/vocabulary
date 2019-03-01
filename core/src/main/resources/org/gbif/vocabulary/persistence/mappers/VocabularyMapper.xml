@@ -60,6 +60,12 @@
     WHERE v.key = #{key,jdbcType=INTEGER}
   </select>
 
+  <select id="getByName" resultMap="VOCABULARY_MAP">
+    SELECT *
+    FROM vocabulary v
+    WHERE v.name = #{name,jdbcType=VARCHAR}
+  </select>
+
   <select id="list" resultType="Vocabulary" resultMap="VOCABULARY_MAP">
     SELECT *
     FROM vocabulary v

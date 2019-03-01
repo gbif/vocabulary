@@ -3,9 +3,11 @@ package org.gbif.vocabulary.restws.concept;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.service.ConceptService;
+import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
 
@@ -25,19 +27,21 @@ import static org.gbif.vocabulary.restws.vocabulary.VocabularyResource.VOCABULAR
 import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
-@RequestMapping(VOCABULARIES_PATH + "/{vocabularyKey}/concepts")
+@RequestMapping(VOCABULARIES_PATH + "/{vocabularyName}/concepts")
 public class ConceptResource {
 
   private final ConceptService conceptService;
+  private final VocabularyService vocabularyService;
 
   @Autowired
-  ConceptResource(ConceptService conceptService) {
+  ConceptResource(ConceptService conceptService, VocabularyService vocabularyService) {
     this.conceptService = conceptService;
+    this.vocabularyService = vocabularyService;
   }
 
   @GetMapping()
   PagingResponse<Concept> listConcepts(
-      @PathVariable("vocabularyKey") int vocabularyKey,
+      @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
       @RequestParam(value = "name", required = false) String name,
       @RequestParam(value = "parentKey", required = false) Integer parentKey,
@@ -46,9 +50,11 @@ public class ConceptResource {
       PagingRequest page) {
     // TODO: add LinkHeader??
 
+    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+
     return conceptService.list(
         ConceptSearchParams.builder()
-            .vocabularyKey(vocabularyKey)
+            .vocabularyKey(vocabulary.getKey())
             .query(query)
             .name(name)
             .parentKey(parentKey)
@@ -58,20 +64,18 @@ public class ConceptResource {
         page);
   }
 
-  @GetMapping("{key}")
-  Concept get(@PathVariable("vocabularyKey") int vocabularyKey, @PathVariable("key") int key) {
-    Concept concept = conceptService.get(key);
-    checkArgument(
-        vocabularyKey == concept.getVocabularyKey(),
-        "Concept vocabulary doesn't match with the resource vocabulary in the URL");
-    return concept;
+  @GetMapping("{name}")
+  Concept get(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName) {
+    return conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
   }
 
-  // TODO: validate request body is not null or is it checked already??
   @PostMapping
-  int create(@PathVariable("vocabularyKey") int vocabularyKey, @RequestBody Concept concept) {
+  int create(@PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
+    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(
-        vocabularyKey == concept.getVocabularyKey(),
+        vocabulary.getKey().equals(concept.getVocabularyKey()),
         "Concept vocabulary doesn't match with the resource vocabulary in the URL");
     // TODO: set auditable fields
     // TODO: add location header
@@ -79,45 +83,50 @@ public class ConceptResource {
     return conceptService.create(concept);
   }
 
-  @PutMapping("{key}")
+  @PutMapping("{name}")
   void update(
-      @PathVariable("vocabularyKey") int vocabularyKey,
-      @PathVariable("key") int key,
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
       @RequestBody Concept concept) {
+    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(
-        vocabularyKey == concept.getVocabularyKey(),
+        vocabulary.getKey().equals(concept.getVocabularyKey()),
         "Concept vocabulary doesn't match with the resource vocabulary in the URL");
     checkArgument(
-        key == concept.getKey(), "Concept key doesn't match with the resource key in the URL");
+        conceptName.equals(concept.getName()),
+        "Concept name doesn't match with the resource name in the URL");
     conceptService.update(concept);
   }
 
   @GetMapping("suggest")
   List<KeyNameResult> suggest(
-      @PathVariable("vocabularyKey") int vocabularyKey, @RequestParam("q") String query) {
-    return conceptService.suggest(query, vocabularyKey);
+      @PathVariable("vocabularyName") String vocabularyName, @RequestParam("q") String query) {
+    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    return conceptService.suggest(query, vocabulary.getKey());
   }
 
-  @PutMapping("{key}/deprecate")
+  @PutMapping("{name}/deprecate")
   void deprecate(
-      @PathVariable("key") int key, @RequestBody DeprecateConceptAction deprecateConceptAction) {
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody DeprecateConceptAction deprecateConceptAction) {
+    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+
     // TODO: set deprecatedBy
-    if (deprecateConceptAction.getReplacementKey() != null) {
-      conceptService.deprecate(
-          key,
-          "TODO",
-          deprecateConceptAction.getReplacementKey(),
-          deprecateConceptAction.isDeprecateChildren());
-    } else {
-      conceptService.deprecate(key, "TODO", deprecateConceptAction.isDeprecateChildren());
-    }
+    conceptService.deprecate(
+        concept.getKey(),
+        "TODO",
+        deprecateConceptAction.getReplacementKey(),
+        deprecateConceptAction.isDeprecateChildren());
   }
 
-  @DeleteMapping("{key}/deprecate")
+  @DeleteMapping("{name}/deprecate")
   void restoreDeprecated(
-      @PathVariable("key") int key,
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
       @RequestParam(value = "restoreDeprecatedChildren", required = false)
           boolean restoreDeprecatedChildren) {
-    conceptService.restoreDeprecated(key, restoreDeprecatedChildren);
+    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+    conceptService.restoreDeprecated(concept.getKey(), restoreDeprecatedChildren);
   }
 }

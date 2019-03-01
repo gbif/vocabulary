@@ -127,7 +127,7 @@ public class VocabularyServiceIT {
   public void deprecateTest() {
     int v1Key = vocabularyService.create(createBasicVocabulary());
 
-    vocabularyService.deprecate(v1Key, DEPRECATED_BY, false);
+    vocabularyService.deprecateWithoutReplacement(v1Key, DEPRECATED_BY, false);
     assertDeprecated(vocabularyService.get(v1Key), DEPRECATED_BY);
 
     vocabularyService.restoreDeprecated(v1Key, false);

@@ -15,6 +15,15 @@ import javax.validation.constraints.NotNull;
 public interface ConceptService extends BaseService<Concept> {
 
   /**
+   * Retrieves a concept by its name and its vocabulary name.
+   *
+   * @param name name of the concept
+   * @param vocabularyName name of the vocabulary
+   * @return concept
+   */
+  Concept getByNameAndVocabulary(@NotBlank String name, @NotBlank String vocabularyName);
+
+  /**
    * Retrieves pages of {@link Concept} that match with the {@link ConceptSearchParams} received.
    *
    * @param params to do the search.
@@ -42,7 +51,7 @@ public interface ConceptService extends BaseService<Concept> {
    * @param deprecateChildren if true the children of the concept will be deprecated too
    */
   void deprecate(
-      int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateChildren);
+      int key, @NotBlank String deprecatedBy, @Nullable Integer replacementKey, boolean deprecateChildren);
 
   /**
    * Deprecates a concept without replacement.
@@ -51,7 +60,7 @@ public interface ConceptService extends BaseService<Concept> {
    * @param deprecatedBy name of the actor who deprecates the concept
    * @param deprecateChildren if true the children of the concept will be deprecated too
    */
-  void deprecate(int key, @NotBlank String deprecatedBy, boolean deprecateChildren);
+  void deprecateWithoutReplacement(int key, @NotBlank String deprecatedBy, boolean deprecateChildren);
 
   /**
    * Restores a deprecated concept.

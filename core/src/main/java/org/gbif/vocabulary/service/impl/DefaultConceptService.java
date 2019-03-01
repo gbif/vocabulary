@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
+
 import static java.util.Objects.requireNonNull;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -47,19 +49,18 @@ public class DefaultConceptService implements ConceptService {
     return conceptMapper.get(key);
   }
 
+  @Override
+  public Concept getByNameAndVocabulary(@NotBlank String name, @NotBlank String vocabularyName) {
+    return conceptMapper.getByNameAndVocabulary(name, vocabularyName);
+  }
+
   @Transactional
   @Override
   public int create(@NotNull @Valid Concept concept) {
     checkArgument(concept.getKey() == null, "Can't create a concept which already has a key");
 
-    // checking if there is another similar concept.
-    List<KeyNameResult> similarities =
-        conceptMapper.findSimilarities(concept.getName(), concept.getVocabularyKey());
-    if (!similarities.isEmpty()) {
-      throw new IllegalArgumentException(
-          "Cannot create concept because it conflicts with other entities, e.g.: "
-              + similarities.toString());
-    }
+    // checking the validity of the concept.
+    validateEntity(concept, conceptMapper::findSimilarities);
 
     checkArgument(
         !vocabularyMapper.isDeprecated(concept.getVocabularyKey()),
@@ -89,6 +90,10 @@ public class DefaultConceptService implements ConceptService {
 
     if (!Objects.equals(oldConcept.getVocabularyKey(), concept.getVocabularyKey())) {
       throw new IllegalArgumentException("A concept cannot be transferred to another vocabulary");
+    }
+
+    if (!Objects.equals(oldConcept.getName(), concept.getName())) {
+      throw new IllegalArgumentException("Cannot modify the name of a concept");
     }
 
     if (!Objects.equals(oldConcept.getParentKey(), concept.getParentKey())) {
@@ -150,7 +155,15 @@ public class DefaultConceptService implements ConceptService {
   @Transactional
   @Override
   public void deprecate(
-      int key, @NotBlank String deprecatedBy, int replacementKey, boolean deprecateChildren) {
+      int key,
+      @NotBlank String deprecatedBy,
+      @Nullable Integer replacementKey,
+      boolean deprecateChildren) {
+
+    if (replacementKey == null) {
+      deprecateWithoutReplacement(key, deprecatedBy, deprecateChildren);
+      return;
+    }
 
     checkArgument(
         conceptMapper.getVocabularyKey(key).equals(conceptMapper.getVocabularyKey(replacementKey)),
@@ -174,7 +187,8 @@ public class DefaultConceptService implements ConceptService {
 
   @Transactional
   @Override
-  public void deprecate(int key, @NotBlank String deprecatedBy, boolean deprecateChildren) {
+  public void deprecateWithoutReplacement(
+      int key, @NotBlank String deprecatedBy, boolean deprecateChildren) {
     List<Integer> children = findChildrenKeys(key, false);
     if (!children.isEmpty()) {
       if (!deprecateChildren) {

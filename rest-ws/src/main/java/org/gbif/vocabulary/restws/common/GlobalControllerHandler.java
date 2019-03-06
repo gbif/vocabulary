@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.restws.config;
+package org.gbif.vocabulary.restws.common;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.web.bind.WebDataBinder;

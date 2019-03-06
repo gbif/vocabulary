@@ -17,7 +17,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
  * should be imported by all the users of this module.
  */
 @Configuration
-@PropertySource(value = "classpath:config.properties")
+@PropertySource(value = "classpath:core.properties")
 @ComponentScan("org.gbif.vocabulary.service")
 @MapperScan("org.gbif.vocabulary.persistence.mappers")
 public class SpringConfig {

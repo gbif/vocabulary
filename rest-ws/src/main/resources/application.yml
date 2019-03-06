@@ -9,3 +9,8 @@ spring:
       connectionTimeout: 30000
       idleTimeout: 600000
       maxLifetime: 1800000
+
+server.port: 8090
+
+security:
+  registryApiUrl: http://localhost:8080

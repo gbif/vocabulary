@@ -46,7 +46,7 @@ public class VocabularyResource {
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
       PagingRequest page) {
 
-    // TODO: add LinkHeader??
+    // TODO: add Link Header??
 
     return vocabularyService.list(
         VocabularySearchParams.builder()
@@ -64,11 +64,10 @@ public class VocabularyResource {
   }
 
   @PostMapping
-  int create(@RequestBody Vocabulary vocabulary) {
+  Vocabulary create(@RequestBody Vocabulary vocabulary) {
     // TODO: set auditable fields
-    // TODO: add location header
-    // TODO: return the whole object instead of only the key??
-    return vocabularyService.create(vocabulary);
+    int key = vocabularyService.create(vocabulary);
+    return vocabularyService.get(key);
   }
 
   @PutMapping("{name}")
@@ -77,6 +76,7 @@ public class VocabularyResource {
         vocabularyName.equals(vocabulary.getName()),
         "Provided entity must have the same name as the resource in the URL");
     vocabularyService.update(vocabulary);
+    // TODO: return updated vocabulary??
   }
 
   @GetMapping("suggest")

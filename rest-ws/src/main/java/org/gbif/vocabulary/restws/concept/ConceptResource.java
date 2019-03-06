@@ -48,7 +48,7 @@ public class ConceptResource {
       @RequestParam(value = "replacedByKey", required = false) Integer replacedByKey,
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
       PagingRequest page) {
-    // TODO: add LinkHeader??
+    // TODO: add Link Header??
 
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
 
@@ -72,15 +72,15 @@ public class ConceptResource {
   }
 
   @PostMapping
-  int create(@PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
+  Concept create(
+      @PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(
         vocabulary.getKey().equals(concept.getVocabularyKey()),
         "Concept vocabulary doesn't match with the resource vocabulary in the URL");
     // TODO: set auditable fields
-    // TODO: add location header
-    // TODO: return the whole object instead of only the key??
-    return conceptService.create(concept);
+    int key = conceptService.create(concept);
+    return conceptService.get(key);
   }
 
   @PutMapping("{name}")
@@ -96,6 +96,7 @@ public class ConceptResource {
         conceptName.equals(concept.getName()),
         "Concept name doesn't match with the resource name in the URL");
     conceptService.update(concept);
+    // TODO: return updated concept??
   }
 
   @GetMapping("suggest")

@@ -34,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -279,6 +280,36 @@ public class VocabularyResourceTest extends BaseResourceTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
         .andExpect(status().isForbidden());
+  }
+
+  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @Test
+  public void restoreDeprecatedTest() throws Exception {
+    Vocabulary vocabulary = createVocabulary();
+    vocabulary.setKey(TEST_KEY);
+    when(vocabularyService.getByName(anyString())).thenReturn(vocabulary);
+    doNothing().when(vocabularyService).restoreDeprecated(anyInt(), anyBoolean());
+
+    mockMvc
+        .perform(delete(BASE_PATH + "/" + vocabulary.getName() + "/deprecate"))
+        .andExpect(status().isNoContent());
+  }
+
+  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @Test
+  public void restoreDeprecatedWrongNameTest() throws Exception {
+    mockMvc.perform(delete(BASE_PATH + "/fake/deprecate")).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void restoreDeprecatedUnauthorizedTest() throws Exception {
+    mockMvc.perform(delete(BASE_PATH + "/name/deprecate")).andExpect(status().isUnauthorized());
+  }
+
+  @WithMockUser(authorities = {"USER"})
+  @Test
+  public void restoreDeprecatedForbiddenTest() throws Exception {
+    mockMvc.perform(delete(BASE_PATH + "/name/deprecate")).andExpect(status().isForbidden());
   }
 
   private Vocabulary createVocabulary() {

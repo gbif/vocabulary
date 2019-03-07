@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.restws.vocabulary;
+package org.gbif.vocabulary.restws.model;
 
 import org.gbif.vocabulary.restws.model.DeprecateAction;
 

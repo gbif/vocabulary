@@ -1,10 +1,11 @@
-package org.gbif.vocabulary.restws.vocabulary;
+package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.gbif.vocabulary.restws.vocabulary.VocabularyResource.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.restws.resources.VocabularyResource.VOCABULARIES_PATH;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

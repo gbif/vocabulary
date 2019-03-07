@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.restws.concept;
+package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -6,6 +6,7 @@ import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.gbif.vocabulary.restws.vocabulary.VocabularyResource.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.restws.resources.VocabularyResource.VOCABULARIES_PATH;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

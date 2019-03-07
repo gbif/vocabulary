@@ -2,17 +2,13 @@ package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.service.VocabularyService;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -240,12 +236,6 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
   @Override
   Vocabulary createEntity() {
-    Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName(UUID.randomUUID().toString());
-    vocabulary.setNamespace(NAMESPACE_TEST);
-    vocabulary.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
-    vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
-
-    return vocabulary;
+    return super.createVocabulary();
   }
 }

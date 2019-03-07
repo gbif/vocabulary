@@ -1,7 +1,13 @@
 package org.gbif.vocabulary.restws.resources;
 
+import org.gbif.api.vocabulary.Language;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -111,4 +117,25 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
   abstract String getBasePath();
 
   abstract T createEntity();
+
+  Vocabulary createVocabulary() {
+    Vocabulary vocabulary = new Vocabulary();
+    vocabulary.setName(UUID.randomUUID().toString());
+    vocabulary.setNamespace(NAMESPACE_TEST);
+    vocabulary.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
+
+    return vocabulary;
+  }
+
+  Concept createConcept() {
+    Concept concept = new Concept();
+    concept.setName(UUID.randomUUID().toString());
+    concept.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    concept.setAlternativeLabels(
+      Collections.singletonMap(Language.ENGLISH, Arrays.asList("Label2", "Label3")));
+    concept.setEditorialNotes(Arrays.asList("note1", "note2"));
+
+    return concept;
+  }
 }

@@ -45,6 +45,6 @@ public class JwtAuthenticationProvider extends AbstractAuthenticationProvider {
 
   @Override
   public boolean supports(Class<?> authentication) {
-    return JwtAuthentication.class.equals(authentication);
+    return JwtAuthentication.class.isAssignableFrom(authentication);
   }
 }

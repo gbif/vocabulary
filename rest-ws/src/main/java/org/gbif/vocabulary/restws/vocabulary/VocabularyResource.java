@@ -65,18 +65,18 @@ public class VocabularyResource {
 
   @PostMapping
   Vocabulary create(@RequestBody Vocabulary vocabulary) {
-    // TODO: set auditable fields
     int key = vocabularyService.create(vocabulary);
     return vocabularyService.get(key);
   }
 
   @PutMapping("{name}")
-  void update(@PathVariable("name") String vocabularyName, @RequestBody Vocabulary vocabulary) {
+  Vocabulary update(
+      @PathVariable("name") String vocabularyName, @RequestBody Vocabulary vocabulary) {
     checkArgument(
         vocabularyName.equals(vocabulary.getName()),
         "Provided entity must have the same name as the resource in the URL");
     vocabularyService.update(vocabulary);
-    // TODO: return updated vocabulary??
+    return vocabularyService.get(vocabulary.getKey());
   }
 
   @GetMapping("suggest")

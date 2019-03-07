@@ -78,13 +78,12 @@ public class ConceptResource {
     checkArgument(
         vocabulary.getKey().equals(concept.getVocabularyKey()),
         "Concept vocabulary doesn't match with the resource vocabulary in the URL");
-    // TODO: set auditable fields
     int key = conceptService.create(concept);
     return conceptService.get(key);
   }
 
   @PutMapping("{name}")
-  void update(
+  Concept update(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody Concept concept) {
@@ -96,7 +95,7 @@ public class ConceptResource {
         conceptName.equals(concept.getName()),
         "Concept name doesn't match with the resource name in the URL");
     conceptService.update(concept);
-    // TODO: return updated concept??
+    return conceptService.get(concept.getKey());
   }
 
   @GetMapping("suggest")

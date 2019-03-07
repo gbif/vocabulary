@@ -11,13 +11,13 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class SecurityConfig {
 
-  @NotBlank private String registryApiUrl;
+  @NotBlank private String loginApiBasePath;
 
-  public String getRegistryApiUrl() {
-    return registryApiUrl;
+  public String getLoginApiBasePath() {
+    return loginApiBasePath;
   }
 
-  public void setRegistryApiUrl(String registryApiUrl) {
-    this.registryApiUrl = registryApiUrl;
+  public void setLoginApiBasePath(String loginApiBasePath) {
+    this.loginApiBasePath = loginApiBasePath;
   }
 }

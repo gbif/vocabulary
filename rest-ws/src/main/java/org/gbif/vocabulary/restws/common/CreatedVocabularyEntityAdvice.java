@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+/**
+ * Intercepts all the responses of POST requests to add a Location header and a {@link
+ * HttpStatus#CREATED} code.
+ */
 @ControllerAdvice
 public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<VocabularyEntity> {
 

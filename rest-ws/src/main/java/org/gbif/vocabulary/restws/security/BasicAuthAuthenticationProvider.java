@@ -40,6 +40,6 @@ public class BasicAuthAuthenticationProvider extends AbstractAuthenticationProvi
 
   @Override
   public boolean supports(Class<?> authentication) {
-    return UsernamePasswordAuthenticationToken.class.equals(authentication);
+    return UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication);
   }
 }

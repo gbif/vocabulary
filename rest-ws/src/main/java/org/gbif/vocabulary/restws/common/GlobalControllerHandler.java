@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 @ControllerAdvice
 public class GlobalControllerHandler {
 
-  /** Only applies to request parameters. */
+  /** Only applies to query parameters. */
   @InitBinder
   public void initBinder(WebDataBinder binder) {
     // trims all strings and converts empty strings to null

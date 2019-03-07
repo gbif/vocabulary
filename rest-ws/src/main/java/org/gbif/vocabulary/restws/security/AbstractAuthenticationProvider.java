@@ -17,7 +17,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -26,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
 public abstract class AbstractAuthenticationProvider implements AuthenticationProvider {
 
   protected static final ObjectReader OBJECT_READER = new ObjectMapper().reader();
-  private static final String REGISTRY_LOGIN_URL = "/user/login";
+  private static final String LOGIN_API_URL = "/user/login";
 
   private final RestTemplate restTemplate;
   private final SecurityConfig config;
@@ -37,14 +36,14 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
   }
 
   @Override
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+  public Authentication authenticate(Authentication authentication) {
     // create headers
     HttpHeaders headers = createHttHeaders(authentication);
 
     try {
       ResponseEntity<String> response =
           restTemplate.postForEntity(
-              config.getRegistryApiUrl() + REGISTRY_LOGIN_URL,
+              config.getLoginApiBasePath() + LOGIN_API_URL,
               new HttpEntity<>(headers),
               String.class);
 

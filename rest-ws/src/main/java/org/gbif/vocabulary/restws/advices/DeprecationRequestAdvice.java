@@ -51,7 +51,7 @@ public class DeprecationRequestAdvice implements RequestBodyAdvice {
     DeprecateAction deprecateAction = (DeprecateAction) body;
     deprecateAction.setDeprecatedBy(authentication.getName());
 
-    return body;
+    return deprecateAction;
   }
 
   @Override

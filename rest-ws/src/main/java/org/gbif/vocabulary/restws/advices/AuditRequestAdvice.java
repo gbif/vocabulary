@@ -60,7 +60,7 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
 
     vocabularyEntity.setModifiedBy(authentication.getName());
 
-    return body;
+    return vocabularyEntity;
   }
 
   @Override

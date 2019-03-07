@@ -1,10 +1,6 @@
 # default config here
 spring:
-  # TODO: take it from pom??
   datasource:
-    url: jdbc:postgresql://localhost:5432/vocabulary
-    username: rgz522
-    password:
     hikari:
       connectionTimeout: 30000
       idleTimeout: 600000
@@ -14,3 +10,11 @@ server.port: 8090
 
 security:
   loginApiBasePath: http://localhost:8080
+
+---
+spring:
+  profiles: local
+  datasource:
+    url: jdbc:postgresql://localhost:5432/vocabulary
+    username: rgz522
+    password:

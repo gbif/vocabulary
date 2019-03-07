@@ -27,7 +27,13 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Vocabul
   @Override
   public boolean supports(
       MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-    return returnType.hasMethodAnnotation(PostMapping.class);
+    try {
+      return returnType.hasMethodAnnotation(PostMapping.class)
+          && VocabularyEntity.class.isAssignableFrom(
+              Class.forName(returnType.getGenericParameterType().getTypeName()));
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("Unexpected parameter type", e);
+    }
   }
 
   @Override

@@ -49,7 +49,7 @@ public class Application {
   @Configuration
   static class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static final String VOCABULARIES_PATTERN = "/vocabularies**";
+    private static final String VOCABULARIES_PATTERN = "/vocabularies/**";
 
     @Autowired private AuthenticationProvider basicAuthAuthenticationProvider;
 

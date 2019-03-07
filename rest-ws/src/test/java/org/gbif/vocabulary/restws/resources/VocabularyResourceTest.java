@@ -42,16 +42,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class VocabularyResourceTest extends BaseResourceTest {
-
-  private static final String BASE_PATH = "/vocabularies";
+public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
   @MockBean private VocabularyService vocabularyService;
 
   @Test
   public void listVocabulariesTest() throws Exception {
     List<Vocabulary> vocabularies =
-        ImmutableList.of(createVocabulary(), createVocabulary(), createVocabulary());
+        ImmutableList.of(createEntity(), createEntity(), createEntity());
 
     VocabularySearchParams searchParams = VocabularySearchParams.builder().build();
     when(vocabularyService.list(any(VocabularySearchParams.class), any(PagingRequest.class)))
@@ -59,7 +57,8 @@ public class VocabularyResourceTest extends BaseResourceTest {
             new PagingResponse<Vocabulary>(
                 new PagingRequest(), (long) vocabularies.size(), vocabularies));
 
-    MvcResult mvcResult = mockMvc.perform(get(BASE_PATH)).andExpect(status().isOk()).andReturn();
+    MvcResult mvcResult =
+        mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
     List<Vocabulary> resultList =
@@ -71,11 +70,11 @@ public class VocabularyResourceTest extends BaseResourceTest {
 
   @Test
   public void getVocabularyTest() throws Exception {
-    Vocabulary vocabulary = createVocabulary();
+    Vocabulary vocabulary = createEntity();
     when(vocabularyService.getByName(anyString())).thenReturn(vocabulary);
 
     mockMvc
-        .perform(get(BASE_PATH + "/foo"))
+        .perform(get(getBasePath() + "/foo"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
   }
@@ -83,13 +82,13 @@ public class VocabularyResourceTest extends BaseResourceTest {
   @Test
   public void getNotFoundVocabularyTest() throws Exception {
     when(vocabularyService.getByName(anyString())).thenReturn(null);
-    mockMvc.perform(get(BASE_PATH + "/foo")).andExpect(status().isNotFound());
+    mockMvc.perform(get(getBasePath() + "/foo")).andExpect(status().isNotFound());
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void createVocabularyTest() throws Exception {
-    Vocabulary vocabulary = createVocabulary();
+    Vocabulary vocabulary = createEntity();
     when(vocabularyService.create(any(Vocabulary.class))).thenReturn(TEST_KEY);
     Vocabulary created = new Vocabulary();
     BeanUtils.copyProperties(vocabulary, created);
@@ -98,11 +97,11 @@ public class VocabularyResourceTest extends BaseResourceTest {
 
     mockMvc
         .perform(
-            post(BASE_PATH)
+            post(getBasePath())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(vocabulary)))
         .andExpect(status().isCreated())
-        .andExpect(header().string("Location", endsWith(BASE_PATH + "/" + created.getName())))
+        .andExpect(header().string("Location", endsWith(getBasePath() + "/" + created.getName())))
         .andExpect(jsonPath("key", is(TEST_KEY)))
         .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
   }
@@ -110,7 +109,7 @@ public class VocabularyResourceTest extends BaseResourceTest {
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void createNullEntityTest() throws Exception {
-    Vocabulary vocabulary = createVocabulary();
+    Vocabulary vocabulary = createEntity();
     when(vocabularyService.create(any(Vocabulary.class))).thenReturn(TEST_KEY);
     Vocabulary created = new Vocabulary();
     BeanUtils.copyProperties(vocabulary, created);
@@ -118,35 +117,14 @@ public class VocabularyResourceTest extends BaseResourceTest {
     when(vocabularyService.get(TEST_KEY)).thenReturn(created);
 
     mockMvc
-        .perform(post(BASE_PATH).contentType(MediaType.APPLICATION_JSON))
+        .perform(post(getBasePath()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  public void unauthorizedCreateTest() throws Exception {
-    mockMvc
-        .perform(
-            post(BASE_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(createVocabulary())))
-        .andExpect(status().isUnauthorized());
-  }
-
-  @WithMockUser
-  @Test
-  public void forbiddenCreateTest() throws Exception {
-    mockMvc
-        .perform(
-            post(BASE_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(createVocabulary())))
-        .andExpect(status().isForbidden());
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void updateTest() throws Exception {
-    Vocabulary vocabulary = createVocabulary();
+    Vocabulary vocabulary = createEntity();
     vocabulary.setKey(TEST_KEY);
 
     doNothing().when(vocabularyService).update(any(Vocabulary.class));
@@ -154,7 +132,7 @@ public class VocabularyResourceTest extends BaseResourceTest {
 
     mockMvc
         .perform(
-            put(BASE_PATH + "/" + vocabulary.getName())
+            put(getBasePath() + "/" + vocabulary.getName())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(vocabulary)))
         .andExpect(status().isOk())
@@ -164,7 +142,7 @@ public class VocabularyResourceTest extends BaseResourceTest {
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void updateWrongNameTest() throws Exception {
-    Vocabulary vocabulary = createVocabulary();
+    Vocabulary vocabulary = createEntity();
     vocabulary.setKey(TEST_KEY);
 
     doNothing().when(vocabularyService).update(any(Vocabulary.class));
@@ -172,7 +150,7 @@ public class VocabularyResourceTest extends BaseResourceTest {
 
     mockMvc
         .perform(
-            put(BASE_PATH + "/fake")
+            put(getBasePath() + "/fake")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(vocabulary)))
         .andExpect(status().isBadRequest());
@@ -182,29 +160,8 @@ public class VocabularyResourceTest extends BaseResourceTest {
   @Test
   public void updateNullEntityTest() throws Exception {
     mockMvc
-        .perform(put(BASE_PATH + "/fake").contentType(MediaType.APPLICATION_JSON))
+        .perform(put(getBasePath() + "/fake").contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  public void unauthorizedUpdateTest() throws Exception {
-    mockMvc
-        .perform(
-            put(BASE_PATH + "/fake")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(createVocabulary())))
-        .andExpect(status().isUnauthorized());
-  }
-
-  @WithMockUser()
-  @Test
-  public void forbiddenUpdateTest() throws Exception {
-    mockMvc
-        .perform(
-            put(BASE_PATH + "/fake")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(createVocabulary())))
-        .andExpect(status().isForbidden());
   }
 
   @Test
@@ -220,7 +177,10 @@ public class VocabularyResourceTest extends BaseResourceTest {
     when(vocabularyService.suggest(anyString())).thenReturn(suggestions);
 
     MvcResult mvcResult =
-        mockMvc.perform(get(BASE_PATH + "/suggest?q=foo")).andExpect(status().isOk()).andReturn();
+        mockMvc
+            .perform(get(getBasePath() + "/suggest?q=foo"))
+            .andExpect(status().isOk())
+            .andReturn();
 
     List<KeyNameResult> resultList =
         OBJECT_MAPPER.readValue(
@@ -229,22 +189,17 @@ public class VocabularyResourceTest extends BaseResourceTest {
     assertEquals(suggestions.size(), resultList.size());
   }
 
-  @Test
-  public void suggestWithoutQueryTest() throws Exception {
-    mockMvc.perform(get(BASE_PATH + "/suggest")).andExpect(status().isBadRequest()).andReturn();
-  }
-
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void deprecateTest() throws Exception {
-    Vocabulary vocabulary = createVocabulary();
+    Vocabulary vocabulary = createEntity();
     vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(anyString())).thenReturn(vocabulary);
     doNothing().when(vocabularyService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
 
     mockMvc
         .perform(
-            put(BASE_PATH + "/" + vocabulary.getName() + "/deprecate")
+            put(getBasePath() + "/" + vocabulary.getName() + "/deprecate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
         .andExpect(status().isNoContent());
@@ -255,64 +210,38 @@ public class VocabularyResourceTest extends BaseResourceTest {
   public void deprecateWrongNameTest() throws Exception {
     mockMvc
         .perform(
-            put(BASE_PATH + "/fake/deprecate")
+            put(getBasePath() + "/fake/deprecate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
         .andExpect(status().isBadRequest());
   }
 
-  @Test
-  public void deprecateUnauthorizedTest() throws Exception {
-    mockMvc
-        .perform(
-            put(BASE_PATH + "/fake/deprecate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
-        .andExpect(status().isUnauthorized());
-  }
-
-  @WithMockUser(authorities = {"USER"})
-  @Test
-  public void deprecateForbiddenTest() throws Exception {
-    mockMvc
-        .perform(
-            put(BASE_PATH + "/fake/deprecate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
-        .andExpect(status().isForbidden());
-  }
-
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void restoreDeprecatedTest() throws Exception {
-    Vocabulary vocabulary = createVocabulary();
+    Vocabulary vocabulary = createEntity();
     vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(anyString())).thenReturn(vocabulary);
     doNothing().when(vocabularyService).restoreDeprecated(anyInt(), anyBoolean());
 
     mockMvc
-        .perform(delete(BASE_PATH + "/" + vocabulary.getName() + "/deprecate"))
+        .perform(delete(getBasePath() + "/" + vocabulary.getName() + "/deprecate"))
         .andExpect(status().isNoContent());
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void restoreDeprecatedWrongNameTest() throws Exception {
-    mockMvc.perform(delete(BASE_PATH + "/fake/deprecate")).andExpect(status().isBadRequest());
+    mockMvc.perform(delete(getBasePath() + "/fake/deprecate")).andExpect(status().isBadRequest());
   }
 
-  @Test
-  public void restoreDeprecatedUnauthorizedTest() throws Exception {
-    mockMvc.perform(delete(BASE_PATH + "/name/deprecate")).andExpect(status().isUnauthorized());
+  @Override
+  String getBasePath() {
+    return "/vocabularies";
   }
 
-  @WithMockUser(authorities = {"USER"})
-  @Test
-  public void restoreDeprecatedForbiddenTest() throws Exception {
-    mockMvc.perform(delete(BASE_PATH + "/name/deprecate")).andExpect(status().isForbidden());
-  }
-
-  private Vocabulary createVocabulary() {
+  @Override
+  Vocabulary createEntity() {
     Vocabulary vocabulary = new Vocabulary();
     vocabulary.setName(UUID.randomUUID().toString());
     vocabulary.setNamespace(NAMESPACE_TEST);

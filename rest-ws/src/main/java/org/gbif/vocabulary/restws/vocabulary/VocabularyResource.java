@@ -90,10 +90,9 @@ public class VocabularyResource {
       @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
 
-    // TODO: set deprecatedBy
     vocabularyService.deprecate(
         vocabulary.getKey(),
-        "TODO",
+        deprecateVocabularyAction.getDeprecatedBy(),
         deprecateVocabularyAction.getReplacementKey(),
         deprecateVocabularyAction.isDeprecateConcepts());
   }

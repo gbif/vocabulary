@@ -112,10 +112,9 @@ public class ConceptResource {
       @RequestBody DeprecateConceptAction deprecateConceptAction) {
     Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
 
-    // TODO: set deprecatedBy
     conceptService.deprecate(
         concept.getKey(),
-        "TODO",
+        deprecateConceptAction.getDeprecatedBy(),
         deprecateConceptAction.getReplacementKey(),
         deprecateConceptAction.isDeprecateChildren());
   }

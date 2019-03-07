@@ -1,6 +1,6 @@
-package org.gbif.vocabulary.restws.common;
+package org.gbif.vocabulary.restws.advices;
 
-import org.gbif.vocabulary.model.VocabularyEntity;
+import org.gbif.vocabulary.restws.model.DeprecateAction;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -13,12 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 
-/**
- * Intercepts all the requests with a {@link org.gbif.vocabulary.model.VocabularyEntity} in the body
- * and assigns the required {@link org.gbif.vocabulary.model.Auditable} fields.
- */
 @ControllerAdvice
-public class AuditRequestAdvice implements RequestBodyAdvice {
+public class DeprecationRequestAdvice implements RequestBodyAdvice {
 
   @Override
   public boolean supports(
@@ -26,7 +22,7 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
       Type targetType,
       Class<? extends HttpMessageConverter<?>> converterType) {
     try {
-      return VocabularyEntity.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
+      return DeprecateAction.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException("Unexpected target type", e);
     }
@@ -52,13 +48,8 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
       Class<? extends HttpMessageConverter<?>> converterType) {
     // set auditable fields
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    VocabularyEntity vocabularyEntity = (VocabularyEntity) body;
-
-    if (vocabularyEntity.getKey() == null) {
-      vocabularyEntity.setCreatedBy(authentication.getName());
-    }
-
-    vocabularyEntity.setModifiedBy(authentication.getName());
+    DeprecateAction deprecateAction = (DeprecateAction) body;
+    deprecateAction.setDeprecatedBy(authentication.getName());
 
     return body;
   }

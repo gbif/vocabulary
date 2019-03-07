@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.restws.common;
+package org.gbif.vocabulary.restws.advices;
 
 import org.gbif.vocabulary.model.VocabularyEntity;
 

@@ -1,15 +1,20 @@
 package org.gbif.vocabulary.restws.vocabulary;
 
+import org.gbif.vocabulary.restws.model.DeprecateAction;
+
 /** Defines the deprecation action for a {@link org.gbif.vocabulary.model.Vocabulary}. */
-public class DeprecateVocabularyAction {
+public class DeprecateVocabularyAction implements DeprecateAction {
 
   private Integer replacementKey;
   private boolean deprecateConcepts;
+  private String deprecatedBy;
 
+  @Override
   public Integer getReplacementKey() {
     return replacementKey;
   }
 
+  @Override
   public void setReplacementKey(Integer replacementKey) {
     this.replacementKey = replacementKey;
   }
@@ -20,5 +25,15 @@ public class DeprecateVocabularyAction {
 
   public void setDeprecateConcepts(boolean deprecateConcepts) {
     this.deprecateConcepts = deprecateConcepts;
+  }
+
+  @Override
+  public String getDeprecatedBy() {
+    return deprecatedBy;
+  }
+
+  @Override
+  public void setDeprecatedBy(String deprecatedBy) {
+    this.deprecatedBy = deprecatedBy;
   }
 }

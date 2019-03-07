@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.restws.common;
+package org.gbif.vocabulary.restws.advices;
 
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.web.bind.WebDataBinder;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 
 /** This class contains the setuop that will be applied to all the vocabulary. */
 @ControllerAdvice
-public class GlobalControllerHandler {
+public class GlobalControllerAdvice {
 
   /** Only applies to query parameters. */
   @InitBinder

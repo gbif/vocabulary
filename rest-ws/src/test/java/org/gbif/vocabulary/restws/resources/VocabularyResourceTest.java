@@ -6,6 +6,7 @@ import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.Arrays;
@@ -28,6 +29,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -228,6 +231,54 @@ public class VocabularyResourceTest extends BaseResourceTest {
   @Test
   public void suggestWithoutQueryTest() throws Exception {
     mockMvc.perform(get(BASE_PATH + "/suggest")).andExpect(status().isBadRequest()).andReturn();
+  }
+
+  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @Test
+  public void deprecateTest() throws Exception {
+    Vocabulary vocabulary = createVocabulary();
+    vocabulary.setKey(TEST_KEY);
+    when(vocabularyService.getByName(anyString())).thenReturn(vocabulary);
+    doNothing().when(vocabularyService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
+
+    mockMvc
+        .perform(
+            put(BASE_PATH + "/" + vocabulary.getName() + "/deprecate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
+        .andExpect(status().isNoContent());
+  }
+
+  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @Test
+  public void deprecateWrongNameTest() throws Exception {
+    mockMvc
+        .perform(
+            put(BASE_PATH + "/fake/deprecate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void deprecateUnauthorizedTest() throws Exception {
+    mockMvc
+        .perform(
+            put(BASE_PATH + "/fake/deprecate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @WithMockUser(authorities = {"USER"})
+  @Test
+  public void deprecateForbiddenTest() throws Exception {
+    mockMvc
+        .perform(
+            put(BASE_PATH + "/fake/deprecate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
+        .andExpect(status().isForbidden());
   }
 
   private Vocabulary createVocabulary() {

@@ -13,6 +13,7 @@ import org.gbif.vocabulary.service.VocabularyService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.gbif.vocabulary.restws.resources.VocabularyResource.VOCABULARIES_PATH;
@@ -52,6 +54,7 @@ public class ConceptResource {
     // TODO: add Link Header??
 
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
 
     return conceptService.list(
         ConceptSearchParams.builder()
@@ -103,15 +106,21 @@ public class ConceptResource {
   List<KeyNameResult> suggest(
       @PathVariable("vocabularyName") String vocabularyName, @RequestParam("q") String query) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+
     return conceptService.suggest(query, vocabulary.getKey());
   }
 
   @PutMapping("{name}/deprecate")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   void deprecate(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody DeprecateConceptAction deprecateConceptAction) {
     Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+    checkArgument(
+        concept != null,
+        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
 
     conceptService.deprecate(
         concept.getKey(),
@@ -121,12 +130,17 @@ public class ConceptResource {
   }
 
   @DeleteMapping("{name}/deprecate")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   void restoreDeprecated(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestParam(value = "restoreDeprecatedChildren", required = false)
           boolean restoreDeprecatedChildren) {
     Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+    checkArgument(
+        concept != null,
+        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
+
     conceptService.restoreDeprecated(concept.getKey(), restoreDeprecatedChildren);
   }
 }

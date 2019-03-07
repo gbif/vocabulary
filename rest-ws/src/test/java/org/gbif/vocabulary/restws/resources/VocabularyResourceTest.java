@@ -51,11 +51,9 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
     List<Vocabulary> vocabularies =
         ImmutableList.of(createEntity(), createEntity(), createEntity());
 
-    VocabularySearchParams searchParams = VocabularySearchParams.builder().build();
     when(vocabularyService.list(any(VocabularySearchParams.class), any(PagingRequest.class)))
         .thenReturn(
-            new PagingResponse<Vocabulary>(
-                new PagingRequest(), (long) vocabularies.size(), vocabularies));
+            new PagingResponse<>(new PagingRequest(), (long) vocabularies.size(), vocabularies));
 
     MvcResult mvcResult =
         mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();

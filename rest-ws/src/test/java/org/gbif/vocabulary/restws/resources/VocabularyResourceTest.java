@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/** Tests the {@link VocabularyResource} using mocks for the server and service layers. */
 public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
   @MockBean private VocabularyService vocabularyService;
@@ -78,10 +79,10 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void createVocabularyTest() throws Exception {
-    Vocabulary vocabulary = createEntity();
+    Vocabulary vocabularyToCreate = createEntity();
     when(vocabularyService.create(any(Vocabulary.class))).thenReturn(TEST_KEY);
     Vocabulary created = new Vocabulary();
-    BeanUtils.copyProperties(vocabulary, created);
+    BeanUtils.copyProperties(vocabularyToCreate, created);
     created.setKey(TEST_KEY);
     when(vocabularyService.get(TEST_KEY)).thenReturn(created);
 
@@ -89,11 +90,11 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         .perform(
             post(getBasePath())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(vocabulary)))
+                .content(OBJECT_MAPPER.writeValueAsString(vocabularyToCreate)))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", endsWith(getBasePath() + "/" + created.getName())))
         .andExpect(jsonPath("key", is(TEST_KEY)))
-        .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
+        .andExpect(jsonPath("name", equalTo(created.getName())));
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})

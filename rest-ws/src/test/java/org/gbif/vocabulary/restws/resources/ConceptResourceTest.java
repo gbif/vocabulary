@@ -46,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/** Tests the {@link ConceptResource} using mocks for the server and service layers. */
 public class ConceptResourceTest extends BaseResourceTest<Concept> {
 
   private static final String TEST_VOCABULARY_NAME = "v1";
@@ -94,9 +95,9 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
   public void createConceptTest() throws Exception {
     mockVocabulary();
     when(conceptService.create(any(Concept.class))).thenReturn(TEST_KEY);
-    Concept concept = createEntity();
+    Concept conceptToCreate = createEntity();
     Concept created = new Concept();
-    BeanUtils.copyProperties(concept, created);
+    BeanUtils.copyProperties(conceptToCreate, created);
     created.setKey(TEST_KEY);
     when(conceptService.get(TEST_KEY)).thenReturn(created);
 
@@ -104,7 +105,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         .perform(
             post(getBasePath())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(concept)))
+                .content(OBJECT_MAPPER.writeValueAsString(conceptToCreate)))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", endsWith(getBasePath() + "/" + created.getName())))
         .andExpect(jsonPath("key", is(TEST_KEY)))
@@ -164,13 +165,11 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
   @Test
   public void updateConceptWithWrongConceptName() throws Exception {
     mockVocabulary();
-    Concept concept = createEntity();
-
     mockMvc
         .perform(
             put(getBasePath() + "/fake")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(concept)))
+                .content(OBJECT_MAPPER.writeValueAsString(createEntity())))
         .andExpect(status().isBadRequest());
   }
 

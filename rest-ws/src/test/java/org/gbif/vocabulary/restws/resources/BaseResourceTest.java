@@ -1,16 +1,19 @@
 package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.api.vocabulary.Language;
-import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.restws.model.DeprecateAction;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.UUID;
+import java.util.List;
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +24,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -124,6 +129,17 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     mockMvc.perform(put(getBasePath() + "/fake/deprecate")).andExpect(status().isForbidden());
   }
 
+  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @Test
+  public void deprecateEntityNotFoundTest() throws Exception {
+    mockMvc
+        .perform(
+            put(getBasePath() + "/fake/deprecate")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(createDeprecateAction())))
+        .andExpect(status().isBadRequest());
+  }
+
   @Test
   public void restoreDeprecatedUnauthorizedTest() throws Exception {
     mockMvc.perform(delete(getBasePath() + "/name/deprecate")).andExpect(status().isUnauthorized());
@@ -141,13 +157,9 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     mockMvc.perform(delete(getBasePath() + "/fake/deprecate")).andExpect(status().isBadRequest());
   }
 
-  abstract String getBasePath();
-
-  abstract T createEntity();
-
-  Vocabulary createVocabulary() {
+  Vocabulary createVocabulary(String name) {
     Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName(UUID.randomUUID().toString());
+    vocabulary.setName(name);
     vocabulary.setNamespace(NAMESPACE_TEST);
     vocabulary.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
@@ -155,14 +167,33 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     return vocabulary;
   }
 
-  Concept createConcept() {
-    Concept concept = new Concept();
-    concept.setName(UUID.randomUUID().toString());
-    concept.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
-    concept.setAlternativeLabels(
-        Collections.singletonMap(Language.ENGLISH, Arrays.asList("Label2", "Label3")));
-    concept.setEditorialNotes(Arrays.asList("note1", "note2"));
+  void suggestTest(List<KeyNameResult> suggestions) throws Exception {
+    MvcResult mvcResult =
+        mockMvc
+            .perform(get(getBasePath() + "/suggest?q=foo"))
+            .andExpect(status().isOk())
+            .andReturn();
 
-    return concept;
+    List<KeyNameResult> resultList =
+        OBJECT_MAPPER.readValue(
+            mvcResult.getResponse().getContentAsString(),
+            new TypeReference<List<KeyNameResult>>() {});
+    assertEquals(suggestions.size(), resultList.size());
   }
+
+  List<KeyNameResult> createSuggestions() {
+    KeyNameResult keyNameResult1 = new KeyNameResult();
+    keyNameResult1.setKey(1);
+    keyNameResult1.setName("n1");
+    KeyNameResult keyNameResult2 = new KeyNameResult();
+    keyNameResult2.setKey(2);
+    keyNameResult2.setName("n2");
+    return ImmutableList.of(keyNameResult1, keyNameResult2);
+  }
+
+  abstract String getBasePath();
+
+  abstract T createEntity();
+
+  abstract DeprecateAction createDeprecateAction();
 }

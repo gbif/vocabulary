@@ -5,10 +5,12 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.restws.model.DeprecateAction;
 import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -65,10 +67,10 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
   @Test
   public void getVocabularyTest() throws Exception {
     Vocabulary vocabulary = createEntity();
-    when(vocabularyService.getByName(anyString())).thenReturn(vocabulary);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
     mockMvc
-        .perform(get(getBasePath() + "/foo"))
+        .perform(get(getBasePath() + "/" + vocabulary.getName()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
   }
@@ -109,6 +111,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(vocabulary)))
         .andExpect(status().isOk())
+        .andExpect(jsonPath("key", is(vocabulary.getKey())))
         .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
   }
 
@@ -125,27 +128,9 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
   @Test
   public void suggestTest() throws Exception {
-    KeyNameResult keyNameResult1 = new KeyNameResult();
-    keyNameResult1.setKey(1);
-    keyNameResult1.setName("n1");
-    KeyNameResult keyNameResult2 = new KeyNameResult();
-    keyNameResult2.setKey(2);
-    keyNameResult2.setName("n2");
-    List<KeyNameResult> suggestions = ImmutableList.of(keyNameResult1, keyNameResult2);
-
+    List<KeyNameResult> suggestions = createSuggestions();
     when(vocabularyService.suggest(anyString())).thenReturn(suggestions);
-
-    MvcResult mvcResult =
-        mockMvc
-            .perform(get(getBasePath() + "/suggest?q=foo"))
-            .andExpect(status().isOk())
-            .andReturn();
-
-    List<KeyNameResult> resultList =
-        OBJECT_MAPPER.readValue(
-            mvcResult.getResponse().getContentAsString(),
-            new TypeReference<List<KeyNameResult>>() {});
-    assertEquals(suggestions.size(), resultList.size());
+    suggestTest(suggestions);
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
@@ -153,26 +138,15 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
   public void deprecateTest() throws Exception {
     Vocabulary vocabulary = createEntity();
     vocabulary.setKey(TEST_KEY);
-    when(vocabularyService.getByName(anyString())).thenReturn(vocabulary);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
     doNothing().when(vocabularyService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
 
     mockMvc
         .perform(
             put(getBasePath() + "/" + vocabulary.getName() + "/deprecate")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
+                .content(OBJECT_MAPPER.writeValueAsString(createDeprecateAction())))
         .andExpect(status().isNoContent());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
-  @Test
-  public void deprecateWrongNameTest() throws Exception {
-    mockMvc
-        .perform(
-            put(getBasePath() + "/fake/deprecate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction())))
-        .andExpect(status().isBadRequest());
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
@@ -180,7 +154,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
   public void restoreDeprecatedTest() throws Exception {
     Vocabulary vocabulary = createEntity();
     vocabulary.setKey(TEST_KEY);
-    when(vocabularyService.getByName(anyString())).thenReturn(vocabulary);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
     doNothing().when(vocabularyService).restoreDeprecated(anyInt(), anyBoolean());
 
     mockMvc
@@ -195,6 +169,11 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
   @Override
   Vocabulary createEntity() {
-    return super.createVocabulary();
+    return super.createVocabulary(UUID.randomUUID().toString());
+  }
+
+  @Override
+  DeprecateAction createDeprecateAction() {
+    return new DeprecateVocabularyAction();
   }
 }

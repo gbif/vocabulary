@@ -73,12 +73,6 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
   }
 
-  @Test
-  public void getNotFoundVocabularyTest() throws Exception {
-    when(vocabularyService.getByName(anyString())).thenReturn(null);
-    mockMvc.perform(get(getBasePath() + "/foo")).andExpect(status().isNotFound());
-  }
-
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void createVocabularyTest() throws Exception {
@@ -102,21 +96,6 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
-  public void createNullEntityTest() throws Exception {
-    Vocabulary vocabulary = createEntity();
-    when(vocabularyService.create(any(Vocabulary.class))).thenReturn(TEST_KEY);
-    Vocabulary created = new Vocabulary();
-    BeanUtils.copyProperties(vocabulary, created);
-    created.setKey(TEST_KEY);
-    when(vocabularyService.get(TEST_KEY)).thenReturn(created);
-
-    mockMvc
-        .perform(post(getBasePath()).contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
-  @Test
   public void updateTest() throws Exception {
     Vocabulary vocabulary = createEntity();
     vocabulary.setKey(TEST_KEY);
@@ -136,25 +115,11 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void updateWrongNameTest() throws Exception {
-    Vocabulary vocabulary = createEntity();
-    vocabulary.setKey(TEST_KEY);
-
-    doNothing().when(vocabularyService).update(any(Vocabulary.class));
-    when(vocabularyService.get(TEST_KEY)).thenReturn(vocabulary);
-
     mockMvc
         .perform(
             put(getBasePath() + "/fake")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(vocabulary)))
-        .andExpect(status().isBadRequest());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
-  @Test
-  public void updateNullEntityTest() throws Exception {
-    mockMvc
-        .perform(put(getBasePath() + "/fake").contentType(MediaType.APPLICATION_JSON))
+                .content(OBJECT_MAPPER.writeValueAsString(createEntity())))
         .andExpect(status().isBadRequest());
   }
 
@@ -221,12 +186,6 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
     mockMvc
         .perform(delete(getBasePath() + "/" + vocabulary.getName() + "/deprecate"))
         .andExpect(status().isNoContent());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
-  @Test
-  public void restoreDeprecatedWrongNameTest() throws Exception {
-    mockMvc.perform(delete(getBasePath() + "/fake/deprecate")).andExpect(status().isBadRequest());
   }
 
   @Override

@@ -46,6 +46,19 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
   @MockBean private PlatformTransactionManager platformTransactionManager;
 
   @Test
+  public void getNotFoundEntityTest() throws Exception {
+    mockMvc.perform(get(getBasePath() + "/foo")).andExpect(status().isNotFound());
+  }
+
+  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @Test
+  public void createNullEntityTest() throws Exception {
+    mockMvc
+        .perform(post(getBasePath()).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   public void unauthorizedCreateTest() throws Exception {
     mockMvc
         .perform(
@@ -64,6 +77,14 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(createEntity())))
         .andExpect(status().isForbidden());
+  }
+
+  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @Test
+  public void updateNullEntityTest() throws Exception {
+    mockMvc
+        .perform(put(getBasePath() + "/fake").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -114,6 +135,12 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     mockMvc.perform(delete(getBasePath() + "/name/deprecate")).andExpect(status().isForbidden());
   }
 
+  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @Test
+  public void restoreDeprecatedEntityNotFoundNameTest() throws Exception {
+    mockMvc.perform(delete(getBasePath() + "/fake/deprecate")).andExpect(status().isBadRequest());
+  }
+
   abstract String getBasePath();
 
   abstract T createEntity();
@@ -133,7 +160,7 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     concept.setName(UUID.randomUUID().toString());
     concept.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
     concept.setAlternativeLabels(
-      Collections.singletonMap(Language.ENGLISH, Arrays.asList("Label2", "Label3")));
+        Collections.singletonMap(Language.ENGLISH, Arrays.asList("Label2", "Label3")));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

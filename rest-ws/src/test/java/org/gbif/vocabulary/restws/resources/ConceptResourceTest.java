@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -47,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Tests the {@link ConceptResource} using mocks for the server and service layers. */
+@Execution(ExecutionMode.SAME_THREAD)
 public class ConceptResourceTest extends BaseResourceTest<Concept> {
 
   private static final String TEST_VOCABULARY_NAME = "v1";

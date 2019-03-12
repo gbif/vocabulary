@@ -14,11 +14,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /** Base {@link AuthenticationProvider} to support the different kinds of authentication. */
@@ -51,8 +51,7 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
     } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.Forbidden e) {
       throw new BadCredentialsException("Wrong credentials for user: " + authentication.getName());
     } catch (Exception e) {
-      throw new AuthenticationServiceException(
-          "Could not authenticate user: " + authentication.getName(), e);
+      throw new RestClientException("Could not authenticate user: " + authentication.getName(), e);
     }
   }
 

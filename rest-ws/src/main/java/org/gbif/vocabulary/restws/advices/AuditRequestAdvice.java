@@ -54,7 +54,7 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     VocabularyEntity vocabularyEntity = (VocabularyEntity) body;
 
-    if (vocabularyEntity.getKey() == null) {
+    if (vocabularyEntity.getCreatedBy() == null) {
       vocabularyEntity.setCreatedBy(authentication.getName());
     }
 

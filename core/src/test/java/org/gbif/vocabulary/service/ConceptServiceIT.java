@@ -244,12 +244,6 @@ public class ConceptServiceIT {
     assertThrows(
         IllegalArgumentException.class,
         () -> conceptService.deprecate(c1, DEPRECATED_BY, c2, false));
-
-    Concept concept2 = conceptService.get(c2);
-    concept2.setVocabularyKey(vocabularyKeys[0]);
-    conceptService.update(concept2);
-
-    assertDoesNotThrow(() -> conceptService.deprecate(c1, DEPRECATED_BY, c2, false));
   }
 
   @Test
@@ -286,10 +280,10 @@ public class ConceptServiceIT {
     conceptService.deprecate(key1, DEPRECATED_BY, key2, false);
     assertDeprecatedWithReplacement(conceptService.get(key1), DEPRECATED_BY, key2);
     Concept deprecatedChild3 = conceptService.get(key3);
-    assertDeprecated(conceptService.get(key3), DEPRECATED_BY);
+    assertNotDeprecated(deprecatedChild3);
     assertEquals(key2, deprecatedChild3.getParentKey().intValue());
     Concept deprecatedChild4 = conceptService.get(key4);
-    assertDeprecated(conceptService.get(key4), DEPRECATED_BY);
+    assertNotDeprecated(deprecatedChild4);
     assertEquals(key2, deprecatedChild4.getParentKey().intValue());
   }
 

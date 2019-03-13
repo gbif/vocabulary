@@ -168,7 +168,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
   @Override
   String getBasePath() {
-    return "/vocabularies";
+    return "/" + VocabularyResource.VOCABULARIES_PATH;
   }
 
   @Override

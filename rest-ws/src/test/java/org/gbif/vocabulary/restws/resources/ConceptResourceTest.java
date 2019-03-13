@@ -223,7 +223,12 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
 
   @Override
   String getBasePath() {
-    return "/vocabularies/" + TEST_VOCABULARY_NAME + "/concepts";
+    return "/"
+        + VocabularyResource.VOCABULARIES_PATH
+        + "/"
+        + TEST_VOCABULARY_NAME
+        + "/"
+        + ConceptResource.CONCEPTS_PATH;
   }
 
   @Override

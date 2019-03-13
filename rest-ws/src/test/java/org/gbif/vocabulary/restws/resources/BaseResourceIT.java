@@ -4,6 +4,7 @@ import org.gbif.api.model.registry.LenientEquals;
 import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.restws.LoginServerExtension;
 import org.gbif.vocabulary.restws.PostgresDBExtension;
 import org.gbif.vocabulary.restws.TestUser;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** Base class for resource integration tests. */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
@@ -41,7 +43,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
 
   @Autowired WebTestClient webClient;
 
-  Function<TestUser, String> BASIC_AUTH_HEADER =
+  static final Function<TestUser, String> BASIC_AUTH_HEADER =
       testUser ->
           "Basic "
               + Base64Utils.encodeToString(
@@ -108,6 +110,49 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
               assertTrue(created.lenientEquals(v));
               assertEquals(EDITOR.getUsername(), v.getModifiedBy());
             });
+  }
+
+  @Test
+  public void suggestTest() {
+    // create entity
+    T entity1 = createEntity();
+    entity1.setName("suggest111");
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .body(BodyInserters.fromObject(entity1))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+
+    // create entity
+    T entity2 = createEntity();
+    entity2.setName("suggest222");
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .body(BodyInserters.fromObject(entity2))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+
+    webClient
+        .get()
+        .uri(builder -> builder.path(getBasePath() + "/suggest").queryParam("q", "sugg").build())
+        .exchange()
+        .expectBodyList(KeyNameResult.class)
+        .hasSize(2);
+
+    webClient
+        .get()
+        .uri(builder -> builder.path(getBasePath() + "/suggest").queryParam("q", "ggest1").build())
+        .exchange()
+        .expectBodyList(KeyNameResult.class)
+        .hasSize(1);
   }
 
   @Test

@@ -1,6 +1,8 @@
 package org.gbif.vocabulary.restws.advices;
 
 import org.gbif.vocabulary.restws.model.DeprecateAction;
+import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
+import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -47,9 +49,8 @@ public class DeprecationRequestAdvice implements RequestBodyAdvice {
       Type targetType,
       Class<? extends HttpMessageConverter<?>> converterType) {
     // set auditable fields
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     DeprecateAction deprecateAction = (DeprecateAction) body;
-    deprecateAction.setDeprecatedBy(authentication.getName());
+    deprecateAction.setDeprecatedBy(getAuthenticatedUser());
 
     return deprecateAction;
   }
@@ -61,7 +62,27 @@ public class DeprecationRequestAdvice implements RequestBodyAdvice {
       MethodParameter parameter,
       Type targetType,
       Class<? extends HttpMessageConverter<?>> converterType) {
-    // do nothing
+    try {
+      if (DeprecateVocabularyAction.class.isAssignableFrom(
+          Class.forName(targetType.getTypeName()))) {
+        DeprecateVocabularyAction action = new DeprecateVocabularyAction();
+        action.setDeprecatedBy(getAuthenticatedUser());
+        return action;
+      } else if (DeprecateConceptAction.class.isAssignableFrom(
+          Class.forName(targetType.getTypeName()))) {
+        DeprecateConceptAction action = new DeprecateConceptAction();
+        action.setDeprecatedBy(getAuthenticatedUser());
+        return action;
+      }
+    } catch (ClassNotFoundException e) {
+      throw new IllegalStateException("Unexpected target type", e);
+    }
+
     return body;
+  }
+
+  private String getAuthenticatedUser() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return authentication.getName();
   }
 }

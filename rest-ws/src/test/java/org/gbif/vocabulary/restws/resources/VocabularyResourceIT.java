@@ -1,59 +1,143 @@
 package org.gbif.vocabulary.restws.resources;
 
+import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.restws.LoginServerExtension;
-import org.gbif.vocabulary.restws.PostgresDBExtension;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.restws.TestUser;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.reactive.function.BodyInserters;
 
-@ExtendWith({SpringExtension.class, LoginServerExtension.class})
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(initializers = {VocabularyResourceIT.ContexInitializer.class})
-public class VocabularyResourceIT {
+public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
 
-  @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
+  private static final String TEST_NAMESPACE = "ns";
 
-  @RegisterExtension static LoginServerExtension loginServer = new LoginServerExtension();
+  VocabularyResourceIT() {
+    super(Vocabulary.class);
+  }
 
-  @Autowired private WebTestClient webClient;
-
-  // TODO: ....
   @Test
-  public void exampleTest() {
-    webClient.get().uri("/vocabularies").exchange().expectStatus().isOk();
+  void listTest() {
+    final String namespace = "listns";
 
-    Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName("name");
+    // create entity
+    Vocabulary v1 = createEntity();
+    v1.setNamespace(namespace);
     webClient
         .post()
-        .uri("/vocabularies")
-        .header(
-            "Authorization",
-            "Basic "
-                + Base64Utils.encodeToString(
-                    (TestUser.ADMIN.getUsername() + ":" + TestUser.ADMIN.getPassword())
-                        .getBytes(StandardCharsets.UTF_8)))
-        .body(BodyInserters.fromObject(vocabulary))
+        .uri(getBasePath())
+        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .body(BodyInserters.fromObject(v1))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
         .isCreated();
+
+    // list entities
+    webClient
+        .get()
+        .uri(builder -> builder.path(getBasePath()).queryParam("namespace", namespace).build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("results")
+        .value(r -> Assertions.assertEquals(1, r.size()), List.class);
+
+    // create entity
+    Vocabulary v2 = createEntity();
+    v2.setNamespace(namespace);
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .body(BodyInserters.fromObject(v2))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+
+    // list entities
+    webClient
+        .get()
+        .uri(builder -> builder.path(getBasePath()).queryParam("namespace", namespace).build())
+        .attribute("namespace", namespace)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("results")
+        .value(r -> Assertions.assertEquals(2, r.size()), List.class);
+  }
+
+  @Test
+  public void suggestTest() {
+    // create entity
+    Vocabulary v1 = createEntity();
+    v1.setName("suggest111");
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .body(BodyInserters.fromObject(v1))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+
+    // create entity
+    Vocabulary v2 = createEntity();
+    v2.setName("suggest222");
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .body(BodyInserters.fromObject(v2))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+
+    webClient
+        .get()
+        .uri(builder -> builder.path(getBasePath() + "/suggest").queryParam("q", "sugg").build())
+        .exchange()
+        .expectBodyList(KeyNameResult.class)
+        .hasSize(2);
+
+    webClient
+        .get()
+        .uri(builder -> builder.path(getBasePath() + "/suggest").queryParam("q", "ggest1").build())
+        .exchange()
+        .expectBodyList(KeyNameResult.class)
+        .hasSize(1);
+  }
+
+  @Override
+  Vocabulary createEntity() {
+    Vocabulary vocabulary = new Vocabulary();
+    vocabulary.setName(UUID.randomUUID().toString());
+    vocabulary.setNamespace(TEST_NAMESPACE);
+    vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
+    vocabulary.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    return vocabulary;
+  }
+
+  @Override
+  String getBasePath() {
+    return "/vocabularies";
   }
 
   static class ContexInitializer

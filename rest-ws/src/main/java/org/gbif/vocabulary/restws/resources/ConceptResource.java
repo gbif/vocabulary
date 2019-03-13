@@ -23,13 +23,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.gbif.vocabulary.restws.resources.ConceptResource.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.resources.VocabularyResource.VOCABULARIES_PATH;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
-@RequestMapping(VOCABULARIES_PATH + "/{vocabularyName}/concepts")
+@RequestMapping(VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH)
 public class ConceptResource {
+
+  public static final String CONCEPTS_PATH = "concepts";
 
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;

@@ -77,4 +77,18 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>org.gbif.vocabulary.restws.Application</mainClass>
+          <addResources>false</addResources>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
 </project>

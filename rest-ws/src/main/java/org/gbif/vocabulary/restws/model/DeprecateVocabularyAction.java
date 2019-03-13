@@ -1,7 +1,5 @@
 package org.gbif.vocabulary.restws.model;
 
-import org.gbif.vocabulary.restws.model.DeprecateAction;
-
 /** Defines the deprecation action for a {@link org.gbif.vocabulary.model.Vocabulary}. */
 public class DeprecateVocabularyAction implements DeprecateAction {
 

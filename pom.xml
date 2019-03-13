@@ -22,6 +22,13 @@
     <module>rest-ws</module>
   </modules>
 
+  <scm>
+    <connection>scm:git:git@github.com:gbif/vocabulary.git</connection>
+    <url>https://github.com/gbif/vocabulary</url>
+    <developerConnection>scm:git:git@github.com:gbif/vocabulary.git</developerConnection>
+    <tag>motherpom-37</tag>
+  </scm>
+
   <repositories>
     <repository>
       <id>gbif-all</id>
@@ -41,6 +48,8 @@
     <wiremock.version>2.21.0</wiremock.version>
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
+    <release.tagNameBase>${project.artifactId}</release.tagNameBase>
+    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -129,6 +138,19 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${maven-release-plugin.version}</version>
+        <configuration>
+          <goals>deploy</goals>
+          <preparationGoals>install</preparationGoals>
+          <resume>false</resume>
+          <useReleaseProfile>true</useReleaseProfile>
+          <releaseProfiles>gbif-release</releaseProfiles>
+          <tagNameFormat>${release.tagNameBase}-@{project.version}</tagNameFormat>
+        </configuration>
       </plugin>
     </plugins>
   </build>

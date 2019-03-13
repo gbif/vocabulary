@@ -1,10 +1,10 @@
 # TODO: create profile test and run tests with it??
 spring:
-  datasource:
-    hikari:
-      connectionTimeout: 30000
-      idleTimeout: 600000
-      maxLifetime: 1800000
+  #datasource:
+    #hikari:
+      #connectionTimeout: 30000
+      #idleTimeout: 600000
+      #maxLifetime: 1800000
   liquibase:
     change-log: classpath:/liquibase/master.xml
     enabled: true

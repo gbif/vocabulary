@@ -17,13 +17,13 @@ pipeline {
             }
         }
         stage('release') {
-          when{ params.RELEASE }
+          when{ expression { params.RELEASE } }
           steps {
             echo 'release'
           }
         }
         stage('release snapshot') {
-          when{ not { params.RELEASE } }
+          when{ not { expression { params.RELEASE } } }
           steps {
             echo 'snapshot'
           }

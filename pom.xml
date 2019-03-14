@@ -34,6 +34,17 @@
     </repository>
   </repositories>
 
+  <distributionManagement>
+    <repository>
+      <id>gbif-release</id>
+      <url>http://repository.gbif.org/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>gbif-snapshot</id>
+      <url>http://repository.gbif.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <properties>
     <minimumMavenVersion>3.0</minimumMavenVersion>
     <jdkLevel>1.8</jdkLevel>

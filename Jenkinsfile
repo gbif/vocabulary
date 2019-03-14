@@ -11,7 +11,7 @@ pipeline {
           description: 'Do a Maven release')
     }
     stages {
-        stage('build') {
+        stage('build & deploy snapshot') {
             when{ not { expression { params.RELEASE } } }
             steps {
               configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
@@ -26,7 +26,7 @@ pipeline {
           steps {
             configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                                          variable: 'MAVEN_SETTINGS_XML')]) {
-              sh 'mvn -s $MAVEN_SETTINGS_XML release:prepare release:perform -DignoreSnapshots=true'
+              sh 'mvn -s $MAVEN_SETTINGS_XML -B release:prepare release:perform -DignoreSnapshots=true'
             }
           }
         }

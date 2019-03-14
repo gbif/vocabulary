@@ -12,7 +12,7 @@
   <groupId>org.gbif.vocabulary</groupId>
   <artifactId>vocabulary-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.13-SNAPSHOT</version>
+  <version>0.13</version>
 
   <modules>
     <module>core</module>
@@ -24,7 +24,7 @@
     <connection>scm:git:git@github.com:gbif/vocabulary.git</connection>
     <url>https://github.com/gbif/vocabulary</url>
     <developerConnection>scm:git:git@github.com:gbif/vocabulary.git</developerConnection>
-    <tag>vocabulary-parent-0.12</tag>
+    <tag>vocabulary-parent-0.13</tag>
   </scm>
 
   <repositories>

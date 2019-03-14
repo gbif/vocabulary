@@ -14,7 +14,7 @@
   <groupId>org.gbif.vocabulary</groupId>
   <artifactId>vocabulary-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1-SNAPSHOT</version>
 
   <modules>
     <module>core</module>

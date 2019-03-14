@@ -6,6 +6,7 @@ import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.function.BiPredicate;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -18,16 +19,21 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 @ControllerAdvice
 public class DeprecationRequestAdvice implements RequestBodyAdvice {
 
+  private static final BiPredicate<Class, Type> IS_ASSIGNABLE =
+      (expected, targetType) -> {
+        try {
+          return expected.isAssignableFrom(Class.forName(targetType.getTypeName()));
+        } catch (ClassNotFoundException e) {
+          throw new IllegalStateException("Unexpected target type", e);
+        }
+      };
+
   @Override
   public boolean supports(
       MethodParameter methodParameter,
       Type targetType,
       Class<? extends HttpMessageConverter<?>> converterType) {
-    try {
-      return DeprecateAction.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Unexpected target type", e);
-    }
+    return IS_ASSIGNABLE.test(DeprecateAction.class, targetType);
   }
 
   @Override
@@ -62,20 +68,15 @@ public class DeprecationRequestAdvice implements RequestBodyAdvice {
       MethodParameter parameter,
       Type targetType,
       Class<? extends HttpMessageConverter<?>> converterType) {
-    try {
-      if (DeprecateVocabularyAction.class.isAssignableFrom(
-          Class.forName(targetType.getTypeName()))) {
-        DeprecateVocabularyAction action = new DeprecateVocabularyAction();
-        action.setDeprecatedBy(getAuthenticatedUser());
-        return action;
-      } else if (DeprecateConceptAction.class.isAssignableFrom(
-          Class.forName(targetType.getTypeName()))) {
-        DeprecateConceptAction action = new DeprecateConceptAction();
-        action.setDeprecatedBy(getAuthenticatedUser());
-        return action;
-      }
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Unexpected target type", e);
+
+    if (IS_ASSIGNABLE.test(DeprecateVocabularyAction.class, targetType)) {
+      DeprecateVocabularyAction action = new DeprecateVocabularyAction();
+      action.setDeprecatedBy(getAuthenticatedUser());
+      return action;
+    } else if (IS_ASSIGNABLE.test(DeprecateConceptAction.class, targetType)) {
+      DeprecateConceptAction action = new DeprecateConceptAction();
+      action.setDeprecatedBy(getAuthenticatedUser());
+      return action;
     }
 
     return body;

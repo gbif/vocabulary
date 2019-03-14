@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.1.2.RELEASE</version>
-    <relativePath/>
+    <relativePath />
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
   <artifactId>vocabulary-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.16-SNAPSHOT</version>
+  <version>0.17-SNAPSHOT</version>
 
   <modules>
     <module>core</module>
@@ -49,7 +48,7 @@
   <properties>
     <minimumMavenVersion>3.0</minimumMavenVersion>
     <jdkLevel>1.8</jdkLevel>
-    <gbif-api.version>0.78-SNAPSHOT</gbif-api.version>
+    <gbif-api.version>0.78</gbif-api.version>
     <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
     <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
     <guava.version>27.0.1-jre</guava.version>

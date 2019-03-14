@@ -21,8 +21,8 @@ pipeline {
             }
         }
         stage('deploy snapshot') {
-            when{ allOf { not { expression { params.RELEASE } }
-                          branch master } }
+            when{ allOf { not { expression { params.RELEASE } };
+                          branch 'master' } }
             steps {
               configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                              variable: 'MAVEN_SETTINGS_XML')]) {

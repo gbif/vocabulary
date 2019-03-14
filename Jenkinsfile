@@ -12,20 +12,16 @@ pipeline {
     }
     stages {
         stage('build') {
+            when{ not { expression { params.RELEASE } } }
             steps {
               sh 'mvn clean package verify'
+              sh 'mvn deploy'
             }
         }
         stage('release') {
           when{ expression { params.RELEASE } }
           steps {
             echo 'release'
-          }
-        }
-        stage('release snapshot') {
-          when{ not { expression { params.RELEASE } } }
-          steps {
-            echo 'snapshot'
           }
         }
     }

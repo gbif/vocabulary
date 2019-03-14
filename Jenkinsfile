@@ -14,8 +14,10 @@ pipeline {
         stage('build') {
             when{ not { expression { params.RELEASE } } }
             steps {
-              sh 'mvn clean package verify'
-              sh 'mvn deploy'
+              configFileProvider([configFile('org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709')]) {
+                sh 'mvn clean package verify'
+                sh 'mvn deploy'
+              }
             }
         }
         stage('release') {

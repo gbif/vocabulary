@@ -37,7 +37,7 @@
 
   <distributionManagement>
     <repository>
-      <id>gbif-release</id>
+      <id>gbif-deploy</id>
       <url>http://repository.gbif.org/content/repositories/releases</url>
     </repository>
     <snapshotRepository>

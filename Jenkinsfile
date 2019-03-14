@@ -10,6 +10,9 @@ pipeline {
           defaultValue: false,
           description: 'Do a Maven release')
     }
+    triggers {
+      pollSCM ''
+    }
     stages {
         stage('build & deploy snapshot') {
             when{ not { expression { params.RELEASE } } }

@@ -14,9 +14,10 @@ pipeline {
         stage('build') {
             when{ not { expression { params.RELEASE } } }
             steps {
-              configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709')]) {
+              configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                                             variable: 'MAVEN_SETTINGS_XML')]) {
                 sh 'mvn clean package -DskipTests'
-                sh 'mvn deploy'
+                sh 'mvn -s $MAVEN_SETTINGS_XML deploy'
               }
             }
         }

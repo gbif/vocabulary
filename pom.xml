@@ -182,9 +182,9 @@
                 <requirePluginVersions>
                   <message>Best Practice is to always define plugin versions!</message>
                 </requirePluginVersions>
-                <requireReleaseDeps>
-                  <message>No Snapshot dependencies allowed!</message>
-                </requireReleaseDeps>
+                <!--<requireReleaseDeps>-->
+                  <!--<message>No Snapshot dependencies allowed!</message>-->
+                <!--</requireReleaseDeps>-->
               </rules>
             </configuration>
           </plugin>

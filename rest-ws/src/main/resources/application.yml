@@ -1,4 +1,5 @@
 spring:
+  application.name: vocabulary-ws
   datasource:
     hikari:
       connectionTimeout: 30000
@@ -12,9 +13,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/vocabulary
     username: rgz522
     password:
-
-// TODO: remove, it's just to test it with the registry in local
-server.port: 8090
 
 security:
   loginApiBasePath: http://localhost:8080

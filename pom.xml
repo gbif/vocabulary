@@ -54,13 +54,14 @@
     <guava.version>27.0.1-jre</guava.version>
     <postgresql-embedded.version>2.10</postgresql-embedded.version>
     <junit-vintage.version>5.3.2</junit-vintage.version>
-    <jjwt.version>0.9.1</jjwt.version>
     <postgresql-testcontainers.version>1.10.5</postgresql-testcontainers.version>
     <wiremock.version>2.21.0</wiremock.version>
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
     <release.tagNameBase>${project.artifactId}</release.tagNameBase>
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+    <spring-cloud-zookeeper.version>2.1.1.RELEASE</spring-cloud-zookeeper.version>
+    <zookeeper.version>3.4.12</zookeeper.version>
   </properties>
 
   <dependencyManagement>
@@ -111,9 +112,31 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.jsonwebtoken</groupId>
-        <artifactId>jjwt</artifactId>
-        <version>${jjwt.version}</version>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-zookeeper-all</artifactId>
+        <version>${spring-cloud-zookeeper.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.zookeeper</groupId>
+        <artifactId>zookeeper</artifactId>
+        <version>${zookeeper.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-zookeeper-config</artifactId>
+        <version>${spring-cloud-zookeeper.version}</version>
       </dependency>
 
       <!-- tests -->

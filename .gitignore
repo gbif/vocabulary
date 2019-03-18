@@ -7,5 +7,3 @@ core/databasechangelog\.csv
 release\.properties
 
 *.releaseBackup
-
-*.iml

@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.restws.resources;
+package org.gbif.vocabulary.restws.resources.mock;
 
 import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -9,7 +9,6 @@ import org.gbif.vocabulary.restws.model.DeprecateAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,14 +18,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -39,7 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "spring.liquibase.enabled=false")
+@TestPropertySource(properties = {"spring.liquibase.enabled=false"})
+@ActiveProfiles({"mock", "test"})
 abstract class BaseResourceTest<T extends VocabularyEntity> {
 
   // util constants
@@ -49,9 +48,6 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Autowired MockMvc mockMvc;
-
-  @MockBean private DataSource dataSource;
-  @MockBean private PlatformTransactionManager platformTransactionManager;
 
   @Test
   public void getNotFoundEntityTest() throws Exception {

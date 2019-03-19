@@ -1,9 +1,6 @@
+# Add default properties here
 spring:
-  datasource:
-    hikari:
-      connectionTimeout: 30000
-      idleTimeout: 600000
-      maxLifetime: 1800000
+  application.name: vocabulary-ws
 
 ---
 spring:
@@ -13,9 +10,6 @@ spring:
     username: rgz522
     password:
 
-// TODO: remove, it's just to test it with the registry in local
-server.port: 8090
-
 security:
-  loginApiBasePath: http://localhost:8080
+  loginApiBasePath: api.gbif-dev.org/v1
 

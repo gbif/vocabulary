@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.restws.resources;
+package org.gbif.vocabulary.restws.resources.mock;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -9,6 +9,8 @@ import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.restws.model.DeprecateAction;
 import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
+import org.gbif.vocabulary.restws.resources.ConceptResource;
+import org.gbif.vocabulary.restws.resources.VocabularyResource;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 

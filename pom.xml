@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.1.2.RELEASE</version>
-    <relativePath />
+    <relativePath/>
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
@@ -61,6 +62,8 @@
     <guava.version>18.0</guava.version>
     <release.tagNameBase>${project.artifactId}</release.tagNameBase>
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+    <spring-cloud-zookeeper.version>2.1.1.RELEASE</spring-cloud-zookeeper.version>
+    <zookeeper.version>3.4.12</zookeeper.version>
   </properties>
 
   <dependencyManagement>
@@ -110,10 +113,46 @@
         <artifactId>core</artifactId>
         <version>${project.version}</version>
       </dependency>
+
+      <!-- dependencies to register to ZK -->
       <dependency>
-        <groupId>io.jsonwebtoken</groupId>
-        <artifactId>jjwt</artifactId>
-        <version>${jjwt.version}</version>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+        <version>${spring-cloud-zookeeper.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-archaius</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-netflix-core</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.zookeeper</groupId>
+        <artifactId>zookeeper</artifactId>
+        <version>${zookeeper.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-zookeeper-config</artifactId>
+        <version>${spring-cloud-zookeeper.version}</version>
       </dependency>
 
       <!-- tests -->
@@ -197,9 +236,9 @@
                 <!--<requirePluginVersions>-->
                 <!--<message>Best Practice is to always define plugin versions!</message>-->
                 <!--</requirePluginVersions>-->
-                <!--<requireReleaseDeps>-->
-                <!--<message>No Snapshot dependencies allowed!</message>-->
-                <!--</requireReleaseDeps>-->
+                <requireReleaseDeps>
+                  <message>No Snapshot dependencies allowed!</message>
+                </requireReleaseDeps>
               </rules>
             </configuration>
           </plugin>

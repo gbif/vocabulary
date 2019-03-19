@@ -1,4 +1,4 @@
-package org.gbif.vocabulary.restws.resources;
+package org.gbif.vocabulary.restws.resources.mock;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -7,6 +7,7 @@ import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.model.DeprecateAction;
 import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
+import org.gbif.vocabulary.restws.resources.VocabularyResource;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;

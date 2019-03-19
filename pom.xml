@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.1.2.RELEASE</version>
-    <relativePath/>
+    <relativePath />
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
   <artifactId>vocabulary-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.17-SNAPSHOT</version>
+  <version>0.17</version>
 
   <modules>
     <module>core</module>
@@ -25,7 +24,7 @@
     <connection>scm:git:git@github.com:gbif/vocabulary.git</connection>
     <url>https://github.com/gbif/vocabulary</url>
     <developerConnection>scm:git:git@github.com:gbif/vocabulary.git</developerConnection>
-    <tag>vocabulary-parent-0.12</tag>
+    <tag>vocabulary-parent-0.17</tag>
   </scm>
 
   <repositories>

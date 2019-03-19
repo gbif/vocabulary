@@ -8,7 +8,7 @@
     <version>0.18-SNAPSHOT</version>
   </parent>
 
-  <artifactId>rest-ws</artifactId>
+  <artifactId>vocabulary-rest-ws</artifactId>
   <version>0.18-SNAPSHOT</version>
 
   <dependencies>
@@ -90,7 +90,6 @@
   </dependencies>
 
   <build>
-    <finalName>vocabulary-ws-${project.version}</finalName>
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>

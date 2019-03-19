@@ -17,7 +17,7 @@
   <modules>
     <module>core</module>
     <module>model</module>
-    <module>rest-ws</module>
+    <module>vocabulary-rest-ws</module>
   </modules>
 
   <scm>

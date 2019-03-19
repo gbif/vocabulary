@@ -2,6 +2,11 @@
 spring:
   application.name: vocabulary-ws
 
+management:
+  server.port: 8081
+  endpoints.web.exposure.include: "*"
+  endpoint.shutdown.enabled: true
+
 ---
 spring:
   profiles: local
@@ -11,5 +16,5 @@ spring:
     password:
 
 security:
-  loginApiBasePath: api.gbif-dev.org/v1
+  loginApiBasePath: http://api.gbif-dev.org/v1
 

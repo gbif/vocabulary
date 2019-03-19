@@ -64,6 +64,8 @@ public class Application {
           .hasAnyAuthority(UserRole.VOCABULARY_ADMIN.name(), UserRole.VOCABULARY_EDITOR.name())
           .antMatchers(HttpMethod.DELETE, VOCABULARIES_PATTERN)
           .hasAnyAuthority(UserRole.VOCABULARY_ADMIN.name(), UserRole.VOCABULARY_EDITOR.name())
+          .antMatchers("/actuator/**")
+          .hasAuthority(UserRole.VOCABULARY_ADMIN.name())
           .anyRequest()
           .permitAll()
           .and()

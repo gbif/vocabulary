@@ -1,3 +1,4 @@
+# Add default properties here
 spring:
   cloud:
     zookeeper:

@@ -7,6 +7,9 @@ management:
   endpoints.web.exposure.include: "*"
   endpoint.shutdown.enabled: true
 
+security:
+  stopSecret: stop
+
 ---
 spring:
   profiles: local

@@ -26,6 +26,7 @@ public class NotFoundResponseAdvice implements ResponseBodyAdvice {
       Class selectedConverterType,
       ServerHttpRequest request,
       ServerHttpResponse response) {
+    // TODO: check status too??
     if (body == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }

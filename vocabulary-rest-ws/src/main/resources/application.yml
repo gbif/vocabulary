@@ -1,6 +1,6 @@
 # Add default properties here
 spring:
-  application.name: vocabulary-ws
+  application.name: vocabulary-rest-ws
 
 management:
   server.port: 8081

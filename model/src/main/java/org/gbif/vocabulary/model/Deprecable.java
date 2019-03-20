@@ -2,7 +2,7 @@ package org.gbif.vocabulary.model;
 
 import java.time.LocalDateTime;
 
-/** Defines the minimn fields an entity must have to be deprecable. */
+/** Defines the minimum fields an entity must have to be deprecable. */
 public interface Deprecable {
 
   Integer getReplacedByKey();

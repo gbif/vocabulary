@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
 
-/** Defines the minimun fields that an vocabulary entity must have. */
+/** Defines the minimum fields that an vocabulary entity must have. */
 public interface VocabularyEntity extends Auditable, Deprecable {
 
   Integer getKey();

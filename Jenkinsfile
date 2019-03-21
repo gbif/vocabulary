@@ -20,6 +20,14 @@ pipeline {
               }
             }
         }
+        stage('SonarQube analysis') {
+            when{ not { expression { params.RELEASE } } }
+            steps{
+              withSonarQubeEnv('GBIF Sonarqube') {
+                sh 'mvn sonar:sonar'
+              }
+            }
+        }
         stage('deploy snapshot') {
             when{ allOf { not { expression { params.RELEASE } };
                           branch 'master' } }

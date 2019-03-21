@@ -14,7 +14,7 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ConceptMapper extends BaseMapper<Concept> {
 
-  // FIXME: create an object for params
+  // TODO: create an object for params
   List<Concept> list(
       @Nullable @Param("query") String query,
       @Nullable @Param("vocabularyKey") Integer vocabularyKey,

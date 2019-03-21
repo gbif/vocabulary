@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.gbif.vocabulary.restws.resources.VocabularyResource.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.restws.resources.VocabularyResource.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

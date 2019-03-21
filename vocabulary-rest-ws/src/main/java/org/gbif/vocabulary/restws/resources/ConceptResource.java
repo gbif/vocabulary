@@ -23,13 +23,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.gbif.vocabulary.restws.resources.ConceptResource.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.resources.VocabularyResource.VOCABULARIES_PATH;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
-@RequestMapping(VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH)
+@RequestMapping(VOCABULARIES_PATH + "/{vocabularyName}/" + ConceptResource.CONCEPTS_PATH)
 public class ConceptResource {
 
   public static final String CONCEPTS_PATH = "concepts";
@@ -44,7 +43,7 @@ public class ConceptResource {
   }
 
   @GetMapping()
-  PagingResponse<Concept> listConcepts(
+  public PagingResponse<Concept> listConcepts(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
       @RequestParam(value = "name", required = false) String name,
@@ -70,14 +69,14 @@ public class ConceptResource {
   }
 
   @GetMapping("{name}")
-  Concept get(
+  public Concept get(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName) {
     return conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
   }
 
   @PostMapping
-  Concept create(
+  public Concept create(
       @PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(
@@ -88,7 +87,7 @@ public class ConceptResource {
   }
 
   @PutMapping("{name}")
-  Concept update(
+  public Concept update(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody Concept concept) {
@@ -104,7 +103,7 @@ public class ConceptResource {
   }
 
   @GetMapping("suggest")
-  List<KeyNameResult> suggest(
+  public List<KeyNameResult> suggest(
       @PathVariable("vocabularyName") String vocabularyName, @RequestParam("q") String query) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
@@ -113,7 +112,7 @@ public class ConceptResource {
   }
 
   @PutMapping("{name}/deprecate")
-  void deprecate(
+  public void deprecate(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody DeprecateConceptAction deprecateConceptAction) {
@@ -130,7 +129,7 @@ public class ConceptResource {
   }
 
   @DeleteMapping("{name}/deprecate")
-  void restoreDeprecated(
+  public void restoreDeprecated(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestParam(value = "restoreDeprecatedChildren", required = false)

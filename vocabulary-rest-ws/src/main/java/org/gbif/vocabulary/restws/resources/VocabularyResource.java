@@ -40,7 +40,7 @@ public class VocabularyResource {
   }
 
   @GetMapping
-  PagingResponse<Vocabulary> listVocabularies(
+  public PagingResponse<Vocabulary> listVocabularies(
       @RequestParam(value = "q", required = false) String query,
       @RequestParam(value = "name", required = false) String name,
       @RequestParam(value = "namespace", required = false) String namespace,
@@ -60,18 +60,18 @@ public class VocabularyResource {
   }
 
   @GetMapping("{name}")
-  Vocabulary get(@PathVariable("name") String vocabularyName) {
+  public Vocabulary get(@PathVariable("name") String vocabularyName) {
     return vocabularyService.getByName(vocabularyName);
   }
 
   @PostMapping
-  Vocabulary create(@RequestBody Vocabulary vocabulary) {
+  public Vocabulary create(@RequestBody Vocabulary vocabulary) {
     int key = vocabularyService.create(vocabulary);
     return vocabularyService.get(key);
   }
 
   @PutMapping("{name}")
-  Vocabulary update(
+  public Vocabulary update(
       @PathVariable("name") String vocabularyName, @RequestBody Vocabulary vocabulary) {
     checkArgument(
         vocabularyName.equals(vocabulary.getName()),
@@ -81,12 +81,12 @@ public class VocabularyResource {
   }
 
   @GetMapping("suggest")
-  List<KeyNameResult> suggest(@RequestParam("q") String query) {
+  public List<KeyNameResult> suggest(@RequestParam("q") String query) {
     return vocabularyService.suggest(query);
   }
 
   @PutMapping("{name}/deprecate")
-  void deprecate(
+  public void deprecate(
       @PathVariable("name") String vocabularyName,
       @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
@@ -100,7 +100,7 @@ public class VocabularyResource {
   }
 
   @DeleteMapping("{name}/deprecate")
-  void restoreDeprecated(
+  public void restoreDeprecated(
       @PathVariable("name") String vocabularyName,
       @RequestParam(value = "restoreDeprecatedConcepts", required = false)
           boolean restoreDeprecatedConcepts) {

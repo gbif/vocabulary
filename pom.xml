@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.1.2.RELEASE</version>
-    <relativePath />
+    <relativePath/>
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
@@ -46,23 +47,34 @@
   </distributionManagement>
 
   <properties>
-    <minimumMavenVersion>3.0</minimumMavenVersion>
-    <jdkLevel>1.8</jdkLevel>
-    <gbif-api.version>0.78</gbif-api.version>
-    <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
-    <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
-    <guava.version>27.0.1-jre</guava.version>
     <postgresql-embedded.version>2.10</postgresql-embedded.version>
     <junit-vintage.version>5.3.2</junit-vintage.version>
-    <jjwt.version>0.9.1</jjwt.version>
     <postgresql-testcontainers.version>1.10.5</postgresql-testcontainers.version>
     <wiremock.version>2.21.0</wiremock.version>
-    <!-- version limited by gbif-api -->
-    <guava.version>18.0</guava.version>
+    <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
+    <javax-validation.version>2.0.1.Final</javax-validation.version>
+
+    <!-- maven release -->
+    <minimumMavenVersion>3.0</minimumMavenVersion>
+    <jdkLevel>1.8</jdkLevel>
     <release.tagNameBase>${project.artifactId}</release.tagNameBase>
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+
+    <!-- gbif -->
+    <gbif-api.version>0.78</gbif-api.version>
+    <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
+
+    <!-- version limited by gbif-api -->
+    <guava.version>18.0</guava.version>
+
+    <!-- ZK -->
     <spring-cloud-zookeeper.version>2.1.1.RELEASE</spring-cloud-zookeeper.version>
     <zookeeper.version>3.4.12</zookeeper.version>
+
+    <!-- logging -->
+    <slf4j.version>1.7.26</slf4j.version>
+    <logback.version>1.2.3</logback.version>
+    <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
   </properties>
 
   <dependencyManagement>
@@ -83,6 +95,23 @@
         </exclusions>
       </dependency>
       <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>model</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif</groupId>
+        <artifactId>gbif-common-mybatis</artifactId>
+        <version>${gbif.common-mybatis.version}</version>
+      </dependency>
+
+      <!-- DB -->
+      <dependency>
         <groupId>org.mybatis.spring.boot</groupId>
         <artifactId>mybatis-spring-boot-starter</artifactId>
         <version>${mybatis.spring.boot.starter}</version>
@@ -92,25 +121,34 @@
         <artifactId>postgresql</artifactId>
         <version>${postgresql.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.gbif</groupId>
-        <artifactId>gbif-common-mybatis</artifactId>
-        <version>${gbif.common-mybatis.version}</version>
-      </dependency>
+
+      <!-- utils -->
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>${guava.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.gbif.vocabulary</groupId>
-        <artifactId>model</artifactId>
-        <version>${project.version}</version>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>${javax-validation.version}</version>
+      </dependency>
+
+      <!-- logging -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.gbif.vocabulary</groupId>
-        <artifactId>core</artifactId>
-        <version>${project.version}</version>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>${logback.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.logstash.logback</groupId>
+        <artifactId>logstash-logback-encoder</artifactId>
+        <version>${logstash-logback-encoder.version}</version>
       </dependency>
 
       <!-- dependencies to register to ZK -->

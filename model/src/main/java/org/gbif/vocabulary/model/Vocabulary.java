@@ -4,7 +4,6 @@ import org.gbif.api.model.registry.LenientEquals;
 import org.gbif.api.vocabulary.Language;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.StringJoiner;
  *
  * <p>A vocabulary should be identified by its name, which should be unique.
  */
-public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
+public class Vocabulary extends AbstractVocabularyEntity implements LenientEquals<Vocabulary> {
 
   private Integer key;
   private String namespace;
@@ -26,18 +25,6 @@ public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
   private Map<Language, String> definition = new EnumMap<>(Language.class);
   private List<URI> externalDefinitions = new ArrayList<>();
   private List<String> editorialNotes = new ArrayList<>();
-
-  // deprecation fields
-  private Integer replacedByKey;
-  private LocalDateTime deprecated;
-  private String deprecatedBy;
-
-  // audit fields
-  private LocalDateTime created;
-  private String createdBy;
-  private LocalDateTime modified;
-  private String modifiedBy;
-  private LocalDateTime deleted;
 
   @Override
   public Integer getKey() {
@@ -105,86 +92,6 @@ public class Vocabulary implements VocabularyEntity, LenientEquals<Vocabulary> {
   @Override
   public void setEditorialNotes(List<String> editorialNotes) {
     this.editorialNotes = editorialNotes;
-  }
-
-  @Override
-  public Integer getReplacedByKey() {
-    return replacedByKey;
-  }
-
-  @Override
-  public void setReplacedByKey(Integer replacedByKey) {
-    this.replacedByKey = replacedByKey;
-  }
-
-  @Override
-  public LocalDateTime getDeprecated() {
-    return deprecated;
-  }
-
-  @Override
-  public void setDeprecated(LocalDateTime deprecated) {
-    this.deprecated = deprecated;
-  }
-
-  @Override
-  public String getDeprecatedBy() {
-    return deprecatedBy;
-  }
-
-  @Override
-  public void setDeprecatedBy(String deprecatedBy) {
-    this.deprecatedBy = deprecatedBy;
-  }
-
-  @Override
-  public LocalDateTime getCreated() {
-    return created;
-  }
-
-  @Override
-  public void setCreated(LocalDateTime created) {
-    this.created = created;
-  }
-
-  @Override
-  public String getCreatedBy() {
-    return createdBy;
-  }
-
-  @Override
-  public void setCreatedBy(String createdBy) {
-    this.createdBy = createdBy;
-  }
-
-  @Override
-  public LocalDateTime getModified() {
-    return modified;
-  }
-
-  @Override
-  public void setModified(LocalDateTime modified) {
-    this.modified = modified;
-  }
-
-  @Override
-  public String getModifiedBy() {
-    return modifiedBy;
-  }
-
-  @Override
-  public void setModifiedBy(String modifiedBy) {
-    this.modifiedBy = modifiedBy;
-  }
-
-  @Override
-  public LocalDateTime getDeleted() {
-    return deleted;
-  }
-
-  @Override
-  public void setDeleted(LocalDateTime deleted) {
-    this.deleted = deleted;
   }
 
   @Override

@@ -1,7 +1,6 @@
 package org.gbif.vocabulary.model;
 
 import java.time.LocalDateTime;
-import javax.validation.constraints.NotNull;
 
 /** Defines the minimum fields that an entity must have in order to be auditable. */
 public interface Auditable {

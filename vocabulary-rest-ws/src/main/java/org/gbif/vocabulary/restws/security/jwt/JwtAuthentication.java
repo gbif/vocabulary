@@ -1,6 +1,7 @@
 package org.gbif.vocabulary.restws.security.jwt;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,5 +41,19 @@ public class JwtAuthentication extends AbstractAuthenticationToken {
 
   public String getToken() {
     return token;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
+    JwtAuthentication that = (JwtAuthentication) o;
+    return Objects.equals(username, that.username) && Objects.equals(token, that.token);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), username, token);
   }
 }

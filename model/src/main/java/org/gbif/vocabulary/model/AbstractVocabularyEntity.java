@@ -1,12 +1,26 @@
 package org.gbif.vocabulary.model;
 
+import org.gbif.api.vocabulary.Language;
+
+import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base class for {@link VocabularyEntity} to provide a default implementation of {@link
  * VocabularyEntity}.
  */
 public abstract class AbstractVocabularyEntity implements VocabularyEntity {
+
+  Integer key;
+  String name;
+  Map<Language, String> label = new EnumMap<>(Language.class);
+  Map<Language, String> definition = new EnumMap<>(Language.class);
+  List<URI> externalDefinitions = new ArrayList<>();
+  List<String> editorialNotes = new ArrayList<>();
 
   // deprecation fields
   Integer replacedByKey;
@@ -19,6 +33,66 @@ public abstract class AbstractVocabularyEntity implements VocabularyEntity {
   LocalDateTime modified;
   String modifiedBy;
   LocalDateTime deleted;
+
+  @Override
+  public Integer getKey() {
+    return key;
+  }
+
+  @Override
+  public void setKey(Integer key) {
+    this.key = key;
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  @Override
+  public Map<Language, String> getLabel() {
+    return label;
+  }
+
+  @Override
+  public void setLabel(Map<Language, String> label) {
+    this.label = label;
+  }
+
+  @Override
+  public Map<Language, String> getDefinition() {
+    return definition;
+  }
+
+  @Override
+  public void setDefinition(Map<Language, String> definition) {
+    this.definition = definition;
+  }
+
+  @Override
+  public List<URI> getExternalDefinitions() {
+    return externalDefinitions;
+  }
+
+  @Override
+  public void setExternalDefinitions(List<URI> externalDefinitions) {
+    this.externalDefinitions = externalDefinitions;
+  }
+
+  @Override
+  public List<String> getEditorialNotes() {
+    return editorialNotes;
+  }
+
+  @Override
+  public void setEditorialNotes(List<String> editorialNotes) {
+    this.editorialNotes = editorialNotes;
+  }
 
   @Override
   public Integer getReplacedByKey() {

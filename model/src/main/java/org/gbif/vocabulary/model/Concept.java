@@ -20,27 +20,11 @@ import javax.validation.constraints.NotNull;
  */
 public class Concept extends AbstractVocabularyEntity implements LenientEquals<Concept> {
 
-  private Integer key;
   private Integer vocabularyKey;
   private Integer parentKey;
-  private String name;
-  private Map<Language, String> label = new EnumMap<>(Language.class);
   private Map<Language, List<String>> alternativeLabels = new EnumMap<>(Language.class);
   private Map<Language, List<String>> misspeltLabels = new EnumMap<>(Language.class);
-  private Map<Language, String> definition = new EnumMap<>(Language.class);
-  private List<URI> externalDefinitions = new ArrayList<>();
   private List<URI> sameAsUris = new ArrayList<>();
-  private List<String> editorialNotes = new ArrayList<>();
-
-  @Override
-  public Integer getKey() {
-    return key;
-  }
-
-  @Override
-  public void setKey(Integer key) {
-    this.key = key;
-  }
 
   @NotNull
   public Integer getVocabularyKey() {
@@ -59,26 +43,6 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
     this.parentKey = parentKey;
   }
 
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  @Override
-  public Map<Language, String> getLabel() {
-    return label;
-  }
-
-  @Override
-  public void setLabel(Map<Language, String> label) {
-    this.label = label;
-  }
-
   public Map<Language, List<String>> getAlternativeLabels() {
     return alternativeLabels;
   }
@@ -95,42 +59,12 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
     this.misspeltLabels = misspeltLabels;
   }
 
-  @Override
-  public Map<Language, String> getDefinition() {
-    return definition;
-  }
-
-  @Override
-  public void setDefinition(Map<Language, String> definition) {
-    this.definition = definition;
-  }
-
-  @Override
-  public List<URI> getExternalDefinitions() {
-    return externalDefinitions;
-  }
-
-  @Override
-  public void setExternalDefinitions(List<URI> externalDefinitions) {
-    this.externalDefinitions = externalDefinitions;
-  }
-
   public List<URI> getSameAsUris() {
     return sameAsUris;
   }
 
   public void setSameAsUris(List<URI> sameAsUris) {
     this.sameAsUris = sameAsUris;
-  }
-
-  @Override
-  public List<String> getEditorialNotes() {
-    return editorialNotes;
-  }
-
-  @Override
-  public void setEditorialNotes(List<String> editorialNotes) {
-    this.editorialNotes = editorialNotes;
   }
 
   @Override

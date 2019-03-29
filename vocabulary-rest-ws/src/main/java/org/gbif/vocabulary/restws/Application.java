@@ -120,7 +120,7 @@ public class Application {
           .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
           .and()
-          .addFilterBefore(new JwtRequestFilter(), BasicAuthenticationFilter.class);
+          .addFilterBefore(new JwtRequestFilter(authenticationManager()), BasicAuthenticationFilter.class);
       // TODO: xss filter
     }
 

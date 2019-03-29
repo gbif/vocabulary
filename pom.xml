@@ -225,6 +225,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${maven-failsafe-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -242,6 +243,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
+        <version>${maven-deploy-plugin.version}</version>
       </plugin>
     </plugins>
   </build>
@@ -270,9 +272,9 @@
                 <requireJavaVersion>
                   <version>[${jdkLevel},)</version>
                 </requireJavaVersion>
-                <!--<requirePluginVersions>-->
-                <!--<message>Best Practice is to always define plugin versions!</message>-->
-                <!--</requirePluginVersions>-->
+                <requirePluginVersions>
+                  <message>Best Practice is to always define plugin versions!</message>
+                </requirePluginVersions>
                 <requireReleaseDeps>
                   <message>No Snapshot dependencies allowed!</message>
                 </requireReleaseDeps>

@@ -10,7 +10,6 @@ public interface Auditable {
 
   void setCreated(LocalDateTime created);
 
-  @NotNull
   String getCreatedBy();
 
   void setCreatedBy(String createdBy);
@@ -19,7 +18,6 @@ public interface Auditable {
 
   void setModified(LocalDateTime modified);
 
-  @NotNull
   String getModifiedBy();
 
   void setModifiedBy(String modifiedBy);

@@ -46,7 +46,6 @@ public class VocabularyResource {
       @RequestParam(value = "namespace", required = false) String namespace,
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
       PagingRequest page) {
-
     // TODO: add Link Header??
 
     return vocabularyService.list(

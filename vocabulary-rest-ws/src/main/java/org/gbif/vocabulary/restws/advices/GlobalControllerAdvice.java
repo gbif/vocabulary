@@ -1,5 +1,7 @@
 package org.gbif.vocabulary.restws.advices;
 
+import javax.validation.ConstraintViolationException;
+
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
@@ -18,7 +20,7 @@ public class GlobalControllerAdvice {
     binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
   }
 
-  @ExceptionHandler(IllegalArgumentException.class)
+  @ExceptionHandler({IllegalArgumentException.class, ConstraintViolationException.class})
   public ResponseEntity<String> illegalArgumentException(IllegalArgumentException ex) {
     return ResponseEntity.badRequest().body(ex.getMessage());
   }

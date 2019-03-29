@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,8 +27,10 @@ public class NotFoundResponseAdvice implements ResponseBodyAdvice {
       Class selectedConverterType,
       ServerHttpRequest request,
       ServerHttpResponse response) {
-    // TODO: check status too??
-    if (body == null) {
+
+    if (HttpStatus.OK.value()
+            == ((ServletServerHttpResponse) response).getServletResponse().getStatus()
+        && body == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 

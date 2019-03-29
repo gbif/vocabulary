@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
@@ -31,7 +32,10 @@ public class NoContentResponseAdvice implements ResponseBodyAdvice<Void> {
       ServerHttpRequest request,
       ServerHttpResponse response) {
 
-    response.setStatusCode(HttpStatus.NO_CONTENT);
+    if (HttpStatus.OK.value()
+        == ((ServletServerHttpResponse) response).getServletResponse().getStatus()) {
+      response.setStatusCode(HttpStatus.NO_CONTENT);
+    }
 
     return body;
   }

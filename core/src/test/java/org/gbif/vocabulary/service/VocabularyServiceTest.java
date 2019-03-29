@@ -46,11 +46,6 @@ public class VocabularyServiceTest extends BaseServiceTest<Vocabulary> {
 
     // set name
     vocabulary.setName("name");
-    assertThrows(ConstraintViolationException.class, () -> vocabularyService.create(vocabulary));
-
-    // set required auditable fields
-    vocabulary.setCreatedBy("test");
-    vocabulary.setModifiedBy("test");
     mockCreateEntity(vocabulary);
     assertDoesNotThrow(() -> vocabularyService.create(vocabulary));
   }

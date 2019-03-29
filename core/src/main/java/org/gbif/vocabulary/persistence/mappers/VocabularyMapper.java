@@ -14,7 +14,6 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface VocabularyMapper extends BaseMapper<Vocabulary> {
 
-  // TODO: create an object for params??
   List<Vocabulary> list(
       @Nullable @Param("query") String query,
       @Nullable @Param("name") String name,

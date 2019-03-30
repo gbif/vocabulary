@@ -41,7 +41,7 @@ public class JwtResponseBodyAdvice implements ResponseBodyAdvice {
           ((ServletServerHttpResponse) response).getServletResponse();
       httpServletResponse.setHeader(
           RESPONSE_TOKEN_HEADER, ((JwtAuthentication) authentication).getToken());
-      httpServletResponse.setHeader("Access-Control-Expose-Headers", RESPONSE_TOKEN_HEADER);
+      httpServletResponse.addHeader("Access-Control-Expose-Headers", RESPONSE_TOKEN_HEADER);
     }
 
     return body;

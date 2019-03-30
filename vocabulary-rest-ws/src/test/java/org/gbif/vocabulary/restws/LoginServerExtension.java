@@ -7,17 +7,26 @@ import java.util.UUID;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.springframework.http.HttpStatus;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.gbif.vocabulary.restws.TestUser.ADMIN;
-import static org.gbif.vocabulary.restws.TestUser.EDITOR;
-import static org.gbif.vocabulary.restws.TestUser.USER;
+import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
+import static org.gbif.vocabulary.restws.TestCredentials.EDITOR;
+import static org.gbif.vocabulary.restws.TestCredentials.INVALID_JWT_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.INVALID_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_ADMIN;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_EDITOR;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.USER;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
+import static com.github.tomakehurst.wiremock.client.WireMock.notMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 
 public class LoginServerExtension implements BeforeAllCallback, AfterAllCallback {
@@ -46,8 +55,33 @@ public class LoginServerExtension implements BeforeAllCallback, AfterAllCallback
                 aResponse().withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(EDITOR)))));
     wireMockServer.stubFor(
         post("/user/login")
-            .withHeader("Authorization", matching("Bearer +"))
-            .willReturn(aResponse().withHeader("token", UUID.randomUUID().toString())));
+            .withBasicAuth(INVALID_USER.getUsername(), INVALID_USER.getPassword())
+            .willReturn(aResponse().withStatus(HttpStatus.UNAUTHORIZED.value())));
+    wireMockServer.stubFor(
+        post("/user/login")
+            .withHeader("Authorization", equalTo("Bearer " + JWT_USER.getToken()))
+            .willReturn(
+                aResponse()
+                    .withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(JWT_USER)))
+                    .withHeader("token", UUID.randomUUID().toString())));
+    wireMockServer.stubFor(
+        post("/user/login")
+            .withHeader("Authorization", equalTo("Bearer " + JWT_ADMIN.getToken()))
+            .willReturn(
+                aResponse()
+                    .withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(JWT_ADMIN)))
+                    .withHeader("token", UUID.randomUUID().toString())));
+    wireMockServer.stubFor(
+        post("/user/login")
+            .withHeader("Authorization", equalTo("Bearer " + JWT_EDITOR.getToken()))
+            .willReturn(
+                aResponse()
+                    .withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(JWT_EDITOR)))
+                    .withHeader("token", UUID.randomUUID().toString())));
+    wireMockServer.stubFor(
+        post("/user/login")
+            .withHeader("Authorization", equalTo("Bearer " + INVALID_JWT_USER.getToken()))
+            .willReturn(aResponse().withStatus(HttpStatus.UNAUTHORIZED.value())));
 
     wireMockServer.start();
   }
@@ -65,9 +99,9 @@ public class LoginServerExtension implements BeforeAllCallback, AfterAllCallback
     List<UserRole> roles;
     String userName;
 
-    LoginResponse(TestUser testUser) {
-      this.roles = testUser.getRoles();
-      this.userName = testUser.getUsername();
+    LoginResponse(TestCredentials testCredentials) {
+      this.roles = testCredentials.getRoles();
+      this.userName = testCredentials.getUsername();
     }
 
     public List<UserRole> getRoles() {

@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -30,10 +31,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     JwtUtils.findTokenInRequest(request)
         .ifPresent(
-            token ->
+            token -> {
+              try {
                 SecurityContextHolder.getContext()
                     .setAuthentication(
-                        authenticationManager.authenticate(new JwtAuthentication(token))));
+                        authenticationManager.authenticate(new JwtAuthentication(token)));
+              } catch (AuthenticationException exc) {
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+              }
+            });
 
     filterChain.doFilter(request, response);
   }

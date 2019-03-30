@@ -7,10 +7,11 @@ import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.restws.LoginServerExtension;
 import org.gbif.vocabulary.restws.PostgresDBExtension;
-import org.gbif.vocabulary.restws.TestUser;
+import org.gbif.vocabulary.restws.TestCredentials;
 
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -25,8 +26,14 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import static org.gbif.vocabulary.restws.TestUser.ADMIN;
-import static org.gbif.vocabulary.restws.TestUser.EDITOR;
+import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
+import static org.gbif.vocabulary.restws.TestCredentials.EDITOR;
+import static org.gbif.vocabulary.restws.TestCredentials.INVALID_JWT_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.INVALID_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_ADMIN;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_EDITOR;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.USER;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,12 +52,15 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
 
   @Autowired WebTestClient webClient;
 
-  static final Function<TestUser, String> BASIC_AUTH_HEADER =
-      testUser ->
+  static final Function<TestCredentials, String> BASIC_AUTH_HEADER =
+      testCredentials ->
           "Basic "
               + Base64Utils.encodeToString(
-                  (testUser.getUsername() + ":" + testUser.getPassword())
+                  (testCredentials.getUsername() + ":" + testCredentials.getPassword())
                       .getBytes(StandardCharsets.UTF_8));
+
+  static final Function<TestCredentials, String> JWT_AUTH_HEADER =
+      testCredentials -> "Bearer " + testCredentials.getToken();
 
   private final String urlEntityFormat = getBasePath() + "/%s";
   private final String urlDeprecateFormat = getBasePath() + "/%s/deprecate";
@@ -115,6 +125,97 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
   }
 
   @Test
+  void invalidBasicAuthTest() {
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", BASIC_AUTH_HEADER.apply(INVALID_USER))
+        .body(BodyInserters.fromObject(createEntity()))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  @Test
+  void basicAuthInsufficientCredentialsTest() {
+    // create entity with invalid credentials using JWT
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", BASIC_AUTH_HEADER.apply(USER))
+        .body(BodyInserters.fromObject(createEntity()))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void jwtSuccessTest() {
+    // create entity with admin using JWT
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", JWT_AUTH_HEADER.apply(JWT_ADMIN))
+        .body(BodyInserters.fromObject(createEntity()))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isCreated()
+        .expectBody(clazz)
+        .value(
+            v -> {
+              assertEquals(JWT_ADMIN.getUsername(), v.getCreatedBy());
+              assertEquals(JWT_ADMIN.getUsername(), v.getModifiedBy());
+            });
+
+    // create entity with editor using JWT
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", JWT_AUTH_HEADER.apply(JWT_EDITOR))
+        .body(BodyInserters.fromObject(createEntity()))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isCreated()
+        .expectBody(clazz)
+        .value(
+            v -> {
+              assertEquals(JWT_EDITOR.getUsername(), v.getCreatedBy());
+              assertEquals(JWT_EDITOR.getUsername(), v.getModifiedBy());
+            });
+  }
+
+  @Test
+  void jwtInsufficientCredentialsTest() {
+    // create entity with invalid credentials using JWT
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", JWT_AUTH_HEADER.apply(JWT_USER))
+        .body(BodyInserters.fromObject(createEntity()))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void invalidJwtTokenTest() {
+    webClient
+        .post()
+        .uri(getBasePath())
+        .header("Authorization", JWT_AUTH_HEADER.apply(INVALID_JWT_USER))
+        .body(BodyInserters.fromObject(createEntity()))
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  @Test
   public void suggestTest() {
     // create entity
     T entity1 = createEntity();
@@ -122,7 +223,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
     webClient
         .post()
         .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .header("Authorization", BASIC_AUTH_HEADER.apply(TestCredentials.ADMIN))
         .body(BodyInserters.fromObject(entity1))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
@@ -135,7 +236,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
     webClient
         .post()
         .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .header("Authorization", BASIC_AUTH_HEADER.apply(TestCredentials.ADMIN))
         .body(BodyInserters.fromObject(entity2))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()

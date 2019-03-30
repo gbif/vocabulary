@@ -23,16 +23,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.gbif.vocabulary.restws.resources.ConceptResource.*;
-import static org.gbif.vocabulary.restws.resources.VocabularyResource.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
+import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
 @RequestMapping(VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH)
 public class ConceptResource {
-
-  public static final String CONCEPTS_PATH = "concepts";
 
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
@@ -52,7 +50,6 @@ public class ConceptResource {
       @RequestParam(value = "replacedByKey", required = false) Integer replacedByKey,
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
       PagingRequest page) {
-    // TODO: add Link Header??
 
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);

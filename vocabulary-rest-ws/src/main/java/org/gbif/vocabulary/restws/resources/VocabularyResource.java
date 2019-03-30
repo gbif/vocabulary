@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.gbif.vocabulary.restws.resources.VocabularyResource.*;
+import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -29,8 +29,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 @RestController
 @RequestMapping(VOCABULARIES_PATH)
 public class VocabularyResource {
-
-  public static final String VOCABULARIES_PATH = "vocabularies";
 
   private final VocabularyService vocabularyService;
 
@@ -46,7 +44,6 @@ public class VocabularyResource {
       @RequestParam(value = "namespace", required = false) String namespace,
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
       PagingRequest page) {
-    // TODO: add Link Header??
 
     return vocabularyService.list(
         VocabularySearchParams.builder()

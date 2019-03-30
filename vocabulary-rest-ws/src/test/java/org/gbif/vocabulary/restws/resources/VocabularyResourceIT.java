@@ -2,7 +2,6 @@ package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.restws.TestUser;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,6 +16,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.reactive.function.BodyInserters;
+
+import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
+import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
 /** IT for the {@link VocabularyResource}. */
 @ContextConfiguration(initializers = {VocabularyResourceIT.ContexInitializer.class})
@@ -38,7 +40,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     webClient
         .post()
         .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
         .body(BodyInserters.fromObject(v1))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
@@ -62,7 +64,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     webClient
         .post()
         .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
         .body(BodyInserters.fromObject(v2))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
@@ -94,7 +96,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
 
   @Override
   String getBasePath() {
-    return "/" + VocabularyResource.VOCABULARIES_PATH;
+    return "/" + VOCABULARIES_PATH;
   }
 
   static class ContexInitializer

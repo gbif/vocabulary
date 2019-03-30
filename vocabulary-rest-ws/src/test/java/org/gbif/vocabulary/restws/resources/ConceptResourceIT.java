@@ -3,7 +3,6 @@ package org.gbif.vocabulary.restws.resources;
 import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.restws.TestUser;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +21,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import static org.gbif.vocabulary.restws.TestUser.ADMIN;
+import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
+import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
+import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
 /** IT for the {@link ConceptResource}. */
 @ContextConfiguration(initializers = {ConceptResourceIT.ContexInitializer.class})
@@ -43,7 +44,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     Vocabulary created =
         webClient
             .post()
-            .uri("/vocabularies")
+            .uri("/" + VOCABULARIES_PATH)
             .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
             .body(BodyInserters.fromObject(vocabulary))
             .accept(MediaType.APPLICATION_JSON)
@@ -65,7 +66,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     webClient
         .post()
         .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
         .body(BodyInserters.fromObject(c1))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
@@ -88,7 +89,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     webClient
         .post()
         .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(TestUser.ADMIN))
+        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
         .body(BodyInserters.fromObject(c2))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
@@ -122,12 +123,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
   @Override
   String getBasePath() {
-    return "/"
-        + VocabularyResource.VOCABULARIES_PATH
-        + "/"
-        + defaultVocabularyName
-        + "/"
-        + ConceptResource.CONCEPTS_PATH;
+    return "/" + VOCABULARIES_PATH + "/" + defaultVocabularyName + "/" + CONCEPTS_PATH;
   }
 
   static class ContexInitializer

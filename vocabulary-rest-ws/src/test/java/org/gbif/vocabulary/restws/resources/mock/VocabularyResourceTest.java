@@ -25,6 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -169,7 +171,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
   @Override
   String getBasePath() {
-    return "/" + VocabularyResource.VOCABULARIES_PATH;
+    return "/" + VOCABULARIES_PATH;
   }
 
   @Override

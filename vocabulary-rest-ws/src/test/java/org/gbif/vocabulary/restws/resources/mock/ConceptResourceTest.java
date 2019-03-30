@@ -10,7 +10,6 @@ import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.restws.model.DeprecateAction;
 import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
 import org.gbif.vocabulary.restws.resources.ConceptResource;
-import org.gbif.vocabulary.restws.resources.VocabularyResource;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 
@@ -31,6 +30,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
+
+import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
+import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
@@ -225,12 +227,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
 
   @Override
   String getBasePath() {
-    return "/"
-        + VocabularyResource.VOCABULARIES_PATH
-        + "/"
-        + TEST_VOCABULARY_NAME
-        + "/"
-        + ConceptResource.CONCEPTS_PATH;
+    return "/" + VOCABULARIES_PATH + "/" + TEST_VOCABULARY_NAME + "/" + CONCEPTS_PATH;
   }
 
   @Override

@@ -83,6 +83,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
 
   @Test
   public void listConceptsUnknownVocabularyTest() throws Exception {
+    // mock not set, so the service returns null
     mockMvc.perform(get(getBasePath())).andExpect(status().isBadRequest());
   }
 

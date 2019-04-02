@@ -5,7 +5,7 @@ import org.gbif.api.vocabulary.Language;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 /** Defines the minimum fields that an vocabulary entity must have. */
 public interface VocabularyEntity extends Auditable, Deprecable {
@@ -14,7 +14,7 @@ public interface VocabularyEntity extends Auditable, Deprecable {
 
   void setKey(Integer key);
 
-  @NotNull
+  @NotBlank
   String getName();
 
   void setName(String name);

@@ -5,6 +5,7 @@ import org.gbif.vocabulary.SpringConfig;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -42,6 +43,8 @@ public class Application {
   @Bean
   public RestTemplate restTemplate(RestTemplateBuilder builder) {
     return builder
+        .setConnectTimeout(Duration.ofSeconds(30))
+        .setReadTimeout(Duration.ofSeconds(60))
         .additionalInterceptors(
             (request, body, execution) -> {
               request.getHeaders().setContentType(MediaType.APPLICATION_JSON);

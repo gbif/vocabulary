@@ -36,8 +36,8 @@ public class GlobalControllerAdvice {
   }
 
   @ExceptionHandler({IllegalArgumentException.class, ConstraintViolationException.class})
-  public ResponseEntity<Object> illegalArgumentException(WebRequest request, Exception ex) {
-    return buildResponse(request, HttpStatus.BAD_REQUEST, INVALID_PARAM_ERROR);
+  public ResponseEntity<Object> invalidFieldsExceptions(WebRequest request, Exception ex) {
+    return buildResponse(request, HttpStatus.UNPROCESSABLE_ENTITY, INVALID_PARAM_ERROR);
   }
 
   @ExceptionHandler(DuplicateKeyException.class)
@@ -45,7 +45,7 @@ public class GlobalControllerAdvice {
       WebRequest request, DuplicateKeyException ex) {
     return buildResponse(
         request,
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.UNPROCESSABLE_ENTITY,
         DUPLICATED_ENTITY_ERROR,
         ex.getMostSpecificCause().getMessage());
   }

@@ -84,7 +84,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
   @Test
   public void listConceptsUnknownVocabularyTest() throws Exception {
     // mock not set, so the service returns null
-    mockMvc.perform(get(getBasePath())).andExpect(status().isBadRequest());
+    mockMvc.perform(get(getBasePath())).andExpect(status().isUnprocessableEntity());
   }
 
   @Test
@@ -132,7 +132,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
             post(getBasePath())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(concept)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isUnprocessableEntity());
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
@@ -166,7 +166,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
             put(getBasePath() + "/" + concept.getName())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(concept)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isUnprocessableEntity());
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
@@ -178,7 +178,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
             put(getBasePath() + "/fake")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(createEntity())))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isUnprocessableEntity());
   }
 
   @Test

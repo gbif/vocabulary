@@ -125,12 +125,13 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
   public void updateWrongNameTest() throws Exception {
+    // mock not set, so the service returns null
     mockMvc
         .perform(
             put(getBasePath() + "/fake")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(createEntity())))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isUnprocessableEntity());
   }
 
   @Test

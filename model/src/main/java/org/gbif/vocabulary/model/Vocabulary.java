@@ -14,6 +14,7 @@ public class Vocabulary extends AbstractVocabularyEntity implements LenientEqual
 
   private String namespace;
 
+  /** Namespace for imported vocabularies. */
   public String getNamespace() {
     return namespace;
   }

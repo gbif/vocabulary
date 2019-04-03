@@ -26,6 +26,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   private Map<Language, List<String>> misspeltLabels = new EnumMap<>(Language.class);
   private List<URI> sameAsUris = new ArrayList<>();
 
+  /** Vocabulary of the concept. */
   @NotNull
   public Integer getVocabularyKey() {
     return vocabularyKey;
@@ -35,6 +36,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
     this.vocabularyKey = vocabularyKey;
   }
 
+  /** Concept parent in case it exists. */
   public Integer getParentKey() {
     return parentKey;
   }
@@ -43,6 +45,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
     this.parentKey = parentKey;
   }
 
+  /** Indicates alternative labels commonly associated to the concept. */
   public Map<Language, List<String>> getAlternativeLabels() {
     return alternativeLabels;
   }
@@ -51,6 +54,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
     this.alternativeLabels = alternativeLabels;
   }
 
+  /** Indicates misspelt labels commonly associated to the concept. */
   public Map<Language, List<String>> getMisspeltLabels() {
     return misspeltLabels;
   }
@@ -59,6 +63,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
     this.misspeltLabels = misspeltLabels;
   }
 
+  /** External URIs for concepts considered equivalent. */
   public List<URI> getSameAsUris() {
     return sameAsUris;
   }

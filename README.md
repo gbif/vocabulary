@@ -17,7 +17,6 @@ To compile the project just run
 mvn clean compile
 ```
 
-
 ## REST WS
 
 ### How to run the REST WS
@@ -32,3 +31,7 @@ java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-0.20-SNAPSHOT.jar --sprin
 There is an API documentation available [here](https://htmlpreview.github.io/?https://github.com/gbif/vocabulary/blob/master/vocabulary-rest-ws/src/docs/generated-docs/index.html)
 
 Source HTML files can be found [here](vocabulary-rest-ws/src/docs/generated-docs). 
+
+
+## Core module
+Some of the business rules applied in the core module are contained [here](core/notes.md) along with a brief explanation.

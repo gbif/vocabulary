@@ -29,4 +29,4 @@ java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-0.20-SNAPSHOT.jar --sprin
 ```
 
 ### API Documentation
-There is an API documentation available [here](vocabulary-rest-ws/src/docs/generated-docs/api-documentation.html) in HTML. 
+There is an API documentation available [here](vocabulary-rest-ws/src/docs/generated-docs) in HTML. 

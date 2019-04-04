@@ -1,0 +1,26 @@
+:sourcedir: {snippets}/concept-documentation-test/deprecate-concept-test
+=== Deprecate
+
+include::{sourcedir}/auto-method-path.adoc[]
+
+include::{sourcedir}/auto-description.adoc[]
+
+==== Path parameters
+
+include::{sourcedir}/auto-path-parameters.adoc[]
+
+==== Query parameters
+
+include::{sourcedir}/auto-request-parameters.adoc[]
+
+==== Request fields
+
+include::{sourcedir}/request-fields.adoc[]
+
+==== Example request
+
+include::{sourcedir}/curl-request.adoc[]
+
+==== Example response
+
+include::{sourcedir}/http-response.adoc[]

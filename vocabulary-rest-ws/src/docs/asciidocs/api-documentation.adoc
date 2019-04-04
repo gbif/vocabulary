@@ -1,0 +1,67 @@
+= API Documentation
+:toc: left
+
+== Introduction
+Documentation for the Vocabulary server API.
+
+== Authentication
+Authentication is required for all POST, PUT and DELETE requests. There are 2 ways to authenticate: basic auth and JWT.
+
+=== Basic Auth
+[source,bash]
+----
+$ curl --user user:password {{host}}
+----
+
+=== JWT
+JWT tokens are issued by the endpoint http://api.gbif-dev.org/v1/user/login. This call should be done using basic auth.
+
+[source,bash]
+----
+$ curl -X POST {{host}} -H 'Bearer: f5036eda-0da6-4099-9131-863a511e1cd1'
+----
+
+== Client Errors
+There are basically 2 possible types of client errors:
+
+* 400 Bad Request: returned when the JSON is invalid or the request is not well-formed.
+* 422 Unprocessable Entity: returned when the request is syntactically correct but the fields are invalid (required fields not set, duplicated keys, inconsistent keys, etc.)
+
+
+== Vocabulary
+Methods to work with vocabularies.
+
+include::{snippets}/vocabulary-documentation-test/list-vocabulary-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-documentation-test/get-vocabulary-test/auto-section.adoc[]
+
+include::vocabulary/vocabulary-create.adoc[]
+
+include::vocabulary/vocabulary-update.adoc[]
+
+include::vocabulary/vocabulary-deprecate.adoc[]
+
+include::{snippets}/vocabulary-documentation-test/restore-vocabulary-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-documentation-test/suggest-vocabulary-test/auto-section.adoc[]
+
+== Concept
+Methods to work with concepts
+
+include::{snippets}/concept-documentation-test/list-concepts-test/auto-section.adoc[]
+
+include::{snippets}/concept-documentation-test/get-concept-test/auto-section.adoc[]
+
+include::concept/concept-create.adoc[]
+
+include::concept/concept-update.adoc[]
+
+include::concept/concept-deprecate.adoc[]
+
+include::{snippets}/concept-documentation-test/restore-deprecated-concept-test/auto-section.adoc[]
+
+include::{snippets}/concept-documentation-test/suggest-concept-test/auto-section.adoc[]
+
+
+
+

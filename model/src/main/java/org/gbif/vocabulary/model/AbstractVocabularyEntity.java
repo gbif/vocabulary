@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import javax.validation.constraints.NotBlank;
 
 /**
  * Base class for {@link VocabularyEntity} to provide a default implementation of {@link
@@ -16,6 +17,7 @@ import java.util.Map;
 public abstract class AbstractVocabularyEntity implements VocabularyEntity {
 
   Integer key;
+  @NotBlank
   String name;
   Map<Language, String> label = new EnumMap<>(Language.class);
   Map<Language, String> definition = new EnumMap<>(Language.class);

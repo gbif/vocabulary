@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -10,6 +11,10 @@
 
   <artifactId>vocabulary-rest-ws</artifactId>
   <version>0.20-SNAPSHOT</version>
+
+  <properties>
+    <snippetsDirectory>${project.build.directory}/generated-snippets</snippetsDirectory>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -112,6 +117,29 @@
       <artifactId>liquibase-core</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- restdocs -->
+    <dependency>
+      <groupId>org.springframework.restdocs</groupId>
+      <artifactId>spring-restdocs-mockmvc</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>capital.scalable</groupId>
+      <artifactId>spring-auto-restdocs-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.restdocs</groupId>
+      <artifactId>spring-restdocs-asciidoctor</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.restdocs</groupId>
+      <artifactId>spring-restdocs-webtestclient</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -124,6 +152,30 @@
           <addResources>false</addResources>
           <folders>conf/</folders>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.asciidoctor</groupId>
+        <artifactId>asciidoctor-maven-plugin</artifactId>
+        <version>${ascii-doctor-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>generate-docs</id>
+            <phase>package</phase>
+            <goals>
+              <goal>process-asciidoc</goal>
+            </goals>
+            <configuration>
+              <sourceHighlighter>highlight.js</sourceHighlighter>
+              <backend>html</backend>
+              <doctype>book</doctype>
+              <attributes>
+                <snippets>${snippetsDirectory}</snippets>
+              </attributes>
+              <sourceDirectory>src/docs/asciidocs</sourceDirectory>
+              <outputDirectory>src/docs/generated-docs</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

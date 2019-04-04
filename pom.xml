@@ -74,6 +74,10 @@
     <slf4j.version>1.7.26</slf4j.version>
     <logback.version>1.2.3</logback.version>
     <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
+
+    <!-- documentation -->
+    <spring.auto-rest-docs.version>2.0.4</spring.auto-rest-docs.version>
+    <ascii-doctor-plugin.version>1.5.7</ascii-doctor-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -214,6 +218,14 @@
         <groupId>com.github.tomakehurst</groupId>
         <artifactId>wiremock</artifactId>
         <version>${wiremock.version}</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- documentation -->
+      <dependency>
+        <groupId>capital.scalable</groupId>
+        <artifactId>spring-auto-restdocs-core</artifactId>
+        <version>${spring.auto-rest-docs.version}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>

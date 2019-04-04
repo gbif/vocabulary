@@ -20,14 +20,13 @@ import javax.validation.constraints.NotNull;
  */
 public class Concept extends AbstractVocabularyEntity implements LenientEquals<Concept> {
 
-  private Integer vocabularyKey;
+  @NotNull private Integer vocabularyKey;
   private Integer parentKey;
   private Map<Language, List<String>> alternativeLabels = new EnumMap<>(Language.class);
   private Map<Language, List<String>> misspeltLabels = new EnumMap<>(Language.class);
   private List<URI> sameAsUris = new ArrayList<>();
 
   /** Vocabulary of the concept. */
-  @NotNull
   public Integer getVocabularyKey() {
     return vocabularyKey;
   }

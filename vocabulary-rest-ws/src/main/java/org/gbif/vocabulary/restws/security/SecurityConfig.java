@@ -13,7 +13,7 @@ public class SecurityConfig {
 
   @NotBlank private String loginApiBasePath;
 
-  @NotBlank private String stopSecret;
+  @NotBlank private String actuatorSecret;
 
   public String getLoginApiBasePath() {
     return loginApiBasePath;
@@ -23,11 +23,11 @@ public class SecurityConfig {
     this.loginApiBasePath = loginApiBasePath;
   }
 
-  public String getStopSecret() {
-    return stopSecret;
+  public String getActuatorSecret() {
+    return actuatorSecret;
   }
 
-  public void setStopSecret(String stopSecret) {
-    this.stopSecret = stopSecret;
+  public void setActuatorSecret(String actuatorSecret) {
+    this.actuatorSecret = actuatorSecret;
   }
 }

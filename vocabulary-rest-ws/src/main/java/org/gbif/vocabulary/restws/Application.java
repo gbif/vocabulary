@@ -82,7 +82,7 @@ public class Application {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
       auth.inMemoryAuthentication()
           .withUser(ACTUATOR_USER)
-          .password(passwordEncoder().encode(securityConfig.getStopSecret()))
+          .password(passwordEncoder().encode(securityConfig.getActuatorSecret()))
           .roles("ACTUATOR");
     }
 

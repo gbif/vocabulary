@@ -1,6 +1,7 @@
 # Add default properties here
 spring:
   application.name: vocabulary-rest-ws
+  jackson.default-property-inclusion: NON_EMPTY
 
 management:
   server.port: 8081

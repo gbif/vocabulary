@@ -598,7 +598,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Length: 1346
+Content-Length: 533
 Content-Type: application/json;charset=UTF-8
 
 {
@@ -607,58 +607,25 @@ Content-Type: application/json;charset=UTF-8
   "endOfRecords" : true,
   "count" : 3,
   "results" : [ {
-    "key" : null,
     "name" : "vocab1",
     "label" : {
       "ENGLISH" : "Label"
     },
-    "definition" : { },
-    "externalDefinitions" : [ ],
     "editorialNotes" : [ "note1", "note2" ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : null,
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
     "namespace" : "ns"
   }, {
-    "key" : null,
     "name" : "vocab2",
     "label" : {
       "ENGLISH" : "Label"
     },
-    "definition" : { },
-    "externalDefinitions" : [ ],
     "editorialNotes" : [ "note1", "note2" ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : null,
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
     "namespace" : "ns"
   }, {
-    "key" : null,
     "name" : "vocab3",
     "label" : {
       "ENGLISH" : "Label"
     },
-    "definition" : { },
-    "externalDefinitions" : [ ],
     "editorialNotes" : [ "note1", "note2" ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : null,
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
     "namespace" : "ns"
   } ]
 }</code></pre>
@@ -717,26 +684,15 @@ Content-Type: application/json;charset=UTF-8
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Length: 380
+Content-Length: 131
 Content-Type: application/json;charset=UTF-8
 
 {
-  "key" : null,
   "name" : "vocab1",
   "label" : {
     "ENGLISH" : "Label"
   },
-  "definition" : { },
-  "externalDefinitions" : [ ],
   "editorialNotes" : [ "note1", "note2" ],
-  "replacedByKey" : null,
-  "deprecated" : null,
-  "deprecatedBy" : null,
-  "created" : null,
-  "createdBy" : null,
-  "modified" : null,
-  "modifiedBy" : null,
-  "deleted" : null,
   "namespace" : "ns"
 }</code></pre>
 </div>
@@ -963,11 +919,11 @@ Content-Type: application/json;charset=UTF-8
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
-Content-Length: 286
+Content-Length: 105
 Content-Type: application/json;charset=UTF-8
 Location: http://api.gbif-dev.org/vocabularies/vocab1
 
-{"key":1,"name":"vocab1","label":{"ENGLISH":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"namespace":"ns"}</code></pre>
+{"key":1,"name":"vocab1","label":{"ENGLISH":"Label"},"editorialNotes":["note1","note2"],"namespace":"ns"}</code></pre>
 </div>
 </div>
 </div>
@@ -1213,10 +1169,10 @@ Location: http://api.gbif-dev.org/vocabularies/vocab1
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Length: 286
+Content-Length: 105
 Content-Type: application/json;charset=UTF-8
 
-{"key":1,"name":"vocab1","label":{"ENGLISH":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"namespace":"ns"}</code></pre>
+{"key":1,"name":"vocab1","label":{"ENGLISH":"Label"},"editorialNotes":["note1","note2"],"namespace":"ns"}</code></pre>
 </div>
 </div>
 </div>
@@ -1557,8 +1513,8 @@ Content-Type: application/json;charset=UTF-8
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Length: 995
 Content-Type: application/json;charset=UTF-8
-Content-Length: 1952
 
 {
   "offset" : 0,
@@ -1566,83 +1522,44 @@ Content-Length: 1952
   "endOfRecords" : true,
   "count" : 3,
   "results" : [ {
-    "key" : null,
     "name" : "concept1",
     "label" : {
       "ENGLISH" : "Label"
     },
-    "definition" : { },
-    "externalDefinitions" : [ ],
     "editorialNotes" : [ "note1", "note2" ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : null,
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
     "vocabularyKey" : 1,
-    "parentKey" : null,
     "alternativeLabels" : {
       "ENGLISH" : [ "Alt label", "Another alt label" ]
     },
     "misspeltLabels" : {
       "ENGLISH" : [ "Labl" ]
-    },
-    "sameAsUris" : [ ]
+    }
   }, {
-    "key" : null,
     "name" : "concept2",
     "label" : {
       "ENGLISH" : "Label"
     },
-    "definition" : { },
-    "externalDefinitions" : [ ],
     "editorialNotes" : [ "note1", "note2" ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : null,
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
     "vocabularyKey" : 1,
-    "parentKey" : null,
     "alternativeLabels" : {
       "ENGLISH" : [ "Alt label", "Another alt label" ]
     },
     "misspeltLabels" : {
       "ENGLISH" : [ "Labl" ]
-    },
-    "sameAsUris" : [ ]
+    }
   }, {
-    "key" : null,
     "name" : "concept3",
     "label" : {
       "ENGLISH" : "Label"
     },
-    "definition" : { },
-    "externalDefinitions" : [ ],
     "editorialNotes" : [ "note1", "note2" ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : null,
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
     "vocabularyKey" : 1,
-    "parentKey" : null,
     "alternativeLabels" : {
       "ENGLISH" : [ "Alt label", "Another alt label" ]
     },
     "misspeltLabels" : {
       "ENGLISH" : [ "Labl" ]
-    },
-    "sameAsUris" : [ ]
+    }
   } ]
 }</code></pre>
 </div>
@@ -1706,35 +1623,22 @@ Content-Length: 1952
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Length: 566
+Content-Length: 273
 Content-Type: application/json;charset=UTF-8
 
 {
-  "key" : null,
   "name" : "concept1",
   "label" : {
     "ENGLISH" : "Label"
   },
-  "definition" : { },
-  "externalDefinitions" : [ ],
   "editorialNotes" : [ "note1", "note2" ],
-  "replacedByKey" : null,
-  "deprecated" : null,
-  "deprecatedBy" : null,
-  "created" : null,
-  "createdBy" : null,
-  "modified" : null,
-  "modifiedBy" : null,
-  "deleted" : null,
   "vocabularyKey" : 1,
-  "parentKey" : null,
   "alternativeLabels" : {
     "ENGLISH" : [ "Alt label", "Another alt label" ]
   },
   "misspeltLabels" : {
     "ENGLISH" : [ "Labl" ]
-  },
-  "sameAsUris" : [ ]
+  }
 }</code></pre>
 </div>
 </div>
@@ -2022,10 +1926,10 @@ Content-Type: application/json;charset=UTF-8
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
 Content-Type: application/json;charset=UTF-8
-Content-Length: 426
 Location: http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1
+Content-Length: 212
 
-{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misspeltLabels":{"ENGLISH":["Labl"]},"sameAsUris":[]}</code></pre>
+{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misspeltLabels":{"ENGLISH":["Labl"]}}</code></pre>
 </div>
 </div>
 </div>
@@ -2318,9 +2222,9 @@ Location: http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Content-Length: 426
+Content-Length: 212
 
-{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misspeltLabels":{"ENGLISH":["Labl"]},"sameAsUris":[]}</code></pre>
+{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misspeltLabels":{"ENGLISH":["Labl"]}}</code></pre>
 </div>
 </div>
 </div>

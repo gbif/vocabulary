@@ -33,4 +33,4 @@ There is an API documentation available as [HTML files](vocabulary-rest-ws/src/d
 
 
 ## Core module
-Some of the business rules applied in the core module are contained [here](core/notes.md) along with a brief explanation.
+Some of the business rules applied in the core module are available as [notes](core/notes.md) along with a brief explanation.

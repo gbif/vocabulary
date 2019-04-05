@@ -29,9 +29,7 @@ java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-0.20-SNAPSHOT.jar --sprin
 ```
 
 ### API Documentation
-There is an API documentation available [here](https://htmlpreview.github.io/?https://github.com/gbif/vocabulary/blob/master/vocabulary-rest-ws/src/docs/generated-docs/index.html)
-
-Source HTML files can be found [here](vocabulary-rest-ws/src/docs/generated-docs). 
+There is an API documentation available [here](https://htmlpreview.github.io/?https://github.com/gbif/vocabulary/blob/master/vocabulary-rest-ws/src/docs/generated-docs/index.html). Source HTML files can be found [here](vocabulary-rest-ws/src/docs/generated-docs). 
 
 
 ## Core module

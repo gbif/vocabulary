@@ -5,12 +5,12 @@
 A simple registry of controlled vocabularies used for terms found in GBIF mediated data.
 
 ## Code style
-The code formatting follows the Google Java format https://github.com/google/google-java-format
+The code formatting follows the [Google Java format](https://github.com/google/google-java-format).
 
 ## How to run the project
 
 To run the tests Docker has to be installed and running in the machine. You can find instructions about how to install 
-Docker on Mac here https://docs.docker.com/docker-for-mac/ (see other platforms in the menu).
+Docker on Mac on https://docs.docker.com/docker-for-mac/ (see other platforms in the menu).
 
 To compile the project just run 
 ```
@@ -20,7 +20,8 @@ mvn clean compile
 ## REST WS
 
 ### How to run the REST WS
-To run the project in local you have to configure your database in the profile `local` of the [application.properties](vocabulary-rest-ws/src/main/resources/application.yml).
+To run the project in your local machine you have to configure your database in the profile `local` of the [application.properties](vocabulary-rest-ws/src/main/resources/application.yml). The DB scheme can be recreated by using the [Liquibase files](core/src/main/resources/liquibase).
+
 After that, you can run the project by specifying the local profile: 
 
 ```

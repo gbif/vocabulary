@@ -3,18 +3,22 @@ package org.gbif.vocabulary.model;
 import org.gbif.api.vocabulary.Language;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** Tests {@link Concept}. */
 public class ConceptTest {
 
   @Test
-  public void lenientEqualsTest() {
+  public void equalityTest() {
     Concept c1 = new Concept();
+    c1.setKey(1);
     c1.setName("n1");
     c1.setVocabularyKey(1);
     c1.setLabel(Collections.singletonMap(Language.ENGLISH, "label"));
@@ -27,17 +31,22 @@ public class ConceptTest {
     c1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
 
     Concept c2 = new Concept();
-    c2.setName("n1");
-    c2.setVocabularyKey(1);
-    c2.setLabel(Collections.singletonMap(Language.ENGLISH, "label"));
-    c2.setParentKey(2);
-    c2.setAlternativeLabels(Collections.singletonMap(Language.ENGLISH, Arrays.asList("alt")));
-    c2.setMisspeltLabels(Collections.singletonMap(Language.ENGLISH, Arrays.asList("misspelt")));
-    c2.setDefinition(Collections.singletonMap(Language.ENGLISH, "def"));
-    c2.setSameAsUris(Collections.singletonList(URI.create("http://test.com")));
-    c2.setEditorialNotes(Arrays.asList("n1", "n2"));
-    c2.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
+    c2.setKey(c1.getKey());
+    c2.setName(c1.getName());
+    c2.setVocabularyKey(c1.getVocabularyKey());
+    c2.setLabel(c1.getLabel());
+    c2.setParentKey(c1.getParentKey());
+    c2.setAlternativeLabels(c1.getAlternativeLabels());
+    c2.setMisspeltLabels(c1.getMisspeltLabels());
+    c2.setDefinition(c1.getDefinition());
+    c2.setSameAsUris(c1.getSameAsUris());
+    c2.setEditorialNotes(c1.getEditorialNotes());
+    c2.setExternalDefinitions(c1.getExternalDefinitions());
 
     assertTrue(c1.lenientEquals(c2));
+
+    c1.setModified(LocalDateTime.now());
+    assertTrue(c1.lenientEquals(c2));
+    assertNotEquals(c1, c2);
   }
 }

@@ -29,6 +29,8 @@ public class ConceptTest {
     c1.setSameAsUris(Collections.singletonList(URI.create("http://test.com")));
     c1.setEditorialNotes(Arrays.asList("n1", "n2"));
     c1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
+    c1.setDeleted(LocalDateTime.now());
+    c1.setDeprecated(LocalDateTime.now());
 
     Concept c2 = new Concept();
     c2.setKey(c1.getKey());
@@ -42,6 +44,8 @@ public class ConceptTest {
     c2.setSameAsUris(c1.getSameAsUris());
     c2.setEditorialNotes(c1.getEditorialNotes());
     c2.setExternalDefinitions(c1.getExternalDefinitions());
+    c2.setDeleted(c1.getDeleted());
+    c2.setDeprecated(c1.getDeprecated());
 
     assertTrue(c1.lenientEquals(c2));
 

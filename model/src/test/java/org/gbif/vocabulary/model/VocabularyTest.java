@@ -25,6 +25,7 @@ public class VocabularyTest {
     v1.setDefinition(Collections.singletonMap(Language.ENGLISH, "def"));
     v1.setEditorialNotes(Arrays.asList("n1", "n2"));
     v1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
+    v1.setCreated(LocalDateTime.now());
     v1.setDeleted(LocalDateTime.now());
     v1.setDeprecated(LocalDateTime.now());
 
@@ -36,6 +37,7 @@ public class VocabularyTest {
     v2.setDefinition(v1.getDefinition());
     v2.setEditorialNotes(v1.getEditorialNotes());
     v2.setExternalDefinitions(v1.getExternalDefinitions());
+    v2.setCreated(v1.getCreated());
     v2.setDeleted(v1.getDeleted());
     v2.setDeprecated(v1.getDeprecated());
 

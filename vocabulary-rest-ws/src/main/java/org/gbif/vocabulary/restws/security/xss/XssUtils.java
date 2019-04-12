@@ -74,30 +74,4 @@ public class XssUtils {
     }
     return false;
   }
-
-  /**
-   * Strip all instances of all XXS patterns that match.
-   *
-   * @param value
-   * @return
-   */
-  public static String stripXSS(String value) {
-
-    if (value == null) {
-      return null;
-    }
-
-    // Avoid null characters
-    String cleanValue = NULL_CHAR.matcher(value).replaceAll("");
-    if (StringUtils.isBlank(cleanValue)) {
-      return cleanValue;
-    }
-
-    // Remove all sections that match a pattern
-    for (Pattern scriptPattern : PATTERNS) {
-      Matcher matcher = scriptPattern.matcher(cleanValue);
-      cleanValue = matcher.replaceAll("");
-    }
-    return cleanValue;
-  }
 }

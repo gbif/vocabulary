@@ -198,6 +198,7 @@ abstract class DocumentationBaseTest {
     ConstraintDescriptions fieldConstraints = new ConstraintDescriptions(clazz);
 
     return fields.stream()
+        .filter(f -> !f.isSynthetic())
         .map(
             f -> {
               FieldDescriptor fd =

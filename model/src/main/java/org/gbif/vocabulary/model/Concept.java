@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
  * Models a concept in a {@link Vocabulary}.
  *
  * <p>A concept must be linked to a {@link Vocabulary} and supports nesting in concepts. A concept
- * should be identified by its name, which should be unique.
+ * is identified by its name, which is unique.
  */
 public class Concept extends AbstractVocabularyEntity implements LenientEquals<Concept> {
 

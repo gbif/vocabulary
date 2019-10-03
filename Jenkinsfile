@@ -28,7 +28,7 @@ pipeline {
               }
             }
         }
-        stage('deploy snapshot') {
+        stage('deploy snapshot version to nexus') {
             when{ allOf { not { expression { params.RELEASE } };
                           branch 'master' } }
             steps {
@@ -38,7 +38,7 @@ pipeline {
               }
             }
         }
-        stage('release') {
+        stage('deploy release version to nexus') {
           when{ expression { params.RELEASE } }
           steps {
             configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',

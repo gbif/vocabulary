@@ -68,7 +68,7 @@
 
     <!-- ZK -->
     <spring-cloud-zookeeper.version>2.1.1.RELEASE</spring-cloud-zookeeper.version>
-    <zookeeper.version>3.4.12</zookeeper.version>
+    <zookeeper.version>3.4.14</zookeeper.version>
 
     <!-- logging -->
     <slf4j.version>1.7.26</slf4j.version>

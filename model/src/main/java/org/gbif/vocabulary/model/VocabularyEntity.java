@@ -2,13 +2,14 @@ package org.gbif.vocabulary.model;
 
 import org.gbif.api.vocabulary.Language;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import javax.validation.constraints.NotBlank;
 
 /** Defines the minimum fields that an vocabulary entity must have. */
-public interface VocabularyEntity extends Auditable, Deprecable {
+public interface VocabularyEntity extends Auditable, Deprecable, Serializable {
 
   /** Unique identifier for persistence. */
   Integer getKey();

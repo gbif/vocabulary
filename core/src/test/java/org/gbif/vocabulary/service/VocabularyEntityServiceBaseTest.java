@@ -27,16 +27,9 @@ import static org.mockito.Mockito.when;
  *
  * @param <T> {@link VocabularyEntity} to parametrize the class.
  */
-@TestPropertySource(properties = "spring.liquibase.enabled=false")
-@ExtendWith(SpringExtension.class)
-@SpringBootTest
-@ActiveProfiles("test")
-abstract class BaseServiceTest<T extends VocabularyEntity> {
+abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity> extends MockServiceBaseTest {
 
   static final int TEST_KEY = 1;
-
-  @MockBean private DataSource dataSource;
-  @MockBean private PlatformTransactionManager platformTransactionManager;
 
   @Test
   public void createNullEntityTest() {

@@ -6,14 +6,13 @@ import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -30,8 +29,8 @@ import static org.mockito.Mockito.when;
 @Execution(ExecutionMode.SAME_THREAD)
 public class ExportServiceTest extends MockServiceBaseTest {
 
-  private static final ObjectReader OBJECT_READER =
-      new ObjectMapper().registerModule(new JavaTimeModule()).readerFor(VocabularyExport.class);
+  private static final ObjectMapper OBJECT_MAPPER =
+      new ObjectMapper().registerModule(new JavaTimeModule());
 
   @Autowired private ExportService exportService;
   @MockBean private VocabularyService vocabularyService;
@@ -42,12 +41,12 @@ public class ExportServiceTest extends MockServiceBaseTest {
     final String vocabularyName = "vocab";
     mockVocabulary(vocabularyName);
 
-    File file = exportService.exportVocabulary(vocabularyName);
+    Path path = exportService.exportVocabulary(vocabularyName);
 
-    assertNotNull(file);
-    assertTrue(file.getName().startsWith(vocabularyName));
+    assertNotNull(path);
+    assertTrue(path.getFileName().toString().startsWith(vocabularyName));
 
-    VocabularyExport export = OBJECT_READER.readValue(file);
+    VocabularyExport export = OBJECT_MAPPER.readValue(path.toFile(), VocabularyExport.class);
     assertEquals(export.getVocabulary().getName(), vocabularyName);
     assertEquals(3, export.getConcepts().size());
     assertNotNull(export.getMetadata().getCreatedDate());

@@ -49,7 +49,7 @@ public class DefaultExportService implements ExportService {
   }
 
   @Override
-  public File exportVocabulary(@NotBlank String vocabularyName) {
+  public Path exportVocabulary(@NotBlank String vocabularyName) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
 
     Path exportPath = createExportFile(vocabulary.getName());
@@ -85,7 +85,7 @@ public class DefaultExportService implements ExportService {
           "Could not create export for vocabulary " + vocabularyName, e);
     }
 
-    return exportPath.toFile();
+    return exportPath;
   }
 
   private Path createExportFile(String vocabularyName) {

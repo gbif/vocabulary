@@ -1,5 +1,6 @@
 package org.gbif.vocabulary.restws.advices;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,6 +26,7 @@ public class GlobalControllerAdvice {
   private static final String INVALID_PARAM_ERROR = "Invalid Field";
   private static final String DB_ERROR = "DB error";
   private static final String DUPLICATED_ENTITY_ERROR = "Duplicated Entity";
+  private static final String IO_ERROR = "IO error";
 
   @Autowired private ErrorAttributes errorAttributes;
 
@@ -57,6 +59,15 @@ public class GlobalControllerAdvice {
         HttpStatus.INTERNAL_SERVER_ERROR,
         DB_ERROR,
         ex.getServerErrorMessage().getMessage());
+  }
+
+  @ExceptionHandler(IOException.class)
+  public ResponseEntity<Object> IOException(WebRequest request, IOException ex) {
+    return buildResponse(
+      request,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      IO_ERROR,
+      ex.getMessage());
   }
 
   /**

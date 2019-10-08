@@ -9,8 +9,7 @@ import org.gbif.vocabulary.model.export.VocabularyExport;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -20,9 +19,9 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -59,8 +58,25 @@ public class ExportServiceTest extends MockServiceBaseTest {
     Concept c1 = new Concept();
     c1.setName("c1");
     c1.setVocabularyKey(vocabulary.getKey());
-    c1.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
     c1.setCreated(LocalDateTime.now());
+
+    // labels
+    Map<Language, String> labels = new HashMap<>();
+    labels.put(Language.ENGLISH, "Label");
+    labels.put(Language.SPANISH, "Etiqueta");
+    c1.setLabel(labels);
+
+    // alternative labels
+    Map<Language, List<String>> alternativeLabels = new HashMap<>();
+    alternativeLabels.put(Language.ENGLISH, Arrays.asList("label2", "label3", "label4"));
+    alternativeLabels.put(Language.SPANISH, Arrays.asList("label5", "label6"));
+    c1.setAlternativeLabels(alternativeLabels);
+
+    // misspelt labels
+    Map<Language, List<String>> misspeltLabels = new HashMap<>();
+    misspeltLabels.put(Language.ENGLISH, Arrays.asList("labl2", "labl3", "labl4"));
+    misspeltLabels.put(Language.SPANISH, Arrays.asList("labl5", "labl6"));
+    c1.setMisspeltLabels(misspeltLabels);
 
     Concept c2 = new Concept();
     c2.setName("c2");

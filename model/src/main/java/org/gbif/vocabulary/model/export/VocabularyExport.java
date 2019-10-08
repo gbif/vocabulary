@@ -1,10 +1,11 @@
 package org.gbif.vocabulary.model.export;
 
-import org.gbif.common.shaded.com.fasterxml.jackson.annotation.JsonProperty;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** Models an export of a vocabulary with all its concepts. */
 public class VocabularyExport {

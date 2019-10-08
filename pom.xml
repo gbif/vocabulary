@@ -18,6 +18,7 @@
     <module>core</module>
     <module>model</module>
     <module>vocabulary-rest-ws</module>
+    <module>vocabulary-lookup</module>
   </modules>
 
   <scm>
@@ -52,6 +53,8 @@
     <wiremock.version>2.21.0</wiremock.version>
     <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
     <javax-validation.version>2.0.1.Final</javax-validation.version>
+    <okhttp-version>4.2.2</okhttp-version>
+    <cache2k-version>1.2.4.Final</cache2k-version>
 
     <!-- maven release -->
     <minimumMavenVersion>3.0</minimumMavenVersion>
@@ -60,7 +63,7 @@
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 
     <!-- gbif -->
-    <gbif-api.version>0.92</gbif-api.version>
+    <gbif-api.version>0.93.1-jackson2</gbif-api.version>
     <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
 
     <!-- version limited by gbif-api -->
@@ -102,6 +105,10 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>org.gbif</groupId>
+            <artifactId>gbif-common</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -119,6 +126,22 @@
         <artifactId>gbif-common-mybatis</artifactId>
         <version>${gbif.common-mybatis.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp</artifactId>
+        <version>${okhttp-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.cache2k</groupId>
+        <artifactId>cache2k-api</artifactId>
+        <version>${cache2k-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.cache2k</groupId>
+        <artifactId>cache2k-core</artifactId>
+        <version>${cache2k-version}</version>
+      </dependency>
+
 
       <!-- DB -->
       <dependency>

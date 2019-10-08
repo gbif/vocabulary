@@ -1,0 +1,96 @@
+{
+  "metadata" : {
+    "createdDate" : "2019-10-08T16:24:47.218"
+  },
+  "vocabulary" : {
+    "key" : null,
+    "name" : "vocab",
+    "label" : { },
+    "definition" : { },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : null,
+    "createdBy" : null,
+    "modified" : null,
+    "modifiedBy" : null,
+    "deleted" : null,
+    "namespace" : null
+  },
+  "concepts" : [ {
+    "key" : null,
+    "name" : "c1",
+    "label" : {
+      "SPANISH" : "Etiqueta",
+      "ENGLISH" : "Label"
+    },
+    "definition" : { },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2019-10-08T16:24:47.123",
+    "createdBy" : null,
+    "modified" : null,
+    "modifiedBy" : null,
+    "deleted" : null,
+    "vocabularyKey" : null,
+    "parentKey" : null,
+    "alternativeLabels" : {
+      "SPANISH" : [ "label5", "label6" ],
+      "ENGLISH" : [ "label2", "label3", "label4" ]
+    },
+    "misspeltLabels" : {
+      "SPANISH" : [ "labl5", "labl6" ],
+      "ENGLISH" : [ "labl2", "labl3", "labl4" ]
+    },
+    "sameAsUris" : [ ]
+  }, {
+    "key" : null,
+    "name" : "c2",
+    "label" : {
+      "ENGLISH" : "Label"
+    },
+    "definition" : { },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : null,
+    "createdBy" : null,
+    "modified" : null,
+    "modifiedBy" : null,
+    "deleted" : null,
+    "vocabularyKey" : null,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "misspeltLabels" : { },
+    "sameAsUris" : [ ]
+  }, {
+    "key" : null,
+    "name" : "c3",
+    "label" : {
+      "ENGLISH" : "Label"
+    },
+    "definition" : { },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : null,
+    "createdBy" : null,
+    "modified" : null,
+    "modifiedBy" : null,
+    "deleted" : null,
+    "vocabularyKey" : null,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "misspeltLabels" : { },
+    "sameAsUris" : [ ]
+  } ]
+}

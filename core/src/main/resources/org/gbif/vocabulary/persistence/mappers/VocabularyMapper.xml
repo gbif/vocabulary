@@ -125,8 +125,12 @@
 
   <select id="findSimilarities" resultType="KeyNameResult">
     SELECT key, name
-    FROM vocabulary where #{name} = ANY(avals(label))
-    LIMIT 5
+    FROM vocabulary
+    WHERE #{values, typeHandler=StringArrayTypeHandler} &amp;&amp; array_append(avals(label), name)
+    <if test="vocabularyKey != null">
+      AND key != #{vocabularyKey}
+    </if>
+    LIMIT 3
   </select>
 
   <update id="deprecate">

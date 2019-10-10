@@ -21,9 +21,6 @@ public interface BaseMapper<T extends VocabularyEntity> {
 
   void update(T entity);
 
-  /** Searchs for a similar entity. */
-  List<KeyNameResult> findSimilarities(T entity);
-
   void deprecate(
       @Param("key") int key,
       @Param("deprecatedBy") String deprecatedBy,

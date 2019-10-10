@@ -10,15 +10,18 @@ import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.ConceptService;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +63,7 @@ public class DefaultConceptService implements ConceptService {
     checkArgument(concept.getKey() == null, "Can't create a concept which already has a key");
 
     // checking the validity of the concept.
-    validateEntity(concept, conceptMapper::findSimilarities);
+    validateEntity(concept, createSimilaritiesExtractor(concept, false));
 
     checkArgument(
         !vocabularyMapper.isDeprecated(concept.getVocabularyKey()),
@@ -117,6 +120,9 @@ public class DefaultConceptService implements ConceptService {
     checkArgument(
         Objects.equals(oldConcept.getDeleted(), concept.getDeleted()),
         "Cannot delete or restore an entity while updating");
+
+    // validity check
+    validateEntity(concept, createSimilaritiesExtractor(concept, true));
 
     // update the concept
     conceptMapper.update(concept);
@@ -207,7 +213,7 @@ public class DefaultConceptService implements ConceptService {
   @Override
   public void restoreDeprecated(int key, boolean restoreDeprecatedChildren) {
     // get the concept
-    Concept concept = Objects.requireNonNull(conceptMapper.get(key));
+    Concept concept = requireNonNull(conceptMapper.get(key));
 
     // check if the vocabulary is not deprecated
     if (vocabularyMapper.isDeprecated(concept.getVocabularyKey())) {
@@ -231,5 +237,26 @@ public class DefaultConceptService implements ConceptService {
     return conceptMapper.list(null, null, parentKey, null, null, deprecated, null).stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
+  }
+
+  private Supplier<List<KeyNameResult>> createSimilaritiesExtractor(
+      Concept concept, boolean update) {
+    return () -> {
+      List<String> valuesToCheck =
+          ImmutableList.<String>builder()
+              .add(concept.getName())
+              .addAll(concept.getLabel().values())
+              .addAll(
+                  concept.getAlternativeLabels().values().stream()
+                      .flatMap(Collection::stream)
+                      .collect(Collectors.toList()))
+              .addAll(
+                  concept.getMisspeltLabels().values().stream()
+                      .flatMap(Collection::stream)
+                      .collect(Collectors.toList()))
+              .build();
+      return conceptMapper.findSimilarities(
+          valuesToCheck, concept.getVocabularyKey(), update ? concept.getKey() : null);
+    };
   }
 }

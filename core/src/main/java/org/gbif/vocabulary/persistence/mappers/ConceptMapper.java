@@ -31,7 +31,8 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Nullable @Param("name") String name,
       @Nullable @Param("deprecated") Boolean deprecated);
 
-  Concept getByNameAndVocabulary(@Param("name") String name, @Param("vocabularyName") String vocabularyName);
+  Concept getByNameAndVocabulary(
+      @Param("name") String name, @Param("vocabularyName") String vocabularyName);
 
   void deprecateInBulk(
       @Param("keys") List<Integer> keys,
@@ -55,4 +56,17 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   Integer findReplacement(@Param("key") int key);
 
   Integer getVocabularyKey(@Param("key") int conceptKey);
+
+  /**
+   * Searchs for a similar concept whose name or any of its labels are the same as the ones received
+   * as parameter.
+   *
+   * @param values values that we want to check that are unique in the vocabulary
+   * @param vocabularyKey key of the vocabulary whose concepts we'll check
+   * @param conceptKey if we are updating a concept we exclude it from the searh
+   */
+  List<KeyNameResult> findSimilarities(
+      @Param("values") List<String> values,
+      @Param("vocabularyKey") int vocabularyKey,
+      @Nullable @Param("conceptKey") Integer conceptKey);
 }

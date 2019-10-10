@@ -213,14 +213,12 @@
   <select id="findSimilarities" resultType="KeyNameResult">
     SELECT key, name
     FROM concept
-    WHERE vocabulary_key = #{vocabularyKey} AND
-      (
-        #{name} = name
-        OR #{name} = ANY(avals(label))
-        OR #{name} = ANY(avals(alternative_labels))
-        OR #{name} = ANY(avals(misspelt_labels))
-      )
-    LIMIT 5
+    WHERE vocabulary_key = #{vocabularyKey}
+      AND #{values, typeHandler=StringArrayTypeHandler} &amp;&amp; array_append(avals(label)||avals(alternative_labels)||avals(misspelt_labels), name)
+      <if test="conceptKey != null">
+        AND key != #{conceptKey}
+      </if>
+    LIMIT 3
   </select>
 
   <select id="findReplacement" resultType="Integer">

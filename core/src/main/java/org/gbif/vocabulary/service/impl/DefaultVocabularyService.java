@@ -13,12 +13,14 @@ import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +62,7 @@ public class DefaultVocabularyService implements VocabularyService {
     checkArgument(vocabulary.getKey() == null, "Can't create a vocabulary which already has a key");
 
     // checking the validity of the concept.
-    validateEntity(vocabulary, vocabularyMapper::findSimilarities);
+    validateEntity(vocabulary, createSimilaritiesExtractor(vocabulary, false));
 
     vocabularyMapper.create(vocabulary);
 
@@ -90,6 +92,9 @@ public class DefaultVocabularyService implements VocabularyService {
     checkArgument(
         Objects.equals(oldVocabulary.getDeleted(), vocabulary.getDeleted()),
         "Cannot delete or restore an vocabulary while updating");
+
+    // validity check
+    validateEntity(vocabulary, createSimilaritiesExtractor(vocabulary, true));
 
     // update the vocabulary
     vocabularyMapper.update(vocabulary);
@@ -156,5 +161,17 @@ public class DefaultVocabularyService implements VocabularyService {
     return conceptMapper.list(null, vocabularyKey, null, null, null, deprecated, null).stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
+  }
+
+  private Supplier<List<KeyNameResult>> createSimilaritiesExtractor(
+      Vocabulary vocabulary, boolean update) {
+    return () -> {
+      List<String> valuesToCheck =
+          ImmutableList.<String>builder()
+              .add(vocabulary.getName())
+              .addAll(vocabulary.getLabel().values())
+              .build();
+      return vocabularyMapper.findSimilarities(valuesToCheck, update ? vocabulary.getKey() : null);
+    };
   }
 }

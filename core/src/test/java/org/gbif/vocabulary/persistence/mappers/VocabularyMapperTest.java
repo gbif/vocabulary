@@ -6,11 +6,7 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -135,17 +131,18 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabulary1.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary1);
 
-    Vocabulary similar = createNewEntity();
-    similar.setName("igual");
-    List<KeyNameResult> similarities = vocabularyMapper.findSimilarities(similar);
+    List<KeyNameResult> similarities =
+        vocabularyMapper.findSimilarities(Arrays.asList("igual", "foo"), null);
     assertEquals(1, similarities.size());
     assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(vocabulary1.getName(), similarities.get(0).getName());
 
-    Vocabulary vocabulary2 = createNewEntity();
-    vocabulary2.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
-    vocabularyMapper.create(vocabulary2);
-    assertEquals(2, vocabularyMapper.findSimilarities(similar).size());
+    similarities = vocabularyMapper.findSimilarities(Collections.singletonList(vocabulary1.getName()), null);
+    assertEquals(1, similarities.size());
+    assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
+    assertEquals(vocabulary1.getName(), similarities.get(0).getName());
+
+    assertEquals(0, vocabularyMapper.findSimilarities(Arrays.asList("foo", "bar"), null).size());
   }
 
   private void assertList(

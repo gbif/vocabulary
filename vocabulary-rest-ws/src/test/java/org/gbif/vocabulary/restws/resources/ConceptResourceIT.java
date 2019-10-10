@@ -25,7 +25,13 @@ import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
-/** IT for the {@link ConceptResource}. */
+/**
+ * IT for the {@link ConceptResource}.
+ *
+ * <p>These tests are intended to run in parallel. This should be taken into account when adding new
+ * * tests since we're not cleaning the DB after each test and htis can interferred with other
+ * tests.
+ */
 @ContextConfiguration(initializers = {ConceptResourceIT.ContexInitializer.class})
 public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
@@ -113,9 +119,11 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     Concept concept = new Concept();
     concept.setName(UUID.randomUUID().toString());
     concept.setVocabularyKey(defaultVocabularyKey);
-    concept.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    concept.setLabel(Collections.singletonMap(Language.ENGLISH, UUID.randomUUID().toString()));
     concept.setAlternativeLabels(
-        Collections.singletonMap(Language.ENGLISH, Arrays.asList("alt1", "alt2")));
+        Collections.singletonMap(
+            Language.ENGLISH,
+            Arrays.asList(UUID.randomUUID().toString(), UUID.randomUUID().toString())));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

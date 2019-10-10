@@ -7,12 +7,7 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -165,22 +160,57 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         Collections.singletonMap(Language.SPANISH, Collections.singletonList("primeiro")));
     conceptMapper.create(concept1);
 
-    Concept similar = createNewEntity();
-    similar.setName("primero");
-    List<KeyNameResult> similarities = conceptMapper.findSimilarities(similar);
+    Concept concept2 = createNewEntity();
+    concept2.setLabel(new HashMap<>(Collections.singletonMap(Language.SPANISH, "segundo")));
+    conceptMapper.create(concept2);
+
+    List<KeyNameResult> similarities =
+        conceptMapper.findSimilarities(
+            Collections.singletonList("primero"), concept1.getVocabularyKey(), null);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(concept1.getName(), similarities.get(0).getName());
 
-    similar.setName("primeiro");
-    similarities = conceptMapper.findSimilarities(similar);
+    similarities =
+        conceptMapper.findSimilarities(
+            Collections.singletonList("primeiro"), concept1.getVocabularyKey(), null);
     assertEquals(1, similarities.size());
     assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(concept1.getName(), similarities.get(0).getName());
+
+    similarities =
+        conceptMapper.findSimilarities(
+            Arrays.asList("primeiro", "primero"), concept1.getVocabularyKey(), null);
+    assertEquals(1, similarities.size());
+    assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
+    assertEquals(concept1.getName(), similarities.get(0).getName());
+
+    similarities =
+        conceptMapper.findSimilarities(
+            Arrays.asList("foo", concept1.getName()), concept1.getVocabularyKey(), null);
+    assertEquals(1, similarities.size());
+    assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
+    assertEquals(concept1.getName(), similarities.get(0).getName());
+
+    similarities =
+        conceptMapper.findSimilarities(
+            Arrays.asList("primero", "segundo"), concept1.getVocabularyKey(), null);
+    assertEquals(2, similarities.size());
+
+    similarities =
+        conceptMapper.findSimilarities(
+            Collections.singletonList("foo"), concept1.getVocabularyKey(), null);
+    assertEquals(0, similarities.size());
 
     // for another vocabulary there should be no match
-    similar.setVocabularyKey(vocabularyKeys[1]);
-    assertEquals(0, conceptMapper.findSimilarities(similar).size());
+    similarities = conceptMapper.findSimilarities(Collections.singletonList("foo"), 200, null);
+    assertEquals(0, similarities.size());
+
+    // for the same concept there should be no match
+    similarities =
+        conceptMapper.findSimilarities(
+            Collections.singletonList("primero"), concept1.getVocabularyKey(), concept1.getKey());
+    assertEquals(0, similarities.size());
   }
 
   @Test

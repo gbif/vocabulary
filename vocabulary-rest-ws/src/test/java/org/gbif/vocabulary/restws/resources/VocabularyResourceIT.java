@@ -13,7 +13,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -25,6 +24,9 @@ import org.springframework.web.reactive.function.BodyInserters;
 import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * IT for the {@link VocabularyResource}.
@@ -69,7 +71,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
         .isOk()
         .expectBody()
         .jsonPath("results")
-        .value(r -> Assertions.assertEquals(1, r.size()), List.class);
+        .value(r -> assertEquals(1, r.size()), List.class);
 
     // create entity
     Vocabulary v2 = createEntity();
@@ -94,7 +96,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
         .isOk()
         .expectBody()
         .jsonPath("results")
-        .value(r -> Assertions.assertEquals(2, r.size()), List.class);
+        .value(r -> assertEquals(2, r.size()), List.class);
   }
 
   @Test

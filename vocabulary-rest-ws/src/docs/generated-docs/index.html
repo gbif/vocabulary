@@ -1513,7 +1513,7 @@ Content-Type: application/json;charset=UTF-8
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Length: 995
+Content-Length: 1001
 Content-Type: application/json;charset=UTF-8
 
 {
@@ -1531,7 +1531,7 @@ Content-Type: application/json;charset=UTF-8
     "alternativeLabels" : {
       "ENGLISH" : [ "Alt label", "Another alt label" ]
     },
-    "misspeltLabels" : {
+    "misappliedLabels" : {
       "ENGLISH" : [ "Labl" ]
     }
   }, {
@@ -1544,7 +1544,7 @@ Content-Type: application/json;charset=UTF-8
     "alternativeLabels" : {
       "ENGLISH" : [ "Alt label", "Another alt label" ]
     },
-    "misspeltLabels" : {
+    "misappliedLabels" : {
       "ENGLISH" : [ "Labl" ]
     }
   }, {
@@ -1557,7 +1557,7 @@ Content-Type: application/json;charset=UTF-8
     "alternativeLabels" : {
       "ENGLISH" : [ "Alt label", "Another alt label" ]
     },
-    "misspeltLabels" : {
+    "misappliedLabels" : {
       "ENGLISH" : [ "Labl" ]
     }
   } ]
@@ -1623,7 +1623,7 @@ Content-Type: application/json;charset=UTF-8
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Length: 273
+Content-Length: 275
 Content-Type: application/json;charset=UTF-8
 
 {
@@ -1636,7 +1636,7 @@ Content-Type: application/json;charset=UTF-8
   "alternativeLabels" : {
     "ENGLISH" : [ "Alt label", "Another alt label" ]
   },
-  "misspeltLabels" : {
+  "misappliedLabels" : {
     "ENGLISH" : [ "Labl" ]
   }
 }</code></pre>
@@ -1714,7 +1714,7 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misspeltLabels</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misappliedLabels</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
@@ -1828,7 +1828,7 @@ Content-Type: application/json;charset=UTF-8
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misspeltLabels</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misappliedLabels</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
@@ -1916,7 +1916,7 @@ Content-Type: application/json;charset=UTF-8
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts' -i -u 'user:password' -X POST \
     -H 'Content-Type: application/json' \
-    -d '{"key":null,"name":"concept1","label":{"ENGLISH":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misspeltLabels":{"ENGLISH":["Labl"]},"sameAsUris":[]}'</code></pre>
+    -d '{"key":null,"name":"concept1","label":{"ENGLISH":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misappliedLabels":{"ENGLISH":["Labl"]},"sameAsUris":[]}'</code></pre>
 </div>
 </div>
 </div>
@@ -1925,11 +1925,11 @@ Content-Type: application/json;charset=UTF-8
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
+Content-Length: 214
 Content-Type: application/json;charset=UTF-8
 Location: http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1
-Content-Length: 212
 
-{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misspeltLabels":{"ENGLISH":["Labl"]}}</code></pre>
+{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misappliedLabels":{"ENGLISH":["Labl"]}}</code></pre>
 </div>
 </div>
 </div>
@@ -2010,7 +2010,7 @@ Content-Length: 212
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misspeltLabels</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misappliedLabels</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
@@ -2124,7 +2124,7 @@ Content-Length: 212
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misspeltLabels</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misappliedLabels</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
@@ -2212,7 +2212,7 @@ Content-Length: 212
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1' -i -u 'user:password' -X PUT \
     -H 'Content-Type: application/json' \
-    -d '{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misspeltLabels":{"ENGLISH":["Labl"]},"sameAsUris":[]}'</code></pre>
+    -d '{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misappliedLabels":{"ENGLISH":["Labl"]},"sameAsUris":[]}'</code></pre>
 </div>
 </div>
 </div>
@@ -2221,10 +2221,10 @@ Content-Length: 212
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Length: 214
 Content-Type: application/json;charset=UTF-8
-Content-Length: 212
 
-{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misspeltLabels":{"ENGLISH":["Labl"]}}</code></pre>
+{"key":1,"name":"concept1","label":{"ENGLISH":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"ENGLISH":["Alt label","Another alt label"]},"misappliedLabels":{"ENGLISH":["Labl"]}}</code></pre>
 </div>
 </div>
 </div>

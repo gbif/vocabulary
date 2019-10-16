@@ -10,6 +10,11 @@
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler" />
   </resultMap>
 
+  <sql id="VOCABULARY_READ_FIELDS">
+    v.key, v.namespace, v.name, v.label, v.definition, v.external_definition_urls, v.editorial_notes, v.replaced_by_key,
+    v.deprecated_by, v.deprecated, v.created_by, v.modified_by, v.created, v.modified, v.deleted
+  </sql>
+
   <sql id="VOCABULARY_WRITE_FIELDS">
     namespace, name, label, definition, external_definition_urls, editorial_notes, created_by, modified_by, created, modified
   </sql>
@@ -17,8 +22,8 @@
   <sql id="VOCABULARY_PARAMS_CREATE">
     #{namespace,jdbcType=VARCHAR},
     #{name,jdbcType=VARCHAR},
-    #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
-    #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
+    #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
+    #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
     #{createdBy,jdbcType=VARCHAR},
@@ -30,8 +35,8 @@
   <sql id="VOCABULARY_PARAMS_UPDATE">
     namespace = #{namespace,jdbcType=VARCHAR},
     name = #{name,jdbcType=VARCHAR},
-    label = #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
-    definition = #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
+    label = #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
+    definition = #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     external_definition_urls = #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     editorial_notes = #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
     created_by = #{createdBy,jdbcType=VARCHAR},
@@ -55,19 +60,19 @@
   </update>
 
   <select id="get" resultMap="VOCABULARY_MAP">
-    SELECT *
+    SELECT <include refid="VOCABULARY_READ_FIELDS" />
     FROM vocabulary v
     WHERE v.key = #{key,jdbcType=INTEGER}
   </select>
 
   <select id="getByName" resultMap="VOCABULARY_MAP">
-    SELECT *
+    SELECT <include refid="VOCABULARY_READ_FIELDS" />
     FROM vocabulary v
     WHERE v.name = #{name,jdbcType=VARCHAR}
   </select>
 
   <select id="list" resultType="Vocabulary" resultMap="VOCABULARY_MAP">
-    SELECT *
+    SELECT <include refid="VOCABULARY_READ_FIELDS" />
     FROM vocabulary v
     <if test="query != null" >
       JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
@@ -126,7 +131,7 @@
   <select id="findSimilarities" resultType="KeyNameResult">
     SELECT key, name
     FROM vocabulary
-    WHERE #{values, typeHandler=StringArrayTypeHandler} &amp;&amp; array_append(avals(label), name)
+    WHERE #{values, typeHandler=StringArrayTypeHandler} &amp;&amp; normalized_values
     <if test="vocabularyKey != null">
       AND key != #{vocabularyKey}
     </if>

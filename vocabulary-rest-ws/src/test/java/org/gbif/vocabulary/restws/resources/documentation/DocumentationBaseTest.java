@@ -149,7 +149,7 @@ abstract class DocumentationBaseTest {
     concept.setAlternativeLabels(
         Collections.singletonMap(
             Language.ENGLISH, Arrays.asList("Alt label", "Another alt label")));
-    concept.setMisspeltLabels(Collections.singletonMap(Language.ENGLISH, Arrays.asList("Labl")));
+    concept.setMisappliedLabels(Collections.singletonMap(Language.ENGLISH, Arrays.asList("Labl")));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

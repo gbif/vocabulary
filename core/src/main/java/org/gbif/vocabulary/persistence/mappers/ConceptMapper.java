@@ -61,12 +61,13 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * Searchs for a similar concept whose name or any of its labels are the same as the ones received
    * as parameter.
    *
-   * @param values values that we want to check that are unique in the vocabulary
+   * @param normalizedValues values that we want to check that are unique in the vocabulary. <b>They
+   *     must be normalized</b>
    * @param vocabularyKey key of the vocabulary whose concepts we'll check
    * @param conceptKey if we are updating a concept we exclude it from the searh
    */
   List<KeyNameResult> findSimilarities(
-      @Param("values") List<String> values,
+      @Param("values") List<String> normalizedValues,
       @Param("vocabularyKey") int vocabularyKey,
       @Nullable @Param("conceptKey") Integer conceptKey);
 }

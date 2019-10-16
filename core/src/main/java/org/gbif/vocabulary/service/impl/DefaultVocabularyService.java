@@ -5,6 +5,7 @@ import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.normalizers.EntityNormalizer;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
@@ -168,8 +169,8 @@ public class DefaultVocabularyService implements VocabularyService {
     return () -> {
       List<String> valuesToCheck =
           ImmutableList.<String>builder()
-              .add(vocabulary.getName())
-              .addAll(vocabulary.getLabel().values())
+              .add(EntityNormalizer.normalizeName(vocabulary.getName()))
+              .addAll(EntityNormalizer.normalizeLabels(vocabulary.getLabel().values()))
               .build();
       return vocabularyMapper.findSimilarities(valuesToCheck, update ? vocabulary.getKey() : null);
     };

@@ -24,12 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
-import static org.gbif.vocabulary.TestUtils.assertDeprecated;
-import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
-import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
-import static org.gbif.vocabulary.TestUtils.createBasicConcept;
-import static org.gbif.vocabulary.TestUtils.createBasicVocabulary;
+import static org.gbif.vocabulary.TestUtils.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,8 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Integration tests for the {@link ConceptService}.
  *
- * These tests are intended to run in parallel. This should be taken into account when adding new tests since
- * we're not cleaning the DB after each test and htis can interferred with other tests.
+ * <p>These tests are intended to run in parallel. This should be taken into account when adding new
+ * tests since we're not cleaning the DB after each test and htis can interferred with other tests.
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -118,7 +113,7 @@ public class ConceptServiceIT {
   public void createSimilarConceptTest() {
     Concept concept = createBasicConcept(vocabularyKeys[0]);
     concept.setLabel(Collections.singletonMap(Language.ENGLISH, "sim1"));
-    concept.setMisspeltLabels(
+    concept.setMisappliedLabels(
         Collections.singletonMap(Language.ENGLISH, Collections.singletonList("simm1")));
     conceptService.create(concept);
 
@@ -133,7 +128,7 @@ public class ConceptServiceIT {
     assertDoesNotThrow(() -> conceptService.create(similar));
 
     Concept similar2 = createBasicConcept(vocabularyKeys[0]);
-    similar2.getMisspeltLabels().put(Language.ENGLISH, Collections.singletonList("simm1"));
+    similar2.getMisappliedLabels().put(Language.ENGLISH, Collections.singletonList("simm1"));
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar));
   }
 
@@ -145,17 +140,17 @@ public class ConceptServiceIT {
 
     // update concept
     concept.setLabel(Collections.singletonMap(Language.ENGLISH, "label"));
-    concept.setMisspeltLabels(
+    concept.setMisappliedLabels(
         Collections.singletonMap(Language.ENGLISH, Arrays.asList("labl", "lbel")));
     concept.setParentKey(vocabularyKeys[1]);
     conceptService.update(concept);
 
     Concept updatedConcept = conceptService.get(key);
     assertEquals("label", updatedConcept.getLabel().get(Language.ENGLISH));
-    assertEquals(2, updatedConcept.getMisspeltLabels().get(Language.ENGLISH).size());
+    assertEquals(2, updatedConcept.getMisappliedLabels().get(Language.ENGLISH).size());
     assertTrue(
         updatedConcept
-            .getMisspeltLabels()
+            .getMisappliedLabels()
             .get(Language.ENGLISH)
             .containsAll(Arrays.asList("labl", "lbel")));
     assertEquals(vocabularyKeys[1], updatedConcept.getParentKey().intValue());
@@ -164,7 +159,8 @@ public class ConceptServiceIT {
   @Test
   public void updateSimilarConceptTest() {
     Concept concept1 = createBasicConcept(vocabularyKeys[0]);
-    concept1.setMisspeltLabels(
+    concept1.setName("simConcept");
+    concept1.setMisappliedLabels(
         Collections.singletonMap(Language.ENGLISH, Collections.singletonList("simupdated")));
     conceptService.create(concept1);
 

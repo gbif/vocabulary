@@ -9,6 +9,7 @@ import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -78,7 +79,7 @@ public class VocabularyResource {
       @PathVariable("name") String vocabularyName,
       @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
 
     vocabularyService.deprecate(
         vocabulary.getKey(),
@@ -93,7 +94,7 @@ public class VocabularyResource {
       @RequestParam(value = "restoreDeprecatedConcepts", required = false)
           boolean restoreDeprecatedConcepts) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
 
     vocabularyService.restoreDeprecated(vocabulary.getKey(), restoreDeprecatedConcepts);
   }

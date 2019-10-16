@@ -11,17 +11,10 @@ import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
@@ -52,7 +45,7 @@ public class ConceptResource {
       PagingRequest page) {
 
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
 
     return conceptService.list(
         ConceptSearchParams.builder()
@@ -77,9 +70,11 @@ public class ConceptResource {
   public Concept create(
       @PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
     checkArgument(
         vocabulary.getKey().equals(concept.getVocabularyKey()),
         "Concept vocabulary doesn't match with the resource vocabulary in the URL");
+
     int key = conceptService.create(concept);
     return conceptService.get(key);
   }
@@ -90,12 +85,14 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @RequestBody Concept concept) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
     checkArgument(
         vocabulary.getKey().equals(concept.getVocabularyKey()),
         "Concept vocabulary doesn't match with the resource vocabulary in the URL");
     checkArgument(
         conceptName.equals(concept.getName()),
         "Concept name doesn't match with the resource name in the URL");
+
     conceptService.update(concept);
     return conceptService.get(concept.getKey());
   }
@@ -104,7 +101,7 @@ public class ConceptResource {
   public List<KeyNameResult> suggest(
       @PathVariable("vocabularyName") String vocabularyName, @RequestParam("q") String query) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
 
     return conceptService.suggest(query, vocabulary.getKey());
   }
@@ -115,9 +112,8 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @RequestBody DeprecateConceptAction deprecateConceptAction) {
     Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
-    checkArgument(
-        concept != null,
-        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
+    Objects.requireNonNull(
+        concept, "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
 
     conceptService.deprecate(
         concept.getKey(),
@@ -133,9 +129,8 @@ public class ConceptResource {
       @RequestParam(value = "restoreDeprecatedChildren", required = false)
           boolean restoreDeprecatedChildren) {
     Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
-    checkArgument(
-        concept != null,
-        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
+    Objects.requireNonNull(
+        concept, "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
 
     conceptService.restoreDeprecated(concept.getKey(), restoreDeprecatedChildren);
   }

@@ -4,18 +4,17 @@ import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.normalizers.EntityNormalizer;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.ConceptService;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -244,17 +243,17 @@ public class DefaultConceptService implements ConceptService {
     return () -> {
       List<String> valuesToCheck =
           ImmutableList.<String>builder()
-              .add(concept.getName())
-              .addAll(concept.getLabel().values())
+              .add(EntityNormalizer.normalizeName(concept.getName()))
+              .addAll(EntityNormalizer.normalizeLabels(concept.getLabel().values()))
               .addAll(
-                  concept.getAlternativeLabels().values().stream()
+                  Stream.concat(
+                          concept.getAlternativeLabels().values().stream(),
+                          concept.getMisappliedLabels().values().stream())
                       .flatMap(Collection::stream)
-                      .collect(Collectors.toList()))
-              .addAll(
-                  concept.getMisspeltLabels().values().stream()
-                      .flatMap(Collection::stream)
+                      .map(EntityNormalizer::normalizeLabel)
                       .collect(Collectors.toList()))
               .build();
+
       return conceptMapper.findSimilarities(
           valuesToCheck, concept.getVocabularyKey(), update ? concept.getKey() : null);
     };

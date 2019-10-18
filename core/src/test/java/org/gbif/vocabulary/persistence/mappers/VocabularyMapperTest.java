@@ -19,6 +19,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+import static org.gbif.vocabulary.model.normalizers.EntityNormalizer.normalizeLabel;
+import static org.gbif.vocabulary.model.normalizers.EntityNormalizer.normalizeName;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -137,12 +139,34 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(vocabulary1.getName(), similarities.get(0).getName());
 
-    similarities = vocabularyMapper.findSimilarities(Collections.singletonList(vocabulary1.getName()), null);
+    similarities =
+        vocabularyMapper.findSimilarities(
+            Collections.singletonList(normalizeName(vocabulary1.getName())), null);
     assertEquals(1, similarities.size());
     assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
     assertEquals(vocabulary1.getName(), similarities.get(0).getName());
 
     assertEquals(0, vocabularyMapper.findSimilarities(Arrays.asList("foo", "bar"), null).size());
+
+    // create another vocabulary
+    Vocabulary vocabulary2 = createNewEntity();
+    vocabulary2.setName("another-vocab");
+    vocabulary2.setLabel(Collections.singletonMap(Language.ENGLISH, "another label "));
+    vocabularyMapper.create(vocabulary2);
+
+    similarities =
+        vocabularyMapper.findSimilarities(
+            Collections.singletonList(normalizeLabel("  ANOTHER   label")), null);
+    assertEquals(1, similarities.size());
+    assertEquals(vocabulary2.getKey().intValue(), similarities.get(0).getKey());
+    assertEquals(vocabulary2.getName(), similarities.get(0).getName());
+
+    similarities =
+        vocabularyMapper.findSimilarities(
+            Collections.singletonList(normalizeName("Another Vocab ")), null);
+    assertEquals(1, similarities.size());
+    assertEquals(vocabulary2.getKey().intValue(), similarities.get(0).getKey());
+    assertEquals(vocabulary2.getName(), similarities.get(0).getName());
   }
 
   private void assertList(

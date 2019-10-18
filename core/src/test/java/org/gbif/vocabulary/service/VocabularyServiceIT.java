@@ -92,6 +92,7 @@ public class VocabularyServiceIT {
   @Test
   public void updateSimilarVocabularyTest() {
     Vocabulary vocabulary1 = createBasicVocabulary();
+    vocabulary1.setName("simVocab");
     vocabulary1.setLabel(Collections.singletonMap(Language.ENGLISH, "simupdated"));
     vocabularyService.create(vocabulary1);
 

@@ -2,6 +2,7 @@ package org.gbif.vocabulary.persistence.handlers;
 
 import org.gbif.api.vocabulary.Language;
 
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,13 +10,14 @@ import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.base.Strings;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
-import org.postgresql.util.HStoreConverter;
 
 /**
  * MyBatis {@link org.apache.ibatis.type.TypeHandler} for a {@link Map} keyed on {@link Language}
@@ -24,8 +26,9 @@ import org.postgresql.util.HStoreConverter;
 public class ValueListByLanguageMapTypeHandler
     extends BaseTypeHandler<Map<Language, List<String>>> {
 
-  private static final String SEPARATOR_CHAR = ",";
-  private static final Pattern SEPARATOR = Pattern.compile(SEPARATOR_CHAR);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  private static final ObjectReader OBJECT_READER =
+      OBJECT_MAPPER.readerFor(new TypeReference<Map<Language, List<String>>>() {});
 
   @Override
   public void setNonNullParameter(
@@ -56,27 +59,23 @@ public class ValueListByLanguageMapTypeHandler
   }
 
   private String toString(Map<Language, List<String>> languageStringListMap) {
-    return HStoreConverter.toString(
-        languageStringListMap.entrySet().stream()
-            .collect(
-                Collectors.toMap(
-                    e -> e.getKey().getIso2LetterCode(),
-                    e -> String.join(SEPARATOR_CHAR, e.getValue()))));
+    try {
+      return OBJECT_MAPPER.writeValueAsString(languageStringListMap);
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException(
+          "Couldn't convert language map to JSON: " + languageStringListMap, e);
+    }
   }
 
-  private Map<Language, List<String>> fromString(String hstring) {
-    if (Strings.isNullOrEmpty(hstring)) {
+  private Map<Language, List<String>> fromString(String json) {
+    if (Strings.isNullOrEmpty(json)) {
       return new EnumMap<>(Language.class);
     }
 
-    return HStoreConverter.fromString(hstring).entrySet().stream()
-        .collect(
-            Collectors.toMap(
-                entry -> Language.fromIsoCode(entry.getKey()),
-                entry -> SEPARATOR.splitAsStream(entry.getValue()).collect(Collectors.toList()),
-                (k, v) -> {
-                  throw new IllegalStateException(String.format("Duplicate key %s", k));
-                },
-                () -> new EnumMap<>(Language.class)));
+    try {
+      return OBJECT_READER.readValue(json);
+    } catch (IOException e) {
+      throw new IllegalStateException("Couldn't deserialize JSON from DB: " + json, e);
+    }
   }
 }

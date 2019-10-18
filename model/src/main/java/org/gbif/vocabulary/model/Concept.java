@@ -23,7 +23,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   @NotNull private Integer vocabularyKey;
   private Integer parentKey;
   private Map<Language, List<String>> alternativeLabels = new EnumMap<>(Language.class);
-  private Map<Language, List<String>> misspeltLabels = new EnumMap<>(Language.class);
+  private Map<Language, List<String>> misappliedLabels = new EnumMap<>(Language.class);
   private List<URI> sameAsUris = new ArrayList<>();
 
   /** Vocabulary of the concept. */
@@ -53,13 +53,13 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
     this.alternativeLabels = alternativeLabels;
   }
 
-  /** Indicates misspelt labels commonly associated to the concept. */
-  public Map<Language, List<String>> getMisspeltLabels() {
-    return misspeltLabels;
+  /** Indicates misapplied labels commonly associated to the concept. */
+  public Map<Language, List<String>> getMisappliedLabels() {
+    return misappliedLabels;
   }
 
-  public void setMisspeltLabels(Map<Language, List<String>> misspeltLabels) {
-    this.misspeltLabels = misspeltLabels;
+  public void setMisappliedLabels(Map<Language, List<String>> misappliedLabels) {
+    this.misappliedLabels = misappliedLabels;
   }
 
   /** External URIs for concepts considered equivalent. */
@@ -83,7 +83,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
         && Objects.equals(name, concept.name)
         && Objects.equals(label, concept.label)
         && Objects.equals(alternativeLabels, concept.alternativeLabels)
-        && Objects.equals(misspeltLabels, concept.misspeltLabels)
+        && Objects.equals(misappliedLabels, concept.misappliedLabels)
         && Objects.equals(definition, concept.definition)
         && Objects.equals(externalDefinitions, concept.externalDefinitions)
         && Objects.equals(sameAsUris, concept.sameAsUris)
@@ -107,7 +107,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
         name,
         label,
         alternativeLabels,
-        misspeltLabels,
+        misappliedLabels,
         definition,
         externalDefinitions,
         sameAsUris,
@@ -124,20 +124,20 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   @Override
   public String toString() {
     return new StringJoiner(", ", Concept.class.getSimpleName() + "[", "]")
-        .add("key=" + key)
         .add("vocabularyKey=" + vocabularyKey)
         .add("parentKey=" + parentKey)
-        .add("replacedByKey=" + replacedByKey)
+        .add("alternativeLabels=" + alternativeLabels)
+        .add("misappliedLabels=" + misappliedLabels)
+        .add("sameAsUris=" + sameAsUris)
+        .add("key=" + key)
         .add("name='" + name + "'")
         .add("label=" + label)
-        .add("alternativeLabel=" + alternativeLabels)
-        .add("misspeltLabel=" + misspeltLabels)
         .add("definition=" + definition)
         .add("externalDefinitions=" + externalDefinitions)
-        .add("sameAsUris=" + sameAsUris)
         .add("editorialNotes=" + editorialNotes)
+        .add("replacedByKey=" + replacedByKey)
         .add("deprecated=" + deprecated)
-        .add("deprecatedBy=" + deprecatedBy)
+        .add("deprecatedBy='" + deprecatedBy + "'")
         .add("created=" + created)
         .add("createdBy='" + createdBy + "'")
         .add("modified=" + modified)
@@ -156,7 +156,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
         && Objects.equals(name, other.name)
         && Objects.equals(label, other.label)
         && Objects.equals(alternativeLabels, other.alternativeLabels)
-        && Objects.equals(misspeltLabels, other.misspeltLabels)
+        && Objects.equals(misappliedLabels, other.misappliedLabels)
         && Objects.equals(definition, other.definition)
         && Objects.equals(externalDefinitions, other.externalDefinitions)
         && Objects.equals(sameAsUris, other.sameAsUris)

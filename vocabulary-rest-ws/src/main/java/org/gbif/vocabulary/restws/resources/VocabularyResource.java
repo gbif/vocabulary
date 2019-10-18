@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -88,7 +89,7 @@ public class VocabularyResource {
       @PathVariable("name") String vocabularyName,
       @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
 
     vocabularyService.deprecate(
         vocabulary.getKey(),
@@ -103,7 +104,7 @@ public class VocabularyResource {
       @RequestParam(value = "restoreDeprecatedConcepts", required = false)
           boolean restoreDeprecatedConcepts) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
 
     vocabularyService.restoreDeprecated(vocabulary.getKey(), restoreDeprecatedConcepts);
   }

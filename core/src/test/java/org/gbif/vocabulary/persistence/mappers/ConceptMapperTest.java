@@ -22,6 +22,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
+import static org.gbif.vocabulary.model.normalizers.EntityNormalizer.normalizeLabel;
+import static org.gbif.vocabulary.model.normalizers.EntityNormalizer.normalizeLabels;
+import static org.gbif.vocabulary.model.normalizers.EntityNormalizer.normalizeName;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,7 +66,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
    * @param vocabularyMapper to insert the vocabulary in the DB.
    */
   @BeforeAll
-  public static void populateData(@Autowired VocabularyMapper vocabularyMapper) {
+  public static void populateData(
+      @Autowired VocabularyMapper vocabularyMapper, @Autowired ConceptMapper conceptMapper) {
     Vocabulary vocabulary = new Vocabulary();
     vocabulary.setName(DEFAULT_VOCABULARY);
     vocabulary.setCreatedBy("test");
@@ -91,7 +95,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept concept2 = createNewEntity();
     concept2.setName("concept2");
     concept2.setParentKey(concept1.getKey());
-    concept2.setMisspeltLabels(
+    concept2.setMisappliedLabels(
         Collections.singletonMap(Language.ENGLISH, Collections.singletonList("misspelt example")));
     conceptMapper.create(concept2);
 
@@ -155,47 +159,30 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @Test
   public void findSimilaritiesTest() {
     Concept concept1 = createNewEntity();
-    concept1.setLabel(new HashMap<>(Collections.singletonMap(Language.SPANISH, "primero")));
-    concept1.setMisspeltLabels(
-        Collections.singletonMap(Language.SPANISH, Collections.singletonList("primeiro")));
+    concept1.setLabel(new HashMap<>(Collections.singletonMap(Language.SPANISH, "primero ")));
+    concept1.setMisappliedLabels(
+        Collections.singletonMap(Language.SPANISH, Arrays.asList("primeiro", "otro primeiro")));
     conceptMapper.create(concept1);
-
-    Concept concept2 = createNewEntity();
-    concept2.setLabel(new HashMap<>(Collections.singletonMap(Language.SPANISH, "segundo")));
-    conceptMapper.create(concept2);
 
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList("primero"), concept1.getVocabularyKey(), null);
-    assertEquals(1, similarities.size());
-    assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(concept1.getName(), similarities.get(0).getName());
+            Collections.singletonList(normalizeLabel("primero")),
+            concept1.getVocabularyKey(),
+            null);
+    assertSimilarity(similarities, concept1);
 
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList("primeiro"), concept1.getVocabularyKey(), null);
-    assertEquals(1, similarities.size());
-    assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(concept1.getName(), similarities.get(0).getName());
-
+            Collections.singletonList(normalizeLabel("primeiro")),
+            concept1.getVocabularyKey(),
+            null);
+    assertSimilarity(similarities, concept1);
     similarities =
         conceptMapper.findSimilarities(
-            Arrays.asList("primeiro", "primero"), concept1.getVocabularyKey(), null);
-    assertEquals(1, similarities.size());
-    assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(concept1.getName(), similarities.get(0).getName());
-
-    similarities =
-        conceptMapper.findSimilarities(
-            Arrays.asList("foo", concept1.getName()), concept1.getVocabularyKey(), null);
-    assertEquals(1, similarities.size());
-    assertEquals(concept1.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(concept1.getName(), similarities.get(0).getName());
-
-    similarities =
-        conceptMapper.findSimilarities(
-            Arrays.asList("primero", "segundo"), concept1.getVocabularyKey(), null);
-    assertEquals(2, similarities.size());
+            Arrays.asList("foo", normalizeName(concept1.getName())),
+            concept1.getVocabularyKey(),
+            null);
+    assertSimilarity(similarities, concept1);
 
     similarities =
         conceptMapper.findSimilarities(
@@ -209,8 +196,41 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     // for the same concept there should be no match
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList("primero"), concept1.getVocabularyKey(), concept1.getKey());
+            Collections.singletonList(normalizeLabel("primero")),
+            concept1.getVocabularyKey(),
+            concept1.getKey());
     assertEquals(0, similarities.size());
+  }
+
+  @Test
+  public void findSimilaritiesNormalizationTest() {
+    Concept concept1 = createNewEntity();
+    concept1.setName("my-concept");
+    concept1.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "normalization ")));
+    concept1.setMisappliedLabels(
+        Collections.singletonMap(Language.ENGLISH, Arrays.asList("norm", "another norm")));
+    conceptMapper.create(concept1);
+
+    List<KeyNameResult> similarities =
+        conceptMapper.findSimilarities(
+            Collections.singletonList(normalizeLabel(" normaLiZA tion  ")),
+            concept1.getVocabularyKey(),
+            null);
+    assertSimilarity(similarities, concept1);
+
+    similarities =
+        conceptMapper.findSimilarities(
+            normalizeLabels(Arrays.asList(" aNotHer  NORM  ", "segundo")),
+            concept1.getVocabularyKey(),
+            null);
+    assertSimilarity(similarities, concept1);
+
+    similarities =
+        conceptMapper.findSimilarities(
+            Collections.singletonList(normalizeName("My Concept")),
+            concept1.getVocabularyKey(),
+            null);
+    assertSimilarity(similarities, concept1);
   }
 
   @Test
@@ -326,14 +346,20 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         conceptMapper.count(query, vocabularyKey, parentKey, replacedByKey, name, deprecated));
   }
 
+  private void assertSimilarity(List<KeyNameResult> similarities, Concept concept) {
+    assertEquals(1, similarities.size());
+    assertEquals(concept.getKey().intValue(), similarities.get(0).getKey());
+    assertEquals(concept.getName(), similarities.get(0).getName());
+  }
+
   @Override
   Concept createNewEntity() {
     Concept entity = new Concept();
     entity.setVocabularyKey(vocabularyKeys[0]);
     entity.setName(UUID.randomUUID().toString());
     entity.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Label")));
-    entity.setMisspeltLabels(
-        Collections.singletonMap(Language.SPANISH, Arrays.asList("labl", "lbel")));
+    entity.setMisappliedLabels(
+        Collections.singletonMap(Language.SPANISH, Arrays.asList("lab,l", "lbel")));
     entity.setDefinition(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
@@ -347,7 +373,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
    * Initializes the Spring Context. Needed to create the datasource on the fly using the postgres
    * container.
    *
-   * <p>NOTE: this initializer cannot be in the base class because it gets executed only once.
+   * <p>NOTE: this initializer cannot be in the base class because it gets executed only once when
+   * we run several tests at the same time.
    */
   static class ContexInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {

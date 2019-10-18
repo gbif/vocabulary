@@ -6,15 +6,21 @@
     <id property="key" column="key"/>
     <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler" />
     <result property="alternativeLabels" column="alternative_labels" typeHandler="ValueListByLanguageMapTypeHandler" />
-    <result property="misspeltLabels" column="misspelt_labels" typeHandler="ValueListByLanguageMapTypeHandler" />
+    <result property="misappliedLabels" column="misapplied_labels" typeHandler="ValueListByLanguageMapTypeHandler" />
     <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler" />
     <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler" />
     <result property="sameAsUris" column="same_as_uris" typeHandler="UriArrayTypeHandler" />
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler" />
   </resultMap>
 
+  <sql id="CONCEPT_READ_FIELDS">
+    c.key, c.vocabulary_key, c.parent_key, c.replaced_by_key, c.name, c.label, c.alternative_labels, c.misapplied_labels,
+    c.definition, c.external_definition_urls, c.same_as_uris, c.editorial_notes, c.deprecated_by, c.deprecated, c.created_by,
+    c.modified_by, c.created, c.modified, c.deleted
+  </sql>
+
   <sql id="CONCEPT_INSERT_FIELDS">
-    vocabulary_key, parent_key, name, label, alternative_labels, misspelt_labels, definition,
+    vocabulary_key, parent_key, name, label, alternative_labels, misapplied_labels, definition,
     external_definition_urls, same_as_uris, editorial_notes, created_by, modified_by, created, modified
   </sql>
 
@@ -22,10 +28,10 @@
     #{vocabularyKey,jdbcType=INTEGER},
     #{parentKey,jdbcType=INTEGER},
     #{name,jdbcType=VARCHAR},
-    #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
-    #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::hstore,
-    #{misspeltLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::hstore,
-    #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
+    #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
+    #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::jsonb,
+    #{misappliedLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::jsonb,
+    #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
@@ -40,10 +46,10 @@
     parent_key = #{parentKey,jdbcType=INTEGER},
     replaced_by_key = #{replacedByKey,jdbcType=INTEGER},
     name = #{name,jdbcType=VARCHAR},
-    label = #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
-    alternative_labels = #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::hstore,
-    misspelt_labels = #{misspeltLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::hstore,
-    definition = #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::hstore,
+    label = #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
+    alternative_labels = #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::jsonb,
+    misapplied_labels = #{misappliedLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::jsonb,
+    definition = #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     external_definition_urls = #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     same_as_uris = #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     editorial_notes = #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
@@ -74,13 +80,13 @@
   </update>
 
   <select id="get" resultMap="CONCEPT_MAP">
-    SELECT *
+    SELECT <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
     WHERE c.key = #{key,jdbcType=INTEGER}
   </select>
 
   <select id="getByNameAndVocabulary" resultMap="CONCEPT_MAP">
-    SELECT *
+    SELECT <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
     INNER JOIN vocabulary v on v.key = c.vocabulary_key
     WHERE c.name = #{name,jdbcType=VARCHAR} and v.name = #{vocabularyName,jdbcType=VARCHAR}
@@ -135,7 +141,7 @@
   </update>
 
   <select id="list" resultType="Concept" resultMap="CONCEPT_MAP">
-    SELECT *
+    SELECT <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
     <if test="query != null" >
       JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
@@ -214,7 +220,7 @@
     SELECT key, name
     FROM concept
     WHERE vocabulary_key = #{vocabularyKey}
-      AND #{values, typeHandler=StringArrayTypeHandler} &amp;&amp; array_append(avals(label)||avals(alternative_labels)||avals(misspelt_labels), name)
+      AND #{values, typeHandler=StringArrayTypeHandler} &amp;&amp; normalized_values
       <if test="conceptKey != null">
         AND key != #{conceptKey}
       </if>

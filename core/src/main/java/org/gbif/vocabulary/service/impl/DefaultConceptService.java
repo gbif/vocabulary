@@ -4,7 +4,7 @@ import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.normalizers.EntityNormalizer;
+import org.gbif.vocabulary.model.normalizers.StringNormalizer;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
@@ -243,14 +243,14 @@ public class DefaultConceptService implements ConceptService {
     return () -> {
       List<String> valuesToCheck =
           ImmutableList.<String>builder()
-              .add(EntityNormalizer.normalizeName(concept.getName()))
-              .addAll(EntityNormalizer.normalizeLabels(concept.getLabel().values()))
+              .add(StringNormalizer.normalizeName(concept.getName()))
+              .addAll(StringNormalizer.normalizeLabels(concept.getLabel().values()))
               .addAll(
                   Stream.concat(
                           concept.getAlternativeLabels().values().stream(),
                           concept.getMisappliedLabels().values().stream())
                       .flatMap(Collection::stream)
-                      .map(EntityNormalizer::normalizeLabel)
+                      .map(StringNormalizer::normalizeLabel)
                       .collect(Collectors.toList()))
               .build();
 

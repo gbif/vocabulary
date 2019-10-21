@@ -40,12 +40,12 @@
     "vocabularyKey" : null,
     "parentKey" : null,
     "alternativeLabels" : {
-      "SPANISH" : [ "label5", "label6" ],
-      "ENGLISH" : [ "label2", "label3", "label4" ]
+      "spa" : [ "label5", "label6" ],
+      "eng" : [ "label2", "label3", "label4" ]
     },
     "misspeltLabels" : {
-      "SPANISH" : [ "labl5", "labl6" ],
-      "ENGLISH" : [ "labl2", "labl3", "labl4" ]
+      "spa" : [ "labl5", "labl6" ],
+      "eng" : [ "labl2", "labl3", "labl4" ]
     },
     "sameAsUris" : [ ]
   }, {

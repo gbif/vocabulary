@@ -22,9 +22,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
-import static org.gbif.vocabulary.model.normalizers.EntityNormalizer.normalizeLabel;
-import static org.gbif.vocabulary.model.normalizers.EntityNormalizer.normalizeLabels;
-import static org.gbif.vocabulary.model.normalizers.EntityNormalizer.normalizeName;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

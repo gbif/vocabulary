@@ -7,7 +7,7 @@ import java.io.InputStream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jdk.nashorn.internal.ir.annotations.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,8 +24,7 @@ public class VocabularyLookupTest {
     assertNotNull(lookup);
   }
 
-  // TODO
-  @Ignore
+  @Disabled("manual test")
   @Test
   public void loadVocabularyFromApiUrl() throws IOException {
     InputStream in = VocabularyDownloader.downloadVocabulary("http://localhost:8080", "ada");
@@ -34,6 +33,6 @@ public class VocabularyLookupTest {
         new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .readValue(in, VocabularyExport.class);
-    export.toString();
+    assertNotNull(export);
   }
 }

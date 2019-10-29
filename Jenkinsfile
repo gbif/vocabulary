@@ -15,6 +15,7 @@ pipeline {
           steps{
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
               git url: 'https://github.com/gbif/vocabulary.git', branch: 'master'
+              sh 'mvn clean package verify'
               sh('git commit *.html -m "API Documentation"')
               sh('git push git@github.com:gbif/vocabulary.git master')
             }

@@ -14,6 +14,7 @@ pipeline {
         stage('documentation') {
           steps{
             git credentialsId: '4b740850-d7e0-4ab2-9eee-ecd1607e1e02', url: 'https://github.com/gbif/vocabulary.git'
+            sh 'mvn clean package verify'
             sh('git commit *.html -m "API Documentation"')
             sh('git push origin master')
           }

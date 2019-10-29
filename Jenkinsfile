@@ -20,6 +20,7 @@ pipeline {
               }
               sshagent(['credentiald-id-using-ssh-key']) {
                 sh('git commit *.html -m "API Documentation"')
+                sh('git push')
               }
             }
         }

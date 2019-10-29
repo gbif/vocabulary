@@ -18,9 +18,9 @@ pipeline {
                                              variable: 'MAVEN_SETTINGS_XML')]) {
                 sh 'mvn clean package verify dependency:analyze -U'
               }
-              sshagent(['4b740850-d7e0-4ab2-9eee-ecd1607e1e02']) {
+              sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
                 sh('git commit *.html -m "API Documentation"')
-                sh('git push gbif-jenkins2@github.com:gbif/vocabulary.git master')
+                sh('git push gbif-jenkins@github.com:gbif/vocabulary.git master')
               }
             }
         }

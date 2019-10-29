@@ -45,6 +45,8 @@ include::{snippets}/vocabulary-documentation-test/restore-vocabulary-test/auto-s
 
 include::{snippets}/vocabulary-documentation-test/suggest-vocabulary-test/auto-section.adoc[]
 
+include::{snippets}/vocabulary-documentation-test/download-vocabulary-test/auto-section.adoc[]
+
 == Concept
 Methods to work with concepts
 

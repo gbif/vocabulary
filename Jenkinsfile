@@ -53,7 +53,7 @@ pipeline {
           }
         }
         stage('Generate API documentation') {
-          when{ anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION } }
+          when{ anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION } } }
           steps{
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
               sh 'mvn clean package -Pdocumentation'

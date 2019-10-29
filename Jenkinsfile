@@ -32,7 +32,7 @@ pipeline {
               }
             }
         }
-        stage('upload snapshot to nexus') {
+        stage('snapshot to nexus') {
             when{ allOf { not { expression { params.RELEASE } };
                           branch 'master' } }
             steps {

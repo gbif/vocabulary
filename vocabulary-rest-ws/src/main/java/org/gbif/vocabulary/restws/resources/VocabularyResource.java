@@ -6,12 +6,19 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
+import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
@@ -24,10 +31,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class VocabularyResource {
 
   private final VocabularyService vocabularyService;
+  private final ExportService exportService;
 
   @Autowired
-  VocabularyResource(VocabularyService vocabularyService) {
+  VocabularyResource(VocabularyService vocabularyService, ExportService exportService) {
     this.vocabularyService = vocabularyService;
+    this.exportService = exportService;
   }
 
   @GetMapping
@@ -79,7 +88,7 @@ public class VocabularyResource {
       @PathVariable("name") String vocabularyName,
       @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
+    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
 
     vocabularyService.deprecate(
         vocabulary.getKey(),
@@ -94,8 +103,20 @@ public class VocabularyResource {
       @RequestParam(value = "restoreDeprecatedConcepts", required = false)
           boolean restoreDeprecatedConcepts) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    Objects.requireNonNull(vocabulary, "Vocabulary not found for name " + vocabularyName);
+    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
 
     vocabularyService.restoreDeprecated(vocabulary.getKey(), restoreDeprecatedConcepts);
+  }
+
+  @GetMapping(value = "{name}/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<Resource> downloadVocabulary(@PathVariable("name") String vocabularyName)
+      throws IOException {
+    Path exportPath = exportService.exportVocabulary(vocabularyName);
+    ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(exportPath));
+
+    return ResponseEntity.ok()
+        .header(
+            "Content-Disposition", "attachment; filename=" + exportPath.getFileName().toString())
+        .body(resource);
   }
 }

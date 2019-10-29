@@ -16,6 +16,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 
+/**
+ * Intercepts all the deprecation requests and sets the auditable fields. The user is taken from the
+ * security context.
+ */
 @ControllerAdvice
 public class DeprecationRequestAdvice implements RequestBodyAdvice {
 

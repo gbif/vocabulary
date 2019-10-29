@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Tests the {@link VocabularyService}. */
 @Execution(ExecutionMode.SAME_THREAD)
-public class VocabularyServiceTest extends BaseServiceTest<Vocabulary> {
+public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocabulary> {
 
   @Autowired private VocabularyService vocabularyService;
   @MockBean private VocabularyMapper vocabularyMapper;

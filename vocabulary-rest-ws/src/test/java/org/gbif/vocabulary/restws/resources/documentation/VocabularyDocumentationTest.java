@@ -2,11 +2,13 @@ package org.gbif.vocabulary.restws.resources.documentation;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
 import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
+import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
@@ -44,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class VocabularyDocumentationTest extends DocumentationBaseTest {
 
   @MockBean private VocabularyService vocabularyService;
+  @MockBean private ConceptService conceptService;
 
   @Test
   public void listVocabularyTest() throws Exception {
@@ -159,6 +162,18 @@ public class VocabularyDocumentationTest extends DocumentationBaseTest {
             delete(getBasePath() + "/" + vocabulary.getName() + "/deprecate")
                 .with(authorizationDocumentation()))
         .andExpect(status().isNoContent());
+  }
+
+  @Test
+  public void downloadVocabularyTest() throws Exception {
+    Vocabulary vocabulary = createVocabulary("exportableVocab");
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+    when(conceptService.list(any(), any())).thenReturn(new PagingResponse<Concept>(0L, 0, 0L));
+
+    mockMvc
+        .perform(get(getBasePath() + "/" + vocabulary.getName() + "/download"))
+        .andExpect(status().isOk())
+        .andExpect(header().exists("Content-Disposition"));
   }
 
   @Override

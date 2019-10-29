@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,15 +23,19 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.cache2k.Cache;
 import org.cache2k.Cache2kBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 /** Class that allows to load a vocabulary export in memory to do fast lookups by concept labels. */
-public class VocabularyLookup {
+public class VocabularyLookup implements AutoCloseable {
 
+  private static final Logger LOG = LoggerFactory.getLogger(VocabularyLookup.class);
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper().registerModule(new JavaTimeModule());
 
@@ -41,6 +44,7 @@ public class VocabularyLookup {
   private Vocabulary vocabulary;
 
   private VocabularyLookup(InputStream in) {
+    Objects.requireNonNull(in);
     conceptCache =
         Cache2kBuilder.of(String.class, Concept.class)
             .eternal(true)
@@ -62,21 +66,18 @@ public class VocabularyLookup {
    * @return {@link VocabularyLookup} with the vocabulary loaded in memory.
    */
   public static VocabularyLookup load(InputStream in) {
-    return new VocabularyLookup(Objects.requireNonNull(in));
+    return new VocabularyLookup(in);
   }
 
   public Optional<Concept> lookup(String value) {
     checkArgument(!Strings.isNullOrEmpty(value), "A value to lookup for is required");
 
     // base normalization
-    String normalizedValue = normalizeLabel(value);
+    String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
 
     List<UnaryOperator<String>> normalizations =
         ImmutableList.of(
-            UnaryOperator.identity(),
-            StringNormalizer::normalizeName,
-            StringNormalizer::replaceNonAsciiCharactersWithEquivalents,
-            StringNormalizer::replaceNonAlphanumericCharacters);
+            UnaryOperator.identity(), StringNormalizer::stripNonAlphanumericCharacters);
 
     return normalizations.stream()
         .map(n -> conceptCache.get(n.apply(normalizedValue)))
@@ -84,10 +85,15 @@ public class VocabularyLookup {
         .findFirst();
   }
 
-  private void processVocabularyExport(InputStream in) {
-    JsonFactory jsonFactory = OBJECT_MAPPER.getFactory();
+  @Override
+  public void close() throws Exception {
+    if (conceptCache != null) {
+      conceptCache.close();
+    }
+  }
 
-    try (JsonParser parser = jsonFactory.createParser(in)) {
+  private void processVocabularyExport(InputStream in) {
+    try (JsonParser parser = OBJECT_MAPPER.getFactory().createParser(in)) {
       // root
       parser.nextToken();
 
@@ -111,12 +117,12 @@ public class VocabularyLookup {
           Concept concept = OBJECT_MAPPER.readValue(parser, Concept.class);
 
           // add name to the cache
-          conceptCache.put(normalizeName(concept.getName()), concept);
+          addToCache(normalizeName(concept.getName()), concept);
 
           // add labels to the cache
           concept.getLabel().values().stream()
               .map(StringNormalizer::normalizeLabel)
-              .forEach(v -> conceptCache.put(v, concept));
+              .forEach(v -> addToCache(v, concept));
 
           // add alternative and misapplied labels to the cache
           Stream.concat(
@@ -124,7 +130,7 @@ public class VocabularyLookup {
                   concept.getMisappliedLabels().values().stream())
               .flatMap(Collection::stream)
               .map(StringNormalizer::normalizeLabel)
-              .forEach(v -> conceptCache.put(v, concept));
+              .forEach(v -> addToCache(v, concept));
 
           parser.nextValue();
         }
@@ -132,5 +138,25 @@ public class VocabularyLookup {
     } catch (IOException e) {
       throw new IllegalArgumentException("Couldn't parse json vocabulary", e);
     }
+  }
+
+  private void addToCache(String value, Concept concept) {
+    String normalizedValue = StringNormalizer.replaceNonAsciiCharactersWithEquivalents(value);
+    boolean added = conceptCache.putIfAbsent(normalizedValue, concept);
+
+    if (!added) {
+      Concept existingConcept = conceptCache.get(normalizedValue);
+      if (!existingConcept.equals(concept)) {
+        LOG.warn("Duplicated key {} present in concept {} and {}", value, concept, existingConcept);
+      }
+    }
+  }
+
+  public ExportMetadata getExportMetadata() {
+    return exportMetadata;
+  }
+
+  public Vocabulary getVocabulary() {
+    return vocabulary;
   }
 }

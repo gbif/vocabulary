@@ -11,14 +11,13 @@ import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -51,7 +50,12 @@ public class DefaultExportService implements ExportService {
 
   @Override
   public Path exportVocabulary(@NotBlank String vocabularyName) {
-    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    Vocabulary vocabulary =
+        Optional.ofNullable(vocabularyService.getByName(vocabularyName))
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "Couldn't find vocabulary with name " + vocabularyName));
 
     Path exportPath = createExportFile(vocabulary.getName());
 

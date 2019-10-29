@@ -73,7 +73,7 @@ final class AsciiParser {
    * @param c The character to fold
    * @param sb String builder to append to
    */
-  private static final void foldToASCII(final char c, StringBuilder sb) {
+  private static void foldToASCII(final char c, StringBuilder sb) {
     // Quick test: if it's not in range then just keep current character
     if (c < '\u0080') {
       sb.append(c);

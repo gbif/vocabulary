@@ -11,7 +11,9 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** Tests the {@link VocabularyLookup}. */
 public class VocabularyLookupTest {
 
   private static final String TEST_FILE = "test-vocab.json";
@@ -27,12 +29,25 @@ public class VocabularyLookupTest {
   @Disabled("manual test")
   @Test
   public void loadVocabularyFromApiUrl() throws IOException {
-    InputStream in = VocabularyDownloader.downloadVocabulary("http://localhost:8080", "ada");
+    InputStream in = VocabularyDownloader.downloadVocabulary("http://localhost:8080", "a");
 
     VocabularyExport export =
         new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .readValue(in, VocabularyExport.class);
     assertNotNull(export);
+  }
+
+  @Test
+  public void lookupTest() {
+    VocabularyLookup vocabulary =
+        VocabularyLookup.load(
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_FILE));
+
+    assertTrue(vocabulary.lookup("February").isPresent());
+    assertTrue(vocabulary.lookup("Fev").isPresent());
+    assertTrue(vocabulary.lookup("Fév").isPresent());
+    assertTrue(vocabulary.lookup("ÉnERo").isPresent());
+    assertTrue(vocabulary.lookup("eneiro.").isPresent());
   }
 }

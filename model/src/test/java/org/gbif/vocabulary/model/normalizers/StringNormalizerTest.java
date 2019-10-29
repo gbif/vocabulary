@@ -28,6 +28,6 @@ public class StringNormalizerTest {
   @Test
   public void replaceNonAlphanumericCharactersTest() {
     assertEquals(
-        "abc123", StringNormalizer.replaceNonAlphanumericCharacters("!?|%#&*<>abc123{)];' "));
+        "abc123", StringNormalizer.stripNonAlphanumericCharacters("!?|%#&*<>abc123{)];' "));
   }
 }

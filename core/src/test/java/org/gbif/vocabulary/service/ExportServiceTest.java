@@ -73,10 +73,10 @@ public class ExportServiceTest extends MockServiceBaseTest {
     c1.setAlternativeLabels(alternativeLabels);
 
     // misspelt labels
-    Map<Language, List<String>> misspeltLabels = new HashMap<>();
-    misspeltLabels.put(Language.ENGLISH, Arrays.asList("labl2", "labl3", "labl4"));
-    misspeltLabels.put(Language.SPANISH, Arrays.asList("labl5", "labl6"));
-    c1.setMisspeltLabels(misspeltLabels);
+    Map<Language, List<String>> misappliedLabels = new HashMap<>();
+    misappliedLabels.put(Language.ENGLISH, Arrays.asList("labl2", "labl3", "labl4"));
+    misappliedLabels.put(Language.SPANISH, Arrays.asList("labl5", "labl6"));
+    c1.setMisappliedLabels(misappliedLabels);
 
     Concept c2 = new Concept();
     c2.setName("c2");

@@ -56,12 +56,12 @@ public class StringNormalizer {
   }
 
   /**
-   * Replaces all non-alphanumeric characters. It doesn't change the case.
+   * Strips all non-alphanumeric characters. It doesn't change the case.
    *
    * @param input text to normalize
    * @return text without non-alphanumeric characters
    */
-  public static String replaceNonAlphanumericCharacters(String input) {
+  public static String stripNonAlphanumericCharacters(String input) {
     return NON_ALPHANUMERIC_PATTERN.matcher(input).replaceAll(EMPTY);
   }
 }

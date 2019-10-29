@@ -20,7 +20,7 @@ pipeline {
               }
               sshagent(['4b740850-d7e0-4ab2-9eee-ecd1607e1e02']) {
                 sh('git commit *.html -m "API Documentation"')
-                sh('git push --repo=gbif-jenkins2@github.com:gbif/vocabulary.git origin master')
+                sh('git push gbif-jenkins2@github.com:gbif/vocabulary.git master')
               }
             }
         }

@@ -18,9 +18,9 @@ pipeline {
                                              variable: 'MAVEN_SETTINGS_XML')]) {
                 sh 'mvn clean package verify dependency:analyze -U'
               }
-              sshagent(['credentiald-id-using-ssh-key']) {
+              sshagent(['4b740850-d7e0-4ab2-9eee-ecd1607e1e02']) {
                 sh('git commit *.html -m "API Documentation"')
-                sh('git push')
+                sh('git push origin master')
               }
             }
         }

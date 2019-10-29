@@ -18,6 +18,9 @@ pipeline {
                                              variable: 'MAVEN_SETTINGS_XML')]) {
                 sh 'mvn clean package verify dependency:analyze -U'
               }
+              sshagent(['credentiald-id-using-ssh-key']) {
+                sh('git commit *.html -m "API Documentation"')
+              }
             }
         }
         stage('SonarQube analysis') {
@@ -28,7 +31,7 @@ pipeline {
               }
             }
         }
-        stage('deploy snapshot version to nexus') {
+        stage('release snapshot to nexus') {
             when{ allOf { not { expression { params.RELEASE } };
                           branch 'master' } }
             steps {
@@ -38,7 +41,7 @@ pipeline {
               }
             }
         }
-        stage('deploy release version to nexus') {
+        stage('release version to nexus') {
           when{ expression { params.RELEASE } }
           steps {
             configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',

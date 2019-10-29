@@ -57,8 +57,9 @@ pipeline {
           steps{
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
               sh 'mvn clean package -Pdocumentation'
-              sh('git commit -a *.html -m "Generated API documentation"')
-              sh('git push git@github.com:gbif/vocabulary.git master')
+              sh 'git add *.html'
+              sh 'git commit -m "Generated API documentation"'
+              sh 'git push git@github.com:gbif/vocabulary.git master'
             }
           }
         }

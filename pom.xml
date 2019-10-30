@@ -64,7 +64,7 @@
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 
     <!-- gbif -->
-    <gbif-api.version>0.94.4-jackson2</gbif-api.version>
+    <gbif-api.version>0.96.1-jackson2</gbif-api.version>
     <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
 
     <!-- version limited by gbif-api -->
@@ -89,6 +89,9 @@
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.jacoco.reportPath>${project.build.directory}/target/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.language>java</sonar.language>
+    <sonar.exclusions>**/AsciiParser.java</sonar.exclusions>
+    <sonar.cpd.exclusions>**/AsciiParser.java</sonar.cpd.exclusions>
+    <sonar.coverage.exclusions>**/AsciiParser.java</sonar.coverage.exclusions>
   </properties>
 
   <dependencyManagement>

@@ -53,7 +53,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity> exten
   }
 
   @Test
-  public void getTest() {
+  public void getEntityTest() {
     // mock
     when(getMapper().get(TEST_KEY)).thenReturn(createNewEntity("name"));
 

@@ -3,12 +3,13 @@ package org.gbif.vocabulary.model.export;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** Models an export of a vocabulary with all its concepts. */
-public class VocabularyExport {
+public class VocabularyExport implements Serializable {
 
   public static final String METADATA_PROP = "metadata";
   public static final String VOCABULARY_PROP = "vocabulary";

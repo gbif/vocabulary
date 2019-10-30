@@ -89,6 +89,9 @@
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.jacoco.reportPath>${project.build.directory}/target/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.language>java</sonar.language>
+    <sonar.exclusions>**/AsciiParser.java</sonar.exclusions>
+    <sonar.cpd.exclusions>**/AsciiParser.java</sonar.cpd.exclusions>
+    <sonar.coverage.exclusions>**/AsciiParser.java</sonar.coverage.exclusions>
   </properties>
 
   <dependencyManagement>

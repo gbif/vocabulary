@@ -38,12 +38,12 @@ public class GlobalControllerAdvice {
   }
 
   @ExceptionHandler({IllegalArgumentException.class, ConstraintViolationException.class})
-  public ResponseEntity<Object> invalidFieldsExceptions(WebRequest request, Exception ex) {
+  public ResponseEntity<Object> handleInvalidFieldsExceptions(WebRequest request, Exception ex) {
     return buildResponse(request, HttpStatus.UNPROCESSABLE_ENTITY, INVALID_PARAM_ERROR);
   }
 
   @ExceptionHandler(DuplicateKeyException.class)
-  public ResponseEntity<Object> dbDuplicatedKeyException(
+  public ResponseEntity<Object> handleDBDuplicatedKeyException(
       WebRequest request, DuplicateKeyException ex) {
     return buildResponse(
         request,
@@ -53,7 +53,7 @@ public class GlobalControllerAdvice {
   }
 
   @ExceptionHandler(PSQLException.class)
-  public ResponseEntity<Object> dbException(WebRequest request, PSQLException ex) {
+  public ResponseEntity<Object> handleDBException(WebRequest request, PSQLException ex) {
     return buildResponse(
         request,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -62,7 +62,7 @@ public class GlobalControllerAdvice {
   }
 
   @ExceptionHandler(IOException.class)
-  public ResponseEntity<Object> IOException(WebRequest request, IOException ex) {
+  public ResponseEntity<Object> handleIOException(WebRequest request, IOException ex) {
     return buildResponse(
       request,
       HttpStatus.INTERNAL_SERVER_ERROR,

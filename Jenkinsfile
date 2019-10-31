@@ -17,7 +17,7 @@ pipeline {
     stages {
         stage('test') {
           steps {
-            sh 'mkdir testdir'
+            git credentialsId: '85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f', url: 'https://github.com/gbif/gbif-configuration.git'
           }
         }
         stage('build') {

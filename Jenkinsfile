@@ -15,6 +15,11 @@ pipeline {
           description: 'Generate API documentation')
     }
     stages {
+        stage('test') {
+          steps {
+            sh 'mkdir testdir'
+          }
+        }
         stage('build') {
             when{ not { expression { params.RELEASE } } }
             steps {

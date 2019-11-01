@@ -17,9 +17,6 @@ pipeline {
           defaultValue: false,
           description: 'Generate API documentation')
     }
-    environment {
-      GIT_EMAIL=$(git --no-pager show -s --format='%ae' $GIT_COMMIT)
-    }
     stages {
         stage('Build') {
             when { allOf {
@@ -123,8 +120,8 @@ pipeline {
         }
     }
     post {
-      always {
-        mail to: '${GIT_EMAIL}',
+      failure {
+        mail to: 'mlopez@gbif.org',
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"
       }

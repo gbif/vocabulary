@@ -103,7 +103,7 @@ pipeline {
                     service.yml >> group_vars/$BUILD_ID
 
                 # create hosts for this build
-                cat > hosts <<EOF
+                cat > hosts <<-EOF
                 [$BUILD_ID:children]
                 appserver
                 mapserver

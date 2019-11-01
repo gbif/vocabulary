@@ -116,7 +116,7 @@ pipeline {
           }
         }
         post {
-          failure {
+          always {
             mail to: '${GIT_COMMITTER_EMAIL}',
                  subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
                  body: "Something is wrong with ${env.BUILD_URL}"

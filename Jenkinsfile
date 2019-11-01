@@ -81,12 +81,7 @@ pipeline {
                 mkdir group_vars
 
                 # create service for vocabulary
-                cat <<EOF> tt
-a
-a
-EOF
-
-                cat > service.yml <<-'EOF'
+                cat <<-EOF> service.yml
                 services: [
                 {
                   groupId: org.gbif.vocabulary,
@@ -108,7 +103,7 @@ EOF
                     service.yml >> group_vars/$BUILD_ID
 
                 # create hosts for this build
-                cat > hosts <<-'EOF'
+                cat <<-EOF> hosts
                 [$BUILD_ID:children]
                 appserver
                 mapserver

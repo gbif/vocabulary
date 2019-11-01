@@ -81,13 +81,6 @@ pipeline {
                 mkdir group_vars
 
                 # create service for vocabulary
-
-                cmd ="<<-EOF> test.yml"
-                cmd="$cmd services: ["
-                cmd="$cmd EOF"
-
-                cat $cmd
-
                 cat <<-EOF> service.yml
                 services: [
                 {
@@ -125,7 +118,7 @@ pipeline {
                 echo "Executing Ansible playbook"
 
                 ansible-playbook -vvv -i $BUILD_ID_hosts services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=$GIT_CREDENTIALS"
-              '''
+              '''.stripIndent()
             }
           }
         }

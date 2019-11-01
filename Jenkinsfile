@@ -81,7 +81,7 @@ pipeline {
                 mkdir group_vars
 
                 # create service for vocabulary
-                cat <<EOF > tt
+                cat <<EOF> tt
 a
 a
 EOF

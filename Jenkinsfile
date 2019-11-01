@@ -81,7 +81,7 @@ pipeline {
                 mkdir group_vars
 
                 # create service for vocabulary
-                cat > service.yml <<EOF
+                cat > service.yml <<-EOF
                 services: [
                 {
                   groupId: org.gbif.vocabulary,

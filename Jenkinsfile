@@ -81,6 +81,13 @@ pipeline {
                 mkdir group_vars
 
                 # create service for vocabulary
+
+                cmd ="<<-EOF> test.yml"
+                cmd="$cmd services: ["
+                cmd="$cmd EOF"
+
+                cat $cmd
+
                 cat <<-EOF> service.yml
                 services: [
                 {

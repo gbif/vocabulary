@@ -80,7 +80,7 @@ pipeline {
                 # Configuration and services files are concatenated into a single file, that will contain the Ansible variables
                 cat ../../gbif-configuration/environments/dev/configuration.yml \
                     ../../gbif-configuration/environments/dev/monitoring.yml \
-                    ../../gbif-configuration/vocabulary-rest-ws/dev/deploy/service.yml >> group_vars/build_vars
+                    ../../gbif-configuration/vocabulary-rest-ws/dev/deploy/service.yml >> group_vars/build
 
                 # The default Ansible inventory file 'hosts' is concatenated with the input HOSTS file
                 cat ../../gbif-configuration/environments/dev/hosts \

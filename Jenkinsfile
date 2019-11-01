@@ -109,6 +109,18 @@ pipeline {
               '''
             }
           }
+          post {
+            always {
+                ssh 'rm -rf *'
+            }
+          }
+        }
+        post {
+          failure {
+            mail to: '${GIT_COMMITTER_EMAIL}',
+                 subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
+                 body: "Something is wrong with ${env.BUILD_URL}"
+          }
         }
     }
 }

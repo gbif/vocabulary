@@ -5,7 +5,7 @@ pipeline {
        jdk 'JDK8'
     }
     options {
-       buildDiscarder(logRotator(numToKeepStr: '4', artifactNumToKeepStr: '4'))
+       buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     parameters {
        booleanParam(
@@ -124,7 +124,7 @@ pipeline {
     }
     post {
       always {
-        mail to: ${GIT_EMAIL},
+        mail to: '${GIT_EMAIL}',
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"
       }

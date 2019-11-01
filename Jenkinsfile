@@ -1,12 +1,12 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven3.2'
-        jdk 'JDK8'
+       maven 'Maven3.2'
+       jdk 'JDK8'
     }
     options {
-        buildDiscarder(logRotator(numToKeepStr: '4', artifactNumToKeepStr: '4'))
-      }
+       buildDiscarder(logRotator(numToKeepStr: '4', artifactNumToKeepStr: '4'))
+    }
     parameters {
        booleanParam(
           name: 'RELEASE',
@@ -16,6 +16,9 @@ pipeline {
           name: 'DOCUMENTATION',
           defaultValue: false,
           description: 'Generate API documentation')
+    }
+    environment {
+      GIT_EMAIL=$(git --no-pager show -s --format='%ae' $GIT_COMMIT)
     }
     stages {
         stage('Build') {
@@ -121,7 +124,7 @@ pipeline {
     }
     post {
       failure {
-        mail to: 'mlopez@gbif.org',
+        mail to: ${GIT_EMAIL},
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"
       }

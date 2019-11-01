@@ -104,7 +104,7 @@ pipeline {
 
                 # create hosts for this build
                 cat <<-EOF> hosts
-                [$BUILD_ID:children]
+                [${BUILD_ID}:children]
                 appserver
                 mapserver
                 varnish5

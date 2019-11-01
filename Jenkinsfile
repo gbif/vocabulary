@@ -112,11 +112,6 @@ pipeline {
               '''
             }
           }
-          post {
-            always {
-                ssh 'rm -rf *'
-            }
-          }
         }
     }
     post {

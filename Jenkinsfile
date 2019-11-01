@@ -14,6 +14,9 @@ pipeline {
           defaultValue: false,
           description: 'Generate API documentation')
     }
+    environment {
+      GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
+    }
     stages {
         stage('build') {
             when{ not { expression { params.RELEASE } } }
@@ -66,8 +69,6 @@ pipeline {
         stage('Deploy to DEV') {
           steps {
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
-              GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
-
               sh '''
                 git clone -b master git@github.com:gbif/gbif-configuration.git
                 git clone -b master git@github.com:gbif/c-deploy

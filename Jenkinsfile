@@ -14,12 +14,12 @@ pipeline {
           defaultValue: false,
           description: 'Generate API documentation')
     }
-    environment {
-      GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
-    }
     stages {
         stage('build') {
-            when{ not { expression { params.RELEASE } } }
+            when { allOf {
+                    not { expression { params.RELEASE } };
+                    not { expression { params.DOCUMENTATION } };
+            } }
             steps {
               configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                              variable: 'MAVEN_SETTINGS_XML')]) {
@@ -28,16 +28,22 @@ pipeline {
             }
         }
         stage('SonarQube analysis') {
-            when{ not { expression { params.RELEASE } } }
-            steps{
+            when { allOf {
+                    not { expression { params.RELEASE } };
+                    not { expression { params.DOCUMENTATION } };
+            } }
+            steps {
               withSonarQubeEnv('GBIF Sonarqube') {
                 sh 'mvn sonar:sonar'
               }
             }
         }
         stage('snapshot to nexus') {
-            when{ allOf { not { expression { params.RELEASE } };
-                          branch 'master' } }
+            when { allOf {
+                    not { expression { params.RELEASE } };
+                    not { expression { params.DOCUMENTATION } };
+                    branch 'master';
+             } }
             steps {
               configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                              variable: 'MAVEN_SETTINGS_XML')]) {
@@ -46,7 +52,7 @@ pipeline {
             }
         }
         stage('release version to nexus') {
-          when{ expression { params.RELEASE } }
+          when { expression { params.RELEASE } }
           steps {
             configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                                          variable: 'MAVEN_SETTINGS_XML')]) {
@@ -56,9 +62,10 @@ pipeline {
           }
         }
         stage('Generate API documentation') {
-          when{ anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION } } }
-          steps{
+          when { anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION } } }
+          steps {
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
+              git 'https://github.com/gbif/vocabulary.git'
               sh 'mvn clean package -Pdocumentation'
               sh 'git add *.html'
               sh 'git commit -m "Generated API documentation"'
@@ -67,6 +74,14 @@ pipeline {
           }
         }
         stage('Deploy to DEV') {
+          environment {
+            GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
+          }
+          when { allOf {
+            not { expression { params.RELEASE } };
+            not { expression { params.DOCUMENTATION } };
+            branch 'master'
+          } }
           steps {
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
               sh '''

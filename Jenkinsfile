@@ -100,7 +100,7 @@ pipeline {
                 # Configuration and services files are concatenated into a single file, that will contain the Ansible variables
                 cat ../../gbif-configuration/environments/dev/configuration.yml \
                     ../../gbif-configuration/environments/dev/monitoring.yml \
-                    service.yml >> group_vars/$BUILD_ID
+                    service.yml >> group_vars/${BUILD_ID}
 
                 # create hosts for this build
                 cat <<-EOF> hosts
@@ -117,7 +117,7 @@ pipeline {
                 # Executes the Ansible playbook
                 echo "Executing Ansible playbook"
 
-                ansible-playbook -vvv -i $BUILD_ID_hosts services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=$GIT_CREDENTIALS"
+                ansible-playbook -vvv -i ${BUILD_ID}_hosts services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=$GIT_CREDENTIALS"
               '''.stripIndent()
             }
           }

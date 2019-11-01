@@ -71,10 +71,10 @@ pipeline {
               git 'https://github.com/gbif/vocabulary.git'
               sh '''
                 cd vocabulary-rest-ws
-                mvn clean package -Pdocumentation'
-                sh 'git add *.html'
-                sh 'git commit -m "Generated API documentation"'
-                sh 'git push git@github.com:gbif/vocabulary.git master
+                mvn clean package -Pdocumentation
+                git add *.html
+                git commit -m "Generated API documentation"
+                git push git@github.com:gbif/vocabulary.git master
               '''
             }
           }

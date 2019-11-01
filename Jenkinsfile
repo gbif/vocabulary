@@ -106,7 +106,7 @@ pipeline {
 
                 # The default Ansible inventory file 'hosts' is concatenated with the input HOSTS file
                 cat ../../gbif-configuration/environments/dev/hosts \
-                    ../../gbif-configuration/vocabulary-rest-ws/dev/deploy/hosts >> build_hosts
+                    ../../gbif-configuration/vocabulary-rest-ws/dev/deploy/build_hosts >> build_hosts
 
                 # Executes the Ansible playbook
                 echo "Executing Ansible playbook"

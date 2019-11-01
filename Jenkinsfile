@@ -68,7 +68,7 @@ pipeline {
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
               GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
 
-              sh '
+              sh '''
                 git clone -b master git@github.com:gbif/gbif-configuration.git
                 git clone -b master git@github.com:gbif/c-deploy
 
@@ -89,7 +89,7 @@ pipeline {
                 echo "Executing Ansible playbook"
 
                 ansible-playbook -vvv -i build_hosts services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=$GIT_CREDENTIALS"
-              '
+              '''
             }
           }
         }

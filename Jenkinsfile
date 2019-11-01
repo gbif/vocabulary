@@ -15,7 +15,7 @@ pipeline {
           description: 'Generate API documentation')
     }
     stages {
-        stage('build') {
+        stage('Build') {
             when { allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
@@ -38,7 +38,7 @@ pipeline {
               }
             }
         }
-        stage('snapshot to nexus') {
+        stage('Snapshot to nexus') {
             when { allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
@@ -51,7 +51,7 @@ pipeline {
               }
             }
         }
-        stage('release version to nexus') {
+        stage('Release version to nexus') {
           when { expression { params.RELEASE } }
           steps {
             configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
@@ -118,7 +118,7 @@ pipeline {
     }
     post {
       always {
-        mail to: '${GIT_COMMITTER_EMAIL}',
+        mail to: 'mlopez@gbif.org',
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"
       }

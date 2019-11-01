@@ -103,7 +103,7 @@ pipeline {
                     service.yml >> group_vars/${BUILD_ID}
 
                 # create hosts for this build
-                cat <<-EOF> hosts
+                cat <<-EOF> deploy_hosts
                 [${BUILD_ID}:children]
                 appserver
                 mapserver
@@ -112,7 +112,7 @@ pipeline {
                 EOF
 
                 # The default Ansible inventory file 'hosts' is concatenated with the input HOSTS file
-                cat ../../gbif-configuration/environments/dev/hosts hosts >> $BUILD_ID_hosts
+                cat ../../gbif-configuration/environments/dev/hosts deploy_hosts >> ${BUILD_ID}_hosts
 
                 # Executes the Ansible playbook
                 echo "Executing Ansible playbook"

@@ -70,6 +70,7 @@ pipeline {
           steps {
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
               sh '''
+                rm -rf *
                 git clone -b master git@github.com:gbif/gbif-configuration.git
                 git clone -b master git@github.com:gbif/c-deploy
 

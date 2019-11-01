@@ -4,6 +4,9 @@ pipeline {
         maven 'Maven3.2'
         jdk 'JDK8'
     }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '4', artifactNumToKeepStr: '4'))
+      }
     parameters {
        booleanParam(
           name: 'RELEASE',
@@ -117,7 +120,7 @@ pipeline {
         }
     }
     post {
-      always {
+      failure {
         mail to: 'mlopez@gbif.org',
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"

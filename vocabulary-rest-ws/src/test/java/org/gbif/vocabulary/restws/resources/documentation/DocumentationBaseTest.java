@@ -83,7 +83,6 @@ abstract class DocumentationBaseTest {
   public void setUp(RestDocumentationContextProvider restDocumentation) {
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(this.context)
-            //            .addFilters(springSecurityFilterChain)
             .alwaysDo(JacksonResultHandlers.prepareJackson(OBJECT_MAPPER))
             .alwaysDo(
                 MockMvcRestDocumentation.document(
@@ -149,7 +148,8 @@ abstract class DocumentationBaseTest {
     concept.setAlternativeLabels(
         Collections.singletonMap(
             Language.ENGLISH, Arrays.asList("Alt label", "Another alt label")));
-    concept.setMisappliedLabels(Collections.singletonMap(Language.ENGLISH, Arrays.asList("Labl")));
+    concept.setMisappliedLabels(
+        Collections.singletonMap(Language.ENGLISH, Collections.singletonList("Labl")));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

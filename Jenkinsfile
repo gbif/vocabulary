@@ -15,11 +15,6 @@ pipeline {
           description: 'Generate API documentation')
     }
     stages {
-        stage('test') {
-          steps {
-            git credentialsId: '85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f', url: 'git@github.com:gbif/gbif-configuration.git'
-          }
-        }
         stage('build') {
             when{ not { expression { params.RELEASE } } }
             steps {
@@ -65,6 +60,36 @@ pipeline {
               sh 'git add *.html'
               sh 'git commit -m "Generated API documentation"'
               sh 'git push git@github.com:gbif/vocabulary.git master'
+            }
+          }
+        }
+        stage('Deploy to DEV') {
+          steps {
+            sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
+              GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02	')
+
+              sh '
+                git clone -b master git@github.com:gbif/gbif-configuration.git
+                git clone -b master git@github.com:gbif/c-deploy
+
+                cd c-deploy/services
+                echo "Creating group_vars directory"
+                mkdir group_vars
+
+                # Configuration and services files are concatenated into a single file, that will contain the Ansible variables
+                cat ../../gbif-configuration/environments/dev/configuration.yml \
+                    ../../gbif-configuration/environments/dev/monitoring.yml \
+                    ../../gbif-configuration/vocabulary-rest-ws/dev/deploy/service.yml >> group_vars/build_vars
+
+                # The default Ansible inventory file 'hosts' is concatenated with the input HOSTS file
+                cat ../../gbif-configuration/environments/dev/hosts \
+                    ../../gbif-configuration/vocabulary-rest-ws/dev/deploy/hosts >> build_hosts
+
+                # Executes the Ansible playbook
+                echo "Executing Ansible playbook"
+
+                ansible-playbook -vvv -i build_hosts services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=$GIT_CREDENTIALS"
+              '
             }
           }
         }

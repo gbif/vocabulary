@@ -84,8 +84,8 @@ pipeline {
           }
           when { allOf {
             not { expression { params.RELEASE } };
-            not { expression { params.DOCUMENTATION } };
-            branch 'master'
+            not { expression { params.DOCUMENTATION } }//;
+//             branch 'master'
           } }
           steps {
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
@@ -97,7 +97,11 @@ pipeline {
                 cd c-deploy/services
                 echo "Creating group_vars directory"
                 mkdir group_vars
+               '''
 
+               createServiceFile('../../gbif-configuration/environments/dev/services.yml')
+
+              sh '''
                 # Configuration and services files are concatenated into a single file, that will contain the Ansible variables
                 cat ../../gbif-configuration/environments/dev/configuration.yml \
                     ../../gbif-configuration/environments/dev/monitoring.yml \
@@ -124,3 +128,25 @@ pipeline {
       }
     }
 }
+
+ void createServiceFile(String servicesPath) {
+   def services = readYaml file: servicesPath
+   # create service for vocabulary
+    sh '''
+      cat <<-EOF> service-test.yml
+      services: [
+      {
+        groupId: ${services.groupId},
+        artifactId: ${services.artifactId},
+        packaging: jar,
+        version: LATEST,
+        framework: spring,
+        testOnDeploy: 1,
+        httpPort: 8114,
+        httpAdminPort: 8115,
+        useFixedPorts: 0
+      }
+      ]
+      EOF
+    '''.stripIndent()
+ }

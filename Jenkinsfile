@@ -126,7 +126,7 @@ pipeline {
     }
     post {
       always {
-        mail to: "${env.GIT_COMMITTER_EMAIL}",
+        mail to: "mlopez@gbif.org",
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"
       }

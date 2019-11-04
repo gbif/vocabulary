@@ -22,7 +22,6 @@ pipeline {
             when { allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
-                    branch 'master'; // TODO:remove
             } }
             steps {
               configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
@@ -35,7 +34,6 @@ pipeline {
             when { allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
-                    branch 'master'; // TODO:remove
             } }
             steps {
               withSonarQubeEnv('GBIF Sonarqube') {

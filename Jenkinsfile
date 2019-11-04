@@ -93,15 +93,15 @@ pipeline {
                 rm -rf *
                 git clone -b master git@github.com:gbif/gbif-configuration.git
                 git clone -b master git@github.com:gbif/c-deploy
+               '''
 
+               createServiceFile('${WORKSPACE}/gbif-configuration/environments/dev/services.yml')
+
+              sh '''
                 cd c-deploy/services
                 echo "Creating group_vars directory"
                 mkdir group_vars
-               '''
 
-               createServiceFile('../../gbif-configuration/environments/dev/services.yml')
-
-              sh '''
                 # Configuration and services files are concatenated into a single file, that will contain the Ansible variables
                 cat ../../gbif-configuration/environments/dev/configuration.yml \
                     ../../gbif-configuration/environments/dev/monitoring.yml \

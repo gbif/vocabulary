@@ -22,7 +22,6 @@ pipeline {
             when { allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
-                    branch 'master'; // TODO: remove
             } }
             steps {
               configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
@@ -35,7 +34,6 @@ pipeline {
             when { allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
-                    branch 'master'; // TODO: remove
             } }
             steps {
               withSonarQubeEnv('GBIF Sonarqube') {
@@ -88,8 +86,8 @@ pipeline {
           }
           when { allOf {
             not { expression { params.RELEASE } };
-            not { expression { params.DOCUMENTATION } }//;
-//             branch 'master' TODO: uncomment
+            not { expression { params.DOCUMENTATION } };
+            branch 'master';
           } }
           steps {
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
@@ -118,7 +116,6 @@ pipeline {
 
                 # Executes the Ansible playbook
                 echo "Executing Ansible playbook"
-
                 ansible-playbook -vvv -i ${BUILD_ID}_hosts services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=$GIT_CREDENTIALS"
               """
             }
@@ -127,7 +124,7 @@ pipeline {
     }
     post {
       failure {
-        mail to: 'mlopez@gbif.org',
+        mail to: "${GIT_AUTHOR_EMAIL}",
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"
       }

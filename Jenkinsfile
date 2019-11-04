@@ -131,12 +131,19 @@ pipeline {
 
  void createServiceFile(String servicesPath) {
    def services = readYaml file: servicesPath
+   def vocabularyService
+   for(service in services){
+    if (service.artifactId == "vocabulary-rest-ws") {
+      vocabularyService = service
+    }
+   }
+
     sh """
       cat <<-EOF> service-test.yml
       services: [
       {
-        groupId: ${services.groupId},
-        artifactId: ${services.artifactId},
+        groupId: ${vocabularyService.groupId},
+        artifactId: ${vocabularyService.artifactId},
         packaging: jar,
         version: LATEST,
         framework: spring,

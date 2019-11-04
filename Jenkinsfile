@@ -131,7 +131,6 @@ pipeline {
 
  void createServiceFile(String servicesPath) {
    def services = readYaml file: servicesPath
-   # create service for vocabulary
     sh '''
       cat <<-EOF> service-test.yml
       services: [

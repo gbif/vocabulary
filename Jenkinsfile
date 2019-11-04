@@ -131,7 +131,7 @@ pipeline {
 
  void createServiceFile(String servicesPath) {
    def services = readYaml file: servicesPath
-    sh '''
+    sh "
       cat <<-EOF> service-test.yml
       services: [
       {
@@ -147,5 +147,5 @@ pipeline {
       }
       ]
       EOF
-    '''.stripIndent()
+    ".stripIndent()
  }

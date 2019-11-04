@@ -130,9 +130,11 @@ pipeline {
 }
 
  void createServiceFile(String servicesPath) {
-   def services = readYaml file: servicesPath
+   def allServices = readYaml file: servicesPath
+   pri
+
    def vocabularyService
-   for(service in services){
+   for(service in allServices.services){
     if (service.artifactId == "vocabulary-rest-ws") {
       vocabularyService = service
     }

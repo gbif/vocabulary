@@ -1,4 +1,4 @@
-:sourcedir: {snippets}/concept-documentation-test/create-concept-test
+:sourcedir: {snippets}/concept-test-doc/create-concept-test
 === Create
 
 include::{sourcedir}/auto-method-path.adoc[]

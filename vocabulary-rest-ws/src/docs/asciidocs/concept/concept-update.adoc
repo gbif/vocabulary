@@ -1,4 +1,4 @@
-:sourcedir: {snippets}/concept-documentation-test/update-concept-test
+:sourcedir: {snippets}/concept-test-doc/update-concept-test
 === Update
 
 include::{sourcedir}/auto-method-path.adoc[]

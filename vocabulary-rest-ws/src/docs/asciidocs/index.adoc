@@ -31,9 +31,9 @@ There are basically 2 possible types of client errors:
 == Vocabulary
 Methods to work with vocabularies.
 
-include::{snippets}/vocabulary-documentation-test/list-vocabulary-test/auto-section.adoc[]
+include::{snippets}/vocabulary-test-doc/list-vocabulary-test/auto-section.adoc[]
 
-include::{snippets}/vocabulary-documentation-test/get-vocabulary-test/auto-section.adoc[]
+include::{snippets}/vocabulary-test-doc/get-vocabulary-test/auto-section.adoc[]
 
 include::vocabulary/vocabulary-create.adoc[]
 
@@ -41,18 +41,18 @@ include::vocabulary/vocabulary-update.adoc[]
 
 include::vocabulary/vocabulary-deprecate.adoc[]
 
-include::{snippets}/vocabulary-documentation-test/restore-vocabulary-test/auto-section.adoc[]
+include::{snippets}/vocabulary-test-doc/restore-vocabulary-test/auto-section.adoc[]
 
-include::{snippets}/vocabulary-documentation-test/suggest-vocabulary-test/auto-section.adoc[]
+include::{snippets}/vocabulary-test-doc/suggest-vocabulary-test/auto-section.adoc[]
 
-include::{snippets}/vocabulary-documentation-test/download-vocabulary-test/auto-section.adoc[]
+include::{snippets}/vocabulary-test-doc/download-vocabulary-test/auto-section.adoc[]
 
 == Concept
 Methods to work with concepts
 
-include::{snippets}/concept-documentation-test/list-concepts-test/auto-section.adoc[]
+include::{snippets}/concept-test-doc/list-concepts-test/auto-section.adoc[]
 
-include::{snippets}/concept-documentation-test/get-concept-test/auto-section.adoc[]
+include::{snippets}/concept-test-doc/get-concept-test/auto-section.adoc[]
 
 include::concept/concept-create.adoc[]
 
@@ -60,9 +60,9 @@ include::concept/concept-update.adoc[]
 
 include::concept/concept-deprecate.adoc[]
 
-include::{snippets}/concept-documentation-test/restore-deprecated-concept-test/auto-section.adoc[]
+include::{snippets}/concept-test-doc/restore-deprecated-concept-test/auto-section.adoc[]
 
-include::{snippets}/concept-documentation-test/suggest-concept-test/auto-section.adoc[]
+include::{snippets}/concept-test-doc/suggest-concept-test/auto-section.adoc[]
 
 
 

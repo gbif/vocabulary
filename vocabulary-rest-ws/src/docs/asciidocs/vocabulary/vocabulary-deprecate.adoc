@@ -1,4 +1,4 @@
-:sourcedir: {snippets}/vocabulary-documentation-test/deprecate-vocabulary-test
+:sourcedir: {snippets}/vocabulary-test-doc/deprecate-vocabulary-test
 === Deprecate
 
 include::{sourcedir}/auto-method-path.adoc[]

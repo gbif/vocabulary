@@ -1,4 +1,4 @@
-:sourcedir: {snippets}/vocabulary-documentation-test/create-vocabulary-test
+:sourcedir: {snippets}/vocabulary-test-doc/create-vocabulary-test
 === Create
 
 include::{sourcedir}/auto-method-path.adoc[]

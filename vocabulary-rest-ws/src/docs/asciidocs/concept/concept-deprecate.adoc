@@ -1,4 +1,4 @@
-:sourcedir: {snippets}/concept-documentation-test/deprecate-concept-test
+:sourcedir: {snippets}/concept-test-doc/deprecate-concept-test
 === Deprecate
 
 include::{sourcedir}/auto-method-path.adoc[]

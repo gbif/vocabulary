@@ -123,7 +123,7 @@ pipeline {
         }
     }
     post {
-      always {
+      failure {
         mail to: "mlopez@gbif.org",
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"

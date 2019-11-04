@@ -35,6 +35,7 @@ pipeline {
             when { allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
+                    branch 'master'; // TODO: remove
             } }
             steps {
               withSonarQubeEnv('GBIF Sonarqube') {
@@ -86,7 +87,7 @@ pipeline {
           when { allOf {
             not { expression { params.RELEASE } };
             not { expression { params.DOCUMENTATION } }//;
-//             branch 'master'
+//             branch 'master' TODO: uncomment
           } }
           steps {
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {

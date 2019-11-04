@@ -70,7 +70,6 @@ pipeline {
             sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
               git 'https://github.com/gbif/vocabulary.git'
               sh '''
-                cd vocabulary-rest-ws
                 mvn clean package -Pdocumentation
                 git add *.html
                 git commit -m "Generated API documentation"

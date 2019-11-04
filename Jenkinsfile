@@ -83,6 +83,8 @@ pipeline {
         stage('Deploy to DEV') {
           environment {
             GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
+            SERVICE_VOCABULARY = "service-vocabulary.yml"
+            HOSTS_VOCABULARY = "hosts-vocabulary"
           }
           when { allOf {
             not { expression { params.RELEASE } };
@@ -98,8 +100,9 @@ pipeline {
                '''
 
                createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")
+               createHostsFile()
 
-              sh '''
+              sh """
                 cd c-deploy/services
                 echo "Creating group_vars directory"
                 mkdir group_vars
@@ -107,17 +110,17 @@ pipeline {
                 # Configuration and services files are concatenated into a single file, that will contain the Ansible variables
                 cat ../../gbif-configuration/environments/dev/configuration.yml \
                     ../../gbif-configuration/environments/dev/monitoring.yml \
-                    ../../gbif-configuration/vocabulary-rest-ws/dev/deploy/service.yml >> group_vars/build
+                    ${env.WORKSPACE}/${SERVICE_VOCABULARY} >> group_vars/${BUILD_ID}
 
                 # The default Ansible inventory file 'hosts' is concatenated with the input HOSTS file
                 cat ../../gbif-configuration/environments/dev/hosts \
-                    ../../gbif-configuration/vocabulary-rest-ws/dev/deploy/build_hosts >> build_hosts
+                    ${env.WORKSPACE}/${HOSTS_VOCABULARY} >> ${BUILD_ID}_hosts
 
                 # Executes the Ansible playbook
                 echo "Executing Ansible playbook"
 
-                ansible-playbook -vvv -i build_hosts services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=$GIT_CREDENTIALS"
-              '''
+                ansible-playbook -vvv -i ${BUILD_ID}_hosts services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=$GIT_CREDENTIALS"
+              """
             }
           }
         }
@@ -131,31 +134,44 @@ pipeline {
     }
 }
 
- void createServiceFile(String servicesPath) {
-   def allServices = readYaml file: servicesPath
+void createServiceFile(String servicesPath) {
+ def allServices = readYaml file: servicesPath
 
-   def vocabularyService
-   for(service in allServices.services){
-    if (service.artifactId == "vocabulary-rest-ws") {
-      vocabularyService = service
-    }
-   }
-
-    sh """
-      cat <<-EOF> service-test.yml
-      services: [
-      {
-        groupId: ${vocabularyService.groupId},
-        artifactId: ${vocabularyService.artifactId},
-        packaging: jar,
-        version: LATEST,
-        framework: spring,
-        testOnDeploy: 1,
-        httpPort: 8114,
-        httpAdminPort: 8115,
-        useFixedPorts: 0
-      }
-      ]
-      EOF
-    """.stripIndent()
+ def vocabularyService
+ for(service in allServices.services){
+  if (service.artifactId == "vocabulary-rest-ws") {
+    vocabularyService = service
+  }
  }
+
+  sh """
+    cat <<-EOF> ${env.WORKSPACE}/${SERVICE_VOCABULARY}
+    services: [
+    {
+      groupId: ${vocabularyService.groupId},
+      artifactId: ${vocabularyService.artifactId},
+      packaging: jar,
+      version: ${vocabularyService.version},
+      framework: ${vocabularyService.framework},
+      testOnDeploy: ${vocabularyService.testOnDeploy},
+      httpPort: ${vocabularyService.httpPort},
+      httpAdminPort: ${vocabularyService.httpAdminPort},
+      useFixedPorts: 0
+    }
+    ]
+    EOF
+  """.stripIndent()
+}
+
+void createHostsFile() {
+  sh """
+    cat <<-EOF> ${env.WORKSPACE}/${HOSTS_VOCABULARY}
+    # this group is used to allow parallel executions of the Ansible scripts using different files of variables
+    [${BUILD_ID}:children]
+    appserver
+    mapserver
+    varnish5
+    nagios
+    EOF
+  """.stripIndent()
+}

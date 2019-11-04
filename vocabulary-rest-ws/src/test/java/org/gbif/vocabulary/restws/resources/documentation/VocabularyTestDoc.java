@@ -4,9 +4,10 @@ import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
+import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 
@@ -21,7 +22,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
 import static org.hamcrest.Matchers.endsWith;
@@ -42,140 +42,142 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Generates the documentation for the concept API. */
-public class ConceptDocumentationTest extends DocumentationBaseTest {
+/** Generates the documentation for the vocabulary API. */
+public class VocabularyTestDoc extends DocumentationBaseTest {
 
-  @MockBean private ConceptService conceptService;
   @MockBean private VocabularyService vocabularyService;
+  @MockBean private ConceptService conceptService;
 
   @Test
-  public void listConceptsTest() throws Exception {
-    List<Concept> concepts =
+  public void listVocabularyTest() throws Exception {
+    List<Vocabulary> vocabularies =
         ImmutableList.of(
-            createConcept("concept1"), createConcept("concept2"), createConcept("concept3"));
+            createVocabulary("vocab1"), createVocabulary("vocab2"), createVocabulary("vocab3"));
 
-    when(vocabularyService.getByName(anyString()))
-        .thenReturn(createVocabulary(TEST_VOCABULARY_NAME));
-    when(conceptService.list(any(ConceptSearchParams.class), any(PagingRequest.class)))
-        .thenReturn(new PagingResponse<>(new PagingRequest(), (long) concepts.size(), concepts));
+    when(vocabularyService.list(any(VocabularySearchParams.class), any(PagingRequest.class)))
+        .thenReturn(
+            new PagingResponse<>(new PagingRequest(), (long) vocabularies.size(), vocabularies));
 
     MvcResult mvcResult =
         mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
     List<Vocabulary> resultList =
-        OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<Concept>>() {});
+        OBJECT_MAPPER.convertValue(
+            rootNode.get("results"), new TypeReference<List<Vocabulary>>() {});
 
-    assertEquals(concepts.size(), resultList.size());
+    assertEquals(vocabularies.size(), resultList.size());
   }
 
   @Test
-  public void getConceptTest() throws Exception {
-    Concept concept = createConcept("concept1");
-    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+  public void getVocabularyTest() throws Exception {
+    Vocabulary vocabulary = createVocabulary("vocab1");
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
     mockMvc
-        .perform(get(getBasePath() + "/" + concept.getName()))
+        .perform(get(getBasePath() + "/" + vocabulary.getName()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("name", equalTo(concept.getName())));
+        .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
   }
 
   @Test
-  public void createConceptTest() throws Exception {
+  public void createVocabularyTest() throws Exception {
     setSecurityContext();
-    mockVocabulary();
-    when(conceptService.create(any(Concept.class))).thenReturn(TEST_KEY);
-    Concept conceptToCreate = createConcept("concept1");
-    Concept created = new Concept();
-    BeanUtils.copyProperties(conceptToCreate, created);
+    Vocabulary vocabularyToCreate = createVocabulary("vocab1");
+    when(vocabularyService.create(any(Vocabulary.class))).thenReturn(TEST_KEY);
+    Vocabulary created = new Vocabulary();
+    BeanUtils.copyProperties(vocabularyToCreate, created);
     created.setKey(TEST_KEY);
-    when(conceptService.get(TEST_KEY)).thenReturn(created);
+    when(vocabularyService.get(TEST_KEY)).thenReturn(created);
 
     mockMvc
         .perform(
             post(getBasePath())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(conceptToCreate))
+                .content(OBJECT_MAPPER.writeValueAsString(vocabularyToCreate))
                 .with(authorizationDocumentation()))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", endsWith(getBasePath() + "/" + created.getName())))
         .andExpect(jsonPath("key", is(TEST_KEY)))
         .andExpect(jsonPath("name", equalTo(created.getName())))
-        .andDo(documentFields(Concept.class));
+        .andDo(documentFields(Vocabulary.class));
   }
 
   @Test
-  public void updateConceptTest() throws Exception {
+  public void updateVocabularyTest() throws Exception {
     setSecurityContext();
-    mockVocabulary();
-    doNothing().when(conceptService).update(any(Concept.class));
-    Concept concept = createConcept("concept1");
-    concept.setKey(TEST_KEY);
-    when(conceptService.get(TEST_KEY)).thenReturn(concept);
+    Vocabulary vocabulary = createVocabulary("vocab1");
+    vocabulary.setKey(TEST_KEY);
+
+    doNothing().when(vocabularyService).update(any(Vocabulary.class));
+    when(vocabularyService.get(TEST_KEY)).thenReturn(vocabulary);
 
     mockMvc
         .perform(
-            put(getBasePath() + "/" + concept.getName())
+            put(getBasePath() + "/" + vocabulary.getName())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(concept))
+                .content(OBJECT_MAPPER.writeValueAsString(vocabulary))
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("key", is(concept.getKey())))
-        .andExpect(jsonPath("name", equalTo(concept.getName())))
-        .andDo(documentFields(Concept.class));
+        .andExpect(jsonPath("key", is(vocabulary.getKey())))
+        .andExpect(jsonPath("name", equalTo(vocabulary.getName())))
+        .andDo(documentFields(Vocabulary.class));
   }
 
   @Test
-  public void suggestConceptTest() throws Exception {
-    mockVocabulary();
+  public void suggestVocabularyTest() throws Exception {
     List<KeyNameResult> suggestions = createSuggestions();
-    when(conceptService.suggest(anyString(), anyInt())).thenReturn(suggestions);
+    when(vocabularyService.suggest(anyString())).thenReturn(suggestions);
     suggestTest(suggestions);
   }
 
   @Test
-  public void deprecateConceptTest() throws Exception {
+  public void deprecateVocabularyTest() throws Exception {
     setSecurityContext();
-    Concept concept = createConcept("concept1");
-    concept.setKey(TEST_KEY);
-    when(conceptService.getByNameAndVocabulary(concept.getName(), TEST_VOCABULARY_NAME))
-        .thenReturn(concept);
-    doNothing().when(conceptService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
+    Vocabulary vocabulary = createVocabulary("vocab1");
+    vocabulary.setKey(TEST_KEY);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+    doNothing().when(vocabularyService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
 
     mockMvc
         .perform(
-            put(getBasePath() + "/" + concept.getName() + "/deprecate")
+            put(getBasePath() + "/" + vocabulary.getName() + "/deprecate")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateConceptAction()))
+                .content(OBJECT_MAPPER.writeValueAsString(new DeprecateVocabularyAction()))
                 .with(authorizationDocumentation()))
         .andExpect(status().isNoContent())
         .andDo(documentRequestFields(DeprecateConceptAction.class));
   }
 
   @Test
-  public void restoreDeprecatedConceptTest() throws Exception {
+  public void restoreVocabularyTest() throws Exception {
     setSecurityContext();
-    Concept concept = createConcept("concept1");
-    concept.setKey(TEST_KEY);
-    when(conceptService.getByNameAndVocabulary(concept.getName(), TEST_VOCABULARY_NAME))
-        .thenReturn(concept);
-    doNothing().when(conceptService).restoreDeprecated(anyInt(), anyBoolean());
+    Vocabulary vocabulary = createVocabulary("vocab1");
+    vocabulary.setKey(TEST_KEY);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+    doNothing().when(vocabularyService).restoreDeprecated(anyInt(), anyBoolean());
 
     mockMvc
         .perform(
-            delete(getBasePath() + "/" + concept.getName() + "/deprecate")
+            delete(getBasePath() + "/" + vocabulary.getName() + "/deprecate")
                 .with(authorizationDocumentation()))
         .andExpect(status().isNoContent());
   }
 
-  private void mockVocabulary() {
-    Vocabulary vocabulary = createVocabulary(TEST_VOCABULARY_NAME);
-    vocabulary.setKey(TEST_VOCABULARY_KEY);
+  @Test
+  public void downloadVocabularyTest() throws Exception {
+    Vocabulary vocabulary = createVocabulary("exportableVocab");
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+    when(conceptService.list(any(), any())).thenReturn(new PagingResponse<Concept>(0L, 0, 0L));
+
+    mockMvc
+        .perform(get(getBasePath() + "/" + vocabulary.getName() + "/download"))
+        .andExpect(status().isOk())
+        .andExpect(header().exists("Content-Disposition"));
   }
 
   @Override
   String getBasePath() {
-    return "/" + VOCABULARIES_PATH + "/" + TEST_VOCABULARY_NAME + "/" + CONCEPTS_PATH;
+    return "/" + VOCABULARIES_PATH;
   }
 }

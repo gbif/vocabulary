@@ -124,7 +124,7 @@ pipeline {
     }
     post {
       always {
-        mail to: "${CHANGE_AUTHOR_EMAIL}",
+        mail to: "${env.CHANGE_AUTHOR_EMAIL}",
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"
       }
@@ -138,9 +138,11 @@ void createServiceFile(String servicesPath) {
  for(service in allServices.services){
   if (service.artifactId == "vocabulary-rest-ws") {
     vocabularyService = service
+    break
   }
  }
 
+ if (vocabularyService) {
   sh """
     cat <<-EOF> ${env.WORKSPACE}/${SERVICE_VOCABULARY}
     services: [
@@ -157,7 +159,8 @@ void createServiceFile(String servicesPath) {
     }
     ]
     EOF
-  """.stripIndent()
+    """.stripIndent()
+ }
 }
 
 void createHostsFile() {

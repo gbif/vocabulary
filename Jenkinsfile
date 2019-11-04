@@ -95,7 +95,7 @@ pipeline {
                 git clone -b master git@github.com:gbif/c-deploy
                '''
 
-               createServiceFile('${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml')
+               createServiceFile(${WORKSPACE} + '/gbif-configuration/environments/dev/services.yml')
 
               sh '''
                 cd c-deploy/services

@@ -22,6 +22,7 @@ pipeline {
             when { allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
+                    branch 'master'; // TODO:remove
             } }
             steps {
               configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
@@ -34,6 +35,7 @@ pipeline {
             when { allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
+                    branch 'master'; // TODO:remove
             } }
             steps {
               withSonarQubeEnv('GBIF Sonarqube') {
@@ -124,7 +126,7 @@ pipeline {
     }
     post {
       always {
-        mail to: "${env.CHANGE_AUTHOR_EMAIL}",
+        mail to: "${env.GIT_AUTHOR_EMAIL}",
              subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
              body: "Something is wrong with ${env.BUILD_URL}"
       }

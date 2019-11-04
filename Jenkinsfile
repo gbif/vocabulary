@@ -95,7 +95,7 @@ pipeline {
                 git clone -b master git@github.com:gbif/c-deploy
                '''
 
-               createServiceFile("${env.WORKSPACE}" + '/gbif-configuration/environments/dev/services.yml')
+               createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")
 
               sh '''
                 cd c-deploy/services
@@ -131,8 +131,7 @@ pipeline {
 
  void createServiceFile(String servicesPath) {
    def services = readYaml file: servicesPath
-    sh '''
-      #!/bin/bash -xe
+    sh """
       cat <<-EOF> service-test.yml
       services: [
       {
@@ -148,5 +147,5 @@ pipeline {
       }
       ]
       EOF
-    '''.stripIndent()
+    """.stripIndent()
  }

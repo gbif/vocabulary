@@ -137,12 +137,19 @@ public class Application {
     CorsConfigurationSource corsConfigurationSource() {
       // CorsFilter only applies this if the origin header is present in the request
       CorsConfiguration configuration = new CorsConfiguration();
+      configuration.setAllowedHeaders(Collections.singletonList("authorization"));
       configuration.setAllowedOrigins(Collections.singletonList("*"));
       configuration.setAllowedMethods(
           Arrays.asList("HEAD", "GET", "POST", "DELETE", "PUT", "OPTIONS"));
+      configuration.setExposedHeaders(
+          Arrays.asList(
+              "Access-Control-Allow-Origin",
+              "Access-Control-Allow-Methods",
+              "Access-Control-Allow-Headers"));
       UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
       source.registerCorsConfiguration("/**", configuration);
       return source;
     }
   }
+
 }

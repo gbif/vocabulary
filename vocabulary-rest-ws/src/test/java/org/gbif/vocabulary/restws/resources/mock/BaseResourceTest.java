@@ -166,12 +166,12 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
         .perform(
             options(getBasePath())
                 .header("origin", "localhost")
-                .header("access-control-request-headers", "authorization")
+                .header("access-control-request-headers", "authorization,content-type")
                 .header("access-control-request-method", "GET"))
         .andExpect(header().string("Access-Control-Allow-Origin", "*"))
         .andExpect(
             header().string("Access-Control-Allow-Methods", "HEAD,GET,POST,DELETE,PUT,OPTIONS"))
-        .andExpect(header().string("Access-Control-Allow-Headers", "authorization"));
+        .andExpect(header().string("Access-Control-Allow-Headers", "authorization, content-type"));
   }
 
   Vocabulary createVocabulary(String name) {

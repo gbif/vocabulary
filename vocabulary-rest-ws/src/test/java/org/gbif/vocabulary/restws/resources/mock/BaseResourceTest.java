@@ -13,6 +13,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,11 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.HeaderResultMatchers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Base class for resources tests. */
@@ -155,7 +155,23 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
   @Test
   public void restoreDeprecatedEntityNotFoundNameTest() throws Exception {
     // mock not set, so the service returns null
-    mockMvc.perform(delete(getBasePath() + "/fake/deprecate")).andExpect(status().isUnprocessableEntity());
+    mockMvc
+        .perform(delete(getBasePath() + "/fake/deprecate"))
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  public void corsHeadersTest() throws Exception {
+    mockMvc
+        .perform(
+            options(getBasePath())
+                .header("origin", "localhost")
+                .header("access-control-request-headers", "authorization")
+                .header("access-control-request-method", "GET"))
+        .andExpect(header().string("Access-Control-Allow-Origin", "*"))
+        .andExpect(
+            header().string("Access-Control-Allow-Methods", "HEAD,GET,POST,DELETE,PUT,OPTIONS"))
+        .andExpect(header().string("Access-Control-Allow-Headers", "authorization"));
   }
 
   Vocabulary createVocabulary(String name) {

@@ -45,6 +45,7 @@ public class VocabularyResource {
       @RequestParam(value = "name", required = false) String name,
       @RequestParam(value = "namespace", required = false) String namespace,
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
+      @RequestParam(value = "key", required = false) Integer key,
       PagingRequest page) {
 
     return vocabularyService.list(
@@ -53,6 +54,7 @@ public class VocabularyResource {
             .name(name)
             .namespace(namespace)
             .deprecated(deprecated)
+            .key(key)
             .build(),
         page);
   }

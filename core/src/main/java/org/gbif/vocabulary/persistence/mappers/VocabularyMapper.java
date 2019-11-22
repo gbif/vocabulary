@@ -19,13 +19,15 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
       @Nullable @Param("name") String name,
       @Nullable @Param("namespace") String namespace,
       @Nullable @Param("deprecated") Boolean deprecated,
+      @Nullable @Param("key") Integer key,
       @Nullable @Param("page") Pageable page);
 
   long count(
       @Nullable @Param("query") String query,
       @Nullable @Param("name") String name,
       @Nullable @Param("namespace") String namespace,
-      @Nullable @Param("deprecated") Boolean deprecated);
+      @Nullable @Param("deprecated") Boolean deprecated,
+      @Nullable @Param("key") Integer key);
 
   Vocabulary getByName(@Param("name") String name);
 

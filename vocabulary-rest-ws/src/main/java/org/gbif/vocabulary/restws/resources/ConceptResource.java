@@ -41,6 +41,7 @@ public class ConceptResource {
       @RequestParam(value = "parentKey", required = false) Integer parentKey,
       @RequestParam(value = "replacedByKey", required = false) Integer replacedByKey,
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
+      @RequestParam(value = "key", required = false) Integer key,
       PagingRequest page) {
 
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
@@ -54,6 +55,7 @@ public class ConceptResource {
             .parentKey(parentKey)
             .replacedByKey(replacedByKey)
             .deprecated(deprecated)
+            .key(key)
             .build(),
         page);
   }

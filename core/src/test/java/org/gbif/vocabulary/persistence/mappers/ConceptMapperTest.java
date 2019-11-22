@@ -105,18 +105,20 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept3.setEditorialNotes(Collections.singletonList("editorial notes"));
     conceptMapper.create(concept3);
 
-    assertList("concept1", null, null, null, null, null, 1);
-    assertList("conc", null, null, null, null, null, 3);
-    assertList("example", null, null, null, null, null, 2);
-    assertList("altern ex", null, null, null, null, null, 1);
-    assertList("oncept", null, null, null, null, null, 0);
-    assertList(null, vocabularyKeys[0], null, null, null, null, 3);
-    assertList(null, null, concept1.getKey(), null, null, null, 2);
-    assertList(null, null, concept2.getKey(), null, null, null, 0);
-    assertList(null, null, null, null, "concept1", null, 1);
-    assertList(null, null, null, null, "concepto", null, 0);
-    assertList("exa", vocabularyKeys[0], null, null, null, null, 2);
-    assertList(null, null, concept1.getKey(), null, "concept3", null, 1);
+    assertList("concept1", null, null, null, null, null, concept1.getKey(), 1);
+    assertList("concept1", null, null, null, null, null, Integer.MAX_VALUE, 0);
+    assertList(null, null, null, null, null, null, concept1.getKey(), 1);
+    assertList("conc", null, null, null, null, null, null, 3);
+    assertList("example", null, null, null, null, null, null, 2);
+    assertList("altern ex", null, null, null, null, null, null, 1);
+    assertList("oncept", null, null, null, null, null, null, 0);
+    assertList(null, vocabularyKeys[0], null, null, null, null, null, 3);
+    assertList(null, null, concept1.getKey(), null, null, null, null, 2);
+    assertList(null, null, concept2.getKey(), null, null, null, null, 0);
+    assertList(null, null, null, null, "concept1", null, null, 1);
+    assertList(null, null, null, null, "concepto", null, null, 0);
+    assertList("exa", vocabularyKeys[0], null, null, null, null, null, 2);
+    assertList(null, null, concept1.getKey(), null, "concept3", null, null, 1);
   }
 
   @Test
@@ -246,11 +248,11 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     // deprecate in bulk
     conceptMapper.deprecateInBulk(
         Arrays.asList(concept1.getKey(), concept2.getKey()), DEPRECATED_BY, null);
-    assertEquals(2, conceptMapper.list(null, null, null, null, null, true, null).size());
+    assertEquals(2, conceptMapper.list(null, null, null, null, null, true, null, null).size());
 
     // undeprecate in bulk
     conceptMapper.restoreDeprecatedInBulk(Arrays.asList(concept1.getKey(), concept2.getKey()));
-    assertEquals(0, conceptMapper.list(null, null, null, null, null, true, null).size());
+    assertEquals(0, conceptMapper.list(null, null, null, null, null, true, null, null).size());
   }
 
   @Test
@@ -335,15 +337,17 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
       Integer replacedByKey,
       String name,
       Boolean deprecated,
+      Integer key,
       int expectedResult) {
     assertEquals(
         expectedResult,
         conceptMapper
-            .list(query, vocabularyKey, parentKey, replacedByKey, name, deprecated, DEFAULT_PAGE)
+            .list(
+                query, vocabularyKey, parentKey, replacedByKey, name, deprecated, key, DEFAULT_PAGE)
             .size());
     assertEquals(
         expectedResult,
-        conceptMapper.count(query, vocabularyKey, parentKey, replacedByKey, name, deprecated));
+        conceptMapper.count(query, vocabularyKey, parentKey, replacedByKey, name, deprecated, key));
   }
 
   private void assertSimilarity(List<KeyNameResult> similarities, Concept concept) {

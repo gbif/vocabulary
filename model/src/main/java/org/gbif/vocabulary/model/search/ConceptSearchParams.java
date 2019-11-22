@@ -11,6 +11,7 @@ public class ConceptSearchParams implements Serializable {
   private final Integer replacedByKey;
   private final String name;
   private final Boolean deprecated;
+  private final Integer key;
 
   private ConceptSearchParams(
       String query,
@@ -18,13 +19,15 @@ public class ConceptSearchParams implements Serializable {
       Integer parentKey,
       Integer replacedByKey,
       String name,
-      Boolean deprecated) {
+      Boolean deprecated,
+      Integer key) {
     this.query = query;
     this.vocabularyKey = vocabularyKey;
     this.parentKey = parentKey;
     this.replacedByKey = replacedByKey;
     this.name = name;
     this.deprecated = deprecated;
+    this.key = key;
   }
 
   public String getQuery() {
@@ -51,6 +54,10 @@ public class ConceptSearchParams implements Serializable {
     return deprecated;
   }
 
+  public Integer getKey() {
+    return key;
+  }
+
   /**
    * Creates a builder to create instances of {@link ConceptSearchParams}.
    *
@@ -71,6 +78,7 @@ public class ConceptSearchParams implements Serializable {
     private Integer replacedByKey;
     private Boolean deprecated;
     private String name;
+    private Integer key;
 
     private Builder() {}
 
@@ -104,9 +112,14 @@ public class ConceptSearchParams implements Serializable {
       return this;
     }
 
+    public Builder key(Integer key) {
+      this.key = key;
+      return this;
+    }
+
     public ConceptSearchParams build() {
       return new ConceptSearchParams(
-          query, vocabularyKey, parentKey, replacedByKey, name, deprecated);
+          query, vocabularyKey, parentKey, replacedByKey, name, deprecated, key);
     }
   }
 }

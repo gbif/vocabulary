@@ -11,7 +11,10 @@ import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.ConceptService;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -141,7 +144,8 @@ public class DefaultConceptService implements ConceptService {
             params.getParentKey(),
             params.getReplacedByKey(),
             params.getName(),
-            params.getDeprecated()),
+            params.getDeprecated(),
+            params.getKey()),
         conceptMapper.list(
             params.getQuery(),
             params.getVocabularyKey(),
@@ -149,6 +153,7 @@ public class DefaultConceptService implements ConceptService {
             params.getReplacedByKey(),
             params.getName(),
             params.getDeprecated(),
+            params.getKey(),
             page));
   }
 
@@ -233,7 +238,7 @@ public class DefaultConceptService implements ConceptService {
 
   /** Returns the keys of all the children of the given concept. */
   private List<Integer> findChildrenKeys(int parentKey, boolean deprecated) {
-    return conceptMapper.list(null, null, parentKey, null, null, deprecated, null).stream()
+    return conceptMapper.list(null, null, parentKey, null, null, deprecated, null, null).stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
   }

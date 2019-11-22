@@ -87,6 +87,9 @@
     <if test="namespace != null">
       AND v.namespace = #{namespace}
     </if>
+    <if test="key != null">
+      AND v.key = #{key}
+    </if>
     ORDER BY <if test="query != null" >ts_rank_cd(v.fulltext_search, query) DESC,</if> v.created DESC, v.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
@@ -108,6 +111,9 @@
     </if>
     <if test="namespace != null">
       AND v.namespace = #{namespace}
+    </if>
+    <if test="key != null">
+      AND v.key = #{key}
     </if>
   </select>
 

@@ -21,6 +21,7 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Nullable @Param("replacedByKey") Integer replacedByKey,
       @Nullable @Param("name") String name,
       @Nullable @Param("deprecated") Boolean deprecated,
+      @Nullable @Param("key") Integer key,
       @Nullable @Param("page") Pageable page);
 
   long count(
@@ -29,7 +30,8 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Nullable @Param("parentKey") Integer parentKey,
       @Nullable @Param("replacedByKey") Integer replacedByKey,
       @Nullable @Param("name") String name,
-      @Nullable @Param("deprecated") Boolean deprecated);
+      @Nullable @Param("deprecated") Boolean deprecated,
+      @Nullable @Param("key") Integer key);
 
   Concept getByNameAndVocabulary(
       @Param("name") String name, @Param("vocabularyName") String vocabularyName);

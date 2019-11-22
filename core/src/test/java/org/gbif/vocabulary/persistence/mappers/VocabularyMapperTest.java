@@ -67,18 +67,20 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabularyGbif.setNamespace("namespace gbif");
     vocabularyMapper.create(vocabularyGbif);
 
-    assertList("vocab1", null, null, null, 1);
-    assertList("voc", null, null, null, 3);
-    assertList("ocab", null, null, null, 0);
-    assertList("namesp gb", null, null, null, 1);
-    assertList(null, "vocab1", null, null, 1);
-    assertList(null, "vocab", null, null, 0);
-    assertList(null, null, "namespace gbif", null, 1);
-    assertList(null, null, "namespace", null, 0);
-    assertList(null, "vocab2", "namespace2", null, 1);
-    assertList("voc", "vocab1", "namespace1", null, 1);
-    assertList("oca", "vocab2", "namespace2", null, 0);
-    assertList("v gbif", "vocab gbif", null, null, 1);
+    assertList("vocab1", null, null, null, Integer.MAX_VALUE,0);
+    assertList("vocab1", null, null, null, vocabulary1.getKey(),1);
+    assertList(null, null, null, null, vocabulary2.getKey(),1);
+    assertList("voc", null, null, null, null,3);
+    assertList("ocab", null, null, null, null,0);
+    assertList("namesp gb", null, null, null, null,1);
+    assertList(null, "vocab1", null, null, null,1);
+    assertList(null, "vocab", null, null, null,0);
+    assertList(null, null, "namespace gbif", null, null,1);
+    assertList(null, null, "namespace", null, null,0);
+    assertList(null, "vocab2", "namespace2", null, null,1);
+    assertList("voc", "vocab1", "namespace1", null, null,1);
+    assertList("oca", "vocab2", "namespace2", null, null,0);
+    assertList("v gbif", "vocab gbif", null, null, null,1);
   }
 
   @Test
@@ -91,14 +93,14 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabulary2.setNamespace("n1");
     vocabularyMapper.create(vocabulary2);
 
-    assertList(null, null, null, true, 0);
-    assertList(null, null, "n1", true, 0);
-    assertList(null, null, "n1", null, 2);
-    assertList(null, null, "n1", false, 2);
+    assertList(null, null, null, true, null, 0);
+    assertList(null, null, "n1", true, null,0);
+    assertList(null, null, "n1", null, null,2);
+    assertList(null, null, "n1", false, null,2);
 
     vocabularyMapper.deprecate(vocabulary1.getKey(), DEPRECATED_BY, null);
-    assertList(null, null, null, true, 1);
-    assertList(null, null, "n1", true, 1);
+    assertList(null, null, null, true, null,1);
+    assertList(null, null, "n1", true, null,1);
   }
 
   @Test
@@ -170,11 +172,11 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   }
 
   private void assertList(
-      String query, String name, String namespace, Boolean deprecated, int expectedResult) {
+      String query, String name, String namespace, Boolean deprecated, Integer key, int expectedResult) {
     assertEquals(
         expectedResult,
-        vocabularyMapper.list(query, name, namespace, deprecated, DEFAULT_PAGE).size());
-    assertEquals(expectedResult, vocabularyMapper.count(query, name, namespace, deprecated));
+        vocabularyMapper.list(query, name, namespace, deprecated, key, DEFAULT_PAGE).size());
+    assertEquals(expectedResult, vocabularyMapper.count(query, name, namespace, deprecated, key));
   }
 
   @Test

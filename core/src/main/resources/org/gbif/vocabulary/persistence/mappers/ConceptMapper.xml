@@ -163,6 +163,9 @@
     <if test="deprecated != null">
       AND c.deprecated IS <if test="deprecated">NOT</if> NULL
     </if>
+    <if test="key != null">
+      AND c.key = #{key}
+    </if>
     ORDER BY <if test="query != null" >ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
@@ -187,6 +190,9 @@
     </if>
     <if test="name != null">
       AND c.name = #{name}
+    </if>
+    <if test="key != null">
+      AND c.key = #{key}
     </if>
   </select>
 

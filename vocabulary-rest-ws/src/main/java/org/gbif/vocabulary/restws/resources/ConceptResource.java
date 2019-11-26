@@ -6,6 +6,7 @@ import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.restws.model.ConceptView;
 import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
@@ -61,10 +62,22 @@ public class ConceptResource {
   }
 
   @GetMapping("{name}")
-  public Concept get(
+  public ConceptView get(
       @PathVariable("vocabularyName") String vocabularyName,
-      @PathVariable("name") String conceptName) {
-    return conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+      @PathVariable("name") String conceptName,
+      @RequestParam(value = "includeParents", required = false) boolean includeParents) {
+    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+
+    if (concept == null) {
+      return null;
+    }
+
+    ConceptView conceptView = new ConceptView(concept);
+    if (includeParents && concept.getParentKey() != null) {
+      conceptView.setParents(conceptService.findParents(concept.getKey()));
+    }
+
+    return conceptView;
   }
 
   @PostMapping

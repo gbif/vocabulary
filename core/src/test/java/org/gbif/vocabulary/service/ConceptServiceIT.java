@@ -10,6 +10,7 @@ import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -395,6 +396,27 @@ public class ConceptServiceIT {
     // parent has to be updated to the root
     mainConcept = conceptService.get(mainConceptKey);
     assertEquals(root, mainConcept.getParentKey().intValue());
+  }
+
+  @Test
+  public void findParentsTest() {
+    Concept concept1 = createBasicConcept(vocabularyKeys[0]);
+    conceptService.create(concept1);
+    assertTrue(conceptService.findParents(concept1.getKey()).isEmpty());
+
+    Concept concept2 = createBasicConcept(vocabularyKeys[0]);
+    concept2.setParentKey(concept1.getKey());
+    conceptService.create(concept2);
+    assertEquals(1, conceptService.findParents(concept2.getKey()).size());
+    assertEquals(concept1.getName(), conceptService.findParents(concept2.getKey()).get(0));
+
+    Concept concept3 = createBasicConcept(vocabularyKeys[0]);
+    concept3.setParentKey(concept2.getKey());
+    conceptService.create(concept3);
+    List<String> parents = conceptService.findParents(concept3.getKey());
+    assertEquals(2, parents.size());
+    assertTrue(parents.contains(concept1.getName()));
+    assertTrue(parents.contains(concept2.getName()));
   }
 
   static class ContexInitializer

@@ -74,4 +74,11 @@ public interface ConceptService extends BaseService<Concept> {
    */
   void restoreDeprecated(int key, boolean restoreDeprecatedChildren);
 
+  /**
+   * Finds the parents of a concept. It includes not only its direct parent, but also the parents of each parent.
+   *
+   * @param conceptKey key of the concept whose parents we're looking for
+   * @return list with the names of the parents
+   */
+  List<String> findParents(int conceptKey);
 }

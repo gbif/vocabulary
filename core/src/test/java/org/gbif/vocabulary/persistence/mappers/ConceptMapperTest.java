@@ -29,6 +29,7 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeNa
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests the {@link ConceptMapper} class
@@ -328,6 +329,31 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept conceptDB =
         conceptMapper.getByNameAndVocabulary(concept1.getName(), DEFAULT_VOCABULARY);
     assertEquals(concept1.getKey(), conceptDB.getKey());
+  }
+
+  @Test
+  public void findParentsTest() {
+    // just created, doesn't have parent
+    Concept concept1 = createNewEntity();
+    conceptMapper.create(concept1);
+    assertTrue(conceptMapper.findParents(concept1.getKey()).isEmpty());
+
+    // concept2 will have concept1 as parent
+    Concept concept2 = createNewEntity();
+    concept2.setParentKey(concept1.getKey());
+    conceptMapper.create(concept2);
+    List<String> parents = conceptMapper.findParents(concept2.getKey());
+    assertEquals(1, parents.size());
+    assertEquals(concept1.getName(), parents.get(0));
+
+    // concept3 will have concept2 as parent
+    Concept concept3 = createNewEntity();
+    concept3.setParentKey(concept2.getKey());
+    conceptMapper.create(concept3);
+    parents = conceptMapper.findParents(concept3.getKey());
+    assertEquals(2, parents.size());
+    assertTrue(parents.contains(concept1.getName()));
+    assertTrue(parents.contains(concept2.getName()));
   }
 
   private void assertList(

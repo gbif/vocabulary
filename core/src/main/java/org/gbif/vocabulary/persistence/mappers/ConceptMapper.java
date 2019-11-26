@@ -72,4 +72,13 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Param("values") List<String> normalizedValues,
       @Param("vocabularyKey") int vocabularyKey,
       @Nullable @Param("conceptKey") Integer conceptKey);
+
+  /**
+   * Given a concept, it finds all its non-deprecated parents. That's to say, it finds its direct
+   * parent and the parents of its parents.
+   *
+   * @param conceptKey key of the concept whose parents we're looking for
+   * @return list with the names of all the parent concepts
+   */
+  List<String> findParents(@Param("key") int conceptKey);
 }

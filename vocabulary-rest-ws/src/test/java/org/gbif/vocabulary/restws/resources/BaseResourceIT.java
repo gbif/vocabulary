@@ -62,9 +62,9 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
   static final Function<TestCredentials, String> JWT_AUTH_HEADER =
       testCredentials -> "Bearer " + testCredentials.getToken();
 
-  private final String urlEntityFormat = getBasePath() + "/%s";
   private final String urlDeprecateFormat = getBasePath() + "/%s/deprecate";
   private final Class<T> clazz;
+  protected final String urlEntityFormat = getBasePath() + "/%s";
 
   BaseResourceIT(Class<T> clazz) {
     this.clazz = clazz;

@@ -236,6 +236,11 @@ public class DefaultConceptService implements ConceptService {
     }
   }
 
+  @Override
+  public List<String> findParents(int conceptKey) {
+    return conceptMapper.findParents(conceptKey);
+  }
+
   /** Returns the keys of all the children of the given concept. */
   private List<Integer> findChildrenKeys(int parentKey, boolean deprecated) {
     return conceptMapper.list(null, null, parentKey, null, null, deprecated, null, null).stream()

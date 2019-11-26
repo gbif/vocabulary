@@ -3,12 +3,14 @@ package org.gbif.vocabulary.restws.resources;
 import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.restws.model.ConceptView;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,6 +26,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * IT for the {@link ConceptResource}.
@@ -112,6 +116,87 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         .expectBody()
         .jsonPath("results")
         .value(r -> Assertions.assertEquals(2, r.size()), List.class);
+  }
+
+  @Test
+  public void getWithParents() {
+    // create entity
+    Concept c1 = createEntity();
+    Concept created1 =
+        webClient
+            .post()
+            .uri(getBasePath())
+            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
+            .body(BodyInserters.fromObject(c1))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectHeader()
+            .value("Location", Matchers.endsWith(getBasePath() + "/" + c1.getName()))
+            .expectBody(Concept.class)
+            .value(
+                v -> {
+                  assertEquals(ADMIN.getUsername(), v.getCreatedBy());
+                  assertEquals(ADMIN.getUsername(), v.getModifiedBy());
+                })
+            .returnResult()
+            .getResponseBody();
+
+    Concept c2 = createEntity();
+    c2.setParentKey(c1.getKey());
+    Concept created2 =
+        webClient
+            .post()
+            .uri(getBasePath())
+            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
+            .body(BodyInserters.fromObject(c2))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectHeader()
+            .value("Location", Matchers.endsWith(getBasePath() + "/" + c2.getName()))
+            .expectBody(Concept.class)
+            .value(
+                v -> {
+                  assertEquals(ADMIN.getUsername(), v.getCreatedBy());
+                  assertEquals(ADMIN.getUsername(), v.getModifiedBy());
+                })
+            .returnResult()
+            .getResponseBody();
+
+    // get vocabulary with parents
+    ConceptView expected = new ConceptView(c2);
+    expected.setParents(Collections.singletonList(created1.getName()));
+    webClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(String.format(urlEntityFormat, created2.getName()))
+                    .queryParam("includeParents", true)
+                    .build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(ConceptView.class)
+        .equals(expected);
+
+    // get vocabulary without parents
+    expected = new ConceptView(c2);
+    webClient
+      .get()
+      .uri(
+        uriBuilder ->
+          uriBuilder
+            .path(String.format(urlEntityFormat, created2.getName()))
+            .build())
+      .exchange()
+      .expectStatus()
+      .isOk()
+      .expectBody(ConceptView.class)
+      .equals(expected);
   }
 
   @Override

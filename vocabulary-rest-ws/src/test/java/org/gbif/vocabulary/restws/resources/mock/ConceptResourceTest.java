@@ -36,6 +36,7 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -96,6 +97,23 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         .perform(get(getBasePath() + "/" + concept.getName()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("name", Matchers.equalTo(concept.getName())));
+  }
+
+  @Test
+  public void getConceptWithParentsTest() throws Exception {
+    Concept concept = createEntity();
+    concept.setKey(1);
+    concept.setParentKey(1);
+    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+
+    final String parentName = "parent1";
+    when(conceptService.findParents(1)).thenReturn(Collections.singletonList(parentName));
+
+    mockMvc
+        .perform(get(getBasePath() + "/" + concept.getName()).param("includeParents", "true"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("name", Matchers.equalTo(concept.getName())))
+        .andExpect(jsonPath("parents", hasItem(parentName)));
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})

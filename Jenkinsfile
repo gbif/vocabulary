@@ -23,23 +23,30 @@ pipeline {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
             } }
-            steps {
-              configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                                             variable: 'MAVEN_SETTINGS_XML')]) {
-                sh 'mvn clean package verify dependency:analyze -U'
+            failFast true
+            parallel {
+              stage('Package and unit tests') {
+                steps {
+                  configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                                                               variable: 'MAVEN_SETTINGS_XML')]) {
+                   sh 'mvn clean package dependency:analyze -U'
+                  }
+                }
               }
-            }
-        }
-        stage('SonarQube analysis') {
-            when { allOf {
-                    not { expression { params.RELEASE } };
-                    not { expression { params.DOCUMENTATION } };
-            } }
-            steps {
-              withSonarQubeEnv('GBIF Sonarqube') {
-                sh 'mvn sonar:sonar'
+              stage('Integration tests') {
+                steps {
+                  configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                                                               variable: 'MAVEN_SETTINGS_XML')]) {
+                   sh 'mvn clean verify -Pintegration'
+                  }
+                }
               }
-            }
+              stage('SonarQube analysis') {
+                steps {
+                  withSonarQubeEnv('GBIF Sonarqube') {
+                    sh 'mvn sonar:sonar'
+                }
+              }
         }
         stage('Snapshot to nexus') {
             when { allOf {

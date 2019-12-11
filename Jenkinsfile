@@ -45,8 +45,10 @@ pipeline {
                 steps {
                   withSonarQubeEnv('GBIF Sonarqube') {
                     sh 'mvn sonar:sonar'
+                  }
                 }
               }
+            }
         }
         stage('Snapshot to nexus') {
             when { allOf {

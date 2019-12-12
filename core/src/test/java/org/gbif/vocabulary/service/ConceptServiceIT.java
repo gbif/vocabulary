@@ -27,10 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.gbif.vocabulary.TestUtils.*;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for the {@link ConceptService}.
@@ -219,6 +216,22 @@ public class ConceptServiceIT {
     createdConcept.setParentKey(deprecatedKey);
     // parent cannot be deprecated
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(createdConcept));
+  }
+
+  @Test
+  public void removeParentInUpdateTest() {
+    int key1 = conceptService.create(createBasicConcept(vocabularyKeys[0]));
+    Concept conceptWithParent = createBasicConcept(vocabularyKeys[0]);
+    conceptWithParent.setParentKey(key1);
+    int keyWithParent = conceptService.create(conceptWithParent);
+
+    Concept createdConceptWithParent = conceptService.get(keyWithParent);
+    assertNotNull(createdConceptWithParent.getParentKey());
+    createdConceptWithParent.setParentKey(null);
+    conceptService.update(createdConceptWithParent);
+
+    Concept updatedConcept = conceptService.get(keyWithParent);
+    assertNull(updatedConcept.getParentKey());
   }
 
   @Test

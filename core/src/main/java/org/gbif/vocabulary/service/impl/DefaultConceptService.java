@@ -103,12 +103,16 @@ public class DefaultConceptService implements ConceptService {
 
     if (!Objects.equals(oldConcept.getParentKey(), concept.getParentKey())) {
       // parent is being updated
-      checkArgument(
-          concept.getVocabularyKey().equals(conceptMapper.getVocabularyKey(concept.getParentKey())),
-          "A concept and its parent must belong to the same vocabulary");
-      checkArgument(
-          !conceptMapper.isDeprecated(concept.getParentKey()),
-          "Cannot update a concept to a deprecated parent");
+      if (concept.getParentKey() != null) {
+        checkArgument(
+            concept
+                .getVocabularyKey()
+                .equals(conceptMapper.getVocabularyKey(concept.getParentKey())),
+            "A concept and its parent must belong to the same vocabulary");
+        checkArgument(
+            !conceptMapper.isDeprecated(concept.getParentKey()),
+            "Cannot update a concept to a deprecated parent");
+      }
     }
 
     checkArgument(oldConcept.getDeprecated() == null, "Cannot update a deprecated entity");

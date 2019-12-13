@@ -12,6 +12,8 @@ public class ConceptSearchParams implements Serializable {
   private final String name;
   private final Boolean deprecated;
   private final Integer key;
+  private Boolean hasParent;
+  private Boolean hasReplacement;
 
   private ConceptSearchParams(
       String query,
@@ -20,7 +22,9 @@ public class ConceptSearchParams implements Serializable {
       Integer replacedByKey,
       String name,
       Boolean deprecated,
-      Integer key) {
+      Integer key,
+      Boolean hasParent,
+      Boolean hasReplacement) {
     this.query = query;
     this.vocabularyKey = vocabularyKey;
     this.parentKey = parentKey;
@@ -28,6 +32,8 @@ public class ConceptSearchParams implements Serializable {
     this.name = name;
     this.deprecated = deprecated;
     this.key = key;
+    this.hasParent = hasParent;
+    this.hasReplacement = hasReplacement;
   }
 
   public String getQuery() {
@@ -58,6 +64,14 @@ public class ConceptSearchParams implements Serializable {
     return key;
   }
 
+  public Boolean getHasParent() {
+    return hasParent;
+  }
+
+  public Boolean getHasReplacement() {
+    return hasReplacement;
+  }
+
   /**
    * Creates a builder to create instances of {@link ConceptSearchParams}.
    *
@@ -79,6 +93,8 @@ public class ConceptSearchParams implements Serializable {
     private Boolean deprecated;
     private String name;
     private Integer key;
+    private Boolean hasParent;
+    private Boolean hasReplacement;
 
     private Builder() {}
 
@@ -117,9 +133,27 @@ public class ConceptSearchParams implements Serializable {
       return this;
     }
 
+    public Builder hasParent(Boolean hasParent) {
+      this.hasParent = hasParent;
+      return this;
+    }
+
+    public Builder hasReplacement(Boolean hasReplacement) {
+      this.hasReplacement = hasReplacement;
+      return this;
+    }
+
     public ConceptSearchParams build() {
       return new ConceptSearchParams(
-          query, vocabularyKey, parentKey, replacedByKey, name, deprecated, key);
+          query,
+          vocabularyKey,
+          parentKey,
+          replacedByKey,
+          name,
+          deprecated,
+          key,
+          hasParent,
+          hasReplacement);
     }
   }
 }

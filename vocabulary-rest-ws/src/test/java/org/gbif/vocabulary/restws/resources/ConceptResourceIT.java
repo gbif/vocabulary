@@ -73,15 +73,20 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   void listTest() {
     Concept c1 = createEntity();
     c1.setName("concept1");
-    webClient
-        .post()
-        .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromObject(c1))
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isCreated();
+    Concept created1 =
+        webClient
+            .post()
+            .uri(getBasePath())
+            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
+            .body(BodyInserters.fromObject(c1))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(Concept.class)
+            .returnResult()
+            .getResponseBody();
+    ;
 
     // list entities
     webClient
@@ -96,6 +101,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
     Concept c2 = createEntity();
     c2.setName("concept2");
+    c2.setParentKey(created1.getKey());
     webClient
         .post()
         .uri(getBasePath())
@@ -116,6 +122,34 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         .expectBody()
         .jsonPath("results")
         .value(r -> Assertions.assertEquals(2, r.size()), List.class);
+
+    // list entities
+    webClient
+        .get()
+        .uri(
+            builder ->
+                builder
+                    .path(getBasePath())
+                    .queryParam("q", "concept")
+                    .queryParam("parentKey", created1.getKey())
+                    .build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("results")
+        .value(r -> Assertions.assertEquals(1, r.size()), List.class);
+
+    // list entities
+    webClient
+        .get()
+        .uri(builder -> builder.path(getBasePath()).queryParam("hasParent", "true").build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("results")
+        .value(r -> Assertions.assertEquals(1, r.size()), List.class);
   }
 
   @Test
@@ -186,17 +220,15 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     // get vocabulary without parents
     expected = new ConceptView(c2);
     webClient
-      .get()
-      .uri(
-        uriBuilder ->
-          uriBuilder
-            .path(String.format(urlEntityFormat, created2.getName()))
-            .build())
-      .exchange()
-      .expectStatus()
-      .isOk()
-      .expectBody(ConceptView.class)
-      .equals(expected);
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder.path(String.format(urlEntityFormat, created2.getName())).build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(ConceptView.class)
+        .equals(expected);
   }
 
   @Override

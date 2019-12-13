@@ -166,6 +166,12 @@
     <if test="key != null">
       AND c.key = #{key}
     </if>
+    <if test="hasParent != null">
+      AND c.parent_key IS <if test="hasParent">NOT</if> NULL
+    </if>
+    <if test="hasReplacement != null">
+      AND c.replaced_by_key IS <if test="hasReplacement">NOT</if> NULL
+    </if>
     ORDER BY <if test="query != null" >ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
@@ -191,8 +197,17 @@
     <if test="name != null">
       AND c.name = #{name}
     </if>
+    <if test="deprecated != null">
+      AND c.deprecated IS <if test="deprecated">NOT</if> NULL
+    </if>
     <if test="key != null">
       AND c.key = #{key}
+    </if>
+    <if test="hasParent != null">
+      AND c.parent_key IS <if test="hasParent">NOT</if> NULL
+    </if>
+    <if test="hasReplacement != null">
+      AND c.replaced_by_key IS <if test="hasReplacement">NOT</if> NULL
     </if>
   </select>
 

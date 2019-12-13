@@ -4,6 +4,7 @@ import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.net.URI;
@@ -105,21 +106,30 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept3.setParentKey(concept1.getKey());
     concept3.setEditorialNotes(Collections.singletonList("editorial notes"));
     conceptMapper.create(concept3);
+    concept3.setReplacedByKey(concept2.getKey());
+    conceptMapper.update(concept3);
 
-    assertList("concept1", null, null, null, null, null, concept1.getKey(), 1);
-    assertList("concept1", null, null, null, null, null, Integer.MAX_VALUE, 0);
-    assertList(null, null, null, null, null, null, concept1.getKey(), 1);
-    assertList("conc", null, null, null, null, null, null, 3);
-    assertList("example", null, null, null, null, null, null, 2);
-    assertList("altern ex", null, null, null, null, null, null, 1);
-    assertList("oncept", null, null, null, null, null, null, 0);
-    assertList(null, vocabularyKeys[0], null, null, null, null, null, 3);
-    assertList(null, null, concept1.getKey(), null, null, null, null, 2);
-    assertList(null, null, concept2.getKey(), null, null, null, null, 0);
-    assertList(null, null, null, null, "concept1", null, null, 1);
-    assertList(null, null, null, null, "concepto", null, null, 0);
-    assertList("exa", vocabularyKeys[0], null, null, null, null, null, 2);
-    assertList(null, null, concept1.getKey(), null, "concept3", null, null, 1);
+    Concept fetch = conceptMapper.get(concept3.getKey());
+
+    assertList(ConceptSearchParams.builder().query("concept1").key(concept1.getKey()).build(), 1);
+    assertList(ConceptSearchParams.builder().query("concept1").key(Integer.MAX_VALUE).build(), 0);
+    assertList(ConceptSearchParams.builder().key(concept1.getKey()).build(), 1);
+    assertList(ConceptSearchParams.builder().query("conc").build(), 3);
+    assertList(ConceptSearchParams.builder().query("example").build(), 2);
+    assertList(ConceptSearchParams.builder().query("altern ex").build(), 1);
+    assertList(ConceptSearchParams.builder().query("oncept").build(), 0);
+    assertList(ConceptSearchParams.builder().vocabularyKey(vocabularyKeys[0]).build(), 3);
+    assertList(ConceptSearchParams.builder().parentKey(concept1.getKey()).build(), 2);
+    assertList(ConceptSearchParams.builder().parentKey(concept2.getKey()).build(), 0);
+    assertList(ConceptSearchParams.builder().name("concept1").build(), 1);
+    assertList(ConceptSearchParams.builder().name("concepto").build(), 0);
+    assertList(
+        ConceptSearchParams.builder().query("exa").vocabularyKey(vocabularyKeys[0]).build(), 2);
+    assertList(
+        ConceptSearchParams.builder().parentKey(concept1.getKey()).name("concept3").build(), 1);
+    assertList(ConceptSearchParams.builder().replacedByKey(concept2.getKey()).build(), 1);
+    assertList(ConceptSearchParams.builder().hasParent(true).build(), 2);
+    assertList(ConceptSearchParams.builder().hasReplacement(true).build(), 1);
   }
 
   @Test
@@ -249,11 +259,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     // deprecate in bulk
     conceptMapper.deprecateInBulk(
         Arrays.asList(concept1.getKey(), concept2.getKey()), DEPRECATED_BY, null);
-    assertEquals(2, conceptMapper.list(null, null, null, null, null, true, null, null).size());
+    assertEquals(
+        2, conceptMapper.list(null, null, null, null, null, true, null, null, null, null).size());
 
     // undeprecate in bulk
     conceptMapper.restoreDeprecatedInBulk(Arrays.asList(concept1.getKey(), concept2.getKey()));
-    assertEquals(0, conceptMapper.list(null, null, null, null, null, true, null, null).size());
+    assertEquals(
+        0, conceptMapper.list(null, null, null, null, null, true, null, null, null, null).size());
   }
 
   @Test
@@ -356,24 +368,34 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertTrue(parents.contains(concept2.getName()));
   }
 
-  private void assertList(
-      String query,
-      Integer vocabularyKey,
-      Integer parentKey,
-      Integer replacedByKey,
-      String name,
-      Boolean deprecated,
-      Integer key,
-      int expectedResult) {
+  private void assertList(ConceptSearchParams searchParams, int expectedResult) {
     assertEquals(
         expectedResult,
         conceptMapper
             .list(
-                query, vocabularyKey, parentKey, replacedByKey, name, deprecated, key, DEFAULT_PAGE)
+                searchParams.getQuery(),
+                searchParams.getVocabularyKey(),
+                searchParams.getParentKey(),
+                searchParams.getReplacedByKey(),
+                searchParams.getName(),
+                searchParams.getDeprecated(),
+                searchParams.getKey(),
+                searchParams.getHasParent(),
+                searchParams.getHasReplacement(),
+                DEFAULT_PAGE)
             .size());
     assertEquals(
         expectedResult,
-        conceptMapper.count(query, vocabularyKey, parentKey, replacedByKey, name, deprecated, key));
+        conceptMapper.count(
+            searchParams.getQuery(),
+            searchParams.getVocabularyKey(),
+            searchParams.getParentKey(),
+            searchParams.getReplacedByKey(),
+            searchParams.getName(),
+            searchParams.getDeprecated(),
+            searchParams.getKey(),
+            searchParams.getHasParent(),
+            searchParams.getHasReplacement()));
   }
 
   private void assertSimilarity(List<KeyNameResult> similarities, Concept concept) {

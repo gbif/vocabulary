@@ -149,7 +149,9 @@ public class DefaultConceptService implements ConceptService {
             params.getReplacedByKey(),
             params.getName(),
             params.getDeprecated(),
-            params.getKey()),
+            params.getKey(),
+            params.getHasParent(),
+            params.getHasReplacement()),
         conceptMapper.list(
             params.getQuery(),
             params.getVocabularyKey(),
@@ -158,6 +160,8 @@ public class DefaultConceptService implements ConceptService {
             params.getName(),
             params.getDeprecated(),
             params.getKey(),
+            params.getHasParent(),
+            params.getHasReplacement(),
             page));
   }
 
@@ -247,7 +251,8 @@ public class DefaultConceptService implements ConceptService {
 
   /** Returns the keys of all the children of the given concept. */
   private List<Integer> findChildrenKeys(int parentKey, boolean deprecated) {
-    return conceptMapper.list(null, null, parentKey, null, null, deprecated, null, null).stream()
+    return conceptMapper.list(null, null, parentKey, null, null, deprecated, null, null, null, null)
+        .stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
   }

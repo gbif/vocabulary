@@ -43,6 +43,8 @@ public class ConceptResource {
       @RequestParam(value = "replacedByKey", required = false) Integer replacedByKey,
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
       @RequestParam(value = "key", required = false) Integer key,
+      @RequestParam(value = "hasParent", required = false) Boolean hasParent,
+      @RequestParam(value = "hasReplacement", required = false) Boolean hasReplacement,
       PagingRequest page) {
 
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
@@ -57,6 +59,8 @@ public class ConceptResource {
             .replacedByKey(replacedByKey)
             .deprecated(deprecated)
             .key(key)
+            .hasParent(hasParent)
+            .hasReplacement(hasReplacement)
             .build(),
         page);
   }

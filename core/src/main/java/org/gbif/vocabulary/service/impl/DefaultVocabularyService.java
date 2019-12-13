@@ -164,8 +164,8 @@ public class DefaultVocabularyService implements VocabularyService {
   }
 
   private List<Integer> findConceptsKeys(int vocabularyKey, boolean deprecated) {
-    return conceptMapper.list(null, vocabularyKey, null, null, null, deprecated, null, null)
-        .stream()
+    return conceptMapper
+        .list(null, vocabularyKey, null, null, null, deprecated, null, null, null, null).stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
   }

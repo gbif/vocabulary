@@ -67,7 +67,7 @@ abstract class DocumentationBaseTest {
 
   static final Long TEST_KEY = 1L;
   static final String TEST_VOCABULARY_NAME = "vocab1";
-  static final long TEST_VOCABULARY_KEY = 1;
+  static final Long TEST_VOCABULARY_KEY = 1L;
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   static final Supplier<String> BASIC_AUTH_HEADER =

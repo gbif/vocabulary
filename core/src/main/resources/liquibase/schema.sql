@@ -45,14 +45,14 @@ $func$
 $func$ LANGUAGE plpgsql;
 
 CREATE TABLE vocabulary(
-  key serial NOT NULL PRIMARY KEY,
+  key bigserial NOT NULL PRIMARY KEY,
   namespace text CHECK (assert_min_length(namespace, 1)),
   name text NOT NULL UNIQUE CHECK (assert_min_length(name, 1)),
   label jsonb,
   definition jsonb,
   external_definition_urls text[],
   editorial_notes text[],
-  replaced_by_key integer REFERENCES vocabulary(key),
+  replaced_by_key bigint REFERENCES vocabulary(key),
   deprecated_by varchar NULL CHECK (assert_min_length(created_by, 1)),
   deprecated timestamp with time zone NULL,
   created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
@@ -101,10 +101,10 @@ CREATE TRIGGER vocabulary_fulltext_update
 
 
 CREATE TABLE concept(
-  key serial NOT NULL PRIMARY KEY,
-  vocabulary_key integer NOT NULL REFERENCES vocabulary(key),
-  parent_key integer REFERENCES concept(key),
-  replaced_by_key integer REFERENCES concept(key),
+  key bigserial NOT NULL PRIMARY KEY,
+  vocabulary_key bigint NOT NULL REFERENCES vocabulary(key),
+  parent_key bigint REFERENCES concept(key),
+  replaced_by_key bigint REFERENCES concept(key),
   name text NOT NULL CHECK (assert_min_length(name, 1)),
   label jsonb,
   alternative_labels jsonb,

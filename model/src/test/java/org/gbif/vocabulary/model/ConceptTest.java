@@ -18,12 +18,12 @@ public class ConceptTest {
   @Test
   public void equalityTest() {
     Concept c1 = new Concept();
-    c1.setKey(1);
+    c1.setKey(1L);
     c1.setName("n1");
-    c1.setVocabularyKey(1);
+    c1.setVocabularyKey(1L);
     c1.setLabel(Collections.singletonMap(Language.ENGLISH, "label"));
-    c1.setParentKey(2);
-    c1.setReplacedByKey(1);
+    c1.setParentKey(2L);
+    c1.setReplacedByKey(1L);
     c1.setAlternativeLabels(Collections.singletonMap(Language.ENGLISH, Arrays.asList("alt")));
     c1.setMisappliedLabels(Collections.singletonMap(Language.ENGLISH, Arrays.asList("misspelt")));
     c1.setDefinition(Collections.singletonMap(Language.ENGLISH, "def"));

@@ -18,7 +18,7 @@ public class VocabularyTest {
   @Test
   public void equalityTest() {
     Vocabulary v1 = new Vocabulary();
-    v1.setKey(1);
+    v1.setKey(1L);
     v1.setName("v1");
     v1.setNamespace("ns");
     v1.setLabel(Collections.singletonMap(Language.ENGLISH, "label"));

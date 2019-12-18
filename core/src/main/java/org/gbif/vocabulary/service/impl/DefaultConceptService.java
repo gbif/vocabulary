@@ -52,7 +52,7 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public Concept get(int key) {
+  public Concept get(long key) {
     return conceptMapper.get(key);
   }
 
@@ -63,7 +63,7 @@ public class DefaultConceptService implements ConceptService {
 
   @Transactional
   @Override
-  public int create(@NotNull @Valid Concept concept) {
+  public long create(@NotNull @Valid Concept concept) {
     checkArgument(concept.getKey() == null, "Can't create a concept which already has a key");
 
     // checking the validity of the concept.
@@ -103,18 +103,15 @@ public class DefaultConceptService implements ConceptService {
       throw new IllegalArgumentException("Cannot modify the name of a concept");
     }
 
-    if (!Objects.equals(oldConcept.getParentKey(), concept.getParentKey())) {
+    if (concept.getParentKey() != null
+        && !Objects.equals(oldConcept.getParentKey(), concept.getParentKey())) {
       // parent is being updated
-      if (concept.getParentKey() != null) {
-        checkArgument(
-            concept
-                .getVocabularyKey()
-                .equals(conceptMapper.getVocabularyKey(concept.getParentKey())),
-            "A concept and its parent must belong to the same vocabulary");
-        checkArgument(
-            !conceptMapper.isDeprecated(concept.getParentKey()),
-            "Cannot update a concept to a deprecated parent");
-      }
+      checkArgument(
+          concept.getVocabularyKey().equals(conceptMapper.getVocabularyKey(concept.getParentKey())),
+          "A concept and its parent must belong to the same vocabulary");
+      checkArgument(
+          !conceptMapper.isDeprecated(concept.getParentKey()),
+          "Cannot update a concept to a deprecated parent");
     }
 
     checkArgument(oldConcept.getDeprecated() == null, "Cannot update a deprecated entity");
@@ -168,16 +165,16 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public List<KeyNameResult> suggest(@NotNull String query, int vocabularyKey) {
+  public List<KeyNameResult> suggest(@NotNull String query, long vocabularyKey) {
     return conceptMapper.suggest(query, vocabularyKey);
   }
 
   @Transactional
   @Override
   public void deprecate(
-      int key,
+      long key,
       @NotBlank String deprecatedBy,
-      @Nullable Integer replacementKey,
+      @Nullable Long replacementKey,
       boolean deprecateChildren) {
 
     if (replacementKey == null) {
@@ -190,7 +187,7 @@ public class DefaultConceptService implements ConceptService {
         "A concept and its replacement must belong to the same vocabulary");
 
     // find children
-    List<Integer> children = findChildrenKeys(key, false);
+    List<Long> children = findChildrenKeys(key, false);
     if (!children.isEmpty()) {
       if (deprecateChildren) {
         // deprecate children without replacement
@@ -208,8 +205,8 @@ public class DefaultConceptService implements ConceptService {
   @Transactional
   @Override
   public void deprecateWithoutReplacement(
-      int key, @NotBlank String deprecatedBy, boolean deprecateChildren) {
-    List<Integer> children = findChildrenKeys(key, false);
+      long key, @NotBlank String deprecatedBy, boolean deprecateChildren) {
+    List<Long> children = findChildrenKeys(key, false);
     if (!children.isEmpty()) {
       if (!deprecateChildren) {
         throw new IllegalArgumentException(
@@ -225,7 +222,7 @@ public class DefaultConceptService implements ConceptService {
 
   @Transactional
   @Override
-  public void restoreDeprecated(int key, boolean restoreDeprecatedChildren) {
+  public void restoreDeprecated(long key, boolean restoreDeprecatedChildren) {
     // get the concept
     Concept concept = requireNonNull(conceptMapper.get(key));
 
@@ -247,19 +244,19 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public List<String> findParents(int conceptKey) {
+  public List<String> findParents(long conceptKey) {
     return conceptMapper.findParents(conceptKey);
   }
 
   @Override
-  public List<ChildrenCountResult> countChildren(List<Integer> conceptParents) {
+  public List<ChildrenCountResult> countChildren(List<Long> conceptParents) {
     Preconditions.checkArgument(
         conceptParents != null && !conceptParents.isEmpty(), "concept parents are required");
     return conceptMapper.countChildren(conceptParents);
   }
 
   /** Returns the keys of all the children of the given concept. */
-  private List<Integer> findChildrenKeys(int parentKey, boolean deprecated) {
+  private List<Long> findChildrenKeys(long parentKey, boolean deprecated) {
     return conceptMapper.list(null, null, parentKey, null, null, deprecated, null, null, null, null)
         .stream()
         .map(Concept::getKey)

@@ -4,18 +4,10 @@ import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 
 import java.time.LocalDateTime;
-import javax.sql.DataSource;
 import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.BeanUtils;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,7 +21,7 @@ import static org.mockito.Mockito.when;
  */
 abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity> extends MockServiceBaseTest {
 
-  static final int TEST_KEY = 1;
+  static final long TEST_KEY = 1;
 
   @Test
   public void createNullEntityTest() {
@@ -119,7 +111,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity> exten
     entityDB.setKey(TEST_KEY);
     T updatedEntity = createNewEntity("e1");
     BeanUtils.copyProperties(entityDB, updatedEntity);
-    updatedEntity.setReplacedByKey(2);
+    updatedEntity.setReplacedByKey(2L);
 
     // mock
     when(getMapper().get(TEST_KEY)).thenReturn(entityDB);

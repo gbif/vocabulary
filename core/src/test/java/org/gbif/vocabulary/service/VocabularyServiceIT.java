@@ -32,8 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Integration tests for the {@link VocabularyService}.
  *
  * <p>These tests are intended to run in parallel. This should be taken into account when adding new
- * tests since we're not cleaning the DB after each test and htis can interferred with other
- * tests.
+ * tests since we're not cleaning the DB after each test and htis can interferred with other tests.
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -76,7 +75,7 @@ public class VocabularyServiceIT {
   @Test
   public void updateTest() {
     Vocabulary vocabulary = createBasicVocabulary();
-    int key = vocabularyService.create(vocabulary);
+    long key = vocabularyService.create(vocabulary);
     vocabulary = vocabularyService.get(key);
 
     // update concept
@@ -97,7 +96,7 @@ public class VocabularyServiceIT {
     vocabularyService.create(vocabulary1);
 
     Vocabulary vocabulary2 = createBasicVocabulary();
-    int key2 = vocabularyService.create(vocabulary2);
+    long key2 = vocabularyService.create(vocabulary2);
 
     // update concept
     Vocabulary updated = vocabularyService.get(key2);
@@ -112,17 +111,17 @@ public class VocabularyServiceIT {
   @Test
   public void deprecatingWhenUpdatingTest() {
     Vocabulary vocabulary = createBasicVocabulary();
-    int key = vocabularyService.create(vocabulary);
+    long key = vocabularyService.create(vocabulary);
 
     Vocabulary createdVocabulary = vocabularyService.get(key);
-    createdVocabulary.setReplacedByKey(2);
+    createdVocabulary.setReplacedByKey(2L);
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(createdVocabulary));
   }
 
   @Test
   public void deletingWhenUpdatingTest() {
     Vocabulary vocabulary = createBasicVocabulary();
-    int key = vocabularyService.create(vocabulary);
+    long key = vocabularyService.create(vocabulary);
 
     Vocabulary createdVocabulary = vocabularyService.get(key);
     createdVocabulary.setDeleted(LocalDateTime.now());
@@ -153,7 +152,7 @@ public class VocabularyServiceIT {
 
   @Test
   public void deprecateTest() {
-    int v1Key = vocabularyService.create(createBasicVocabulary());
+    long v1Key = vocabularyService.create(createBasicVocabulary());
 
     vocabularyService.deprecateWithoutReplacement(v1Key, DEPRECATED_BY, false);
     assertDeprecated(vocabularyService.get(v1Key), DEPRECATED_BY);
@@ -162,11 +161,11 @@ public class VocabularyServiceIT {
     assertNotDeprecated(vocabularyService.get(v1Key));
 
     // add concepts to the vocabulary
-    int c1Key = conceptService.create(createBasicConcept(v1Key));
-    int c2Key = conceptService.create(createBasicConcept(v1Key));
+    long c1Key = conceptService.create(createBasicConcept(v1Key));
+    long c2Key = conceptService.create(createBasicConcept(v1Key));
 
     // create a replacement
-    int v2Key = vocabularyService.create(createBasicVocabulary());
+    long v2Key = vocabularyService.create(createBasicVocabulary());
 
     // deprecating ignoring concepts
     assertThrows(

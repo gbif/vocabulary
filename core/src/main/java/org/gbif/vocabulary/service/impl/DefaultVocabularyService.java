@@ -48,7 +48,7 @@ public class DefaultVocabularyService implements VocabularyService {
   }
 
   @Override
-  public Vocabulary get(int key) {
+  public Vocabulary get(long key) {
     return vocabularyMapper.get(key);
   }
 
@@ -59,7 +59,7 @@ public class DefaultVocabularyService implements VocabularyService {
 
   @Transactional
   @Override
-  public int create(@NotNull @Valid Vocabulary vocabulary) {
+  public long create(@NotNull @Valid Vocabulary vocabulary) {
     checkArgument(vocabulary.getKey() == null, "Can't create a vocabulary which already has a key");
 
     // checking the validity of the concept.
@@ -130,11 +130,11 @@ public class DefaultVocabularyService implements VocabularyService {
 
   @Override
   public void deprecate(
-      int key,
+      long key,
       @NotBlank String deprecatedBy,
-      @Nullable Integer replacementKey,
+      @Nullable Long replacementKey,
       boolean deprecateConcepts) {
-    List<Integer> concepts = findConceptsKeys(key, false);
+    List<Long> concepts = findConceptsKeys(key, false);
     if (!concepts.isEmpty()) {
       if (!deprecateConcepts) {
         throw new IllegalArgumentException(
@@ -150,12 +150,12 @@ public class DefaultVocabularyService implements VocabularyService {
 
   @Override
   public void deprecateWithoutReplacement(
-      int key, @NotBlank String deprecatedBy, boolean deprecateConcepts) {
+      long key, @NotBlank String deprecatedBy, boolean deprecateConcepts) {
     deprecate(key, deprecatedBy, null, deprecateConcepts);
   }
 
   @Override
-  public void restoreDeprecated(int key, boolean restoreDeprecatedConcepts) {
+  public void restoreDeprecated(long key, boolean restoreDeprecatedConcepts) {
     vocabularyMapper.restoreDeprecated(key);
 
     if (restoreDeprecatedConcepts) {
@@ -163,7 +163,7 @@ public class DefaultVocabularyService implements VocabularyService {
     }
   }
 
-  private List<Integer> findConceptsKeys(int vocabularyKey, boolean deprecated) {
+  private List<Long> findConceptsKeys(long vocabularyKey, boolean deprecated) {
     return conceptMapper
         .list(null, vocabularyKey, null, null, null, deprecated, null, null, null, null).stream()
         .map(Concept::getKey)

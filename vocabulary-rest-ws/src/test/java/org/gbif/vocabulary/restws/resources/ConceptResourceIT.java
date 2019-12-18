@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
   private static String defaultVocabularyName;
-  private static int defaultVocabularyKey;
+  private static long defaultVocabularyKey;
 
   ConceptResourceIT() {
     super(Concept.class);

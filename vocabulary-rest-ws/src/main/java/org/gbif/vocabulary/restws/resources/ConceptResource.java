@@ -44,10 +44,10 @@ public class ConceptResource {
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
       @RequestParam(value = "name", required = false) String name,
-      @RequestParam(value = "parentKey", required = false) Integer parentKey,
-      @RequestParam(value = "replacedByKey", required = false) Integer replacedByKey,
+      @RequestParam(value = "parentKey", required = false) Long parentKey,
+      @RequestParam(value = "replacedByKey", required = false) Long replacedByKey,
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
-      @RequestParam(value = "key", required = false) Integer key,
+      @RequestParam(value = "key", required = false) Long key,
       @RequestParam(value = "hasParent", required = false) Boolean hasParent,
       @RequestParam(value = "hasReplacement", required = false) Boolean hasReplacement,
       @RequestParam(value = "includeChildrenCount", required = false) boolean includeChildrenCount,
@@ -75,13 +75,13 @@ public class ConceptResource {
 
     if (includeChildrenCount) {
       // get the keys of all the concepts
-      List<Integer> parentKeys =
+      List<Long> parentKeys =
           conceptsPage.getResults().stream()
               .map(AbstractVocabularyEntity::getKey)
               .collect(Collectors.toList());
 
       // get the children counts
-      Map<Integer, Integer> childrenByConcept =
+      Map<Long, Integer> childrenByConcept =
           conceptService.countChildren(parentKeys).stream()
               .collect(
                   Collectors.toMap(
@@ -128,7 +128,7 @@ public class ConceptResource {
         vocabulary.getKey().equals(concept.getVocabularyKey()),
         "Concept vocabulary doesn't match with the resource vocabulary in the URL");
 
-    int key = conceptService.create(concept);
+    long key = conceptService.create(concept);
     return conceptService.get(key);
   }
 

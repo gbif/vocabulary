@@ -3,17 +3,17 @@ package org.gbif.vocabulary.restws.model;
 /** Defines the deprecation action for a {@link org.gbif.vocabulary.model.Concept}. */
 public class DeprecateConceptAction implements DeprecateAction {
 
-  private Integer replacementKey;
+  private Long replacementKey;
   private boolean deprecateChildren;
   private String deprecatedBy;
 
   @Override
-  public Integer getReplacementKey() {
+  public Long getReplacementKey() {
     return replacementKey;
   }
 
   @Override
-  public void setReplacementKey(Integer replacementKey) {
+  public void setReplacementKey(Long replacementKey) {
     this.replacementKey = replacementKey;
   }
 

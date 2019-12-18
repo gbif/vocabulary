@@ -9,14 +9,14 @@ import java.util.StringJoiner;
  */
 public class KeyNameResult {
 
-  private int key;
+  private long key;
   private String name;
 
-  public int getKey() {
+  public long getKey() {
     return key;
   }
 
-  public void setKey(int key) {
+  public void setKey(long key) {
     this.key = key;
   }
 

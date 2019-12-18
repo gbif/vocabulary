@@ -12,7 +12,7 @@ public class ConceptSearchParamsTest {
     String name = "v1";
     boolean deprecated = true;
     String query = "foo";
-    Integer key = 1;
+    Long key = 1L;
 
     ConceptSearchParams params =
         ConceptSearchParams.builder()

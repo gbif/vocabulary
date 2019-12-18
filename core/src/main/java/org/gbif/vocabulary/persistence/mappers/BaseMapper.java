@@ -13,18 +13,18 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface BaseMapper<T extends VocabularyEntity> {
 
-  T get(@Param("key") int key);
+  T get(@Param("key") long key);
 
   void create(T entity);
 
   void update(T entity);
 
   void deprecate(
-      @Param("key") int key,
+      @Param("key") long key,
       @Param("deprecatedBy") String deprecatedBy,
-      @Nullable @Param("replacementKey") Integer replacementKey);
+      @Nullable @Param("replacementKey") Long replacementKey);
 
-  void restoreDeprecated(@Param("key") int key);
+  void restoreDeprecated(@Param("key") long key);
 
-  boolean isDeprecated(@Param("key") int key);
+  boolean isDeprecated(@Param("key") long key);
 }

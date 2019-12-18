@@ -9,9 +9,10 @@ public class VocabularySearchParams implements Serializable {
   private final String name;
   private final String namespace;
   private final Boolean deprecated;
-  private final Integer key;
+  private final Long key;
 
-  private VocabularySearchParams(String query, String name, String namespace, Boolean deprecated, Integer key) {
+  private VocabularySearchParams(
+      String query, String name, String namespace, Boolean deprecated, Long key) {
     this.query = query;
     this.name = name;
     this.namespace = namespace;
@@ -35,7 +36,7 @@ public class VocabularySearchParams implements Serializable {
     return deprecated;
   }
 
-  public Integer getKey() {
+  public Long getKey() {
     return key;
   }
 
@@ -57,7 +58,7 @@ public class VocabularySearchParams implements Serializable {
     private String name;
     private String namespace;
     private Boolean deprecated;
-    private Integer key;
+    private Long key;
 
     private Builder() {}
 
@@ -81,7 +82,7 @@ public class VocabularySearchParams implements Serializable {
       return this;
     }
 
-    public Builder key(Integer key) {
+    public Builder key(Long key) {
       this.key = key;
       return this;
     }

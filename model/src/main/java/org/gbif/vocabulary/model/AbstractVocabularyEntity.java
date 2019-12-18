@@ -16,7 +16,7 @@ import javax.validation.constraints.NotBlank;
  */
 public abstract class AbstractVocabularyEntity implements VocabularyEntity {
 
-  Integer key;
+  Long key;
   @NotBlank
   String name;
   Map<Language, String> label = new EnumMap<>(Language.class);
@@ -25,7 +25,7 @@ public abstract class AbstractVocabularyEntity implements VocabularyEntity {
   List<String> editorialNotes = new ArrayList<>();
 
   // deprecation fields
-  Integer replacedByKey;
+  Long replacedByKey;
   LocalDateTime deprecated;
   String deprecatedBy;
 
@@ -37,12 +37,12 @@ public abstract class AbstractVocabularyEntity implements VocabularyEntity {
   LocalDateTime deleted;
 
   @Override
-  public Integer getKey() {
+  public Long getKey() {
     return key;
   }
 
   @Override
-  public void setKey(Integer key) {
+  public void setKey(Long key) {
     this.key = key;
   }
 
@@ -97,12 +97,12 @@ public abstract class AbstractVocabularyEntity implements VocabularyEntity {
   }
 
   @Override
-  public Integer getReplacedByKey() {
+  public Long getReplacedByKey() {
     return replacedByKey;
   }
 
   @Override
-  public void setReplacedByKey(Integer replacedByKey) {
+  public void setReplacedByKey(Long replacedByKey) {
     this.replacedByKey = replacedByKey;
   }
 

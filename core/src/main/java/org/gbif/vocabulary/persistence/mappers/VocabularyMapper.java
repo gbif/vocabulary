@@ -19,7 +19,7 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
       @Nullable @Param("name") String name,
       @Nullable @Param("namespace") String namespace,
       @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Integer key,
+      @Nullable @Param("key") Long key,
       @Nullable @Param("page") Pageable page);
 
   long count(
@@ -27,7 +27,7 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
       @Nullable @Param("name") String name,
       @Nullable @Param("namespace") String namespace,
       @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Integer key);
+      @Nullable @Param("key") Long key);
 
   Vocabulary getByName(@Param("name") String name);
 
@@ -43,5 +43,5 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
    */
   List<KeyNameResult> findSimilarities(
       @Param("values") List<String> normalizedValues,
-      @Nullable @Param("vocabularyKey") Integer vocabularyKey);
+      @Nullable @Param("vocabularyKey") Long vocabularyKey);
 }

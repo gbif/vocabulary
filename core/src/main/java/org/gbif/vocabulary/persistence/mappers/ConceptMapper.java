@@ -17,24 +17,24 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   List<Concept> list(
       @Nullable @Param("query") String query,
-      @Nullable @Param("vocabularyKey") Integer vocabularyKey,
-      @Nullable @Param("parentKey") Integer parentKey,
-      @Nullable @Param("replacedByKey") Integer replacedByKey,
+      @Nullable @Param("vocabularyKey") Long vocabularyKey,
+      @Nullable @Param("parentKey") Long parentKey,
+      @Nullable @Param("replacedByKey") Long replacedByKey,
       @Nullable @Param("name") String name,
       @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Integer key,
+      @Nullable @Param("key") Long key,
       @Nullable @Param("hasParent") Boolean hasParent,
       @Nullable @Param("hasReplacement") Boolean hasReplacement,
       @Nullable @Param("page") Pageable page);
 
   long count(
       @Nullable @Param("query") String query,
-      @Nullable @Param("vocabularyKey") Integer vocabularyKey,
-      @Nullable @Param("parentKey") Integer parentKey,
-      @Nullable @Param("replacedByKey") Integer replacedByKey,
+      @Nullable @Param("vocabularyKey") Long vocabularyKey,
+      @Nullable @Param("parentKey") Long parentKey,
+      @Nullable @Param("replacedByKey") Long replacedByKey,
       @Nullable @Param("name") String name,
       @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Integer key,
+      @Nullable @Param("key") Long key,
       @Nullable @Param("hasParent") Boolean hasParent,
       @Nullable @Param("hasReplacement") Boolean hasReplacement);
 
@@ -42,16 +42,16 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Param("name") String name, @Param("vocabularyName") String vocabularyName);
 
   void deprecateInBulk(
-      @Param("keys") List<Integer> keys,
+      @Param("keys") List<Long> keys,
       @Param("deprecatedBy") String deprecatedBy,
-      @Nullable @Param("replacementKey") Integer replacementKey);
+      @Nullable @Param("replacementKey") Long replacementKey);
 
-  void restoreDeprecatedInBulk(@Param("keys") List<Integer> keys);
+  void restoreDeprecatedInBulk(@Param("keys") List<Long> keys);
 
-  void updateParent(@Param("keys") List<Integer> conceptKeys, @Param("parentKey") int parentKey);
+  void updateParent(@Param("keys") List<Long> conceptKeys, @Param("parentKey") long parentKey);
 
   List<KeyNameResult> suggest(
-      @Param("query") String query, @Param("vocabularyKey") int vocabularyKey);
+      @Param("query") String query, @Param("vocabularyKey") long vocabularyKey);
 
   /**
    * Given a deprecated concept, it finds the current replacement, that's to say, the first
@@ -60,9 +60,9 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * @param key key of the deprecated concept
    * @return the key of the current replacement
    */
-  Integer findReplacement(@Param("key") int key);
+  Long findReplacement(@Param("key") long key);
 
-  Integer getVocabularyKey(@Param("key") int conceptKey);
+  Long getVocabularyKey(@Param("key") long conceptKey);
 
   /**
    * Searchs for a similar concept whose name or any of its labels are the same as the ones received
@@ -75,8 +75,8 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    */
   List<KeyNameResult> findSimilarities(
       @Param("values") List<String> normalizedValues,
-      @Param("vocabularyKey") int vocabularyKey,
-      @Nullable @Param("conceptKey") Integer conceptKey);
+      @Param("vocabularyKey") long vocabularyKey,
+      @Nullable @Param("conceptKey") Long conceptKey);
 
   /**
    * Given a concept, it finds all its non-deprecated parents. That's to say, it finds its direct
@@ -85,7 +85,7 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * @param conceptKey key of the concept whose parents we're looking for
    * @return list with the names of all the parent concepts
    */
-  List<String> findParents(@Param("key") int conceptKey);
+  List<String> findParents(@Param("key") long conceptKey);
 
   /**
    * Given a list of concepts, it finds the number of children that each concept has.
@@ -93,5 +93,5 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * @param parentConcepts list with a key of all the concepts to look for
    * @return list of {@link ChildrenCountResult}
    */
-  List<ChildrenCountResult> countChildren(@Param("parentConcepts") List<Integer> parentConcepts);
+  List<ChildrenCountResult> countChildren(@Param("parentConcepts") List<Long> parentConcepts);
 }

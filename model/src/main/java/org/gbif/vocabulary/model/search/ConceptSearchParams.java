@@ -6,23 +6,23 @@ import java.io.Serializable;
 public class ConceptSearchParams implements Serializable {
 
   private final String query;
-  private final Integer vocabularyKey;
-  private final Integer parentKey;
-  private final Integer replacedByKey;
+  private final Long vocabularyKey;
+  private final Long parentKey;
+  private final Long replacedByKey;
   private final String name;
   private final Boolean deprecated;
-  private final Integer key;
+  private final Long key;
   private Boolean hasParent;
   private Boolean hasReplacement;
 
   private ConceptSearchParams(
       String query,
-      Integer vocabularyKey,
-      Integer parentKey,
-      Integer replacedByKey,
+      Long vocabularyKey,
+      Long parentKey,
+      Long replacedByKey,
       String name,
       Boolean deprecated,
-      Integer key,
+      Long key,
       Boolean hasParent,
       Boolean hasReplacement) {
     this.query = query;
@@ -40,15 +40,15 @@ public class ConceptSearchParams implements Serializable {
     return query;
   }
 
-  public Integer getVocabularyKey() {
+  public Long getVocabularyKey() {
     return vocabularyKey;
   }
 
-  public Integer getParentKey() {
+  public Long getParentKey() {
     return parentKey;
   }
 
-  public Integer getReplacedByKey() {
+  public Long getReplacedByKey() {
     return replacedByKey;
   }
 
@@ -60,7 +60,7 @@ public class ConceptSearchParams implements Serializable {
     return deprecated;
   }
 
-  public Integer getKey() {
+  public Long getKey() {
     return key;
   }
 
@@ -87,12 +87,12 @@ public class ConceptSearchParams implements Serializable {
 
   public static class Builder {
     private String query;
-    private Integer vocabularyKey;
-    private Integer parentKey;
-    private Integer replacedByKey;
+    private Long vocabularyKey;
+    private Long parentKey;
+    private Long replacedByKey;
     private Boolean deprecated;
     private String name;
-    private Integer key;
+    private Long key;
     private Boolean hasParent;
     private Boolean hasReplacement;
 
@@ -103,17 +103,17 @@ public class ConceptSearchParams implements Serializable {
       return this;
     }
 
-    public Builder vocabularyKey(Integer vocabularyKey) {
+    public Builder vocabularyKey(Long vocabularyKey) {
       this.vocabularyKey = vocabularyKey;
       return this;
     }
 
-    public Builder parentKey(Integer parentKey) {
+    public Builder parentKey(Long parentKey) {
       this.parentKey = parentKey;
       return this;
     }
 
-    public Builder replacedByKey(Integer replacedByKey) {
+    public Builder replacedByKey(Long replacedByKey) {
       this.replacedByKey = replacedByKey;
       return this;
     }
@@ -128,7 +128,7 @@ public class ConceptSearchParams implements Serializable {
       return this;
     }
 
-    public Builder key(Integer key) {
+    public Builder key(Long key) {
       this.key = key;
       return this;
     }

@@ -52,7 +52,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
   private static final String DEFAULT_VOCABULARY = "default";
 
-  private static int[] vocabularyKeys = new int[2];
+  private static long[] vocabularyKeys = new long[2];
 
   private final ConceptMapper conceptMapper;
 
@@ -113,7 +113,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept fetch = conceptMapper.get(concept3.getKey());
 
     assertList(ConceptSearchParams.builder().query("concept1").key(concept1.getKey()).build(), 1);
-    assertList(ConceptSearchParams.builder().query("concept1").key(Integer.MAX_VALUE).build(), 0);
+    assertList(ConceptSearchParams.builder().query("concept1").key(Long.MAX_VALUE).build(), 0);
     assertList(ConceptSearchParams.builder().key(concept1.getKey()).build(), 1);
     assertList(ConceptSearchParams.builder().query("conc").build(), 3);
     assertList(ConceptSearchParams.builder().query("example").build(), 2);

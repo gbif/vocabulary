@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -137,7 +137,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     Vocabulary vocabulary = createVocabulary("vocab1");
     vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
-    doNothing().when(vocabularyService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
+    doNothing().when(vocabularyService).deprecate(anyLong(), anyString(), anyLong(), anyBoolean());
 
     mockMvc
         .perform(
@@ -155,7 +155,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     Vocabulary vocabulary = createVocabulary("vocab1");
     vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
-    doNothing().when(vocabularyService).restoreDeprecated(anyInt(), anyBoolean());
+    doNothing().when(vocabularyService).restoreDeprecated(anyLong(), anyBoolean());
 
     mockMvc
         .perform(

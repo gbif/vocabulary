@@ -12,9 +12,9 @@ import javax.validation.constraints.NotBlank;
 public interface VocabularyEntity extends Auditable, Deprecable, Serializable {
 
   /** Unique identifier for persistence. */
-  Integer getKey();
+  Long getKey();
 
-  void setKey(Integer key);
+  void setKey(Long key);
 
   /** Unique name. */
   @NotBlank

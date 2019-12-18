@@ -5,15 +5,15 @@ import java.util.Objects;
 /** Utility container to hold a concept key and its number of children. */
 public class ChildrenCountResult {
 
-  private final int conceptKey;
+  private final long conceptKey;
   private final int childrenCount;
 
-  public ChildrenCountResult(int conceptKey, int childrenCount) {
+  public ChildrenCountResult(long conceptKey, int childrenCount) {
     this.conceptKey = conceptKey;
     this.childrenCount = childrenCount;
   }
 
-  public int getConceptKey() {
+  public long getConceptKey() {
     return conceptKey;
   }
 

@@ -28,10 +28,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -129,7 +126,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
   public void suggestConceptTest() throws Exception {
     mockVocabulary();
     List<KeyNameResult> suggestions = createSuggestions();
-    when(conceptService.suggest(anyString(), anyInt())).thenReturn(suggestions);
+    when(conceptService.suggest(anyString(), anyLong())).thenReturn(suggestions);
     suggestTest(suggestions);
   }
 
@@ -140,7 +137,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(concept.getName(), TEST_VOCABULARY_NAME))
         .thenReturn(concept);
-    doNothing().when(conceptService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
+    doNothing().when(conceptService).deprecate(anyLong(), anyString(), anyLong(), anyBoolean());
 
     mockMvc
         .perform(
@@ -159,7 +156,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(concept.getName(), TEST_VOCABULARY_NAME))
         .thenReturn(concept);
-    doNothing().when(conceptService).restoreDeprecated(anyInt(), anyBoolean());
+    doNothing().when(conceptService).restoreDeprecated(anyLong(), anyBoolean());
 
     mockMvc
         .perform(

@@ -18,7 +18,7 @@ public interface BaseService<T extends VocabularyEntity> {
    * @param entity to create
    * @return key of the newly created entity
    */
-  int create(@NotNull @Valid T entity);
+  long create(@NotNull @Valid T entity);
 
   /**
    * Retrieves an entity by its key.
@@ -26,7 +26,7 @@ public interface BaseService<T extends VocabularyEntity> {
    * @param key key of the entity to retrieve
    * @return entity
    */
-  T get(int key);
+  T get(long key);
 
   /**
    * Updates an entity.

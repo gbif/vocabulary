@@ -56,13 +56,13 @@
   <update id="update">
     UPDATE vocabulary
     SET <include refid="VOCABULARY_PARAMS_UPDATE" />
-    WHERE key = #{key,jdbcType=INTEGER} AND deleted IS NULL
+    WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
   </update>
 
   <select id="get" resultMap="VOCABULARY_MAP">
     SELECT <include refid="VOCABULARY_READ_FIELDS" />
     FROM vocabulary v
-    WHERE v.key = #{key,jdbcType=INTEGER}
+    WHERE v.key = #{key,jdbcType=BIGINT}
   </select>
 
   <select id="getByName" resultMap="VOCABULARY_MAP">
@@ -150,25 +150,25 @@
     deprecated_by = #{deprecatedBy,jdbcType=VARCHAR}
     <choose>
       <when test="replacementKey != null">
-        ,replaced_by_key=#{replacementKey,jdbcType=INTEGER}
+        ,replaced_by_key=#{replacementKey,jdbcType=BIGINT}
       </when>
       <otherwise>
         ,replaced_by_key=null
       </otherwise>
     </choose>
-    WHERE key = #{key,jdbcType=INTEGER} AND deleted IS NULL
+    WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
   </update>
 
   <update id="restoreDeprecated">
     UPDATE vocabulary
     SET deprecated = null, deprecated_by = null, replaced_by_key = null
-    WHERE key = #{key,jdbcType=INTEGER} AND deleted IS NULL
+    WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
   </update>
 
   <select id="isDeprecated" resultType="Boolean">
     SELECT case when count(*) > 0 then 1 else 0 end
     FROM vocabulary
-    WHERE key = #{key,jdbcType=INTEGER} AND deprecated IS NOT NULL
+    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL
   </select>
 
 </mapper>

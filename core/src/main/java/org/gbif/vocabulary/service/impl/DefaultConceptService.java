@@ -5,6 +5,7 @@ import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.normalizers.StringNormalizer;
+import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
@@ -23,6 +24,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -247,6 +249,13 @@ public class DefaultConceptService implements ConceptService {
   @Override
   public List<String> findParents(int conceptKey) {
     return conceptMapper.findParents(conceptKey);
+  }
+
+  @Override
+  public List<ChildrenCountResult> countChildren(List<Integer> conceptParents) {
+    Preconditions.checkArgument(
+        conceptParents != null && !conceptParents.isEmpty(), "concept parents are required");
+    return conceptMapper.countChildren(conceptParents);
   }
 
   /** Returns the keys of all the children of the given concept. */

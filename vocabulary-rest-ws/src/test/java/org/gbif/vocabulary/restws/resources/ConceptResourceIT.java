@@ -33,8 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * IT for the {@link ConceptResource}.
  *
  * <p>These tests are intended to run in parallel. This should be taken into account when adding new
- * * tests since we're not cleaning the DB after each test and htis can interferred with other
- * tests.
+ * tests since we're not cleaning the DB after each test and this can interferred with other tests.
  */
 @ContextConfiguration(initializers = {ConceptResourceIT.ContexInitializer.class})
 public class ConceptResourceIT extends BaseResourceIT<Concept> {
@@ -86,7 +85,6 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
             .expectBody(Concept.class)
             .returnResult()
             .getResponseBody();
-    ;
 
     // list entities
     webClient
@@ -140,16 +138,35 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         .jsonPath("results")
         .value(r -> Assertions.assertEquals(1, r.size()), List.class);
 
-    // list entities
+    // list entities with parent
     webClient
         .get()
-        .uri(builder -> builder.path(getBasePath()).queryParam("hasParent", "true").build())
+        .uri(builder -> builder.path(getBasePath()).queryParam("hasParent", true).build())
         .exchange()
         .expectStatus()
         .isOk()
         .expectBody()
         .jsonPath("results")
         .value(r -> Assertions.assertEquals(1, r.size()), List.class);
+
+    // list entities
+    webClient
+        .get()
+        .uri(
+            builder ->
+                builder
+                    .path(getBasePath())
+                    .queryParam("name", c1.getName())
+                    .queryParam("includeChildrenCount", true)
+                    .build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("results")
+        .value(r -> Assertions.assertEquals(1, r.size()), List.class)
+        .jsonPath("results[0].childrenCount")
+        .value(Matchers.equalTo(1));
   }
 
   @Test

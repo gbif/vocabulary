@@ -4,6 +4,7 @@ import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
@@ -366,6 +367,33 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(2, parents.size());
     assertTrue(parents.contains(concept1.getName()));
     assertTrue(parents.contains(concept2.getName()));
+  }
+
+  @Test
+  public void countChildrenTest() {
+    Concept concept1 = createNewEntity();
+    conceptMapper.create(concept1);
+    assertTrue(conceptMapper.findParents(concept1.getKey()).isEmpty());
+
+    Concept concept2 = createNewEntity();
+    concept2.setParentKey(concept1.getKey());
+    conceptMapper.create(concept2);
+
+    Concept concept3 = createNewEntity();
+    concept3.setParentKey(concept1.getKey());
+    conceptMapper.create(concept3);
+
+    Concept concept4 = createNewEntity();
+    concept4.setParentKey(concept3.getKey());
+    conceptMapper.create(concept4);
+
+    List<ChildrenCountResult> counts =
+        conceptMapper.countChildren(
+            Arrays.asList(
+                concept1.getKey(), concept2.getKey(), concept3.getKey(), concept4.getKey()));
+    assertEquals(2, counts.size());
+    assertTrue(counts.contains(new ChildrenCountResult(concept1.getKey(), 2)));
+    assertTrue(counts.contains(new ChildrenCountResult(concept3.getKey(), 1)));
   }
 
   private void assertList(ConceptSearchParams searchParams, int expectedResult) {

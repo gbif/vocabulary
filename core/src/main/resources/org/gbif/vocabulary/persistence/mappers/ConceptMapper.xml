@@ -285,5 +285,15 @@
     FROM concept
     WHERE key = #{key,jdbcType=INTEGER} AND deprecated IS NOT NULL
   </select>
+  
+  <select id="countChildren" resultType="ChildrenCountResult">
+    SELECT c.parent_key as conceptKey, count(*) as childrenCount
+    FROM concept c
+    WHERE c.parent_key IN
+    <foreach collection="parentConcepts" item="key" separator="," open="(" close=")">
+      #{key}
+    </foreach>
+    GROUP BY c.parent_key
+  </select>
 
 </mapper>

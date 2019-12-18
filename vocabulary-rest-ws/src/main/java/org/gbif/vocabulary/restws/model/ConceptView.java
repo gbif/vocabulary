@@ -10,9 +10,9 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 /** Custom view to represent a {@link Concept} plus some additional information. */
 public class ConceptView implements Serializable {
 
-  @JsonUnwrapped
-  private Concept concept;
+  @JsonUnwrapped private Concept concept;
   private List<String> parents;
+  private Integer childrenCount;
 
   public ConceptView() {}
 
@@ -20,19 +20,35 @@ public class ConceptView implements Serializable {
     this.concept = concept;
   }
 
+  public ConceptView(Concept concept, Integer childrenCount) {
+    this.concept = concept;
+    this.childrenCount = childrenCount;
+  }
+
   public Concept getConcept() {
     return concept;
   }
 
-  public void setConcept(Concept concept) {
+  public ConceptView setConcept(Concept concept) {
     this.concept = concept;
+    return this;
   }
 
   public List<String> getParents() {
     return parents;
   }
 
-  public void setParents(List<String> parents) {
+  public ConceptView setParents(List<String> parents) {
     this.parents = parents;
+    return this;
+  }
+
+  public Integer getChildrenCount() {
+    return childrenCount;
+  }
+
+  public ConceptView setChildrenCount(Integer childrenCount) {
+    this.childrenCount = childrenCount;
+    return this;
   }
 }

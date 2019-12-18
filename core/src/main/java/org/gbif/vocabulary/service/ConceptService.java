@@ -3,6 +3,7 @@ package org.gbif.vocabulary.service;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
@@ -75,10 +76,19 @@ public interface ConceptService extends BaseService<Concept> {
   void restoreDeprecated(int key, boolean restoreDeprecatedChildren);
 
   /**
-   * Finds the parents of a concept. It includes not only its direct parent, but also the parents of each parent.
+   * Finds the parents of a concept. It includes not only its direct parent, but also the parents of
+   * each parent.
    *
    * @param conceptKey key of the concept whose parents we're looking for
    * @return list with the names of the parents
    */
   List<String> findParents(int conceptKey);
+
+  /**
+   * Counts the number of children of each of the concept parents specified.
+   *
+   * @param conceptParents keys of the concepts whose children we'll count
+   * @return list of {@link ChildrenCountResult}
+   */
+  List<ChildrenCountResult> countChildren(List<Integer> conceptParents);
 }

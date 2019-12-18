@@ -2,8 +2,10 @@ package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.AbstractVocabularyEntity;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.restws.model.ConceptView;
@@ -12,6 +14,9 @@ import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +40,7 @@ public class ConceptResource {
   }
 
   @GetMapping()
-  public PagingResponse<Concept> listConcepts(
+  public PagingResponse<ConceptView> listConcepts(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
       @RequestParam(value = "name", required = false) String name,
@@ -45,24 +50,54 @@ public class ConceptResource {
       @RequestParam(value = "key", required = false) Integer key,
       @RequestParam(value = "hasParent", required = false) Boolean hasParent,
       @RequestParam(value = "hasReplacement", required = false) Boolean hasReplacement,
+      @RequestParam(value = "includeChildrenCount", required = false) boolean includeChildrenCount,
       PagingRequest page) {
 
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
 
-    return conceptService.list(
-        ConceptSearchParams.builder()
-            .vocabularyKey(vocabulary.getKey())
-            .query(query)
-            .name(name)
-            .parentKey(parentKey)
-            .replacedByKey(replacedByKey)
-            .deprecated(deprecated)
-            .key(key)
-            .hasParent(hasParent)
-            .hasReplacement(hasReplacement)
-            .build(),
-        page);
+    PagingResponse<Concept> conceptsPage =
+        conceptService.list(
+            ConceptSearchParams.builder()
+                .vocabularyKey(vocabulary.getKey())
+                .query(query)
+                .name(name)
+                .parentKey(parentKey)
+                .replacedByKey(replacedByKey)
+                .deprecated(deprecated)
+                .key(key)
+                .hasParent(hasParent)
+                .hasReplacement(hasReplacement)
+                .build(),
+            page);
+
+    Stream<ConceptView> viewStream = conceptsPage.getResults().stream().map(ConceptView::new);
+
+    if (includeChildrenCount) {
+      // get the keys of all the concepts
+      List<Integer> parentKeys =
+          conceptsPage.getResults().stream()
+              .map(AbstractVocabularyEntity::getKey)
+              .collect(Collectors.toList());
+
+      // get the children counts
+      Map<Integer, Integer> childrenByConcept =
+          conceptService.countChildren(parentKeys).stream()
+              .collect(
+                  Collectors.toMap(
+                      ChildrenCountResult::getConceptKey, ChildrenCountResult::getChildrenCount));
+
+      // set it to the view
+      viewStream =
+          viewStream.map(
+              v -> v.setChildrenCount(childrenByConcept.getOrDefault(v.getConcept().getKey(), 0)));
+    }
+
+    return new PagingResponse<>(
+        conceptsPage.getOffset(),
+        conceptsPage.getLimit(),
+        conceptsPage.getCount(),
+        viewStream.collect(Collectors.toList()));
   }
 
   @GetMapping("{name}")

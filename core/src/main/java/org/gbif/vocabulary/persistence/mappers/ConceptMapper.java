@@ -2,6 +2,7 @@ package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.util.List;
@@ -85,4 +86,12 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * @return list with the names of all the parent concepts
    */
   List<String> findParents(@Param("key") int conceptKey);
+
+  /**
+   * Given a list of concepts, it finds the number of children that each concept has.
+   *
+   * @param parentConcepts list with a key of all the concepts to look for
+   * @return list of {@link ChildrenCountResult}
+   */
+  List<ChildrenCountResult> countChildren(@Param("parentConcepts") List<Integer> parentConcepts);
 }

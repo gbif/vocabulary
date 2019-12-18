@@ -65,7 +65,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles({"mock", "test"})
 abstract class DocumentationBaseTest {
 
-  static final long TEST_KEY = 1;
+  static final Long TEST_KEY = 1L;
   static final String TEST_VOCABULARY_NAME = "vocab1";
   static final long TEST_VOCABULARY_KEY = 1;
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

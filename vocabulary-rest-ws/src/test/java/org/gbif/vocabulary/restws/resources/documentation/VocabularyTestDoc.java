@@ -98,7 +98,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                 .with(authorizationDocumentation()))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", endsWith(getBasePath() + "/" + created.getName())))
-        .andExpect(jsonPath("key", is(TEST_KEY)))
+        .andExpect(jsonPath("key", is(TEST_KEY.intValue())))
         .andExpect(jsonPath("name", equalTo(created.getName())))
         .andDo(documentFields(Vocabulary.class));
   }
@@ -119,7 +119,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                 .content(OBJECT_MAPPER.writeValueAsString(vocabulary))
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("key", is(vocabulary.getKey())))
+        .andExpect(jsonPath("key", is(vocabulary.getKey().intValue())))
         .andExpect(jsonPath("name", equalTo(vocabulary.getName())))
         .andDo(documentFields(Vocabulary.class));
   }

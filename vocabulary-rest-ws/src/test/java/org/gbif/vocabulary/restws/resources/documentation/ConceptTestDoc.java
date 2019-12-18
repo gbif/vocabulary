@@ -96,7 +96,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
                 .with(authorizationDocumentation()))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", endsWith(getBasePath() + "/" + created.getName())))
-        .andExpect(jsonPath("key", is(TEST_KEY)))
+        .andExpect(jsonPath("key", is(TEST_KEY.intValue())))
         .andExpect(jsonPath("name", equalTo(created.getName())))
         .andDo(documentFields(Concept.class));
   }
@@ -117,7 +117,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
                 .content(OBJECT_MAPPER.writeValueAsString(concept))
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("key", is(concept.getKey())))
+        .andExpect(jsonPath("key", is(concept.getKey().intValue())))
         .andExpect(jsonPath("name", equalTo(concept.getName())))
         .andDo(documentFields(Concept.class));
   }

@@ -27,18 +27,28 @@ pipeline {
             parallel {
               stage('Package and unit tests') {
                 steps {
-                  configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                                                               variable: 'MAVEN_SETTINGS_XML')]) {
-                   sh 'mvn clean package dependency:analyze -U'
-                  }
+                    sh """
+                      cat <<-EOF> a
+                      aaa
+                      EOF
+                      """.stripIndent()
+//                   configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+//                                                                variable: 'MAVEN_SETTINGS_XML')]) {
+//                    sh 'mvn clean package dependency:analyze -U'
+//                   }
                 }
               }
               stage('Integration tests') {
                 steps {
-                  configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                                                               variable: 'MAVEN_SETTINGS_XML')]) {
-                   sh 'mvn clean verify -Pintegration'
-                  }
+                    sh """
+                      cat <<-EOF> b
+                      bbb
+                      EOF
+                      """.stripIndent()
+//                   configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+//                                                                variable: 'MAVEN_SETTINGS_XML')]) {
+//                    sh 'mvn clean verify -Pintegration'
+//                   }
                 }
               }
             }

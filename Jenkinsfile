@@ -30,6 +30,7 @@ pipeline {
                   {
                       node
                       {
+                          label 'a'
                           customWorkspace 'workspace/a'
                       }
                   }
@@ -50,6 +51,7 @@ pipeline {
                   {
                       node
                       {
+                          label 'b'
                           customWorkspace 'workspace/b'
                       }
                   }

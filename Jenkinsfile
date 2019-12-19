@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none
     tools {
        maven 'Maven3.2'
        jdk 'JDK8'
@@ -30,7 +30,7 @@ pipeline {
                   {
                       node
                       {
-                          label 'a'
+                          label 'master'
                           customWorkspace 'workspace/a'
                       }
                   }
@@ -46,7 +46,7 @@ pipeline {
                   {
                       node
                       {
-                          label 'b'
+                          label 'master'
                           customWorkspace 'workspace/b'
                       }
                   }

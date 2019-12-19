@@ -60,6 +60,14 @@ pipeline {
             }
         }
         stage('SonarQube analysis') {
+         agent
+          {
+              node
+              {
+                  label 'master'
+                  customWorkspace 'workspace/a'
+              }
+          }
           steps {
             withSonarQubeEnv('GBIF Sonarqube') {
               sh 'mvn sonar:sonar'

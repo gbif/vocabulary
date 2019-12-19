@@ -26,14 +26,14 @@ pipeline {
             failFast true
             parallel {
               stage('Package and unit tests') {
-               agent
-                  {
-                      node
-                      {
-                          label 'master'
-                          customWorkspace 'workspace/a'
-                      }
-                  }
+//                agent
+//                   {
+//                       node
+//                       {
+//                           label 'master'
+//                           customWorkspace 'workspace/a'
+//                       }
+//                   }
                 steps {
                   configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                                                variable: 'MAVEN_SETTINGS_XML')]) {
@@ -60,14 +60,14 @@ pipeline {
             }
         }
         stage('SonarQube analysis') {
-         agent
-          {
-              node
-              {
-                  label 'master'
-                  customWorkspace 'workspace/a'
-              }
-          }
+//          agent
+//           {
+//               node
+//               {
+//                   label 'master'
+//                   customWorkspace 'workspace/a'
+//               }
+//           }
           steps {
             withSonarQubeEnv('GBIF Sonarqube') {
               sh 'mvn sonar:sonar'

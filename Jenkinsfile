@@ -35,15 +35,10 @@ pipeline {
                       }
                   }
                 steps {
-                    sh """
-                      cat <<-EOF> a
-                      aaa
-                      EOF
-                      """.stripIndent()
-//                   configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-//                                                                variable: 'MAVEN_SETTINGS_XML')]) {
-//                    sh 'mvn clean package dependency:analyze -U'
-//                   }
+                  configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                                                               variable: 'MAVEN_SETTINGS_XML')]) {
+                   sh 'mvn clean package dependency:analyze -U'
+                  }
                 }
               }
               stage('Integration tests') {
@@ -56,15 +51,10 @@ pipeline {
                       }
                   }
                 steps {
-                    sh """
-                      cat <<-EOF> b
-                      bbb
-                      EOF
-                      """.stripIndent()
-//                   configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-//                                                                variable: 'MAVEN_SETTINGS_XML')]) {
-//                    sh 'mvn clean verify -Pintegration'
-//                   }
+                  configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                                                               variable: 'MAVEN_SETTINGS_XML')]) {
+                   sh 'mvn clean verify -Pintegration'
+                  }
                 }
               }
             }

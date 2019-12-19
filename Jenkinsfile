@@ -26,6 +26,13 @@ pipeline {
             failFast true
             parallel {
               stage('Package and unit tests') {
+               agent
+                  {
+                      node
+                      {
+                          customWorkspace 'workspace/a'
+                      }
+                  }
                 steps {
                     sh """
                       cat <<-EOF> a
@@ -39,6 +46,13 @@ pipeline {
                 }
               }
               stage('Integration tests') {
+               agent
+                  {
+                      node
+                      {
+                          customWorkspace 'workspace/b'
+                      }
+                  }
                 steps {
                     sh """
                       cat <<-EOF> b

@@ -150,7 +150,7 @@
         <configuration>
           <mainClass>org.gbif.vocabulary.restws.Application</mainClass>
           <addResources>false</addResources>
-          <folders>conf/</folders>
+          <folders>conf</folders>
         </configuration>
       </plugin>
     </plugins>

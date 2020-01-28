@@ -77,6 +77,7 @@
     <!-- logging -->
     <slf4j.version>1.7.26</slf4j.version>
     <logback.version>1.2.3</logback.version>
+    <janino.version>2.5.10</janino.version>
     <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
 
     <!-- documentation -->
@@ -92,6 +93,7 @@
     <sonar.exclusions>**/AsciiParser.java</sonar.exclusions>
     <sonar.cpd.exclusions>**/AsciiParser.java</sonar.cpd.exclusions>
     <sonar.coverage.exclusions>**/AsciiParser.java</sonar.coverage.exclusions>
+    <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -181,6 +183,12 @@
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>${logback.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>janino</groupId>
+        <artifactId>janino</artifactId>
+        <version>${janino.version}</version>
+        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>net.logstash.logback</groupId>

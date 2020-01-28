@@ -13,6 +13,8 @@ import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,8 +83,13 @@ public class ConceptResource {
               .collect(Collectors.toList());
 
       // get the children counts
+      List<ChildrenCountResult> counts = new ArrayList<>();
+      if (!parentKeys.isEmpty()) {
+        counts = conceptService.countChildren(parentKeys);
+      }
+
       Map<Long, Integer> childrenByConcept =
-          conceptService.countChildren(parentKeys).stream()
+          counts.stream()
               .collect(
                   Collectors.toMap(
                       ChildrenCountResult::getConceptKey, ChildrenCountResult::getChildrenCount));

@@ -76,7 +76,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
-    List<Vocabulary> resultList =
+    List<Concept> resultList =
         OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<Concept>>() {});
 
     assertEquals(concepts.size(), resultList.size());

@@ -23,7 +23,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 public class SpringConfig {
 
   /**
-   * We import only the necessary mybatis config from other modules. We can't import all the class
+   * We import only the necessary mybatis config from other modules. We can't import all the classes
    * of the package because some classes are missing a default constructor.
    */
   @Bean

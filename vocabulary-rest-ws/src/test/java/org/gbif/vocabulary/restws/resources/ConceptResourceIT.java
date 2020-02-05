@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * <p>These tests are intended to run in parallel. This should be taken into account when adding new
  * tests since we're not cleaning the DB after each test and this can interferred with other tests.
  */
-@ContextConfiguration(initializers = {ConceptResourceIT.ContexInitializer.class})
+@ContextConfiguration(initializers = {ConceptResourceIT.ContextInitializer.class})
 public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
   private static String defaultVocabularyName;
@@ -268,7 +268,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     return "/" + VOCABULARIES_PATH + "/" + defaultVocabularyName + "/" + CONCEPTS_PATH;
   }
 
-  static class ContexInitializer
+  static class ContextInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of(

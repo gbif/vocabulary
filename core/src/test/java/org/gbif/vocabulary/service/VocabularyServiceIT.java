@@ -68,8 +68,12 @@ public class VocabularyServiceIT {
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.create(similarName));
 
     Vocabulary similarLabel = createBasicVocabulary();
-    similarLabel.getLabel().put(Language.ITALIAN, "sim");
+    similarLabel.getLabel().put(Language.ENGLISH, "sim");
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.create(similarLabel));
+
+    Vocabulary similarLabelDifferentLanguage = createBasicVocabulary();
+    similarLabelDifferentLanguage.getLabel().put(Language.SPANISH, "sim");
+    assertDoesNotThrow(() -> vocabularyService.create(similarLabelDifferentLanguage));
   }
 
   @Test
@@ -106,6 +110,14 @@ public class VocabularyServiceIT {
     Vocabulary updated2 = vocabularyService.get(key2);
     updated2.setLabel(Collections.singletonMap(Language.ENGLISH, vocabulary1.getName()));
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(updated2));
+
+    Vocabulary updated3 = vocabularyService.get(key2);
+    updated3.setLabel(Collections.singletonMap(Language.SPANISH, vocabulary1.getName()));
+    assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(updated2));
+
+    Vocabulary updated4 = vocabularyService.get(key2);
+    updated4.setLabel(Collections.singletonMap(Language.SPANISH, "simupdated"));
+    assertDoesNotThrow(() -> vocabularyService.update(updated4));
   }
 
   @Test

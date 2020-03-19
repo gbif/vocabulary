@@ -4,6 +4,7 @@ import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import java.util.List;
 import javax.annotation.Nullable;
@@ -74,7 +75,7 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * @param conceptKey if we are updating a concept we exclude it from the searh
    */
   List<KeyNameResult> findSimilarities(
-      @Param("values") List<String> normalizedValues,
+      @Param("normalizedValues") List<NormalizedValuesParam> normalizedValues,
       @Param("vocabularyKey") long vocabularyKey,
       @Nullable @Param("conceptKey") Long conceptKey);
 

@@ -240,11 +240,16 @@
   <select id="findSimilarities" resultType="KeyNameResult">
     SELECT key, name
     FROM concept
-    WHERE vocabulary_key = #{vocabularyKey}
-      AND #{values, typeHandler=StringArrayTypeHandler} &amp;&amp; normalized_values
+    <where>
+      vocabulary_key = #{vocabularyKey}
       <if test="conceptKey != null">
         AND key != #{conceptKey}
       </if>
+      AND
+      <foreach collection="normalizedValues" item="v" separator=" OR " open="(" close=")">
+        normalized_values::jsonb->#{v.node} ??| #{v.values, typeHandler=StringArrayTypeHandler}
+      </foreach>
+    </where>
     LIMIT 3
   </select>
 

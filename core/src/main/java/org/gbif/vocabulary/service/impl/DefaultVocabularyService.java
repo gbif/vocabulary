@@ -5,15 +5,14 @@ import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.normalizers.StringNormalizer;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.VocabularyService;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -21,12 +20,15 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
 
 import static java.util.Objects.requireNonNull;
@@ -170,14 +172,39 @@ public class DefaultVocabularyService implements VocabularyService {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Supplies the required method to the DB that checks if the name or labels of the vocabulary
+   * received are already present in any other vocabulary.
+   *
+   * <p><b>NOTICE that the normalization of the name and labels has to be the same as the one the DB
+   * does.</b>
+   */
   private Supplier<List<KeyNameResult>> createSimilaritiesExtractor(
       Vocabulary vocabulary, boolean update) {
     return () -> {
-      List<String> valuesToCheck =
-          ImmutableList.<String>builder()
-              .add(StringNormalizer.normalizeName(vocabulary.getName()))
-              .addAll(StringNormalizer.normalizeLabels(vocabulary.getLabel().values()))
-              .build();
+      List<NormalizedValuesParam> valuesToCheck = new ArrayList<>();
+
+      // add name
+      valuesToCheck.add(
+          NormalizedValuesParam.from(
+              ALL_NODE, Collections.singletonList(normalizeName(vocabulary.getName()))));
+
+      // add labels
+      valuesToCheck.addAll(
+          vocabulary.getLabel().entrySet().stream()
+              .map(
+                  e -> {
+                    List<String> normalizedLabels =
+                        Collections.singletonList(normalizeLabel(e.getValue()));
+
+                    return Arrays.asList(
+                        NormalizedValuesParam.from(
+                            e.getKey().getIso3LetterCode(), normalizedLabels),
+                        NormalizedValuesParam.from(NAME_NODE, normalizedLabels));
+                  })
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList()));
+
       return vocabularyMapper.findSimilarities(valuesToCheck, update ? vocabulary.getKey() : null);
     };
   }

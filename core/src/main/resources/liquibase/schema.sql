@@ -2,6 +2,7 @@ CREATE EXTENSION IF NOT EXISTS unaccent;
 
 CREATE OR REPLACE FUNCTION assert_min_length(input text, minlength integer) RETURNS boolean AS $$ DECLARE length integer; BEGIN length := char_length(trim(input)); IF (length IS NULL) OR (length >= minlength) THEN RETURN TRUE; ELSE RETURN FALSE; END IF; END; $$ LANGUAGE plpgsql;
 
+--gets all the values of the jsonb in an array and ignores the keys
 CREATE OR REPLACE FUNCTION get_json_values(input jsonb)
   RETURNS text[] AS
 $func$
@@ -22,6 +23,44 @@ $func$
               res := array_append(res, trim('"' FROM v));
             END LOOP;
         END LOOP;
+      END IF;
+
+      RETURN res;
+  END
+$func$ LANGUAGE plpgsql;
+
+--adds normalized labels to the normalized_values jsonb column, having them also stored by language
+CREATE OR REPLACE FUNCTION add_normalized_values(input jsonb, normalized_values jsonb)
+  RETURNS jsonb AS
+$func$
+  DECLARE
+    rec record;
+    k text;
+    v text;
+    normalized_labels jsonb;
+    existing_labels_k jsonb;
+    all_labels jsonb;
+   	res jsonb;
+  BEGIN
+      res := coalesce(normalized_values,'{}'::jsonb);
+      IF input IS NOT NULL then
+        all_labels := coalesce(res::jsonb->'all','""'::jsonb);
+      	for k in select distinct jsonb_object_keys(input) loop
+      	  --get all normalized labels for the current key
+      	  normalized_labels := '""'::jsonb;
+      		for v in select input::jsonb->k loop
+      		  normalized_labels := normalized_labels || normalize_label(v)::jsonb;
+      		end loop;
+
+      		--add normalized labels to the current key
+      		existing_labels_k := coalesce(res::jsonb->k,'""'::jsonb);
+          res := jsonb_set(res, array[k], existing_labels_k||normalized_labels, true);
+          --collect all normalized labels
+          all_labels := all_labels||normalized_labels;
+      	end loop;
+
+      	--add all normalized labels to the key that contains all values
+      	res := jsonb_set(res, '{all}', all_labels, true);
       END IF;
 
       RETURN res;
@@ -61,7 +100,7 @@ CREATE TABLE vocabulary(
   modified timestamp with time zone NOT NULL DEFAULT now(),
   deleted timestamp with time zone NULL,
   fulltext_search tsvector,
-  normalized_values text[]
+  normalized_values jsonb
 );
 
 CREATE INDEX vocabulary_fulltext_search_idx ON vocabulary USING gin(fulltext_search);
@@ -72,7 +111,7 @@ $vocabchange$
     DECLARE
       labels text[];
       definitions text[];
-      v text;
+      normalized_name jsonb;
     BEGIN
       labels := COALESCE(get_json_values(NEW.label), array[]::text[]);
       definitions := COALESCE(get_json_values(NEW.definition), array[]::text[]);
@@ -85,10 +124,16 @@ $vocabchange$
 				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.external_definition_urls, ' '),''))) ||
 				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.editorial_notes, ' '),'')));
 
-       NEW.normalized_values := array_append(NEW.normalized_values, normalize_name(NEW.name));
-       FOREACH v IN ARRAY labels LOOP
-          NEW.normalized_values := array_append(NEW.normalized_values, normalize_label(v));
-       END LOOP;
+      --create normalized values as jsonb
+      NEW.normalized_values := '{}'::jsonb;
+
+      --add normalized name to the name and all nodes
+      normalized_name := to_jsonb(normalize_name(NEW.name));
+      NEW.normalized_values := jsonb_set(NEW.normalized_values, '{name}', normalized_name, true);
+      NEW.normalized_values := jsonb_set(NEW.normalized_values, '{all}', normalized_name, true);
+
+      --add normalized labels
+      NEW.normalized_values := add_normalized_values(NEW.label, NEW.normalized_values);
 
       RETURN NEW;
     END;
@@ -121,7 +166,7 @@ CREATE TABLE concept(
   modified timestamp with time zone NOT NULL DEFAULT now(),
   deleted timestamp with time zone NULL,
   fulltext_search tsvector,
-  normalized_values text[],
+  normalized_values jsonb,
   CONSTRAINT unique_concept UNIQUE(vocabulary_key,name)
 );
 
@@ -135,7 +180,7 @@ $conceptchange$
       alternative_labels text[];
       misapplied_labels text[];
       definitions text[];
-      v text;
+      normalized_name jsonb;
     BEGIN
       labels := COALESCE(get_json_values(NEW.label), array[]::text[]);
       alternative_labels := COALESCE(get_json_values(NEW.alternative_labels), array[]::text[]);
@@ -152,10 +197,18 @@ $conceptchange$
 				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.same_as_uris, ' '),''))) ||
 				TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.editorial_notes, ' '),'')));
 
-       NEW.normalized_values := array_append(NEW.normalized_values, normalize_name(NEW.name));
-       FOREACH v IN ARRAY labels||alternative_labels||misapplied_labels LOOP
-          NEW.normalized_values := array_append(NEW.normalized_values, normalize_label(v));
-       END LOOP;
+      --create normalized values as jsonb
+      NEW.normalized_values := '{}'::jsonb;
+
+      --add normalized name to the name and all nodes
+      normalized_name := to_jsonb(normalize_name(NEW.name));
+      NEW.normalized_values := jsonb_set(NEW.normalized_values, '{name}', normalized_name, true);
+      NEW.normalized_values := jsonb_set(NEW.normalized_values, '{all}', normalized_name, true);
+
+      --add normalized labels
+      NEW.normalized_values := add_normalized_values(NEW.label, NEW.normalized_values);
+      NEW.normalized_values := add_normalized_values(NEW.alternative_labels, NEW.normalized_values);
+      NEW.normalized_values := add_normalized_values(NEW.misapplied_labels, NEW.normalized_values);
 
       RETURN NEW;
     END;

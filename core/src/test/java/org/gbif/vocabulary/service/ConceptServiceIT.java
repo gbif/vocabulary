@@ -127,7 +127,11 @@ public class ConceptServiceIT {
 
     Concept similar2 = createBasicConcept(vocabularyKeys[0]);
     similar2.getMisappliedLabels().put(Language.ENGLISH, Collections.singletonList("simm1"));
-    assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar));
+    assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar2));
+
+    Concept similar3 = createBasicConcept(vocabularyKeys[0]);
+    similar3.getMisappliedLabels().put(Language.SPANISH, Collections.singletonList("simm1"));
+    assertDoesNotThrow(() -> conceptService.create(similar3));
   }
 
   @Test
@@ -173,6 +177,15 @@ public class ConceptServiceIT {
     Concept updatedConcept2 = conceptService.get(key2);
     updatedConcept2.setLabel(Collections.singletonMap(Language.ENGLISH, concept1.getName()));
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept2));
+
+    Concept updatedConcept3 = conceptService.get(key2);
+    updatedConcept3.setAlternativeLabels(
+        Collections.singletonMap(Language.ENGLISH, Collections.singletonList("simupdated")));
+    assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept3));
+
+    updatedConcept3.setAlternativeLabels(
+        Collections.singletonMap(Language.SPANISH, Collections.singletonList("simupdated")));
+    assertDoesNotThrow(() -> conceptService.update(updatedConcept3));
   }
 
   @Test

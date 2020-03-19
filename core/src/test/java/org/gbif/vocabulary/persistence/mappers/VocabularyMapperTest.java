@@ -4,6 +4,7 @@ import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import java.net.URI;
 import java.util.*;
@@ -21,6 +22,7 @@ import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -135,20 +137,29 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabulary1.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary1);
 
+    // check Spanish labels
+    NormalizedValuesParam spanishValues =
+        NormalizedValuesParam.from(
+            Language.SPANISH.getIso3LetterCode(), Arrays.asList("igual", "foo"));
+
     List<KeyNameResult> similarities =
-        vocabularyMapper.findSimilarities(Arrays.asList("igual", "foo"), null);
+        vocabularyMapper.findSimilarities(Collections.singletonList(spanishValues), null);
     assertEquals(1, similarities.size());
-    assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(vocabulary1.getName(), similarities.get(0).getName());
+    assertSimilarity(similarities, vocabulary1);
 
-    similarities =
-        vocabularyMapper.findSimilarities(
-            Collections.singletonList(normalizeName(vocabulary1.getName())), null);
+    spanishValues.setValues(Arrays.asList("foo", "bar"));
+    assertEquals(
+        0,
+        vocabularyMapper.findSimilarities(Collections.singletonList(spanishValues), null).size());
+
+    // check name
+    NormalizedValuesParam namesValues =
+        NormalizedValuesParam.from(
+            NAME_NODE, Collections.singletonList(normalizeName(vocabulary1.getName())));
+
+    similarities = vocabularyMapper.findSimilarities(Collections.singletonList(namesValues), null);
     assertEquals(1, similarities.size());
-    assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(vocabulary1.getName(), similarities.get(0).getName());
-
-    assertEquals(0, vocabularyMapper.findSimilarities(Arrays.asList("foo", "bar"), null).size());
+    assertSimilarity(similarities, vocabulary1);
 
     // create another vocabulary
     Vocabulary vocabulary2 = createNewEntity();
@@ -156,19 +167,51 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabulary2.setLabel(Collections.singletonMap(Language.ENGLISH, "another label "));
     vocabularyMapper.create(vocabulary2);
 
+    // check with multiple labels
+    spanishValues.setValues(Collections.singletonList("igual"));
+    namesValues.setValues(Collections.singletonList(normalizeName("Another Vocab")));
     similarities =
-        vocabularyMapper.findSimilarities(
-            Collections.singletonList(normalizeLabel("  ANOTHER   label")), null);
+        vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
+    assertEquals(2, similarities.size());
+
+    namesValues.setValues(Collections.singletonList(normalizeName("new Vocab")));
+    similarities =
+        vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
     assertEquals(1, similarities.size());
-    assertEquals(vocabulary2.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(vocabulary2.getName(), similarities.get(0).getName());
+    assertSimilarity(similarities, vocabulary1);
 
     similarities =
         vocabularyMapper.findSimilarities(
-            Collections.singletonList(normalizeName("Another Vocab ")), null);
+            Arrays.asList(spanishValues, namesValues), vocabulary1.getKey());
+    assertEquals(0, similarities.size());
+
+    spanishValues.setNode(Language.ENGLISH.getIso3LetterCode());
+    similarities =
+        vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
+    assertEquals(0, similarities.size());
+
+    NormalizedValuesParam englishValues =
+        NormalizedValuesParam.from(
+            Language.ENGLISH.getIso3LetterCode(),
+            Collections.singletonList(normalizeLabel("another label")));
+    assertEquals(
+        1,
+        vocabularyMapper.findSimilarities(Collections.singletonList(englishValues), null).size());
+
+    // remove labels and there shouldn't be similarities in labels
+    vocabulary2 = vocabularyMapper.get(vocabulary2.getKey());
+    vocabulary2.setLabel(null);
+    vocabularyMapper.update(vocabulary2);
+
+    assertEquals(
+        0,
+        vocabularyMapper.findSimilarities(Collections.singletonList(englishValues), null).size());
+  }
+
+  private void assertSimilarity(List<KeyNameResult> similarities, Vocabulary vocabulary) {
     assertEquals(1, similarities.size());
-    assertEquals(vocabulary2.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(vocabulary2.getName(), similarities.get(0).getName());
+    assertEquals(vocabulary.getKey().intValue(), similarities.get(0).getKey());
+    assertEquals(vocabulary.getName(), similarities.get(0).getName());
   }
 
   private void assertList(

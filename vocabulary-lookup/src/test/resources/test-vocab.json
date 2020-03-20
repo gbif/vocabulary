@@ -27,7 +27,8 @@
     "name" : "January",
     "label" : {
       "eng" : "January",
-      "spa" : "Enero"
+      "spa" : "Enero",
+      "fra" : "Janvier"
     },
     "definition" : { },
     "externalDefinitions" : [ ],
@@ -78,14 +79,16 @@
       "fra" : [ "fév"]
     },
     "misappliedLabels" : {
-      "eng" : [ "F"]
+      "eng" : [ "F"],
+      "fr" : [ "Marzo"]
     },
     "sameAsUris" : [ ]
   }, {
     "key" : null,
     "name" : "March",
     "label" : {
-      "eng" : "March"
+      "eng" : "March",
+      "spa" : "Marzo"
     },
     "definition" : { },
     "externalDefinitions" : [ ],

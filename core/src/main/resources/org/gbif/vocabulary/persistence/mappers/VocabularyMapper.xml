@@ -137,10 +137,15 @@
   <select id="findSimilarities" resultType="KeyNameResult">
     SELECT key, name
     FROM vocabulary
-    WHERE #{values, typeHandler=StringArrayTypeHandler} &amp;&amp; normalized_values
-    <if test="vocabularyKey != null">
-      AND key != #{vocabularyKey}
-    </if>
+    <where>
+      <if test="vocabularyKey != null">
+        key != #{vocabularyKey}
+      </if>
+      AND
+      <foreach collection="normalizedValues" item="v" separator=" OR " open="(" close=")">
+        normalized_values::jsonb->#{v.node} ??| #{v.values, typeHandler=StringArrayTypeHandler}
+      </foreach>
+    </where>
     LIMIT 3
   </select>
 

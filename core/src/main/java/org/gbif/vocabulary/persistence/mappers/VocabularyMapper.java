@@ -3,6 +3,7 @@ package org.gbif.vocabulary.persistence.mappers;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import java.util.List;
 import javax.annotation.Nullable;
@@ -37,11 +38,11 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
    * Searchs for a similar vocabulary whose name or any of its labels are the same as the ones
    * received as parameter.
    *
-   * @param normalizedValues values that we want to check that are unique in the vocabulary. <b>They must be
-   *     normalized</b>
+   * @param normalizedValues values that we want to check that are unique in the vocabulary.
+   *     <b>They must be normalized</b>
    * @param vocabularyKey if we are updating a vocabulary we exclude it from the searh
    */
   List<KeyNameResult> findSimilarities(
-      @Param("values") List<String> normalizedValues,
+      @Param("normalizedValues") List<NormalizedValuesParam> normalizedValues,
       @Nullable @Param("vocabularyKey") Long vocabularyKey);
 }

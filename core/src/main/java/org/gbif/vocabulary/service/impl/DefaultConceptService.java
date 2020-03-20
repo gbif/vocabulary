@@ -3,34 +3,35 @@ package org.gbif.vocabulary.service.impl;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.api.vocabulary.Language;
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.normalizers.StringNormalizer;
 import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.ConceptService;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
 
 import static java.util.Objects.requireNonNull;
@@ -263,21 +264,52 @@ public class DefaultConceptService implements ConceptService {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Supplies the required method to the DB that checks if the name or labels of the concept
+   * received are already present in any other concept.
+   *
+   * <p><b>NOTICE that the normalization of the name and labels has to be the same as the one the DB
+   * does.</b>
+   */
   private Supplier<List<KeyNameResult>> createSimilaritiesExtractor(
       Concept concept, boolean update) {
     return () -> {
-      List<String> valuesToCheck =
-          ImmutableList.<String>builder()
-              .add(StringNormalizer.normalizeName(concept.getName()))
-              .addAll(StringNormalizer.normalizeLabels(concept.getLabel().values()))
-              .addAll(
-                  Stream.concat(
-                          concept.getAlternativeLabels().values().stream(),
-                          concept.getMisappliedLabels().values().stream())
-                      .flatMap(Collection::stream)
-                      .map(StringNormalizer::normalizeLabel)
-                      .collect(Collectors.toList()))
-              .build();
+      List<NormalizedValuesParam> valuesToCheck = new ArrayList<>();
+
+      // add name
+      valuesToCheck.add(
+          NormalizedValuesParam.from(
+              ALL_NODE, Collections.singletonList(normalizeName(concept.getName()))));
+
+      BiFunction<Language, List<String>, List<NormalizedValuesParam>> normalizer =
+          (lang, labels) -> {
+            List<String> normalizedLabels = normalizeLabels(labels);
+
+            return Arrays.asList(
+                NormalizedValuesParam.from(lang.getIso3LetterCode(), normalizedLabels),
+                NormalizedValuesParam.from(NAME_NODE, normalizedLabels));
+          };
+
+      // add labels
+      valuesToCheck.addAll(
+          concept.getLabel().entrySet().stream()
+              .map(e -> normalizer.apply(e.getKey(), Collections.singletonList(e.getValue())))
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList()));
+
+      // add alternative labels
+      valuesToCheck.addAll(
+          concept.getAlternativeLabels().entrySet().stream()
+              .map(e -> normalizer.apply(e.getKey(), e.getValue()))
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList()));
+
+      // add misapplied labels
+      valuesToCheck.addAll(
+          concept.getMisappliedLabels().entrySet().stream()
+              .map(e -> normalizer.apply(e.getKey(), e.getValue()))
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList()));
 
       return conceptMapper.findSimilarities(
           valuesToCheck, concept.getVocabularyKey(), update ? concept.getKey() : null);

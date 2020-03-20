@@ -1,107 +1,116 @@
 pipeline {
-    agent any
-    tools {
-       maven 'Maven3.2'
-       jdk 'JDK8'
+  agent any
+  tools {
+    maven 'Maven3.2'
+    jdk 'JDK8'
+  }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+  }
+  parameters {
+    booleanParam(name: 'RELEASE',
+            defaultValue: false,
+            description: 'Do a Maven release (it also generates API documentation)')
+    booleanParam(name: 'DOCUMENTATION',
+            defaultValue: false,
+            description: 'Generate API documentation')
+  }
+  stages {
+    stage('Build') {
+      when {
+        allOf {
+          not { expression { params.RELEASE } };
+          not { expression { params.DOCUMENTATION } };
+        }
+      }
+      steps {
+        configFileProvider(
+                [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                        variable: 'MAVEN_SETTINGS_XML')]) {
+          sh 'mvn clean package verify dependency:analyze -U'
+        }
+      }
     }
-    options {
-       buildDiscarder(logRotator(numToKeepStr: '5'))
+    stage('SonarQube analysis') {
+      when {
+        allOf {
+          not { expression { params.RELEASE } };
+          not { expression { params.DOCUMENTATION } };
+        }
+      }
+      steps {
+        withSonarQubeEnv('GBIF Sonarqube') {
+          sh 'mvn sonar:sonar'
+        }
+      }
     }
-    parameters {
-       booleanParam(
-          name: 'RELEASE',
-          defaultValue: false,
-          description: 'Do a Maven release (it also generates API documentation)')
-       booleanParam(
-          name: 'DOCUMENTATION',
-          defaultValue: false,
-          description: 'Generate API documentation')
+    stage('Snapshot to nexus') {
+      when {
+        allOf {
+          not { expression { params.RELEASE } };
+          not { expression { params.DOCUMENTATION } };
+          branch 'master';
+        }
+      }
+      steps {
+        configFileProvider(
+                [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                        variable: 'MAVEN_SETTINGS_XML')]) {
+          sh 'mvn -s $MAVEN_SETTINGS_XML deploy'
+        }
+      }
     }
-    stages {
-        stage('Build') {
-            when { allOf {
-                    not { expression { params.RELEASE } };
-                    not { expression { params.DOCUMENTATION } };
-            } }
-            steps {
-              configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                                             variable: 'MAVEN_SETTINGS_XML')]) {
-                sh 'mvn clean package verify dependency:analyze -U'
-              }
-            }
+    stage('Release version to nexus') {
+      when { expression { params.RELEASE } }
+      steps {
+        configFileProvider(
+                [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                        variable: 'MAVEN_SETTINGS_XML')]) {
+          git 'https://github.com/gbif/vocabulary.git'
+          sh 'mvn -s $MAVEN_SETTINGS_XML -B release:prepare release:perform'
         }
-        stage('SonarQube analysis') {
-            when { allOf {
-                    not { expression { params.RELEASE } };
-                    not { expression { params.DOCUMENTATION } };
-            } }
-            steps {
-              withSonarQubeEnv('GBIF Sonarqube') {
-                sh 'mvn sonar:sonar'
-              }
-            }
-        }
-        stage('Snapshot to nexus') {
-            when { allOf {
-                    not { expression { params.RELEASE } };
-                    not { expression { params.DOCUMENTATION } };
-                    branch 'master';
-             } }
-            steps {
-              configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                                             variable: 'MAVEN_SETTINGS_XML')]) {
-                sh 'mvn -s $MAVEN_SETTINGS_XML deploy'
-              }
-            }
-        }
-        stage('Release version to nexus') {
-          when { expression { params.RELEASE } }
-          steps {
-            configFileProvider([configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                                                         variable: 'MAVEN_SETTINGS_XML')]) {
-              git 'https://github.com/gbif/vocabulary.git'
-              sh 'mvn -s $MAVEN_SETTINGS_XML -B release:prepare release:perform'
-            }
-          }
-        }
-        stage('Generate API documentation') {
-          when { anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION } } }
-          steps {
-            sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
-              git 'https://github.com/gbif/vocabulary.git'
-              sh '''
+      }
+    }
+    stage('Generate API documentation') {
+      when { anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION } } }
+      steps {
+        sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
+          git 'https://github.com/gbif/vocabulary.git'
+          sh '''
                 mvn clean package -Pdocumentation
                 git add *.html
                 git commit -m "Generated API documentation"
                 git push git@github.com:gbif/vocabulary.git master
               '''
-            }
-          }
         }
-        stage('Deploy to DEV') {
-          environment {
-            GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
-            SERVICE_VOCABULARY = "${env.WORKSPACE}/service-vocabulary.yml"
-            HOSTS_VOCABULARY = "${env.WORKSPACE}/hosts-vocabulary"
-            BUILD_HOSTS = "${BUILD_ID}_hosts"
-          }
-          when { allOf {
-            not { expression { params.RELEASE } };
-            not { expression { params.DOCUMENTATION } };
-            branch 'master';
-          } }
-          steps {
-            sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
-              sh '''
+      }
+    }
+    stage('Deploy to DEV') {
+      environment {
+        GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
+        SERVICE_VOCABULARY = "${env.WORKSPACE}/service-vocabulary.yml"
+        HOSTS_VOCABULARY = "${env.WORKSPACE}/hosts-vocabulary"
+        BUILD_HOSTS = "${BUILD_ID}_hosts"
+      }
+      when {
+        allOf {
+          not { expression { params.RELEASE } };
+          not { expression { params.DOCUMENTATION } };
+          branch 'master';
+        }
+      }
+      steps {
+        sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
+          sh '''
                 rm -rf *
                 git clone -b master git@github.com:gbif/gbif-configuration.git
                 git clone -b master git@github.com:gbif/c-deploy.git
                '''
 
-               createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")
-               createHostsFile()
+          createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")
+          createHostsFile()
 
-              sh """
+          sh """
                 cd c-deploy/services
                 echo "Creating group_vars directory"
                 mkdir group_vars
@@ -119,32 +128,31 @@ pipeline {
                 echo "Executing Ansible playbook"
                 ansible-playbook -vvv -i ${BUILD_HOSTS} services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=${GIT_CREDENTIALS}"
               """
-            }
-          }
         }
-    }
-    post {
-      failure {
-        mail to: "mlopez@gbif.org",
-             subject: "Failed Vocabulary Pipeline: ${currentBuild.fullDisplayName}",
-             body: "Something is wrong with ${env.BUILD_URL}"
       }
     }
+  }
+  post {
+    failure {
+      slackSend message: "Vocabulary build failed! - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)",
+              channel: "#vocabulary"
+    }
+  }
 }
 
 void createServiceFile(String servicesPath) {
- def allServices = readYaml file: servicesPath
+  def allServices = readYaml file: servicesPath
 
- def vocabularyService
- for(service in allServices.services){
-  if (service.artifactId == "vocabulary-rest-ws") {
-    vocabularyService = service
-    break
+  def vocabularyService
+  for (service in allServices.services) {
+    if (service.artifactId == "vocabulary-rest-ws") {
+      vocabularyService = service
+      break
+    }
   }
- }
 
- if (vocabularyService) {
-  sh """
+  if (vocabularyService) {
+    sh """
     cat <<-EOF> ${SERVICE_VOCABULARY}
     services: [
     {
@@ -161,7 +169,7 @@ void createServiceFile(String servicesPath) {
     ]
     EOF
     """.stripIndent()
- }
+  }
 }
 
 void createHostsFile() {

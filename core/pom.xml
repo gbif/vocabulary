@@ -5,11 +5,11 @@
   <parent>
     <groupId>org.gbif.vocabulary</groupId>
     <artifactId>vocabulary-parent</artifactId>
-    <version>0.21</version>
+    <version>0.22-SNAPSHOT</version>
   </parent>
 
   <artifactId>core</artifactId>
-  <version>0.21</version>
+  <version>0.22-SNAPSHOT</version>
 
   <dependencies>
     <dependency>

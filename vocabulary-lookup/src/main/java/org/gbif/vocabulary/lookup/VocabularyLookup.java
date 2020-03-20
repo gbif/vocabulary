@@ -283,6 +283,6 @@ public class VocabularyLookup implements AutoCloseable {
 
   private static class LabelMatch {
     Set<Concept> allMatches = new HashSet<>();
-    Map<Language, Set<Concept>> matchesByLanguage = new HashMap<>();
+    Map<Language, Set<Concept>> matchesByLanguage = new EnumMap<>(Language.class);
   }
 }

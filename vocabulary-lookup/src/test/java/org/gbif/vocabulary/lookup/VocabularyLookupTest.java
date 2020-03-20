@@ -13,22 +13,31 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /** Tests the {@link VocabularyLookup}. */
 public class VocabularyLookupTest {
 
-  private static final String TEST_FILE = "test-vocab.json";
+  private static final String TEST_VOCAB_FILE = "test-vocab.json";
+  private static final String INVALID_VOCAB_FILE = "invalid-vocab.json";
 
   @Test
   public void loadVocabularyFromInputStreamTest() {
     VocabularyLookup lookup =
         VocabularyLookup.load(
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_FILE));
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE));
     assertNotNull(lookup);
+  }
+
+  @Test
+  public void invalidVocabularyLoadTest() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            VocabularyLookup.load(
+                Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream(INVALID_VOCAB_FILE)));
   }
 
   @Disabled("manual test")
@@ -47,7 +56,7 @@ public class VocabularyLookupTest {
   public void lookupTest() {
     VocabularyLookup vocabulary =
         VocabularyLookup.load(
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_FILE));
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE));
 
     Optional<Concept> concept = vocabulary.lookup("February");
     assertTrue(concept.isPresent());
@@ -74,7 +83,7 @@ public class VocabularyLookupTest {
   public void lookupWithLanguageTest() {
     VocabularyLookup vocabulary =
         VocabularyLookup.load(
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_FILE));
+            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE));
 
     assertFalse(vocabulary.lookup("Marzo").isPresent());
     assertFalse(vocabulary.lookup("Marzo", Language.ENGLISH).isPresent());

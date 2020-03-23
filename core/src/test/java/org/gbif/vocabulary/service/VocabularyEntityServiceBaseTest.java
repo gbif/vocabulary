@@ -19,7 +19,8 @@ import static org.mockito.Mockito.when;
  *
  * @param <T> {@link VocabularyEntity} to parametrize the class.
  */
-abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity> extends MockServiceBaseTest {
+abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
+    extends MockServiceBaseTest {
 
   static final long TEST_KEY = 1;
 

@@ -4,10 +4,10 @@
 
   <resultMap id="VOCABULARY_MAP" type="Vocabulary" autoMapping="true">
     <id property="key" column="key"/>
-    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler" />
-    <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler" />
-    <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler" />
-    <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler" />
+    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
+    <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
   </resultMap>
 
   <sql id="VOCABULARY_READ_FIELDS">
@@ -55,26 +55,30 @@
 
   <update id="update">
     UPDATE vocabulary
-    SET <include refid="VOCABULARY_PARAMS_UPDATE" />
+    SET
+    <include refid="VOCABULARY_PARAMS_UPDATE"/>
     WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
   </update>
 
   <select id="get" resultMap="VOCABULARY_MAP">
-    SELECT <include refid="VOCABULARY_READ_FIELDS" />
+    SELECT
+    <include refid="VOCABULARY_READ_FIELDS"/>
     FROM vocabulary v
     WHERE v.key = #{key,jdbcType=BIGINT}
   </select>
 
   <select id="getByName" resultMap="VOCABULARY_MAP">
-    SELECT <include refid="VOCABULARY_READ_FIELDS" />
+    SELECT
+    <include refid="VOCABULARY_READ_FIELDS"/>
     FROM vocabulary v
     WHERE v.name = #{name,jdbcType=VARCHAR}
   </select>
 
   <select id="list" resultType="Vocabulary" resultMap="VOCABULARY_MAP">
-    SELECT <include refid="VOCABULARY_READ_FIELDS" />
+    SELECT
+    <include refid="VOCABULARY_READ_FIELDS"/>
     FROM vocabulary v
-    <if test="query != null" >
+    <if test="query != null">
       JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     WHERE v.deleted IS NULL
@@ -90,7 +94,7 @@
     <if test="key != null">
       AND v.key = #{key}
     </if>
-    ORDER BY <if test="query != null" >ts_rank_cd(v.fulltext_search, query) DESC,</if> v.created DESC, v.key
+    ORDER BY <if test="query != null">ts_rank_cd(v.fulltext_search, query) DESC,</if> v.created DESC, v.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>
@@ -99,7 +103,7 @@
   <select id="count" resultType="Long">
     SELECT COUNT(*)
     FROM vocabulary v
-    <if test="query != null" >
+    <if test="query != null">
       JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     WHERE v.deleted IS NULL
@@ -120,17 +124,17 @@
   <select id="suggest" resultType="KeyNameResult">
     SELECT key, name
     FROM (
-      (SELECT key, name
-       FROM vocabulary
-       WHERE name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
-       ORDER BY name LIMIT 20
-      )
-      UNION ALL
-      (SELECT key, name
-       FROM vocabulary
-       WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
-       ORDER BY name LIMIT 20
-      )
+    (SELECT key, name
+    FROM vocabulary
+    WHERE name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+    ORDER BY name LIMIT 20
+    )
+    UNION ALL
+    (SELECT key, name
+    FROM vocabulary
+    WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+    ORDER BY name LIMIT 20
+    )
     ) t1 LIMIT 20
   </select>
 

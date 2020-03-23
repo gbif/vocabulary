@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.persistence.handlers;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 
 import java.io.IOException;
 import java.sql.CallableStatement;
@@ -20,56 +20,56 @@ import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 
 /**
- * MyBatis {@link org.apache.ibatis.type.TypeHandler} for a {@link Map} keyed on {@link Language}
- * and stores a {@link List} of strings.
+ * MyBatis {@link org.apache.ibatis.type.TypeHandler} for a {@link Map} keyed on {@link
+ * TranslationLanguage} and stores a {@link List} of strings.
  */
 public class ValueListByLanguageMapTypeHandler
-    extends BaseTypeHandler<Map<Language, List<String>>> {
+    extends BaseTypeHandler<Map<TranslationLanguage, List<String>>> {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final ObjectReader OBJECT_READER =
-      OBJECT_MAPPER.readerFor(new TypeReference<Map<Language, List<String>>>() {});
+      OBJECT_MAPPER.readerFor(new TypeReference<Map<TranslationLanguage, List<String>>>() {});
 
   @Override
   public void setNonNullParameter(
       PreparedStatement preparedStatement,
       int i,
-      Map<Language, List<String>> languageStringListMap,
+      Map<TranslationLanguage, List<String>> languageStringListMap,
       JdbcType jdbcType)
       throws SQLException {
     preparedStatement.setString(i, toString(languageStringListMap));
   }
 
   @Override
-  public Map<Language, List<String>> getNullableResult(ResultSet resultSet, String columnName)
-      throws SQLException {
+  public Map<TranslationLanguage, List<String>> getNullableResult(
+      ResultSet resultSet, String columnName) throws SQLException {
     return fromString(resultSet.getString(columnName));
   }
 
   @Override
-  public Map<Language, List<String>> getNullableResult(ResultSet resultSet, int columnIndex)
-      throws SQLException {
+  public Map<TranslationLanguage, List<String>> getNullableResult(
+      ResultSet resultSet, int columnIndex) throws SQLException {
     return fromString(resultSet.getString(columnIndex));
   }
 
   @Override
-  public Map<Language, List<String>> getNullableResult(
+  public Map<TranslationLanguage, List<String>> getNullableResult(
       CallableStatement callableStatement, int columnIndex) throws SQLException {
     return fromString(callableStatement.getString(columnIndex));
   }
 
-  private String toString(Map<Language, List<String>> languageStringListMap) {
+  private String toString(Map<TranslationLanguage, List<String>> languageStringListMap) {
     try {
       return OBJECT_MAPPER.writeValueAsString(languageStringListMap);
     } catch (JsonProcessingException e) {
       throw new IllegalStateException(
-          "Couldn't convert language map to JSON: " + languageStringListMap, e);
+          "Couldn't convert TranslationLanguage map to JSON: " + languageStringListMap, e);
     }
   }
 
-  private Map<Language, List<String>> fromString(String json) {
+  private Map<TranslationLanguage, List<String>> fromString(String json) {
     if (Strings.isNullOrEmpty(json)) {
-      return new EnumMap<>(Language.class);
+      return new EnumMap<>(TranslationLanguage.class);
     }
 
     try {

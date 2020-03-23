@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 
@@ -86,14 +86,14 @@ public class VocabularyLookupTest {
             Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE));
 
     assertFalse(vocabulary.lookup("Marzo").isPresent());
-    assertFalse(vocabulary.lookup("Marzo", Language.ENGLISH).isPresent());
-    assertFalse(vocabulary.lookup("Marzo", Language.GERMAN).isPresent());
+    assertFalse(vocabulary.lookup("Marzo", TranslationLanguage.ENGLISH).isPresent());
+    assertFalse(vocabulary.lookup("Marzo", TranslationLanguage.GERMAN).isPresent());
 
-    Optional<Concept> concept = vocabulary.lookup("Marzo", Language.SPANISH);
+    Optional<Concept> concept = vocabulary.lookup("Marzo", TranslationLanguage.SPANISH);
     assertTrue(concept.isPresent());
     assertEquals("March", concept.get().getName());
 
-    concept = vocabulary.lookup("Marzo", Language.FRENCH);
+    concept = vocabulary.lookup("Marzo", TranslationLanguage.FRENCH);
     assertTrue(concept.isPresent());
     assertEquals("February", concept.get().getName());
   }

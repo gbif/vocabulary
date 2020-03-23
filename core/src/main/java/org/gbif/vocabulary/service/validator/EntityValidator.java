@@ -25,7 +25,8 @@ public final class EntityValidator {
       T entity, Supplier<List<KeyNameResult>> similaritiesExtractor) {
 
     if (!NAME_PATTERN.matcher(entity.getName()).matches()) {
-      throw new IllegalArgumentException("Entity name has to match the regex " + NAME_PATTERN.pattern());
+      throw new IllegalArgumentException(
+          "Entity name has to match the regex " + NAME_PATTERN.pattern());
     }
 
     List<KeyNameResult> similarities = similaritiesExtractor.get();

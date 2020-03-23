@@ -3,7 +3,7 @@ package org.gbif.vocabulary.service.impl;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
@@ -281,12 +281,12 @@ public class DefaultConceptService implements ConceptService {
           NormalizedValuesParam.from(
               ALL_NODE, Collections.singletonList(normalizeName(concept.getName()))));
 
-      BiFunction<Language, List<String>, List<NormalizedValuesParam>> normalizer =
+      BiFunction<TranslationLanguage, List<String>, List<NormalizedValuesParam>> normalizer =
           (lang, labels) -> {
             List<String> normalizedLabels = normalizeLabels(labels);
 
             return Arrays.asList(
-                NormalizedValuesParam.from(lang.getIso3LetterCode(), normalizedLabels),
+                NormalizedValuesParam.from(lang.getLocale(), normalizedLabels),
                 NormalizedValuesParam.from(NAME_NODE, normalizedLabels));
           };
 

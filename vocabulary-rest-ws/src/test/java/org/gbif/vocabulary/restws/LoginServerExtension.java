@@ -7,26 +7,16 @@ import java.util.UUID;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.http.HttpStatus;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
-import static org.gbif.vocabulary.restws.TestCredentials.EDITOR;
-import static org.gbif.vocabulary.restws.TestCredentials.INVALID_JWT_USER;
-import static org.gbif.vocabulary.restws.TestCredentials.INVALID_USER;
-import static org.gbif.vocabulary.restws.TestCredentials.JWT_ADMIN;
-import static org.gbif.vocabulary.restws.TestCredentials.JWT_EDITOR;
-import static org.gbif.vocabulary.restws.TestCredentials.JWT_USER;
-import static org.gbif.vocabulary.restws.TestCredentials.USER;
+import static org.gbif.vocabulary.restws.TestCredentials.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.matching;
-import static com.github.tomakehurst.wiremock.client.WireMock.notMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 
 public class LoginServerExtension implements BeforeAllCallback, AfterAllCallback {

@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -94,14 +94,15 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept1.setName("concept1");
     concept1.setAlternativeLabels(
         Collections.singletonMap(
-            Language.ENGLISH, Collections.singletonList("alternative example")));
+            TranslationLanguage.ENGLISH, Collections.singletonList("alternative example")));
     conceptMapper.create(concept1);
 
     Concept concept2 = createNewEntity();
     concept2.setName("concept2");
     concept2.setParentKey(concept1.getKey());
     concept2.setMisappliedLabels(
-        Collections.singletonMap(Language.ENGLISH, Collections.singletonList("misspelt example")));
+        Collections.singletonMap(
+            TranslationLanguage.ENGLISH, Collections.singletonList("misspelt example")));
     conceptMapper.create(concept2);
 
     Concept concept3 = createNewEntity();
@@ -173,15 +174,17 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @Test
   public void findSimilaritiesTest() {
     Concept concept1 = createNewEntity();
-    concept1.setLabel(new HashMap<>(Collections.singletonMap(Language.SPANISH, "primero ")));
+    concept1.setLabel(
+        new HashMap<>(Collections.singletonMap(TranslationLanguage.SPANISH, "primero ")));
     concept1.setMisappliedLabels(
-        Collections.singletonMap(Language.SPANISH, Arrays.asList("primeiro", "otro primeiro")));
+        Collections.singletonMap(
+            TranslationLanguage.SPANISH, Arrays.asList("primeiro", "otro primeiro")));
     conceptMapper.create(concept1);
 
     // check Spanish labels
     NormalizedValuesParam spanishValues =
         NormalizedValuesParam.from(
-            Language.SPANISH.getIso3LetterCode(),
+            TranslationLanguage.SPANISH.getLocale(),
             Collections.singletonList(normalizeLabel("primeiro")));
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
@@ -233,8 +236,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             concept1.getKey());
     assertEquals(0, similarities.size());
 
-    // for other language there should be no matches
-    spanishValues.setNode(Language.ENGLISH.getIso3LetterCode());
+    // for other TranslationLanguage there should be no matches
+    spanishValues.setNode(TranslationLanguage.ENGLISH.getLocale());
     similarities =
         conceptMapper.findSimilarities(
             Collections.singletonList(spanishValues),
@@ -247,15 +250,17 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void findSimilaritiesNormalizationTest() {
     Concept concept1 = createNewEntity();
     concept1.setName("my-concept");
-    concept1.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "normalization")));
+    concept1.setLabel(
+        new HashMap<>(Collections.singletonMap(TranslationLanguage.ENGLISH, "normalization")));
     concept1.setMisappliedLabels(
-        Collections.singletonMap(Language.ENGLISH, Arrays.asList("norm", "another norm")));
+        Collections.singletonMap(
+            TranslationLanguage.ENGLISH, Arrays.asList("norm", "another norm")));
     conceptMapper.create(concept1);
 
     // check Spanish labels
     NormalizedValuesParam englishValues =
         NormalizedValuesParam.from(
-            Language.ENGLISH.getIso3LetterCode(),
+            TranslationLanguage.ENGLISH.getLocale(),
             Collections.singletonList(normalizeLabel(" normaLiZA tion  ")));
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
@@ -281,35 +286,37 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void findSimilaritiesMultipleParamsTest() {
     Concept concept1 = createNewEntity();
     concept1.setName("c1");
-    concept1.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "l1")));
+    concept1.setLabel(new HashMap<>(Collections.singletonMap(TranslationLanguage.ENGLISH, "l1")));
     concept1.setAlternativeLabels(
-        Collections.singletonMap(Language.SPANISH, Collections.singletonList("l uno")));
+        Collections.singletonMap(TranslationLanguage.SPANISH, Collections.singletonList("l uno")));
     concept1.setMisappliedLabels(
-        Collections.singletonMap(Language.ENGLISH, Arrays.asList("ll1", "l1l")));
+        Collections.singletonMap(TranslationLanguage.ENGLISH, Arrays.asList("ll1", "l1l")));
     conceptMapper.create(concept1);
 
     Concept concept2 = createNewEntity();
     concept2.setName("c2");
-    concept2.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "l2")));
+    concept2.setLabel(new HashMap<>(Collections.singletonMap(TranslationLanguage.ENGLISH, "l2")));
     concept2.setMisappliedLabels(
-        Collections.singletonMap(Language.SPANISH, Arrays.asList("ll2", "l2l")));
+        Collections.singletonMap(TranslationLanguage.SPANISH, Arrays.asList("ll2", "l2l")));
     conceptMapper.create(concept2);
 
     // check Spanish labels
     NormalizedValuesParam spanishValues =
         NormalizedValuesParam.from(
-            Language.SPANISH.getIso3LetterCode(), Collections.singletonList(normalizeLabel("ll2")));
+            TranslationLanguage.SPANISH.getLocale(),
+            Collections.singletonList(normalizeLabel("ll2")));
 
     NormalizedValuesParam englishValues =
         NormalizedValuesParam.from(
-            Language.ENGLISH.getIso3LetterCode(), Collections.singletonList(normalizeLabel("l1")));
+            TranslationLanguage.ENGLISH.getLocale(),
+            Collections.singletonList(normalizeLabel("l1")));
 
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
             Arrays.asList(spanishValues, englishValues), concept1.getVocabularyKey(), null);
     assertEquals(2, similarities.size());
 
-    spanishValues.setNode(Language.ITALIAN.getIso3LetterCode());
+    spanishValues.setNode(TranslationLanguage.ITALIAN.getLocale());
     similarities =
         conceptMapper.findSimilarities(
             Arrays.asList(spanishValues, englishValues), concept1.getVocabularyKey(), null);
@@ -506,10 +513,11 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept entity = new Concept();
     entity.setVocabularyKey(vocabularyKeys[0]);
     entity.setName(UUID.randomUUID().toString());
-    entity.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Label")));
+    entity.setLabel(new HashMap<>(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label")));
     entity.setMisappliedLabels(
-        Collections.singletonMap(Language.SPANISH, Arrays.asList("lab,l", "lbel")));
-    entity.setDefinition(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Definition")));
+        Collections.singletonMap(TranslationLanguage.SPANISH, Arrays.asList("lab,l", "lbel")));
+    entity.setDefinition(
+        new HashMap<>(Collections.singletonMap(TranslationLanguage.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
     entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));

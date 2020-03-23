@@ -37,8 +37,8 @@ $func$
     rec record;
     k text;
     v text;
+    norm_label jsonb;
     normalized_labels jsonb;
-    existing_labels_k jsonb;
     all_labels jsonb;
    	res jsonb;
   BEGIN
@@ -47,14 +47,13 @@ $func$
         all_labels := coalesce(res::jsonb->'all','""'::jsonb);
       	for k in select distinct jsonb_object_keys(input) loop
       	  --get all normalized labels for the current key
-      	  normalized_labels := '""'::jsonb;
       		for v in select input::jsonb->k loop
-      		  normalized_labels := normalized_labels || normalize_label(v)::jsonb;
+      		  norm_label := normalize_label(v)::jsonb;
+      		  normalized_labels := coalesce(normalized_labels || norm_label, norm_label);
       		end loop;
 
       		--add normalized labels to the current key
-      		existing_labels_k := coalesce(res::jsonb->k,'""'::jsonb);
-          res := jsonb_set(res, array[k], existing_labels_k||normalized_labels, true);
+          res := jsonb_set(res, array[k], coalesce(res::jsonb->k||normalized_labels, normalized_labels), true);
           --collect all normalized labels
           all_labels := all_labels||normalized_labels;
       	end loop;

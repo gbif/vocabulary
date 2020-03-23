@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.restws.model.ConceptView;
@@ -253,10 +253,11 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     Concept concept = new Concept();
     concept.setName(UUID.randomUUID().toString());
     concept.setVocabularyKey(defaultVocabularyKey);
-    concept.setLabel(Collections.singletonMap(Language.ENGLISH, UUID.randomUUID().toString()));
+    concept.setLabel(
+        Collections.singletonMap(TranslationLanguage.ENGLISH, UUID.randomUUID().toString()));
     concept.setAlternativeLabels(
         Collections.singletonMap(
-            Language.ENGLISH,
+            TranslationLanguage.ENGLISH,
             Arrays.asList(UUID.randomUUID().toString(), UUID.randomUUID().toString())));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 

@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.service;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -110,9 +110,9 @@ public class ConceptServiceIT {
   @Test
   public void createSimilarConceptTest() {
     Concept concept = createBasicConcept(vocabularyKeys[0]);
-    concept.setLabel(Collections.singletonMap(Language.ENGLISH, "sim1"));
+    concept.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "sim1"));
     concept.setMisappliedLabels(
-        Collections.singletonMap(Language.ENGLISH, Collections.singletonList("simm1")));
+        Collections.singletonMap(TranslationLanguage.ENGLISH, Collections.singletonList("simm1")));
     conceptService.create(concept);
 
     Concept similar = createBasicConcept(vocabularyKeys[0]);
@@ -126,11 +126,15 @@ public class ConceptServiceIT {
     assertDoesNotThrow(() -> conceptService.create(similar));
 
     Concept similar2 = createBasicConcept(vocabularyKeys[0]);
-    similar2.getMisappliedLabels().put(Language.ENGLISH, Collections.singletonList("simm1"));
+    similar2
+        .getMisappliedLabels()
+        .put(TranslationLanguage.ENGLISH, Collections.singletonList("simm1"));
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar2));
 
     Concept similar3 = createBasicConcept(vocabularyKeys[0]);
-    similar3.getMisappliedLabels().put(Language.SPANISH, Collections.singletonList("simm1"));
+    similar3
+        .getMisappliedLabels()
+        .put(TranslationLanguage.SPANISH, Collections.singletonList("simm1"));
     assertDoesNotThrow(() -> conceptService.create(similar3));
   }
 
@@ -141,19 +145,19 @@ public class ConceptServiceIT {
     concept = conceptService.get(key);
 
     // update concept
-    concept.setLabel(Collections.singletonMap(Language.ENGLISH, "label"));
+    concept.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "label"));
     concept.setMisappliedLabels(
-        Collections.singletonMap(Language.ENGLISH, Arrays.asList("labl", "lbel")));
+        Collections.singletonMap(TranslationLanguage.ENGLISH, Arrays.asList("labl", "lbel")));
     concept.setParentKey(vocabularyKeys[1]);
     conceptService.update(concept);
 
     Concept updatedConcept = conceptService.get(key);
-    assertEquals("label", updatedConcept.getLabel().get(Language.ENGLISH));
-    assertEquals(2, updatedConcept.getMisappliedLabels().get(Language.ENGLISH).size());
+    assertEquals("label", updatedConcept.getLabel().get(TranslationLanguage.ENGLISH));
+    assertEquals(2, updatedConcept.getMisappliedLabels().get(TranslationLanguage.ENGLISH).size());
     assertTrue(
         updatedConcept
             .getMisappliedLabels()
-            .get(Language.ENGLISH)
+            .get(TranslationLanguage.ENGLISH)
             .containsAll(Arrays.asList("labl", "lbel")));
     assertEquals(vocabularyKeys[1], updatedConcept.getParentKey().intValue());
   }
@@ -163,7 +167,8 @@ public class ConceptServiceIT {
     Concept concept1 = createBasicConcept(vocabularyKeys[0]);
     concept1.setName("simConcept");
     concept1.setMisappliedLabels(
-        Collections.singletonMap(Language.ENGLISH, Collections.singletonList("simupdated")));
+        Collections.singletonMap(
+            TranslationLanguage.ENGLISH, Collections.singletonList("simupdated")));
     conceptService.create(concept1);
 
     Concept concept2 = createBasicConcept(vocabularyKeys[0]);
@@ -171,20 +176,23 @@ public class ConceptServiceIT {
 
     // update concept
     Concept updatedConcept = conceptService.get(key2);
-    updatedConcept.setLabel(Collections.singletonMap(Language.ENGLISH, "simupdated"));
+    updatedConcept.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "simupdated"));
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept));
 
     Concept updatedConcept2 = conceptService.get(key2);
-    updatedConcept2.setLabel(Collections.singletonMap(Language.ENGLISH, concept1.getName()));
+    updatedConcept2.setLabel(
+        Collections.singletonMap(TranslationLanguage.ENGLISH, concept1.getName()));
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept2));
 
     Concept updatedConcept3 = conceptService.get(key2);
     updatedConcept3.setAlternativeLabels(
-        Collections.singletonMap(Language.ENGLISH, Collections.singletonList("simupdated")));
+        Collections.singletonMap(
+            TranslationLanguage.ENGLISH, Collections.singletonList("simupdated")));
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept3));
 
     updatedConcept3.setAlternativeLabels(
-        Collections.singletonMap(Language.SPANISH, Collections.singletonList("simupdated")));
+        Collections.singletonMap(
+            TranslationLanguage.SPANISH, Collections.singletonList("simupdated")));
     assertDoesNotThrow(() -> conceptService.update(updatedConcept3));
   }
 

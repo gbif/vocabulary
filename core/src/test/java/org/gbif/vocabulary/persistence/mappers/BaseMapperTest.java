@@ -1,7 +1,7 @@
 package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.model.registry.LenientEquals;
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
 
     // update
     entitySaved.getEditorialNotes().add("Note test 2");
-    entitySaved.getLabel().put(Language.SPANISH, "Etiqueta");
+    entitySaved.getLabel().put(TranslationLanguage.SPANISH, "Etiqueta");
     baseMapper.update(entitySaved);
 
     T entityUpdated = baseMapper.get(entitySaved.getKey());

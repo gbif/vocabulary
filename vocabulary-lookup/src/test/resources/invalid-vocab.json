@@ -1,110 +1,140 @@
 {
-  "metadata" : {
-    "createdDate" : "2019-10-08T16:24:47.218"
+  "metadata": {
+    "createdDate": "2019-10-08T16:24:47.218"
   },
-  "vocabulary" : {
-    "key" : null,
-    "name" : "Months",
-    "label" : {
-      "eng" : "Months",
-      "spa" : "Meses"
+  "vocabulary": {
+    "key": null,
+    "name": "Months",
+    "label": {
+      "en": "Months",
+      "es-ES": "Meses"
     },
-    "definition" : { },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : null,
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
-    "namespace" : null
+    "definition": {},
+    "externalDefinitions": [],
+    "editorialNotes": [],
+    "replacedByKey": null,
+    "deprecated": null,
+    "deprecatedBy": null,
+    "created": null,
+    "createdBy": null,
+    "modified": null,
+    "modifiedBy": null,
+    "deleted": null,
+    "namespace": null
   },
-  "concepts" : [ {
-    "key" : null,
-    "name" : "January",
-    "label" : {
-      "eng" : "January",
-      "spa" : "Enero",
-      "fra" : "Janvier"
+  "concepts": [
+    {
+      "key": null,
+      "name": "January",
+      "label": {
+        "en": "January",
+        "es-ES": "Enero",
+        "fr-FR": "Janvier"
+      },
+      "definition": {},
+      "externalDefinitions": [],
+      "editorialNotes": [],
+      "replacedByKey": null,
+      "deprecated": null,
+      "deprecatedBy": null,
+      "created": "2019-10-08T16:24:47.123",
+      "createdBy": null,
+      "modified": null,
+      "modifiedBy": null,
+      "deleted": null,
+      "vocabularyKey": null,
+      "parentKey": null,
+      "alternativeLabels": {
+        "en": [
+          "Jan",
+          "Jan.",
+          "Jan.,"
+        ],
+        "es-ES": [
+          "Ene",
+          "Ene."
+        ]
+      },
+      "misappliedLabels": {
+        "en": [
+          "Janauary",
+          "Januray",
+          "Juanuary"
+        ],
+        "es-ES": [
+          "Eniero",
+          "Eneiro"
+        ]
+      },
+      "sameAsUris": []
     },
-    "definition" : { },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2019-10-08T16:24:47.123",
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
-    "vocabularyKey" : null,
-    "parentKey" : null,
-    "alternativeLabels" : {
-      "eng" : [ "Jan", "Jan.", "Jan.,"],
-      "spa" : [ "Ene", "Ene." ]
+    {
+      "key": null,
+      "name": "February",
+      "label": {
+        "en": "February",
+        "es-ES": "Febrero",
+        "fr-FR": "février"
+      },
+      "definition": {},
+      "externalDefinitions": [],
+      "editorialNotes": [],
+      "replacedByKey": null,
+      "deprecated": null,
+      "deprecatedBy": null,
+      "created": null,
+      "createdBy": null,
+      "modified": null,
+      "modifiedBy": null,
+      "deleted": null,
+      "vocabularyKey": null,
+      "parentKey": null,
+      "alternativeLabels": {
+        "en": [
+          "Feb",
+          "Feb.",
+          "Febr."
+        ],
+        "es-ES": [
+          "Febr"
+        ],
+        "fr-FR": [
+          "fév"
+        ]
+      },
+      "misappliedLabels": {
+        "en": [
+          "F"
+        ],
+        "fr-FR": [
+          "Marzo"
+        ]
+      },
+      "sameAsUris": []
     },
-    "misappliedLabels" : {
-      "eng" : [ "Janauary", "Januray", "Juanuary"],
-      "spa" : [ "Eniero", "Eneiro" ]
-    },
-    "sameAsUris" : [ ]
-  }, {
-    "key" : null,
-    "name" : "February",
-    "label" : {
-      "eng" : "February",
-      "spa" : "Febrero",
-      "fra" : "février"
-    },
-    "definition" : { },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : null,
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
-    "vocabularyKey" : null,
-    "parentKey" : null,
-    "alternativeLabels" : {
-      "eng" : [ "Feb", "Feb.", "Febr."],
-      "spa" : [ "Febr" ],
-      "fra" : [ "fév"]
-    },
-    "misappliedLabels" : {
-      "eng" : [ "F"],
-      "fr" : [ "Marzo"]
-    },
-    "sameAsUris" : [ ]
-  }, {
-    "key" : null,
-    "name" : "February",
-    "label" : {
-      "eng" : "March",
-      "spa" : "Marzo"
-    },
-    "definition" : { },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : null,
-    "createdBy" : null,
-    "modified" : null,
-    "modifiedBy" : null,
-    "deleted" : null,
-    "vocabularyKey" : null,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "misappliedLabels" : { },
-    "sameAsUris" : [ ]
-  } ]
+    {
+      "key": null,
+      "name": "February",
+      "label": {
+        "en": "March",
+        "es-ES": "Marzo"
+      },
+      "definition": {},
+      "externalDefinitions": [],
+      "editorialNotes": [],
+      "replacedByKey": null,
+      "deprecated": null,
+      "deprecatedBy": null,
+      "created": null,
+      "createdBy": null,
+      "modified": null,
+      "modifiedBy": null,
+      "deleted": null,
+      "vocabularyKey": null,
+      "parentKey": null,
+      "alternativeLabels": {},
+      "misappliedLabels": {},
+      "sameAsUris": []
+    }
+  ]
 }

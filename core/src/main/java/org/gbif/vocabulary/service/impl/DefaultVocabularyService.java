@@ -198,8 +198,7 @@ public class DefaultVocabularyService implements VocabularyService {
                         Collections.singletonList(normalizeLabel(e.getValue()));
 
                     return Arrays.asList(
-                        NormalizedValuesParam.from(
-                            e.getKey().getIso3LetterCode(), normalizedLabels),
+                        NormalizedValuesParam.from(e.getKey().getLocale(), normalizedLabels),
                         NormalizedValuesParam.from(NAME_NODE, normalizedLabels));
                   })
               .flatMap(Collection::stream)

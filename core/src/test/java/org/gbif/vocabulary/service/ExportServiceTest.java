@@ -1,7 +1,7 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.export.VocabularyExport;
@@ -61,32 +61,32 @@ public class ExportServiceTest extends MockServiceBaseTest {
     c1.setCreated(LocalDateTime.now());
 
     // labels
-    Map<Language, String> labels = new HashMap<>();
-    labels.put(Language.ENGLISH, "Label");
-    labels.put(Language.SPANISH, "Etiqueta");
+    Map<TranslationLanguage, String> labels = new HashMap<>();
+    labels.put(TranslationLanguage.ENGLISH, "Label");
+    labels.put(TranslationLanguage.SPANISH, "Etiqueta");
     c1.setLabel(labels);
 
     // alternative labels
-    Map<Language, List<String>> alternativeLabels = new HashMap<>();
-    alternativeLabels.put(Language.ENGLISH, Arrays.asList("label2", "label3", "label4"));
-    alternativeLabels.put(Language.SPANISH, Arrays.asList("label5", "label6"));
+    Map<TranslationLanguage, List<String>> alternativeLabels = new HashMap<>();
+    alternativeLabels.put(TranslationLanguage.ENGLISH, Arrays.asList("label2", "label3", "label4"));
+    alternativeLabels.put(TranslationLanguage.SPANISH, Arrays.asList("label5", "label6"));
     c1.setAlternativeLabels(alternativeLabels);
 
     // misspelt labels
-    Map<Language, List<String>> misappliedLabels = new HashMap<>();
-    misappliedLabels.put(Language.ENGLISH, Arrays.asList("labl2", "labl3", "labl4"));
-    misappliedLabels.put(Language.SPANISH, Arrays.asList("labl5", "labl6"));
+    Map<TranslationLanguage, List<String>> misappliedLabels = new HashMap<>();
+    misappliedLabels.put(TranslationLanguage.ENGLISH, Arrays.asList("labl2", "labl3", "labl4"));
+    misappliedLabels.put(TranslationLanguage.SPANISH, Arrays.asList("labl5", "labl6"));
     c1.setMisappliedLabels(misappliedLabels);
 
     Concept c2 = new Concept();
     c2.setName("c2");
     c2.setVocabularyKey(vocabulary.getKey());
-    c2.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    c2.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
 
     Concept c3 = new Concept();
     c3.setName("c3");
     c3.setVocabularyKey(vocabulary.getKey());
-    c3.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    c3.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
 
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);
     when(conceptService.list(any(), any()))

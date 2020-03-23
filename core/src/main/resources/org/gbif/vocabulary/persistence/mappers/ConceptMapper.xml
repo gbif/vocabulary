@@ -4,13 +4,13 @@
 
   <resultMap id="CONCEPT_MAP" type="Concept" autoMapping="true">
     <id property="key" column="key"/>
-    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler" />
-    <result property="alternativeLabels" column="alternative_labels" typeHandler="ValueListByLanguageMapTypeHandler" />
-    <result property="misappliedLabels" column="misapplied_labels" typeHandler="ValueListByLanguageMapTypeHandler" />
-    <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler" />
-    <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler" />
-    <result property="sameAsUris" column="same_as_uris" typeHandler="UriArrayTypeHandler" />
-    <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler" />
+    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <result property="alternativeLabels" column="alternative_labels" typeHandler="ValueListByLanguageMapTypeHandler"/>
+    <result property="misappliedLabels" column="misapplied_labels" typeHandler="ValueListByLanguageMapTypeHandler"/>
+    <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
+    <result property="sameAsUris" column="same_as_uris" typeHandler="UriArrayTypeHandler"/>
+    <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
   </resultMap>
 
   <sql id="CONCEPT_READ_FIELDS">
@@ -69,7 +69,8 @@
 
   <update id="update">
     UPDATE concept
-    SET <include refid="CONCEPT_UPDATE_PARAMS" />
+    SET
+    <include refid="CONCEPT_UPDATE_PARAMS"/>
     WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
   </update>
 
@@ -80,13 +81,15 @@
   </update>
 
   <select id="get" resultMap="CONCEPT_MAP">
-    SELECT <include refid="CONCEPT_READ_FIELDS"/>
+    SELECT
+    <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
     WHERE c.key = #{key,jdbcType=BIGINT}
   </select>
 
   <select id="getByNameAndVocabulary" resultMap="CONCEPT_MAP">
-    SELECT <include refid="CONCEPT_READ_FIELDS"/>
+    SELECT
+    <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
     INNER JOIN vocabulary v on v.key = c.vocabulary_key
     WHERE c.name = #{name,jdbcType=VARCHAR} and v.name = #{vocabularyName,jdbcType=VARCHAR}
@@ -141,9 +144,10 @@
   </update>
 
   <select id="list" resultType="Concept" resultMap="CONCEPT_MAP">
-    SELECT <include refid="CONCEPT_READ_FIELDS"/>
+    SELECT
+    <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
-    <if test="query != null" >
+    <if test="query != null">
       JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     WHERE
@@ -172,7 +176,7 @@
     <if test="hasReplacement != null">
       AND c.replaced_by_key IS <if test="hasReplacement">NOT</if> NULL
     </if>
-    ORDER BY <if test="query != null" >ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
+    ORDER BY <if test="query != null">ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>
@@ -181,7 +185,7 @@
   <select id="count" resultType="Long">
     SELECT COUNT(*)
     FROM concept c
-    <if test="query != null" >
+    <if test="query != null">
       JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     WHERE c.deleted IS NULL
@@ -214,17 +218,17 @@
   <select id="suggest" resultType="KeyNameResult">
     SELECT key, name
     FROM (
-      (SELECT key, name
-       FROM concept
-       WHERE vocabulary_key = #{vocabularyKey} AND name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
-       ORDER BY name LIMIT 20
-      )
+    (SELECT key, name
+    FROM concept
+    WHERE vocabulary_key = #{vocabularyKey} AND name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+    ORDER BY name LIMIT 20
+    )
     UNION ALL
-      (SELECT key, name
-       FROM concept
-       WHERE vocabulary_key = #{vocabularyKey} AND name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
-       ORDER BY name LIMIT 20
-      )
+    (SELECT key, name
+    FROM concept
+    WHERE vocabulary_key = #{vocabularyKey} AND name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
+    ORDER BY name LIMIT 20
+    )
     ) t1 LIMIT 20
   </select>
 
@@ -255,26 +259,26 @@
 
   <select id="findReplacement" resultType="Long">
     WITH RECURSIVE replacements(key, replaced_by, deprecated) AS (
-      SELECT root.key, root.replaced_by_key, root.deprecated
-      FROM concept root
-      WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL AND replaced_by_key IS NOT NULL AND deleted IS NULL
+    SELECT root.key, root.replaced_by_key, root.deprecated
+    FROM concept root
+    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL AND replaced_by_key IS NOT NULL AND deleted IS NULL
     UNION
-      SELECT c.key, c.replaced_by_key, c.deprecated
-      FROM replacements r, concept c
-      WHERE r.replaced_by = c.key
+    SELECT c.key, c.replaced_by_key, c.deprecated
+    FROM replacements r, concept c
+    WHERE r.replaced_by = c.key
     )
     SELECT key FROM replacements WHERE deprecated IS NULL;
   </select>
 
   <select id="findParents" resultType="String">
     WITH RECURSIVE parents(key, name, parent_key, deprecated) AS (
-      SELECT root.key, root.name, root.parent_key, root.deprecated
-      FROM concept root
-      WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NULL AND parent_key IS NOT NULL AND deleted IS NULL
+    SELECT root.key, root.name, root.parent_key, root.deprecated
+    FROM concept root
+    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NULL AND parent_key IS NOT NULL AND deleted IS NULL
     UNION
-      SELECT c.key, c.name, c.parent_key, c.deprecated
-      FROM parents p, concept c
-      WHERE p.parent_key = c.key
+    SELECT c.key, c.name, c.parent_key, c.deprecated
+    FROM parents p, concept c
+    WHERE p.parent_key = c.key
     )
     SELECT name FROM parents WHERE key != #{key,jdbcType=BIGINT};
   </select>
@@ -290,7 +294,7 @@
     FROM concept
     WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL
   </select>
-  
+
   <select id="countChildren" resultType="ChildrenCountResult">
     SELECT c.parent_key as conceptKey, count(*) as childrenCount
     FROM concept c

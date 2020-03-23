@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.model;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -17,10 +17,9 @@ import javax.validation.constraints.NotBlank;
 public abstract class AbstractVocabularyEntity implements VocabularyEntity {
 
   Long key;
-  @NotBlank
-  String name;
-  Map<Language, String> label = new EnumMap<>(Language.class);
-  Map<Language, String> definition = new EnumMap<>(Language.class);
+  @NotBlank String name;
+  Map<TranslationLanguage, String> label = new EnumMap<>(TranslationLanguage.class);
+  Map<TranslationLanguage, String> definition = new EnumMap<>(TranslationLanguage.class);
   List<URI> externalDefinitions = new ArrayList<>();
   List<String> editorialNotes = new ArrayList<>();
 
@@ -57,22 +56,22 @@ public abstract class AbstractVocabularyEntity implements VocabularyEntity {
   }
 
   @Override
-  public Map<Language, String> getLabel() {
+  public Map<TranslationLanguage, String> getLabel() {
     return label;
   }
 
   @Override
-  public void setLabel(Map<Language, String> label) {
+  public void setLabel(Map<TranslationLanguage, String> label) {
     this.label = label;
   }
 
   @Override
-  public Map<Language, String> getDefinition() {
+  public Map<TranslationLanguage, String> getDefinition() {
     return definition;
   }
 
   @Override
-  public void setDefinition(Map<Language, String> definition) {
+  public void setDefinition(Map<TranslationLanguage, String> definition) {
     this.definition = definition;
   }
 

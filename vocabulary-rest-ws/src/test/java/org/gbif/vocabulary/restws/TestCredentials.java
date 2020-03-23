@@ -2,7 +2,6 @@ package org.gbif.vocabulary.restws;
 
 import org.gbif.api.vocabulary.UserRole;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

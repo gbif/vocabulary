@@ -2,7 +2,7 @@ package org.gbif.vocabulary.restws.resources.mock;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
@@ -254,9 +254,9 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
     Concept concept = new Concept();
     concept.setVocabularyKey(TEST_VOCABULARY_KEY);
     concept.setName(UUID.randomUUID().toString());
-    concept.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    concept.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
     concept.setAlternativeLabels(
-        Collections.singletonMap(Language.ENGLISH, Arrays.asList("Label2", "Label3")));
+        Collections.singletonMap(TranslationLanguage.ENGLISH, Arrays.asList("Label2", "Label3")));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

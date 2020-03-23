@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.service;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
@@ -60,7 +60,7 @@ public class VocabularyServiceIT {
   @Test
   public void createSimilarVocabularyTest() {
     Vocabulary vocabulary = createBasicVocabulary();
-    vocabulary.setLabel(Collections.singletonMap(Language.ENGLISH, "sim"));
+    vocabulary.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "sim"));
     vocabularyService.create(vocabulary);
 
     Vocabulary similarName = createBasicVocabulary();
@@ -68,11 +68,11 @@ public class VocabularyServiceIT {
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.create(similarName));
 
     Vocabulary similarLabel = createBasicVocabulary();
-    similarLabel.getLabel().put(Language.ENGLISH, "sim");
+    similarLabel.getLabel().put(TranslationLanguage.ENGLISH, "sim");
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.create(similarLabel));
 
     Vocabulary similarLabelDifferentLanguage = createBasicVocabulary();
-    similarLabelDifferentLanguage.getLabel().put(Language.SPANISH, "sim");
+    similarLabelDifferentLanguage.getLabel().put(TranslationLanguage.SPANISH, "sim");
     assertDoesNotThrow(() -> vocabularyService.create(similarLabelDifferentLanguage));
   }
 
@@ -83,12 +83,12 @@ public class VocabularyServiceIT {
     vocabulary = vocabularyService.get(key);
 
     // update concept
-    vocabulary.setLabel(Collections.singletonMap(Language.ENGLISH, "label"));
+    vocabulary.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "label"));
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
     vocabularyService.update(vocabulary);
 
     Vocabulary updatedVocabulary = vocabularyService.get(key);
-    assertEquals("label", updatedVocabulary.getLabel().get(Language.ENGLISH));
+    assertEquals("label", updatedVocabulary.getLabel().get(TranslationLanguage.ENGLISH));
     assertTrue(updatedVocabulary.getEditorialNotes().containsAll(Arrays.asList("note1", "note2")));
   }
 
@@ -96,7 +96,7 @@ public class VocabularyServiceIT {
   public void updateSimilarVocabularyTest() {
     Vocabulary vocabulary1 = createBasicVocabulary();
     vocabulary1.setName("simVocab");
-    vocabulary1.setLabel(Collections.singletonMap(Language.ENGLISH, "simupdated"));
+    vocabulary1.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "simupdated"));
     vocabularyService.create(vocabulary1);
 
     Vocabulary vocabulary2 = createBasicVocabulary();
@@ -104,19 +104,19 @@ public class VocabularyServiceIT {
 
     // update concept
     Vocabulary updated = vocabularyService.get(key2);
-    updated.setLabel(Collections.singletonMap(Language.ENGLISH, "simupdated"));
+    updated.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "simupdated"));
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(updated));
 
     Vocabulary updated2 = vocabularyService.get(key2);
-    updated2.setLabel(Collections.singletonMap(Language.ENGLISH, vocabulary1.getName()));
+    updated2.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, vocabulary1.getName()));
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(updated2));
 
     Vocabulary updated3 = vocabularyService.get(key2);
-    updated3.setLabel(Collections.singletonMap(Language.SPANISH, vocabulary1.getName()));
+    updated3.setLabel(Collections.singletonMap(TranslationLanguage.SPANISH, vocabulary1.getName()));
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(updated2));
 
     Vocabulary updated4 = vocabularyService.get(key2);
-    updated4.setLabel(Collections.singletonMap(Language.SPANISH, "simupdated"));
+    updated4.setLabel(Collections.singletonMap(TranslationLanguage.SPANISH, "simupdated"));
     assertDoesNotThrow(() -> vocabularyService.update(updated4));
   }
 

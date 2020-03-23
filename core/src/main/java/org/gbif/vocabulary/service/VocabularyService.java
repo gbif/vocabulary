@@ -50,7 +50,10 @@ public interface VocabularyService extends BaseService<Vocabulary> {
    * @param deprecateConcepts if true the concepts of the vocabulary will be deprecated too
    */
   void deprecate(
-      long key, @NotBlank String deprecatedBy, @Nullable Long replacementKey, boolean deprecateConcepts);
+      long key,
+      @NotBlank String deprecatedBy,
+      @Nullable Long replacementKey,
+      boolean deprecateConcepts);
 
   /**
    * Deprecates a concept without replacement.
@@ -59,7 +62,8 @@ public interface VocabularyService extends BaseService<Vocabulary> {
    * @param deprecatedBy name of the actor who deprecates the concept
    * @param deprecateConcepts if true the concepts of the concept will be deprecated too
    */
-  void deprecateWithoutReplacement(long key, @NotBlank String deprecatedBy, boolean deprecateConcepts);
+  void deprecateWithoutReplacement(
+      long key, @NotBlank String deprecatedBy, boolean deprecateConcepts);
 
   /**
    * Restores a deprecated concept.

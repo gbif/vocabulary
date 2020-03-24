@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Tests the {@link ConceptService}. */
-@Execution(ExecutionMode.SAME_THREAD)
 public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept> {
 
   @Autowired private ConceptService conceptService;

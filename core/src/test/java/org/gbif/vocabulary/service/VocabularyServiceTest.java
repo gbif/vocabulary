@@ -9,8 +9,6 @@ import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -18,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Tests the {@link VocabularyService}. */
-@Execution(ExecutionMode.SAME_THREAD)
 public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocabulary> {
 
   @Autowired private VocabularyService vocabularyService;

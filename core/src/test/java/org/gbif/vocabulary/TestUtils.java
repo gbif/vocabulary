@@ -49,13 +49,13 @@ public final class TestUtils {
   }
 
   public static <T extends Deprecable> void assertDeprecatedWithReplacement(
-      T deprecated, String deprecatedBy, int replacementKey) {
+      T deprecated, String deprecatedBy, long replacementKey) {
     assertNotNull(deprecated.getDeprecated());
     assertEquals(deprecatedBy, deprecated.getDeprecatedBy());
     assertEquals(replacementKey, deprecated.getReplacedByKey().intValue());
   }
 
-  public static Concept createBasicConcept(int vocabularyKey) {
+  public static Concept createBasicConcept(long vocabularyKey) {
     Concept concept = new Concept();
     concept.setName(UUID.randomUUID().toString());
     concept.setVocabularyKey(vocabularyKey);

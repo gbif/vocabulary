@@ -1,5 +1,6 @@
 package org.gbif.vocabulary.lookup;
 
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.export.ExportMetadata;
@@ -8,12 +9,8 @@ import org.gbif.vocabulary.model.normalizers.StringNormalizer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -39,20 +36,27 @@ public class VocabularyLookup implements AutoCloseable {
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper().registerModule(new JavaTimeModule());
 
-  private final Cache<String, Concept> conceptCache;
+  private final Cache<String, Concept> namesCache;
+  private final Cache<String, LabelMatch> labelsCache;
   private ExportMetadata exportMetadata;
   private Vocabulary vocabulary;
 
   private VocabularyLookup(InputStream in) {
     Objects.requireNonNull(in);
-    conceptCache =
+
+    namesCache =
         Cache2kBuilder.of(String.class, Concept.class)
             .eternal(true)
             .entryCapacity(Long.MAX_VALUE)
             .suppressExceptions(false)
             .build();
+    labelsCache =
+        new Cache2kBuilder<String, LabelMatch>() {}.eternal(true)
+            .entryCapacity(Long.MAX_VALUE)
+            .suppressExceptions(false)
+            .build();
 
-    processVocabularyExport(in);
+    importVocabulary(in);
   }
 
   public static VocabularyLookup load(String apiUrl, String vocabularyName) {
@@ -69,30 +73,117 @@ public class VocabularyLookup implements AutoCloseable {
     return new VocabularyLookup(in);
   }
 
+  /**
+   * Same as {@link #lookup(String, TranslationLanguage)} but since there are no language provided
+   * we only try to use English if there are several candidates.
+   *
+   * @param value the value whose concept we are looking for
+   * @return the {@link Concept} found. Empty {@link Optional} if there was no match.
+   */
   public Optional<Concept> lookup(String value) {
+    return lookup(value, null);
+  }
+
+  /**
+   * Looks up for a value in the vocabulary.
+   *
+   * <p>If there is more than 1 match we use the contextLang as a discriminator. If there is still
+   * no match we try to use English as a fallback.
+   *
+   * @param value the value whose concept we are looking for
+   * @param contextLang {@link TranslationLanguage} to break ties
+   * @return the {@link Concept} found. Empty {@link Optional} if there was no match.
+   */
+  public Optional<Concept> lookup(String value, TranslationLanguage contextLang) {
     checkArgument(!Strings.isNullOrEmpty(value), "A value to lookup for is required");
 
     // base normalization
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
 
-    List<UnaryOperator<String>> normalizations =
+    List<UnaryOperator<String>> transformations =
         ImmutableList.of(
             UnaryOperator.identity(), StringNormalizer::stripNonAlphanumericCharacters);
 
-    return normalizations.stream()
-        .map(n -> conceptCache.get(n.apply(normalizedValue)))
-        .filter(Objects::nonNull)
-        .findFirst();
+    for (UnaryOperator<String> t : transformations) {
+      String transformedValue = t.apply(normalizedValue);
+
+      // matching by name
+      Concept nameMatch = namesCache.get(transformedValue);
+      if (nameMatch != null) {
+        LOG.info("value {} matched with concept {} by name", value, nameMatch.getName());
+        return Optional.of(nameMatch);
+      }
+
+      // if no match with names we try with labels
+      LabelMatch match = labelsCache.get(transformedValue);
+      if (match != null) {
+        if (match.allMatches.size() == 1) {
+          Concept conceptMatched = match.allMatches.iterator().next();
+          LOG.info("value {} matched with concept {} by label", value, conceptMatched.getName());
+          return Optional.of(conceptMatched);
+        }
+
+        // several candidates found. We try to match by using the language received as discriminator
+        // or English as fallback
+        Optional<Concept> langMatch = matchByLanguage(match, contextLang, value);
+        if (langMatch.isPresent()) {
+          LOG.info(
+              "value {} matched with concept {} by language {}",
+              value,
+              langMatch.get().getName(),
+              contextLang);
+          return langMatch;
+        }
+
+        LOG.warn(
+            "Couldn't resolve match between all the several candidates found for {}: {}",
+            value,
+            match.allMatches);
+      }
+    }
+
+    LOG.info("Couldn't find any match for {}", value);
+    return Optional.empty();
+  }
+
+  private Optional<Concept> matchByLanguage(
+      LabelMatch match, TranslationLanguage lang, String value) {
+    Set<Concept> langMatches = null;
+    if (lang != null) {
+      langMatches = match.matchesByLanguage.get(lang);
+    }
+
+    // we try with English as fallback
+    if ((langMatches == null || langMatches.size() != 1) && lang != TranslationLanguage.ENGLISH) {
+      lang = TranslationLanguage.ENGLISH;
+      langMatches = match.matchesByLanguage.get(lang);
+    }
+
+    if (langMatches == null || langMatches.isEmpty()) {
+      return Optional.empty();
+    }
+
+    if (langMatches.size() == 1) {
+      Concept conceptMatched = langMatches.iterator().next();
+      LOG.info(
+          "Value {} matched with concept {} by using language {}", value, conceptMatched, lang);
+      return Optional.of(conceptMatched);
+    }
+
+    return Optional.empty();
   }
 
   @Override
   public void close() throws Exception {
-    if (conceptCache != null) {
-      conceptCache.close();
+    if (namesCache != null) {
+      namesCache.close();
+    }
+    if (labelsCache != null) {
+      labelsCache.close();
     }
   }
 
-  private void processVocabularyExport(InputStream in) {
+  private void importVocabulary(InputStream in) {
     try (JsonParser parser = OBJECT_MAPPER.getFactory().createParser(in)) {
       // root
       parser.nextToken();
@@ -117,20 +208,20 @@ public class VocabularyLookup implements AutoCloseable {
           Concept concept = OBJECT_MAPPER.readValue(parser, Concept.class);
 
           // add name to the cache
-          addToCache(normalizeName(concept.getName()), concept);
+          addNameToCache(concept);
 
           // add labels to the cache
-          concept.getLabel().values().stream()
-              .map(StringNormalizer::normalizeLabel)
-              .forEach(v -> addToCache(v, concept));
+          concept.getLabel().forEach((key, value) -> addLabelToCache(value, concept, key));
 
-          // add alternative and misapplied labels to the cache
-          Stream.concat(
-                  concept.getAlternativeLabels().values().stream(),
-                  concept.getMisappliedLabels().values().stream())
-              .flatMap(Collection::stream)
-              .map(StringNormalizer::normalizeLabel)
-              .forEach(v -> addToCache(v, concept));
+          // add alternative labels to the cache
+          concept
+              .getAlternativeLabels()
+              .forEach((key, value) -> addLabelsToCache(value, concept, key));
+
+          // add misapplied labels to the cache
+          concept
+              .getMisappliedLabels()
+              .forEach((key, value) -> addLabelsToCache(value, concept, key));
 
           parser.nextValue();
         }
@@ -140,15 +231,47 @@ public class VocabularyLookup implements AutoCloseable {
     }
   }
 
-  private void addToCache(String value, Concept concept) {
-    String normalizedValue = StringNormalizer.replaceNonAsciiCharactersWithEquivalents(value);
-    boolean added = conceptCache.putIfAbsent(normalizedValue, concept);
+  private void addNameToCache(Concept concept) {
+    String normalizedValue =
+        replaceNonAsciiCharactersWithEquivalents(normalizeName(concept.getName()));
+    Concept existing = namesCache.peekAndPut(normalizedValue, concept);
+
+    if (existing != null) {
+      throw new IllegalArgumentException(
+          "Incorrect vocabulary: concept names have to be unique. The concept name "
+              + concept.toString()
+              + " has the same name as "
+              + existing.toString());
+    }
+  }
+
+  private void addLabelsToCache(
+      List<String> values, Concept concept, TranslationLanguage language) {
+    values.forEach(v -> addLabelToCache(v, concept, language));
+  }
+
+  private void addLabelToCache(String value, Concept concept, TranslationLanguage language) {
+    String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
+
+    boolean added =
+        labelsCache.invoke(
+            normalizedValue,
+            e -> {
+              LabelMatch match = e.getOldValue();
+              if (match == null) {
+                match = new LabelMatch();
+              }
+              e.setValue(match);
+
+              match.allMatches.add(concept);
+              return match
+                  .matchesByLanguage
+                  .computeIfAbsent(language, l -> new HashSet<>())
+                  .add(concept);
+            });
 
     if (!added) {
-      Concept existingConcept = conceptCache.get(normalizedValue);
-      if (!existingConcept.equals(concept)) {
-        LOG.warn("Duplicated key {} present in concept {} and {}", value, concept, existingConcept);
-      }
+      LOG.warn("Concept {} not added for value {}", concept, normalizedValue);
     }
   }
 
@@ -158,5 +281,11 @@ public class VocabularyLookup implements AutoCloseable {
 
   public Vocabulary getVocabulary() {
     return vocabulary;
+  }
+
+  private static class LabelMatch {
+    Set<Concept> allMatches = new HashSet<>();
+    Map<TranslationLanguage, Set<Concept>> matchesByLanguage =
+        new EnumMap<>(TranslationLanguage.class);
   }
 }

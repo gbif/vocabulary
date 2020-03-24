@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -63,7 +63,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
         mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
-    List<Vocabulary> resultList =
+    List<Concept> resultList =
         OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<Concept>>() {});
 
     assertEquals(concepts.size(), resultList.size());
@@ -99,7 +99,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
                 .with(authorizationDocumentation()))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", endsWith(getBasePath() + "/" + created.getName())))
-        .andExpect(jsonPath("key", is(TEST_KEY)))
+        .andExpect(jsonPath("key", is(TEST_KEY.intValue())))
         .andExpect(jsonPath("name", equalTo(created.getName())))
         .andDo(documentFields(Concept.class));
   }
@@ -120,7 +120,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
                 .content(OBJECT_MAPPER.writeValueAsString(concept))
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("key", is(concept.getKey())))
+        .andExpect(jsonPath("key", is(concept.getKey().intValue())))
         .andExpect(jsonPath("name", equalTo(concept.getName())))
         .andDo(documentFields(Concept.class));
   }
@@ -129,7 +129,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
   public void suggestConceptTest() throws Exception {
     mockVocabulary();
     List<KeyNameResult> suggestions = createSuggestions();
-    when(conceptService.suggest(anyString(), anyInt())).thenReturn(suggestions);
+    when(conceptService.suggest(anyString(), anyLong())).thenReturn(suggestions);
     suggestTest(suggestions);
   }
 
@@ -140,7 +140,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(concept.getName(), TEST_VOCABULARY_NAME))
         .thenReturn(concept);
-    doNothing().when(conceptService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
+    doNothing().when(conceptService).deprecate(anyLong(), anyString(), anyLong(), anyBoolean());
 
     mockMvc
         .perform(
@@ -159,7 +159,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(concept.getName(), TEST_VOCABULARY_NAME))
         .thenReturn(concept);
-    doNothing().when(conceptService).restoreDeprecated(anyInt(), anyBoolean());
+    doNothing().when(conceptService).restoreDeprecated(anyLong(), anyBoolean());
 
     mockMvc
         .perform(

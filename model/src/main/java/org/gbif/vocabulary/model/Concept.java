@@ -1,15 +1,10 @@
 package org.gbif.vocabulary.model;
 
 import org.gbif.api.model.registry.LenientEquals;
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -20,45 +15,48 @@ import javax.validation.constraints.NotNull;
  */
 public class Concept extends AbstractVocabularyEntity implements LenientEquals<Concept> {
 
-  @NotNull private Integer vocabularyKey;
-  private Integer parentKey;
-  private Map<Language, List<String>> alternativeLabels = new EnumMap<>(Language.class);
-  private Map<Language, List<String>> misappliedLabels = new EnumMap<>(Language.class);
+  @NotNull private Long vocabularyKey;
+
+  private Long parentKey;
+  private Map<TranslationLanguage, List<String>> alternativeLabels =
+      new EnumMap<>(TranslationLanguage.class);
+  private Map<TranslationLanguage, List<String>> misappliedLabels =
+      new EnumMap<>(TranslationLanguage.class);
   private List<URI> sameAsUris = new ArrayList<>();
 
   /** Vocabulary of the concept. */
-  public Integer getVocabularyKey() {
+  public Long getVocabularyKey() {
     return vocabularyKey;
   }
 
-  public void setVocabularyKey(Integer vocabularyKey) {
+  public void setVocabularyKey(Long vocabularyKey) {
     this.vocabularyKey = vocabularyKey;
   }
 
   /** Concept parent in case it exists. */
-  public Integer getParentKey() {
+  public Long getParentKey() {
     return parentKey;
   }
 
-  public void setParentKey(Integer parentKey) {
+  public void setParentKey(Long parentKey) {
     this.parentKey = parentKey;
   }
 
   /** Indicates alternative labels commonly associated to the concept. */
-  public Map<Language, List<String>> getAlternativeLabels() {
+  public Map<TranslationLanguage, List<String>> getAlternativeLabels() {
     return alternativeLabels;
   }
 
-  public void setAlternativeLabels(Map<Language, List<String>> alternativeLabels) {
+  public void setAlternativeLabels(Map<TranslationLanguage, List<String>> alternativeLabels) {
     this.alternativeLabels = alternativeLabels;
   }
 
   /** Indicates misapplied labels commonly associated to the concept. */
-  public Map<Language, List<String>> getMisappliedLabels() {
+  public Map<TranslationLanguage, List<String>> getMisappliedLabels() {
     return misappliedLabels;
   }
 
-  public void setMisappliedLabels(Map<Language, List<String>> misappliedLabels) {
+  public void setMisappliedLabels(Map<TranslationLanguage, List<String>> misappliedLabels) {
     this.misappliedLabels = misappliedLabels;
   }
 

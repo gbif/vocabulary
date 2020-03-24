@@ -6,14 +6,14 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.1.9.RELEASE</version>
+    <version>2.2.4.RELEASE</version>
     <relativePath/>
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
   <artifactId>vocabulary-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.20-SNAPSHOT</version>
+  <version>0.22-SNAPSHOT</version>
 
   <modules>
     <module>core</module>
@@ -64,19 +64,20 @@
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 
     <!-- gbif -->
-    <gbif-api.version>0.96.1-jackson2</gbif-api.version>
+    <gbif-api.version>0.106-jackson2-SNAPSHOT</gbif-api.version>
     <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
 
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
 
     <!-- ZK -->
-    <spring-cloud-zookeeper.version>2.1.1.RELEASE</spring-cloud-zookeeper.version>
+    <spring-cloud-zookeeper.version>2.2.0.RELEASE</spring-cloud-zookeeper.version>
     <zookeeper.version>3.4.14</zookeeper.version>
 
     <!-- logging -->
     <slf4j.version>1.7.26</slf4j.version>
     <logback.version>1.2.3</logback.version>
+    <janino.version>2.5.10</janino.version>
     <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
 
     <!-- documentation -->
@@ -92,6 +93,7 @@
     <sonar.exclusions>**/AsciiParser.java</sonar.exclusions>
     <sonar.cpd.exclusions>**/AsciiParser.java</sonar.cpd.exclusions>
     <sonar.coverage.exclusions>**/AsciiParser.java</sonar.coverage.exclusions>
+    <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -183,6 +185,12 @@
         <version>${logback.version}</version>
       </dependency>
       <dependency>
+        <groupId>janino</groupId>
+        <artifactId>janino</artifactId>
+        <version>${janino.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
         <groupId>net.logstash.logback</groupId>
         <artifactId>logstash-logback-encoder</artifactId>
         <version>${logstash-logback-encoder.version}</version>
@@ -209,6 +217,10 @@
           <exclusion>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-netflix-core</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -267,6 +279,11 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${maven-failsafe-plugin.version}</version>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
@@ -367,29 +384,6 @@
             <configuration>
               <excludes>
                 <exclude>**/*TestDoc.java</exclude>
-                <exclude>**/*IT.java</exclude>
-              </excludes>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>integration</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${maven-failsafe-plugin.version}</version>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>${maven-surefire-plugin.version}</version>
-            <configuration>
-              <excludes>
-                <exclude>**/*.java</exclude>
               </excludes>
             </configuration>
           </plugin>
@@ -412,6 +406,11 @@
               <includes>
                 <include>**/*TestDoc.java</include>
               </includes>
+              <!--              <systemPropertyVariables>-->
+              <!--                <org.springframework.restdocs.outputDir>-->
+              <!--                  ${project.build.directory}/generated-snippets-->
+              <!--                </org.springframework.restdocs.outputDir>-->
+              <!--              </systemPropertyVariables>-->
             </configuration>
           </plugin>
         </plugins>

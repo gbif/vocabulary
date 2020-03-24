@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.model;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -18,11 +18,11 @@ public class VocabularyTest {
   @Test
   public void equalityTest() {
     Vocabulary v1 = new Vocabulary();
-    v1.setKey(1);
+    v1.setKey(1L);
     v1.setName("v1");
     v1.setNamespace("ns");
-    v1.setLabel(Collections.singletonMap(Language.ENGLISH, "label"));
-    v1.setDefinition(Collections.singletonMap(Language.ENGLISH, "def"));
+    v1.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "label"));
+    v1.setDefinition(Collections.singletonMap(TranslationLanguage.ENGLISH, "def"));
     v1.setEditorialNotes(Arrays.asList("n1", "n2"));
     v1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
     v1.setCreated(LocalDateTime.now());

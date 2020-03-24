@@ -45,7 +45,7 @@ public class VocabularyResource {
       @RequestParam(value = "name", required = false) String name,
       @RequestParam(value = "namespace", required = false) String namespace,
       @RequestParam(value = "deprecated", required = false) Boolean deprecated,
-      @RequestParam(value = "key", required = false) Integer key,
+      @RequestParam(value = "key", required = false) Long key,
       PagingRequest page) {
 
     return vocabularyService.list(
@@ -66,7 +66,7 @@ public class VocabularyResource {
 
   @PostMapping
   public Vocabulary create(@RequestBody Vocabulary vocabulary) {
-    int key = vocabularyService.create(vocabulary);
+    long key = vocabularyService.create(vocabulary);
     return vocabularyService.get(key);
   }
 

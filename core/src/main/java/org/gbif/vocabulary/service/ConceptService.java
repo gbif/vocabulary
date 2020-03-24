@@ -3,6 +3,7 @@ package org.gbif.vocabulary.service;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
@@ -40,7 +41,7 @@ public interface ConceptService extends BaseService<Concept> {
    * @param vocabularyKey key of the vocabulary
    * @return a list of up to 20 suggested concepts
    */
-  List<KeyNameResult> suggest(@NotNull String query, int vocabularyKey);
+  List<KeyNameResult> suggest(@NotNull String query, long vocabularyKey);
 
   /**
    * Deprecates a concept with a replacement.
@@ -51,9 +52,9 @@ public interface ConceptService extends BaseService<Concept> {
    * @param deprecateChildren if true the children of the concept will be deprecated too
    */
   void deprecate(
-      int key,
+      long key,
       @NotBlank String deprecatedBy,
-      @Nullable Integer replacementKey,
+      @Nullable Long replacementKey,
       boolean deprecateChildren);
 
   /**
@@ -64,7 +65,7 @@ public interface ConceptService extends BaseService<Concept> {
    * @param deprecateChildren if true the children of the concept will be deprecated too
    */
   void deprecateWithoutReplacement(
-      int key, @NotBlank String deprecatedBy, boolean deprecateChildren);
+      long key, @NotBlank String deprecatedBy, boolean deprecateChildren);
 
   /**
    * Restores a deprecated concept.
@@ -72,13 +73,22 @@ public interface ConceptService extends BaseService<Concept> {
    * @param key key of the concept to undeprecate.
    * @param restoreDeprecatedChildren if true it restores the deprecated children of the concept
    */
-  void restoreDeprecated(int key, boolean restoreDeprecatedChildren);
+  void restoreDeprecated(long key, boolean restoreDeprecatedChildren);
 
   /**
-   * Finds the parents of a concept. It includes not only its direct parent, but also the parents of each parent.
+   * Finds the parents of a concept. It includes not only its direct parent, but also the parents of
+   * each parent.
    *
    * @param conceptKey key of the concept whose parents we're looking for
    * @return list with the names of the parents
    */
-  List<String> findParents(int conceptKey);
+  List<String> findParents(long conceptKey);
+
+  /**
+   * Counts the number of children of each of the concept parents specified.
+   *
+   * @param conceptParents keys of the concepts whose children we'll count
+   * @return list of {@link ChildrenCountResult}
+   */
+  List<ChildrenCountResult> countChildren(List<Long> conceptParents);
 }

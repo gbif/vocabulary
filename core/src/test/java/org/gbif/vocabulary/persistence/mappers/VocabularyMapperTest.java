@@ -1,9 +1,10 @@
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import java.net.URI;
 import java.util.*;
@@ -21,6 +22,7 @@ import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -67,20 +69,20 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabularyGbif.setNamespace("namespace gbif");
     vocabularyMapper.create(vocabularyGbif);
 
-    assertList("vocab1", null, null, null, Integer.MAX_VALUE,0);
-    assertList("vocab1", null, null, null, vocabulary1.getKey(),1);
-    assertList(null, null, null, null, vocabulary2.getKey(),1);
-    assertList("voc", null, null, null, null,3);
-    assertList("ocab", null, null, null, null,0);
-    assertList("namesp gb", null, null, null, null,1);
-    assertList(null, "vocab1", null, null, null,1);
-    assertList(null, "vocab", null, null, null,0);
-    assertList(null, null, "namespace gbif", null, null,1);
-    assertList(null, null, "namespace", null, null,0);
-    assertList(null, "vocab2", "namespace2", null, null,1);
-    assertList("voc", "vocab1", "namespace1", null, null,1);
-    assertList("oca", "vocab2", "namespace2", null, null,0);
-    assertList("v gbif", "vocab gbif", null, null, null,1);
+    assertList("vocab1", null, null, null, Long.MAX_VALUE, 0);
+    assertList("vocab1", null, null, null, vocabulary1.getKey(), 1);
+    assertList(null, null, null, null, vocabulary2.getKey(), 1);
+    assertList("voc", null, null, null, null, 3);
+    assertList("ocab", null, null, null, null, 0);
+    assertList("namesp gb", null, null, null, null, 1);
+    assertList(null, "vocab1", null, null, null, 1);
+    assertList(null, "vocab", null, null, null, 0);
+    assertList(null, null, "namespace gbif", null, null, 1);
+    assertList(null, null, "namespace", null, null, 0);
+    assertList(null, "vocab2", "namespace2", null, null, 1);
+    assertList("voc", "vocab1", "namespace1", null, null, 1);
+    assertList("oca", "vocab2", "namespace2", null, null, 0);
+    assertList("v gbif", "vocab gbif", null, null, null, 1);
   }
 
   @Test
@@ -94,13 +96,13 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabularyMapper.create(vocabulary2);
 
     assertList(null, null, null, true, null, 0);
-    assertList(null, null, "n1", true, null,0);
-    assertList(null, null, "n1", null, null,2);
-    assertList(null, null, "n1", false, null,2);
+    assertList(null, null, "n1", true, null, 0);
+    assertList(null, null, "n1", null, null, 2);
+    assertList(null, null, "n1", false, null, 2);
 
     vocabularyMapper.deprecate(vocabulary1.getKey(), DEPRECATED_BY, null);
-    assertList(null, null, null, true, null,1);
-    assertList(null, null, "n1", true, null,1);
+    assertList(null, null, null, true, null, 1);
+    assertList(null, null, "n1", true, null, 1);
   }
 
   @Test
@@ -132,47 +134,93 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   @Test
   public void findSimilaritiesTest() {
     Vocabulary vocabulary1 = createNewEntity();
-    vocabulary1.setLabel(Collections.singletonMap(Language.SPANISH, "igual"));
+    vocabulary1.setLabel(Collections.singletonMap(TranslationLanguage.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary1);
 
+    // check Spanish labels
+    NormalizedValuesParam spanishValues =
+        NormalizedValuesParam.from(
+            TranslationLanguage.SPANISH.getLocale(), Arrays.asList("igual", "foo"));
+
     List<KeyNameResult> similarities =
-        vocabularyMapper.findSimilarities(Arrays.asList("igual", "foo"), null);
+        vocabularyMapper.findSimilarities(Collections.singletonList(spanishValues), null);
     assertEquals(1, similarities.size());
-    assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(vocabulary1.getName(), similarities.get(0).getName());
+    assertSimilarity(similarities, vocabulary1);
 
-    similarities =
-        vocabularyMapper.findSimilarities(
-            Collections.singletonList(normalizeName(vocabulary1.getName())), null);
+    spanishValues.setValues(Arrays.asList("foo", "bar"));
+    assertEquals(
+        0,
+        vocabularyMapper.findSimilarities(Collections.singletonList(spanishValues), null).size());
+
+    // check name
+    NormalizedValuesParam namesValues =
+        NormalizedValuesParam.from(
+            NAME_NODE, Collections.singletonList(normalizeName(vocabulary1.getName())));
+
+    similarities = vocabularyMapper.findSimilarities(Collections.singletonList(namesValues), null);
     assertEquals(1, similarities.size());
-    assertEquals(vocabulary1.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(vocabulary1.getName(), similarities.get(0).getName());
-
-    assertEquals(0, vocabularyMapper.findSimilarities(Arrays.asList("foo", "bar"), null).size());
+    assertSimilarity(similarities, vocabulary1);
 
     // create another vocabulary
     Vocabulary vocabulary2 = createNewEntity();
     vocabulary2.setName("another-vocab");
-    vocabulary2.setLabel(Collections.singletonMap(Language.ENGLISH, "another label "));
+    vocabulary2.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "another label "));
     vocabularyMapper.create(vocabulary2);
 
+    // check with multiple labels
+    spanishValues.setValues(Collections.singletonList("igual"));
+    namesValues.setValues(Collections.singletonList(normalizeName("Another Vocab")));
     similarities =
-        vocabularyMapper.findSimilarities(
-            Collections.singletonList(normalizeLabel("  ANOTHER   label")), null);
+        vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
+    assertEquals(2, similarities.size());
+
+    namesValues.setValues(Collections.singletonList(normalizeName("new Vocab")));
+    similarities =
+        vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
     assertEquals(1, similarities.size());
-    assertEquals(vocabulary2.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(vocabulary2.getName(), similarities.get(0).getName());
+    assertSimilarity(similarities, vocabulary1);
 
     similarities =
         vocabularyMapper.findSimilarities(
-            Collections.singletonList(normalizeName("Another Vocab ")), null);
+            Arrays.asList(spanishValues, namesValues), vocabulary1.getKey());
+    assertEquals(0, similarities.size());
+
+    spanishValues.setNode(TranslationLanguage.ENGLISH.getLocale());
+    similarities =
+        vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
+    assertEquals(0, similarities.size());
+
+    NormalizedValuesParam englishValues =
+        NormalizedValuesParam.from(
+            TranslationLanguage.ENGLISH.getLocale(),
+            Collections.singletonList(normalizeLabel("another label")));
+    assertEquals(
+        1,
+        vocabularyMapper.findSimilarities(Collections.singletonList(englishValues), null).size());
+
+    // remove labels and there shouldn't be similarities in labels
+    vocabulary2 = vocabularyMapper.get(vocabulary2.getKey());
+    vocabulary2.setLabel(null);
+    vocabularyMapper.update(vocabulary2);
+
+    assertEquals(
+        0,
+        vocabularyMapper.findSimilarities(Collections.singletonList(englishValues), null).size());
+  }
+
+  private void assertSimilarity(List<KeyNameResult> similarities, Vocabulary vocabulary) {
     assertEquals(1, similarities.size());
-    assertEquals(vocabulary2.getKey().intValue(), similarities.get(0).getKey());
-    assertEquals(vocabulary2.getName(), similarities.get(0).getName());
+    assertEquals(vocabulary.getKey().intValue(), similarities.get(0).getKey());
+    assertEquals(vocabulary.getName(), similarities.get(0).getName());
   }
 
   private void assertList(
-      String query, String name, String namespace, Boolean deprecated, Integer key, int expectedResult) {
+      String query,
+      String name,
+      String namespace,
+      Boolean deprecated,
+      Long key,
+      int expectedResult) {
     assertEquals(
         expectedResult,
         vocabularyMapper.list(query, name, namespace, deprecated, key, DEFAULT_PAGE).size());
@@ -192,8 +240,9 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   Vocabulary createNewEntity() {
     Vocabulary entity = new Vocabulary();
     entity.setName(UUID.randomUUID().toString());
-    entity.setLabel(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Label")));
-    entity.setDefinition(new HashMap<>(Collections.singletonMap(Language.ENGLISH, "Definition")));
+    entity.setLabel(new HashMap<>(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label")));
+    entity.setDefinition(
+        new HashMap<>(Collections.singletonMap(TranslationLanguage.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
     entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));

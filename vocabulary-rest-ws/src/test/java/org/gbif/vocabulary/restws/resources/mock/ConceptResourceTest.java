@@ -2,7 +2,7 @@ package org.gbif.vocabulary.restws.resources.mock;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
@@ -41,7 +41,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -58,7 +58,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ConceptResourceTest extends BaseResourceTest<Concept> {
 
   private static final String TEST_VOCABULARY_NAME = "v1";
-  private static final int TEST_VOCABULARY_KEY = 1;
+  private static final long TEST_VOCABULARY_KEY = 1;
 
   @MockBean private ConceptService conceptService;
   @MockBean private VocabularyService vocabularyService;
@@ -76,7 +76,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
-    List<Vocabulary> resultList =
+    List<Concept> resultList =
         OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<Concept>>() {});
 
     assertEquals(concepts.size(), resultList.size());
@@ -102,8 +102,8 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
   @Test
   public void getConceptWithParentsTest() throws Exception {
     Concept concept = createEntity();
-    concept.setKey(1);
-    concept.setParentKey(1);
+    concept.setKey(1L);
+    concept.setParentKey(1L);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
     final String parentName = "parent1";
@@ -134,23 +134,8 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
                 .content(OBJECT_MAPPER.writeValueAsString(conceptToCreate)))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", endsWith(getBasePath() + "/" + created.getName())))
-        .andExpect(jsonPath("key", is(TEST_KEY)))
+        .andExpect(jsonPath("key", is(TEST_KEY.intValue())))
         .andExpect(jsonPath("name", equalTo(created.getName())));
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
-  @Test
-  public void createConceptWithWrongVocabulary() throws Exception {
-    mockVocabulary();
-    Concept concept = createEntity();
-    concept.setVocabularyKey(TEST_VOCABULARY_KEY + 1);
-
-    mockMvc
-        .perform(
-            post(getBasePath())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(concept)))
-        .andExpect(status().isUnprocessableEntity());
   }
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
@@ -168,7 +153,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(concept)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("key", is(concept.getKey())))
+        .andExpect(jsonPath("key", is(concept.getKey().intValue())))
         .andExpect(jsonPath("name", equalTo(concept.getName())));
   }
 
@@ -203,7 +188,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
   public void suggestTest() throws Exception {
     mockVocabulary();
     List<KeyNameResult> suggestions = createSuggestions();
-    when(conceptService.suggest(anyString(), anyInt())).thenReturn(suggestions);
+    when(conceptService.suggest(anyString(), anyLong())).thenReturn(suggestions);
     suggestTest(suggestions);
   }
 
@@ -214,7 +199,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(concept.getName(), TEST_VOCABULARY_NAME))
         .thenReturn(concept);
-    doNothing().when(conceptService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
+    doNothing().when(conceptService).deprecate(anyLong(), anyString(), anyLong(), anyBoolean());
 
     mockMvc
         .perform(
@@ -231,7 +216,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(concept.getName(), TEST_VOCABULARY_NAME))
         .thenReturn(concept);
-    doNothing().when(conceptService).restoreDeprecated(anyInt(), anyBoolean());
+    doNothing().when(conceptService).restoreDeprecated(anyLong(), anyBoolean());
 
     mockMvc
         .perform(delete(getBasePath() + "/" + concept.getName() + "/deprecate"))
@@ -254,9 +239,9 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
     Concept concept = new Concept();
     concept.setVocabularyKey(TEST_VOCABULARY_KEY);
     concept.setName(UUID.randomUUID().toString());
-    concept.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    concept.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
     concept.setAlternativeLabels(
-        Collections.singletonMap(Language.ENGLISH, Arrays.asList("Label2", "Label3")));
+        Collections.singletonMap(TranslationLanguage.ENGLISH, Arrays.asList("Label2", "Label3")));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

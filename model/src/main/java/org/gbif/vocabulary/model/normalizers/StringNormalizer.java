@@ -18,6 +18,8 @@ public class StringNormalizer {
   /**
    * Normalizes a name of a vocabulary entity.
    *
+   * <p><b>This normalization is the same that the DB does</b>
+   *
    * @param name name to normalize
    * @return the name normalized
    */
@@ -27,6 +29,8 @@ public class StringNormalizer {
 
   /**
    * Normalizes a label of a vocabulary entity.
+   *
+   * <p><b>This normalization is the same that the DB does</b>
    *
    * @param label label to normalize
    * @return the label normalized

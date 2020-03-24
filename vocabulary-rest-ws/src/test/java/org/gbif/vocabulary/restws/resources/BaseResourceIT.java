@@ -1,7 +1,7 @@
 package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.api.model.registry.LenientEquals;
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -11,7 +11,6 @@ import org.gbif.vocabulary.restws.TestCredentials;
 
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -26,14 +25,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
-import static org.gbif.vocabulary.restws.TestCredentials.EDITOR;
-import static org.gbif.vocabulary.restws.TestCredentials.INVALID_JWT_USER;
-import static org.gbif.vocabulary.restws.TestCredentials.INVALID_USER;
-import static org.gbif.vocabulary.restws.TestCredentials.JWT_ADMIN;
-import static org.gbif.vocabulary.restws.TestCredentials.JWT_EDITOR;
-import static org.gbif.vocabulary.restws.TestCredentials.JWT_USER;
-import static org.gbif.vocabulary.restws.TestCredentials.USER;
+import static org.gbif.vocabulary.restws.TestCredentials.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -106,7 +98,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .isEqualTo(created);
 
     // update vocabulary
-    created.getLabel().put(Language.SPANISH, "Etiqueta");
+    created.getLabel().put(TranslationLanguage.SPANISH, "Etiqueta");
     webClient
         .put()
         .uri(String.format(urlEntityFormat, created.getName()))

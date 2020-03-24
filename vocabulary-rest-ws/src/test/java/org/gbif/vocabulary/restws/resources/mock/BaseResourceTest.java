@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.restws.resources.mock;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -13,7 +13,6 @@ import java.util.List;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.result.HeaderResultMatchers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,7 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 abstract class BaseResourceTest<T extends VocabularyEntity> {
 
   // util constants
-  static final int TEST_KEY = 1;
+  static final Long TEST_KEY = 1L;
   static final String NAMESPACE_TEST = "ns";
 
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -178,7 +176,7 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     Vocabulary vocabulary = new Vocabulary();
     vocabulary.setName(name);
     vocabulary.setNamespace(NAMESPACE_TEST);
-    vocabulary.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    vocabulary.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return vocabulary;

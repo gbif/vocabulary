@@ -3,30 +3,35 @@ package org.gbif.vocabulary.service.impl;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.api.model.registry.PostPersist;
+import org.gbif.api.model.registry.PrePersist;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.normalizers.StringNormalizer;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.VocabularyService;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
 
-import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
 
 import static java.util.Objects.requireNonNull;
@@ -48,7 +53,7 @@ public class DefaultVocabularyService implements VocabularyService {
   }
 
   @Override
-  public Vocabulary get(int key) {
+  public Vocabulary get(long key) {
     return vocabularyMapper.get(key);
   }
 
@@ -57,9 +62,10 @@ public class DefaultVocabularyService implements VocabularyService {
     return vocabularyMapper.getByName(name);
   }
 
+  @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
-  public int create(@NotNull @Valid Vocabulary vocabulary) {
+  public long create(@NotNull @Valid Vocabulary vocabulary) {
     checkArgument(vocabulary.getKey() == null, "Can't create a vocabulary which already has a key");
 
     // checking the validity of the concept.
@@ -70,6 +76,7 @@ public class DefaultVocabularyService implements VocabularyService {
     return vocabulary.getKey();
   }
 
+  @Validated({PostPersist.class, Default.class})
   @Transactional
   @Override
   public void update(@NotNull @Valid Vocabulary vocabulary) {
@@ -130,11 +137,11 @@ public class DefaultVocabularyService implements VocabularyService {
 
   @Override
   public void deprecate(
-      int key,
+      long key,
       @NotBlank String deprecatedBy,
-      @Nullable Integer replacementKey,
+      @Nullable Long replacementKey,
       boolean deprecateConcepts) {
-    List<Integer> concepts = findConceptsKeys(key, false);
+    List<Long> concepts = findConceptsKeys(key, false);
     if (!concepts.isEmpty()) {
       if (!deprecateConcepts) {
         throw new IllegalArgumentException(
@@ -150,12 +157,12 @@ public class DefaultVocabularyService implements VocabularyService {
 
   @Override
   public void deprecateWithoutReplacement(
-      int key, @NotBlank String deprecatedBy, boolean deprecateConcepts) {
+      long key, @NotBlank String deprecatedBy, boolean deprecateConcepts) {
     deprecate(key, deprecatedBy, null, deprecateConcepts);
   }
 
   @Override
-  public void restoreDeprecated(int key, boolean restoreDeprecatedConcepts) {
+  public void restoreDeprecated(long key, boolean restoreDeprecatedConcepts) {
     vocabularyMapper.restoreDeprecated(key);
 
     if (restoreDeprecatedConcepts) {
@@ -163,21 +170,45 @@ public class DefaultVocabularyService implements VocabularyService {
     }
   }
 
-  private List<Integer> findConceptsKeys(int vocabularyKey, boolean deprecated) {
-    return conceptMapper.list(null, vocabularyKey, null, null, null, deprecated, null, null)
-        .stream()
+  private List<Long> findConceptsKeys(long vocabularyKey, boolean deprecated) {
+    return conceptMapper
+        .list(null, vocabularyKey, null, null, null, deprecated, null, null, null, null).stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
   }
 
+  /**
+   * Supplies the required method to the DB that checks if the name or labels of the vocabulary
+   * received are already present in any other vocabulary.
+   *
+   * <p><b>NOTICE that the normalization of the name and labels has to be the same as the one the DB
+   * does.</b>
+   */
   private Supplier<List<KeyNameResult>> createSimilaritiesExtractor(
       Vocabulary vocabulary, boolean update) {
     return () -> {
-      List<String> valuesToCheck =
-          ImmutableList.<String>builder()
-              .add(StringNormalizer.normalizeName(vocabulary.getName()))
-              .addAll(StringNormalizer.normalizeLabels(vocabulary.getLabel().values()))
-              .build();
+      List<NormalizedValuesParam> valuesToCheck = new ArrayList<>();
+
+      // add name
+      valuesToCheck.add(
+          NormalizedValuesParam.from(
+              ALL_NODE, Collections.singletonList(normalizeName(vocabulary.getName()))));
+
+      // add labels
+      valuesToCheck.addAll(
+          vocabulary.getLabel().entrySet().stream()
+              .map(
+                  e -> {
+                    List<String> normalizedLabels =
+                        Collections.singletonList(normalizeLabel(e.getValue()));
+
+                    return Arrays.asList(
+                        NormalizedValuesParam.from(e.getKey().getLocale(), normalizedLabels),
+                        NormalizedValuesParam.from(NAME_NODE, normalizedLabels));
+                  })
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList()));
+
       return vocabularyMapper.findSimilarities(valuesToCheck, update ? vocabulary.getKey() : null);
     };
   }

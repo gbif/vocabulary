@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.restws.resources.documentation;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -65,9 +65,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles({"mock", "test"})
 abstract class DocumentationBaseTest {
 
-  static final int TEST_KEY = 1;
+  static final Long TEST_KEY = 1L;
   static final String TEST_VOCABULARY_NAME = "vocab1";
-  static final int TEST_VOCABULARY_KEY = 1;
+  static final Long TEST_VOCABULARY_KEY = 1L;
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   static final Supplier<String> BASIC_AUTH_HEADER =
@@ -133,7 +133,7 @@ abstract class DocumentationBaseTest {
   Vocabulary createVocabulary(String name) {
     Vocabulary vocabulary = new Vocabulary();
     vocabulary.setName(name);
-    vocabulary.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    vocabulary.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
     vocabulary.setNamespace("ns");
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
 
@@ -144,12 +144,12 @@ abstract class DocumentationBaseTest {
     Concept concept = new Concept();
     concept.setVocabularyKey(TEST_VOCABULARY_KEY);
     concept.setName(name);
-    concept.setLabel(Collections.singletonMap(Language.ENGLISH, "Label"));
+    concept.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
     concept.setAlternativeLabels(
         Collections.singletonMap(
-            Language.ENGLISH, Arrays.asList("Alt label", "Another alt label")));
+            TranslationLanguage.ENGLISH, Arrays.asList("Alt label", "Another alt label")));
     concept.setMisappliedLabels(
-        Collections.singletonMap(Language.ENGLISH, Collections.singletonList("Labl")));
+        Collections.singletonMap(TranslationLanguage.ENGLISH, Collections.singletonList("Labl")));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

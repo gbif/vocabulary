@@ -6,9 +6,9 @@ import java.time.LocalDateTime;
 public interface Deprecable {
 
   /** Key of the entity that replaces a deprecated entity. */
-  Integer getReplacedByKey();
+  Long getReplacedByKey();
 
-  void setReplacedByKey(Integer replacedByKey);
+  void setReplacedByKey(Long replacedByKey);
 
   LocalDateTime getDeprecated();
 

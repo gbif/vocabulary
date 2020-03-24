@@ -63,11 +63,7 @@ public class GlobalControllerAdvice {
 
   @ExceptionHandler(IOException.class)
   public ResponseEntity<Object> handleIOException(WebRequest request, IOException ex) {
-    return buildResponse(
-      request,
-      HttpStatus.INTERNAL_SERVER_ERROR,
-      IO_ERROR,
-      ex.getMessage());
+    return buildResponse(request, HttpStatus.INTERNAL_SERVER_ERROR, IO_ERROR, ex.getMessage());
   }
 
   /**

@@ -33,7 +33,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -99,7 +99,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
                 .content(OBJECT_MAPPER.writeValueAsString(vocabularyToCreate)))
         .andExpect(status().isCreated())
         .andExpect(header().string("Location", endsWith(getBasePath() + "/" + created.getName())))
-        .andExpect(jsonPath("key", is(TEST_KEY)))
+        .andExpect(jsonPath("key", is(TEST_KEY.intValue())))
         .andExpect(jsonPath("name", equalTo(created.getName())));
   }
 
@@ -118,7 +118,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(vocabulary)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("key", is(vocabulary.getKey())))
+        .andExpect(jsonPath("key", is(vocabulary.getKey().intValue())))
         .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
   }
 
@@ -147,7 +147,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
     Vocabulary vocabulary = createEntity();
     vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
-    doNothing().when(vocabularyService).deprecate(anyInt(), anyString(), anyInt(), anyBoolean());
+    doNothing().when(vocabularyService).deprecate(anyLong(), anyString(), anyLong(), anyBoolean());
 
     mockMvc
         .perform(
@@ -163,7 +163,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
     Vocabulary vocabulary = createEntity();
     vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
-    doNothing().when(vocabularyService).restoreDeprecated(anyInt(), anyBoolean());
+    doNothing().when(vocabularyService).restoreDeprecated(anyLong(), anyBoolean());
 
     mockMvc
         .perform(delete(getBasePath() + "/" + vocabulary.getName() + "/deprecate"))

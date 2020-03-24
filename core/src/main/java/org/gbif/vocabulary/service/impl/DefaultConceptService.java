@@ -3,32 +3,38 @@ package org.gbif.vocabulary.service.impl;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.api.model.registry.PostPersist;
+import org.gbif.api.model.registry.PrePersist;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.normalizers.StringNormalizer;
+import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.ConceptService;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
 
 import static java.util.Objects.requireNonNull;
@@ -50,7 +56,7 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public Concept get(int key) {
+  public Concept get(long key) {
     return conceptMapper.get(key);
   }
 
@@ -59,9 +65,10 @@ public class DefaultConceptService implements ConceptService {
     return conceptMapper.getByNameAndVocabulary(name, vocabularyName);
   }
 
+  @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
-  public int create(@NotNull @Valid Concept concept) {
+  public long create(@NotNull @Valid Concept concept) {
     checkArgument(concept.getKey() == null, "Can't create a concept which already has a key");
 
     // checking the validity of the concept.
@@ -85,6 +92,7 @@ public class DefaultConceptService implements ConceptService {
     return concept.getKey();
   }
 
+  @Validated({PostPersist.class, Default.class})
   @Transactional
   @Override
   public void update(@NotNull @Valid Concept concept) {
@@ -101,7 +109,8 @@ public class DefaultConceptService implements ConceptService {
       throw new IllegalArgumentException("Cannot modify the name of a concept");
     }
 
-    if (!Objects.equals(oldConcept.getParentKey(), concept.getParentKey())) {
+    if (concept.getParentKey() != null
+        && !Objects.equals(oldConcept.getParentKey(), concept.getParentKey())) {
       // parent is being updated
       checkArgument(
           concept.getVocabularyKey().equals(conceptMapper.getVocabularyKey(concept.getParentKey())),
@@ -145,7 +154,9 @@ public class DefaultConceptService implements ConceptService {
             params.getReplacedByKey(),
             params.getName(),
             params.getDeprecated(),
-            params.getKey()),
+            params.getKey(),
+            params.getHasParent(),
+            params.getHasReplacement()),
         conceptMapper.list(
             params.getQuery(),
             params.getVocabularyKey(),
@@ -154,20 +165,22 @@ public class DefaultConceptService implements ConceptService {
             params.getName(),
             params.getDeprecated(),
             params.getKey(),
+            params.getHasParent(),
+            params.getHasReplacement(),
             page));
   }
 
   @Override
-  public List<KeyNameResult> suggest(@NotNull String query, int vocabularyKey) {
+  public List<KeyNameResult> suggest(@NotNull String query, long vocabularyKey) {
     return conceptMapper.suggest(query, vocabularyKey);
   }
 
   @Transactional
   @Override
   public void deprecate(
-      int key,
+      long key,
       @NotBlank String deprecatedBy,
-      @Nullable Integer replacementKey,
+      @Nullable Long replacementKey,
       boolean deprecateChildren) {
 
     if (replacementKey == null) {
@@ -180,7 +193,7 @@ public class DefaultConceptService implements ConceptService {
         "A concept and its replacement must belong to the same vocabulary");
 
     // find children
-    List<Integer> children = findChildrenKeys(key, false);
+    List<Long> children = findChildrenKeys(key, false);
     if (!children.isEmpty()) {
       if (deprecateChildren) {
         // deprecate children without replacement
@@ -198,8 +211,8 @@ public class DefaultConceptService implements ConceptService {
   @Transactional
   @Override
   public void deprecateWithoutReplacement(
-      int key, @NotBlank String deprecatedBy, boolean deprecateChildren) {
-    List<Integer> children = findChildrenKeys(key, false);
+      long key, @NotBlank String deprecatedBy, boolean deprecateChildren) {
+    List<Long> children = findChildrenKeys(key, false);
     if (!children.isEmpty()) {
       if (!deprecateChildren) {
         throw new IllegalArgumentException(
@@ -215,7 +228,7 @@ public class DefaultConceptService implements ConceptService {
 
   @Transactional
   @Override
-  public void restoreDeprecated(int key, boolean restoreDeprecatedChildren) {
+  public void restoreDeprecated(long key, boolean restoreDeprecatedChildren) {
     // get the concept
     Concept concept = requireNonNull(conceptMapper.get(key));
 
@@ -237,32 +250,71 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public List<String> findParents(int conceptKey) {
+  public List<String> findParents(long conceptKey) {
     return conceptMapper.findParents(conceptKey);
   }
 
+  @Override
+  public List<ChildrenCountResult> countChildren(List<Long> conceptParents) {
+    Preconditions.checkArgument(
+        conceptParents != null && !conceptParents.isEmpty(), "concept parents are required");
+    return conceptMapper.countChildren(conceptParents);
+  }
+
   /** Returns the keys of all the children of the given concept. */
-  private List<Integer> findChildrenKeys(int parentKey, boolean deprecated) {
-    return conceptMapper.list(null, null, parentKey, null, null, deprecated, null, null).stream()
+  private List<Long> findChildrenKeys(long parentKey, boolean deprecated) {
+    return conceptMapper.list(null, null, parentKey, null, null, deprecated, null, null, null, null)
+        .stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
   }
 
+  /**
+   * Supplies the required method to the DB that checks if the name or labels of the concept
+   * received are already present in any other concept.
+   *
+   * <p><b>NOTICE that the normalization of the name and labels has to be the same as the one the DB
+   * does.</b>
+   */
   private Supplier<List<KeyNameResult>> createSimilaritiesExtractor(
       Concept concept, boolean update) {
     return () -> {
-      List<String> valuesToCheck =
-          ImmutableList.<String>builder()
-              .add(StringNormalizer.normalizeName(concept.getName()))
-              .addAll(StringNormalizer.normalizeLabels(concept.getLabel().values()))
-              .addAll(
-                  Stream.concat(
-                          concept.getAlternativeLabels().values().stream(),
-                          concept.getMisappliedLabels().values().stream())
-                      .flatMap(Collection::stream)
-                      .map(StringNormalizer::normalizeLabel)
-                      .collect(Collectors.toList()))
-              .build();
+      List<NormalizedValuesParam> valuesToCheck = new ArrayList<>();
+
+      // add name
+      valuesToCheck.add(
+          NormalizedValuesParam.from(
+              ALL_NODE, Collections.singletonList(normalizeName(concept.getName()))));
+
+      BiFunction<TranslationLanguage, List<String>, List<NormalizedValuesParam>> normalizer =
+          (lang, labels) -> {
+            List<String> normalizedLabels = normalizeLabels(labels);
+
+            return Arrays.asList(
+                NormalizedValuesParam.from(lang.getLocale(), normalizedLabels),
+                NormalizedValuesParam.from(NAME_NODE, normalizedLabels));
+          };
+
+      // add labels
+      valuesToCheck.addAll(
+          concept.getLabel().entrySet().stream()
+              .map(e -> normalizer.apply(e.getKey(), Collections.singletonList(e.getValue())))
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList()));
+
+      // add alternative labels
+      valuesToCheck.addAll(
+          concept.getAlternativeLabels().entrySet().stream()
+              .map(e -> normalizer.apply(e.getKey(), e.getValue()))
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList()));
+
+      // add misapplied labels
+      valuesToCheck.addAll(
+          concept.getMisappliedLabels().entrySet().stream()
+              .map(e -> normalizer.apply(e.getKey(), e.getValue()))
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList()));
 
       return conceptMapper.findSimilarities(
           valuesToCheck, concept.getVocabularyKey(), update ? concept.getKey() : null);

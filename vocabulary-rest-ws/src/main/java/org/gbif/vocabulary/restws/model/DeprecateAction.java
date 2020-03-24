@@ -3,9 +3,9 @@ package org.gbif.vocabulary.restws.model;
 /** Common interface for deprecating actions. */
 public interface DeprecateAction {
 
-  Integer getReplacementKey();
+  Long getReplacementKey();
 
-  void setReplacementKey(Integer replacementKey);
+  void setReplacementKey(Long replacementKey);
 
   String getDeprecatedBy();
 

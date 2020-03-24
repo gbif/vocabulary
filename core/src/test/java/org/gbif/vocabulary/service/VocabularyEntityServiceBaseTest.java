@@ -4,18 +4,10 @@ import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 
 import java.time.LocalDateTime;
-import javax.sql.DataSource;
 import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.BeanUtils;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,9 +19,10 @@ import static org.mockito.Mockito.when;
  *
  * @param <T> {@link VocabularyEntity} to parametrize the class.
  */
-abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity> extends MockServiceBaseTest {
+abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
+    extends MockServiceBaseTest {
 
-  static final int TEST_KEY = 1;
+  static final long TEST_KEY = 1;
 
   @Test
   public void createNullEntityTest() {
@@ -49,7 +42,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity> exten
   public void createEntityWithKeyTest() {
     T entity = createNewEntity("name");
     entity.setKey(TEST_KEY);
-    assertThrows(IllegalArgumentException.class, () -> getService().create(entity));
+    assertThrows(ConstraintViolationException.class, () -> getService().create(entity));
   }
 
   @Test
@@ -65,7 +58,8 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity> exten
   public void updateNullEntityTest() {
     assertThrows(ConstraintViolationException.class, () -> getService().update(null));
     // null key
-    assertThrows(NullPointerException.class, () -> getService().update(createNewEntity("name")));
+    assertThrows(
+        ConstraintViolationException.class, () -> getService().update(createNewEntity("name")));
   }
 
   @Test
@@ -119,7 +113,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity> exten
     entityDB.setKey(TEST_KEY);
     T updatedEntity = createNewEntity("e1");
     BeanUtils.copyProperties(entityDB, updatedEntity);
-    updatedEntity.setReplacedByKey(2);
+    updatedEntity.setReplacedByKey(2L);
 
     // mock
     when(getMapper().get(TEST_KEY)).thenReturn(entityDB);

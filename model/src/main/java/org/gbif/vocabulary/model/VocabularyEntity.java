@@ -1,20 +1,28 @@
 package org.gbif.vocabulary.model;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.model.registry.PostPersist;
+import org.gbif.api.model.registry.PrePersist;
+import org.gbif.api.vocabulary.TranslationLanguage;
 
 import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 
 /** Defines the minimum fields that an vocabulary entity must have. */
 public interface VocabularyEntity extends Auditable, Deprecable, Serializable {
 
   /** Unique identifier for persistence. */
-  Integer getKey();
+  @Nullable
+  @Null(groups = {PrePersist.class})
+  @NotNull(groups = {PostPersist.class})
+  Long getKey();
 
-  void setKey(Integer key);
+  void setKey(Long key);
 
   /** Unique name. */
   @NotBlank
@@ -23,14 +31,14 @@ public interface VocabularyEntity extends Auditable, Deprecable, Serializable {
   void setName(String name);
 
   /** Representative label per language. */
-  Map<Language, String> getLabel();
+  Map<TranslationLanguage, String> getLabel();
 
-  void setLabel(Map<Language, String> label);
+  void setLabel(Map<TranslationLanguage, String> label);
 
   /** Definition of the entity by language. */
-  Map<Language, String> getDefinition();
+  Map<TranslationLanguage, String> getDefinition();
 
-  void setDefinition(Map<Language, String> definition);
+  void setDefinition(Map<TranslationLanguage, String> definition);
 
   /** Additional external definitions. */
   List<URI> getExternalDefinitions();

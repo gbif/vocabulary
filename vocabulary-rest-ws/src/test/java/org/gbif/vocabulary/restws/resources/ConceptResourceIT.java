@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.restws.model.ConceptView;
@@ -33,14 +33,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * IT for the {@link ConceptResource}.
  *
  * <p>These tests are intended to run in parallel. This should be taken into account when adding new
- * * tests since we're not cleaning the DB after each test and htis can interferred with other
- * tests.
+ * tests since we're not cleaning the DB after each test and this can interferred with other tests.
  */
-@ContextConfiguration(initializers = {ConceptResourceIT.ContexInitializer.class})
+@ContextConfiguration(initializers = {ConceptResourceIT.ContextInitializer.class})
 public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
   private static String defaultVocabularyName;
-  private static int defaultVocabularyKey;
+  private static long defaultVocabularyKey;
 
   ConceptResourceIT() {
     super(Concept.class);
@@ -73,15 +72,19 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   void listTest() {
     Concept c1 = createEntity();
     c1.setName("concept1");
-    webClient
-        .post()
-        .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromObject(c1))
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isCreated();
+    Concept created1 =
+        webClient
+            .post()
+            .uri(getBasePath())
+            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
+            .body(BodyInserters.fromObject(c1))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(Concept.class)
+            .returnResult()
+            .getResponseBody();
 
     // list entities
     webClient
@@ -96,6 +99,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
     Concept c2 = createEntity();
     c2.setName("concept2");
+    c2.setParentKey(created1.getKey());
     webClient
         .post()
         .uri(getBasePath())
@@ -116,6 +120,53 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         .expectBody()
         .jsonPath("results")
         .value(r -> Assertions.assertEquals(2, r.size()), List.class);
+
+    // list entities
+    webClient
+        .get()
+        .uri(
+            builder ->
+                builder
+                    .path(getBasePath())
+                    .queryParam("q", "concept")
+                    .queryParam("parentKey", created1.getKey())
+                    .build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("results")
+        .value(r -> Assertions.assertEquals(1, r.size()), List.class);
+
+    // list entities with parent
+    webClient
+        .get()
+        .uri(builder -> builder.path(getBasePath()).queryParam("hasParent", true).build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("results")
+        .value(r -> Assertions.assertEquals(1, r.size()), List.class);
+
+    // list entities
+    webClient
+        .get()
+        .uri(
+            builder ->
+                builder
+                    .path(getBasePath())
+                    .queryParam("name", c1.getName())
+                    .queryParam("includeChildrenCount", true)
+                    .build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("results")
+        .value(r -> Assertions.assertEquals(1, r.size()), List.class)
+        .jsonPath("results[0].childrenCount")
+        .value(Matchers.equalTo(1));
   }
 
   @Test
@@ -186,17 +237,15 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     // get vocabulary without parents
     expected = new ConceptView(c2);
     webClient
-      .get()
-      .uri(
-        uriBuilder ->
-          uriBuilder
-            .path(String.format(urlEntityFormat, created2.getName()))
-            .build())
-      .exchange()
-      .expectStatus()
-      .isOk()
-      .expectBody(ConceptView.class)
-      .equals(expected);
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder.path(String.format(urlEntityFormat, created2.getName())).build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(ConceptView.class)
+        .equals(expected);
   }
 
   @Override
@@ -204,10 +253,11 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     Concept concept = new Concept();
     concept.setName(UUID.randomUUID().toString());
     concept.setVocabularyKey(defaultVocabularyKey);
-    concept.setLabel(Collections.singletonMap(Language.ENGLISH, UUID.randomUUID().toString()));
+    concept.setLabel(
+        Collections.singletonMap(TranslationLanguage.ENGLISH, UUID.randomUUID().toString()));
     concept.setAlternativeLabels(
         Collections.singletonMap(
-            Language.ENGLISH,
+            TranslationLanguage.ENGLISH,
             Arrays.asList(UUID.randomUUID().toString(), UUID.randomUUID().toString())));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
@@ -219,7 +269,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     return "/" + VOCABULARIES_PATH + "/" + defaultVocabularyName + "/" + CONCEPTS_PATH;
   }
 
-  static class ContexInitializer
+  static class ContextInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of(

@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.vocabulary.Language;
+import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.export.VocabularyExport;
@@ -155,7 +155,8 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     vocabulary.setName(UUID.randomUUID().toString());
     vocabulary.setNamespace(TEST_NAMESPACE);
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
-    vocabulary.setLabel(Collections.singletonMap(Language.ENGLISH, UUID.randomUUID().toString()));
+    vocabulary.setLabel(
+        Collections.singletonMap(TranslationLanguage.ENGLISH, UUID.randomUUID().toString()));
     return vocabulary;
   }
 

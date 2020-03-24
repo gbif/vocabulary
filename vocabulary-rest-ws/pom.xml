@@ -6,11 +6,11 @@
   <parent>
     <groupId>org.gbif.vocabulary</groupId>
     <artifactId>vocabulary-parent</artifactId>
-    <version>0.20-SNAPSHOT</version>
+    <version>0.22-SNAPSHOT</version>
   </parent>
 
   <artifactId>vocabulary-rest-ws</artifactId>
-  <version>0.20-SNAPSHOT</version>
+  <version>0.22-SNAPSHOT</version>
 
   <properties>
     <snippetsDirectory>${project.build.directory}/generated-snippets</snippetsDirectory>
@@ -54,6 +54,10 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>janino</groupId>
+      <artifactId>janino</artifactId>
     </dependency>
     <dependency>
       <groupId>net.logstash.logback</groupId>
@@ -145,12 +149,24 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
+        <configuration>
+          <excludes>
+            <!-- Excluding config files -->
+            <exclude>**/application.properties</exclude>
+            <exclude>**/bootstrap.yml</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <mainClass>org.gbif.vocabulary.restws.Application</mainClass>
           <addResources>false</addResources>
-          <folders>conf/</folders>
+          <layout>ZIP</layout>
         </configuration>
       </plugin>
     </plugins>

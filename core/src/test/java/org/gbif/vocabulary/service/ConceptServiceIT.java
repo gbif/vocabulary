@@ -7,12 +7,17 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -21,6 +26,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -41,7 +48,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 public class ConceptServiceIT {
 
+  private static final String CLEAN_DB_SCRIPT = "/clean-concepts.sql";
+
   @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
+
+  @Autowired private DataSource dataSource;
 
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
@@ -67,6 +78,13 @@ public class ConceptServiceIT {
     Vocabulary vocabulary2 = createBasicVocabulary();
     vocabularyMapper.create(vocabulary2);
     vocabularyKeys[1] = vocabulary2.getKey();
+  }
+
+  @BeforeEach
+  public void cleanDB() throws SQLException {
+    Connection connection = dataSource.getConnection();
+    ScriptUtils.executeSqlScript(connection, new ClassPathResource(CLEAN_DB_SCRIPT));
+    connection.close();
   }
 
   @Test
@@ -148,7 +166,10 @@ public class ConceptServiceIT {
     concept.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "label"));
     concept.setMisappliedLabels(
         Collections.singletonMap(TranslationLanguage.ENGLISH, Arrays.asList("labl", "lbel")));
-    concept.setParentKey(vocabularyKeys[1]);
+
+    Concept parent = createBasicConcept(vocabularyKeys[0]);
+    long parentKey = conceptService.create(parent);
+    concept.setParentKey(parentKey);
     conceptService.update(concept);
 
     Concept updatedConcept = conceptService.get(key);
@@ -159,7 +180,7 @@ public class ConceptServiceIT {
             .getMisappliedLabels()
             .get(TranslationLanguage.ENGLISH)
             .containsAll(Arrays.asList("labl", "lbel")));
-    assertEquals(vocabularyKeys[1], updatedConcept.getParentKey().intValue());
+    assertEquals(parentKey, updatedConcept.getParentKey().intValue());
   }
 
   @Test

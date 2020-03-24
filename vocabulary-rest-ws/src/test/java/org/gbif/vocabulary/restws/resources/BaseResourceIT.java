@@ -10,15 +10,21 @@ import org.gbif.vocabulary.restws.PostgresDBExtension;
 import org.gbif.vocabulary.restws.TestCredentials;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.function.Function;
+import javax.sql.DataSource;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -42,6 +48,8 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
 
   @RegisterExtension static LoginServerExtension loginServer = new LoginServerExtension();
 
+  @Autowired private DataSource dataSource;
+
   @Autowired WebTestClient webClient;
 
   static final Function<TestCredentials, String> BASIC_AUTH_HEADER =
@@ -60,6 +68,13 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
 
   BaseResourceIT(Class<T> clazz) {
     this.clazz = clazz;
+  }
+
+  @BeforeEach
+  public void cleanDB() throws SQLException {
+    Connection connection = dataSource.getConnection();
+    ScriptUtils.executeSqlScript(connection, new ClassPathResource(getCleanDbScript()));
+    connection.close();
   }
 
   @Test
@@ -319,6 +334,8 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
   }
 
   abstract T createEntity();
+
+  abstract String getCleanDbScript();
 
   abstract String getBasePath();
 }

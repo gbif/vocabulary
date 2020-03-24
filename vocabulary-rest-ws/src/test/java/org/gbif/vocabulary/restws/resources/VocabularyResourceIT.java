@@ -37,6 +37,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ContextConfiguration(initializers = {VocabularyResourceIT.ContexInitializer.class})
 public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
 
+  private static final String CLEAN_DB_SCRIPT = "/clean-db.sql";
+
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper().registerModule(new JavaTimeModule());
   private static final String TEST_NAMESPACE = "ns";
@@ -158,6 +160,11 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     vocabulary.setLabel(
         Collections.singletonMap(TranslationLanguage.ENGLISH, UUID.randomUUID().toString()));
     return vocabulary;
+  }
+
+  @Override
+  String getCleanDbScript() {
+    return CLEAN_DB_SCRIPT;
   }
 
   @Override

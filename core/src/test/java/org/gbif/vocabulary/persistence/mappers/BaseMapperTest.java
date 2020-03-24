@@ -26,6 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Base class to test a {@link BaseMapper} that contains some common tests for base operations of
  * {@link VocabularyEntity}.
  *
+ * <p>It rolls back all the transactions, so there is no need to clean the DB before/after each
+ * test.
+ *
  * @param <T> {@link VocabularyEntity} to parameterized the class. Notice that it also has to
  *     implement {@link LenientEquals}.
  */

@@ -6,12 +6,10 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.servlet.Filter;
 import javax.validation.constraints.NotBlank;
@@ -48,7 +46,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,10 +66,6 @@ abstract class DocumentationBaseTest {
   static final String TEST_VOCABULARY_NAME = "vocab1";
   static final Long TEST_VOCABULARY_KEY = 1L;
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-  static final Supplier<String> BASIC_AUTH_HEADER =
-      () ->
-          "Basic " + Base64Utils.encodeToString("example:example".getBytes(StandardCharsets.UTF_8));
 
   @Autowired private Filter springSecurityFilterChain;
   @Autowired private WebApplicationContext context;

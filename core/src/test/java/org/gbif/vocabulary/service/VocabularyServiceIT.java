@@ -5,10 +5,14 @@ import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import javax.sql.DataSource;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -17,6 +21,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -40,10 +46,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 public class VocabularyServiceIT {
 
+  private static final String CLEAN_DB_SCRIPT = "/clean-db.sql";
+
   @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
+
+  @Autowired private DataSource dataSource;
 
   private final VocabularyService vocabularyService;
   private final ConceptService conceptService;
+
+  @BeforeEach
+  public void cleanDB() throws SQLException {
+    Connection connection = dataSource.getConnection();
+    ScriptUtils.executeSqlScript(connection, new ClassPathResource(CLEAN_DB_SCRIPT));
+    connection.close();
+  }
 
   @Autowired
   VocabularyServiceIT(VocabularyService vocabularyService, ConceptService conceptService) {

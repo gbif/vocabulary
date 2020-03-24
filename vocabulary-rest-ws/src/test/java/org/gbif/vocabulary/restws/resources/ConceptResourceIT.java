@@ -38,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(initializers = {ConceptResourceIT.ContextInitializer.class})
 public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
+  private static final String CLEAN_DB_SCRIPT = "/clean-concepts.sql";
+
   private static String defaultVocabularyName;
   private static long defaultVocabularyKey;
 
@@ -262,6 +264,11 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;
+  }
+
+  @Override
+  String getCleanDbScript() {
+    return CLEAN_DB_SCRIPT;
   }
 
   @Override

@@ -23,11 +23,31 @@ pipeline {
           not { expression { params.DOCUMENTATION } };
         }
       }
-      steps {
-        configFileProvider(
-                [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                        variable: 'MAVEN_SETTINGS_XML')]) {
-          sh 'mvn clean package verify dependency:analyze -U'
+      failFast true
+      parallel {
+        stage('Package and unit tests') {
+          steps {
+            configFileProvider([configFile(
+                    fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                    variable: 'MAVEN_SETTINGS_XML')]) {
+              sh 'mvn clean package dependency:analyze -U'
+            }
+          }
+        }
+        stage('Integration tests') {
+          agent {
+            node {
+              label 'master'
+              customWorkspace 'workspace/b'
+            }
+          }
+          steps {
+            configFileProvider([configFile(
+                    fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                    variable: 'MAVEN_SETTINGS_XML')]) {
+              sh 'mvn clean verify -Pintegration'
+            }
+          }
         }
       }
     }

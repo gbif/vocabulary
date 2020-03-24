@@ -42,7 +42,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
   public void createEntityWithKeyTest() {
     T entity = createNewEntity("name");
     entity.setKey(TEST_KEY);
-    assertThrows(IllegalArgumentException.class, () -> getService().create(entity));
+    assertThrows(ConstraintViolationException.class, () -> getService().create(entity));
   }
 
   @Test
@@ -58,7 +58,8 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
   public void updateNullEntityTest() {
     assertThrows(ConstraintViolationException.class, () -> getService().update(null));
     // null key
-    assertThrows(NullPointerException.class, () -> getService().update(createNewEntity("name")));
+    assertThrows(
+        ConstraintViolationException.class, () -> getService().update(createNewEntity("name")));
   }
 
   @Test

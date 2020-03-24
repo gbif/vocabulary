@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 public class Concept extends AbstractVocabularyEntity implements LenientEquals<Concept> {
 
   @NotNull private Long vocabularyKey;
+
   private Long parentKey;
   private Map<TranslationLanguage, List<String>> alternativeLabels =
       new EnumMap<>(TranslationLanguage.class);

@@ -130,9 +130,7 @@ public class ConceptResource {
       @PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
-    checkArgument(
-        vocabulary.getKey().equals(concept.getVocabularyKey()),
-        "Concept vocabulary doesn't match with the resource vocabulary in the URL");
+    concept.setVocabularyKey(vocabulary.getKey());
 
     long key = conceptService.create(concept);
     return conceptService.get(key);

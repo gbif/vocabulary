@@ -140,21 +140,6 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
 
   @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
   @Test
-  public void createConceptWithWrongVocabulary() throws Exception {
-    mockVocabulary();
-    Concept concept = createEntity();
-    concept.setVocabularyKey(TEST_VOCABULARY_KEY + 1);
-
-    mockMvc
-        .perform(
-            post(getBasePath())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(concept)))
-        .andExpect(status().isUnprocessableEntity());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
-  @Test
   public void updateConceptTest() throws Exception {
     mockVocabulary();
     doNothing().when(conceptService).update(any(Concept.class));

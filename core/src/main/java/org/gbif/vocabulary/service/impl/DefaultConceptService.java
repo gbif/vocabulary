@@ -3,6 +3,8 @@ package org.gbif.vocabulary.service.impl;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.api.model.registry.PostPersist;
+import org.gbif.api.model.registry.PrePersist;
 import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ChildrenCountResult;
@@ -21,6 +23,7 @@ import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
 
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +65,7 @@ public class DefaultConceptService implements ConceptService {
     return conceptMapper.getByNameAndVocabulary(name, vocabularyName);
   }
 
+  @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
   public long create(@NotNull @Valid Concept concept) {
@@ -88,6 +92,7 @@ public class DefaultConceptService implements ConceptService {
     return concept.getKey();
   }
 
+  @Validated({PostPersist.class, Default.class})
   @Transactional
   @Override
   public void update(@NotNull @Valid Concept concept) {

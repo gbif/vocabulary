@@ -3,6 +3,8 @@ package org.gbif.vocabulary.service.impl;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.api.model.registry.PostPersist;
+import org.gbif.api.model.registry.PrePersist;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -19,6 +21,7 @@ import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,6 +62,7 @@ public class DefaultVocabularyService implements VocabularyService {
     return vocabularyMapper.getByName(name);
   }
 
+  @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
   public long create(@NotNull @Valid Vocabulary vocabulary) {
@@ -72,6 +76,7 @@ public class DefaultVocabularyService implements VocabularyService {
     return vocabulary.getKey();
   }
 
+  @Validated({PostPersist.class, Default.class})
   @Transactional
   @Override
   public void update(@NotNull @Valid Vocabulary vocabulary) {

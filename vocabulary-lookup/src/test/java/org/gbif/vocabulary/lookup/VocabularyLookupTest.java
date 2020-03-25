@@ -2,7 +2,7 @@ package org.gbif.vocabulary.lookup;
 
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.model.vocabulary.LanguageRegion;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import java.io.IOException;
 import java.io.InputStream;

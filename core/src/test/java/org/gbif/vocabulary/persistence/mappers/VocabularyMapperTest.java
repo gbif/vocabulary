@@ -1,9 +1,9 @@
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.vocabulary.LanguageRegion;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import java.net.URI;
@@ -134,13 +134,13 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   @Test
   public void findSimilaritiesTest() {
     Vocabulary vocabulary1 = createNewEntity();
-    vocabulary1.setLabel(Collections.singletonMap(TranslationLanguage.SPANISH, "igual"));
+    vocabulary1.setLabel(Collections.singletonMap(LanguageRegion.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary1);
 
     // check Spanish labels
     NormalizedValuesParam spanishValues =
         NormalizedValuesParam.from(
-            TranslationLanguage.SPANISH.getLocale(), Arrays.asList("igual", "foo"));
+            LanguageRegion.SPANISH.getLocale(), Arrays.asList("igual", "foo"));
 
     List<KeyNameResult> similarities =
         vocabularyMapper.findSimilarities(Collections.singletonList(spanishValues), null);
@@ -164,7 +164,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     // create another vocabulary
     Vocabulary vocabulary2 = createNewEntity();
     vocabulary2.setName("another-vocab");
-    vocabulary2.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "another label "));
+    vocabulary2.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "another label "));
     vocabularyMapper.create(vocabulary2);
 
     // check with multiple labels
@@ -185,14 +185,14 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
             Arrays.asList(spanishValues, namesValues), vocabulary1.getKey());
     assertEquals(0, similarities.size());
 
-    spanishValues.setNode(TranslationLanguage.ENGLISH.getLocale());
+    spanishValues.setNode(LanguageRegion.ENGLISH.getLocale());
     similarities =
         vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
     assertEquals(0, similarities.size());
 
     NormalizedValuesParam englishValues =
         NormalizedValuesParam.from(
-            TranslationLanguage.ENGLISH.getLocale(),
+            LanguageRegion.ENGLISH.getLocale(),
             Collections.singletonList(normalizeLabel("another label")));
     assertEquals(
         1,
@@ -240,9 +240,9 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   Vocabulary createNewEntity() {
     Vocabulary entity = new Vocabulary();
     entity.setName(UUID.randomUUID().toString());
-    entity.setLabel(new HashMap<>(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label")));
+    entity.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Label")));
     entity.setDefinition(
-        new HashMap<>(Collections.singletonMap(TranslationLanguage.ENGLISH, "Definition")));
+        new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
     entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));

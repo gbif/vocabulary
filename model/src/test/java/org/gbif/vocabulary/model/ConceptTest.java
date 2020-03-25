@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.model;
 
-import org.gbif.api.vocabulary.TranslationLanguage;
+import org.gbif.vocabulary.model.vocabulary.LanguageRegion;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -21,14 +21,13 @@ public class ConceptTest {
     c1.setKey(1L);
     c1.setName("n1");
     c1.setVocabularyKey(1L);
-    c1.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "label"));
+    c1.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "label"));
     c1.setParentKey(2L);
     c1.setReplacedByKey(1L);
-    c1.setAlternativeLabels(
-        Collections.singletonMap(TranslationLanguage.ENGLISH, Arrays.asList("alt")));
+    c1.setAlternativeLabels(Collections.singletonMap(LanguageRegion.ENGLISH, Arrays.asList("alt")));
     c1.setMisappliedLabels(
-        Collections.singletonMap(TranslationLanguage.ENGLISH, Arrays.asList("misspelt")));
-    c1.setDefinition(Collections.singletonMap(TranslationLanguage.ENGLISH, "def"));
+        Collections.singletonMap(LanguageRegion.ENGLISH, Arrays.asList("misspelt")));
+    c1.setDefinition(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
     c1.setSameAsUris(Collections.singletonList(URI.create("http://test.com")));
     c1.setEditorialNotes(Arrays.asList("n1", "n2"));
     c1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));

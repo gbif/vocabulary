@@ -1,10 +1,10 @@
 package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.api.model.registry.LenientEquals;
-import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.vocabulary.LanguageRegion;
 import org.gbif.vocabulary.restws.LoginServerExtension;
 import org.gbif.vocabulary.restws.PostgresDBExtension;
 import org.gbif.vocabulary.restws.TestCredentials;
@@ -113,7 +113,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .isEqualTo(created);
 
     // update vocabulary
-    created.getLabel().put(TranslationLanguage.SPANISH, "Etiqueta");
+    created.getLabel().put(LanguageRegion.SPANISH, "Etiqueta");
     webClient
         .put()
         .uri(String.format(urlEntityFormat, created.getName()))

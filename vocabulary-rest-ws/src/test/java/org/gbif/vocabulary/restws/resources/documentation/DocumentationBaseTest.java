@@ -1,9 +1,9 @@
 package org.gbif.vocabulary.restws.resources.documentation;
 
-import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.vocabulary.LanguageRegion;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -126,7 +126,7 @@ abstract class DocumentationBaseTest {
   Vocabulary createVocabulary(String name) {
     Vocabulary vocabulary = new Vocabulary();
     vocabulary.setName(name);
-    vocabulary.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
+    vocabulary.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
     vocabulary.setNamespace("ns");
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
 
@@ -137,12 +137,12 @@ abstract class DocumentationBaseTest {
     Concept concept = new Concept();
     concept.setVocabularyKey(TEST_VOCABULARY_KEY);
     concept.setName(name);
-    concept.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
+    concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
     concept.setAlternativeLabels(
         Collections.singletonMap(
-            TranslationLanguage.ENGLISH, Arrays.asList("Alt label", "Another alt label")));
+            LanguageRegion.ENGLISH, Arrays.asList("Alt label", "Another alt label")));
     concept.setMisappliedLabels(
-        Collections.singletonMap(TranslationLanguage.ENGLISH, Collections.singletonList("Labl")));
+        Collections.singletonMap(LanguageRegion.ENGLISH, Collections.singletonList("Labl")));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

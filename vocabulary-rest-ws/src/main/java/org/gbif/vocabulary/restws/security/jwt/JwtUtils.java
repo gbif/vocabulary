@@ -4,14 +4,15 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpHeaders;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 class JwtUtils {
 
   // Patterns that catches case insensitive versions of word 'bearer'
   private static final Pattern BEARER_PATTERN = Pattern.compile("(?i)bearer");
-
-  private JwtUtils() {}
 
   /** Tries to find the token in the {@link HttpHeaders#AUTHORIZATION} header. */
   static Optional<String> findTokenInRequest(HttpServletRequest request) {

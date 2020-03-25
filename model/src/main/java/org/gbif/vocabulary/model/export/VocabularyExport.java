@@ -7,8 +7,12 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 /** Models an export of a vocabulary with all its concepts. */
+@Getter
+@Setter
 public class VocabularyExport implements Serializable {
 
   public static final String METADATA_PROP = "metadata";
@@ -23,28 +27,4 @@ public class VocabularyExport implements Serializable {
 
   @JsonProperty(CONCEPTS_PROP)
   private List<Concept> concepts;
-
-  public ExportMetadata getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(ExportMetadata metadata) {
-    this.metadata = metadata;
-  }
-
-  public Vocabulary getVocabulary() {
-    return vocabulary;
-  }
-
-  public void setVocabulary(Vocabulary vocabulary) {
-    this.vocabulary = vocabulary;
-  }
-
-  public List<Concept> getConcepts() {
-    return concepts;
-  }
-
-  public void setConcepts(List<Concept> concepts) {
-    this.concepts = concepts;
-  }
 }

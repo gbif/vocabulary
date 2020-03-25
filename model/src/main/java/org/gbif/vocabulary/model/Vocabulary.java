@@ -3,88 +3,23 @@ package org.gbif.vocabulary.model;
 import org.gbif.api.model.registry.LenientEquals;
 
 import java.util.Objects;
-import java.util.StringJoiner;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Models a Vocabulary.
  *
  * <p>A vocabulary should be identified by its name, which should be unique.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@Data
 public class Vocabulary extends AbstractVocabularyEntity implements LenientEquals<Vocabulary> {
 
-  private String namespace;
-
   /** Namespace for imported vocabularies. */
-  public String getNamespace() {
-    return namespace;
-  }
-
-  public void setNamespace(String namespace) {
-    this.namespace = namespace;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Vocabulary that = (Vocabulary) o;
-    return Objects.equals(key, that.key)
-        && Objects.equals(namespace, that.namespace)
-        && Objects.equals(name, that.name)
-        && Objects.equals(label, that.label)
-        && Objects.equals(definition, that.definition)
-        && Objects.equals(externalDefinitions, that.externalDefinitions)
-        && Objects.equals(editorialNotes, that.editorialNotes)
-        && Objects.equals(replacedByKey, that.replacedByKey)
-        && Objects.equals(deprecated, that.deprecated)
-        && Objects.equals(deprecatedBy, that.deprecatedBy)
-        && Objects.equals(created, that.created)
-        && Objects.equals(createdBy, that.createdBy)
-        && Objects.equals(modified, that.modified)
-        && Objects.equals(modifiedBy, that.modifiedBy)
-        && Objects.equals(deleted, that.deleted);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(
-        key,
-        namespace,
-        name,
-        label,
-        definition,
-        externalDefinitions,
-        editorialNotes,
-        replacedByKey,
-        deprecated,
-        deprecatedBy,
-        created,
-        createdBy,
-        modified,
-        modifiedBy,
-        deleted);
-  }
-
-  @Override
-  public String toString() {
-    return new StringJoiner(", ", Vocabulary.class.getSimpleName() + "[", "]")
-        .add("key=" + key)
-        .add("namespace='" + namespace + "'")
-        .add("name='" + name + "'")
-        .add("label=" + label)
-        .add("definition=" + definition)
-        .add("externalDefinitions=" + externalDefinitions)
-        .add("editorialNotes=" + editorialNotes)
-        .add("replacedByKey=" + replacedByKey)
-        .add("deprecated=" + deprecated)
-        .add("deprecatedBy='" + deprecatedBy + "'")
-        .add("created=" + created)
-        .add("createdBy='" + createdBy + "'")
-        .add("modified=" + modified)
-        .add("modifiedBy='" + modifiedBy + "'")
-        .add("deleted=" + deleted)
-        .toString();
-  }
+  private String namespace;
 
   @Override
   public boolean lenientEquals(Vocabulary other) {

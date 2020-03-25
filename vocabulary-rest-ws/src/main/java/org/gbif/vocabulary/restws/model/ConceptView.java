@@ -6,15 +6,16 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 /** Custom view to represent a {@link Concept} plus some additional information. */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ConceptView implements Serializable {
 
   @JsonUnwrapped private Concept concept;
   private List<String> parents;
   private Integer childrenCount;
-
-  public ConceptView() {}
 
   public ConceptView(Concept concept) {
     this.concept = concept;

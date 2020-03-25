@@ -3,7 +3,7 @@ package org.gbif.vocabulary.service;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.model.vocabulary.LanguageRegion;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import java.sql.Connection;
 import java.sql.SQLException;

@@ -3,7 +3,7 @@ package org.gbif.vocabulary.restws.resources.mock;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.vocabulary.LanguageRegion;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.restws.model.DeprecateAction;
 
 import java.util.Arrays;

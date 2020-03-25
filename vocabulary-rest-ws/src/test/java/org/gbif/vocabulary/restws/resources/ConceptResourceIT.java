@@ -2,7 +2,7 @@ package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.vocabulary.LanguageRegion;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.restws.model.ConceptView;
 
 import java.util.Arrays;

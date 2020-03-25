@@ -2,7 +2,7 @@ package org.gbif.vocabulary.model;
 
 import org.gbif.api.model.registry.PostPersist;
 import org.gbif.api.model.registry.PrePersist;
-import org.gbif.vocabulary.model.vocabulary.LanguageRegion;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import java.io.Serializable;
 import java.net.URI;

@@ -2,8 +2,8 @@ package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.VocabularyExport;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -58,7 +58,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
         .post()
         .uri(getBasePath())
         .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromObject(v1))
+        .body(BodyInserters.fromValue(v1))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -82,7 +82,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
         .post()
         .uri(getBasePath())
         .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromObject(v2))
+        .body(BodyInserters.fromValue(v2))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -110,7 +110,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
             .post()
             .uri(getBasePath())
             .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-            .body(BodyInserters.fromObject(v1))
+            .body(BodyInserters.fromValue(v1))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -126,7 +126,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
         .post()
         .uri(getBasePath() + "/" + v1.getName() + "/" + CONCEPTS_PATH)
         .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromObject(c1))
+        .body(BodyInserters.fromValue(c1))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()

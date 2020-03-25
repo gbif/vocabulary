@@ -20,6 +20,7 @@
     <module>model</module>
     <module>vocabulary-rest-ws</module>
     <module>vocabulary-lookup</module>
+    <module>vocabulary-importer</module>
   </modules>
 
   <scm>
@@ -148,7 +149,6 @@
         <artifactId>cache2k-core</artifactId>
         <version>${cache2k-version}</version>
       </dependency>
-
 
       <!-- DB -->
       <dependency>

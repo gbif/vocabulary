@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Strings;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -20,6 +22,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Utility class to download the latest version of a Vocabulary. It reuses the same http client for
  * all the calls.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 class VocabularyDownloader {
 
   private static final Logger LOG = LoggerFactory.getLogger(VocabularyDownloader.class);
@@ -53,8 +56,6 @@ class VocabularyDownloader {
                   }
                 }));
   }
-
-  private VocabularyDownloader() {}
 
   /**
    * Downloads the requested vocabulary from the specified URL.

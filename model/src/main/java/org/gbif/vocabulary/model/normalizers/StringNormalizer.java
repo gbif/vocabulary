@@ -5,15 +5,17 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /** Utility class to normalize vocabulary entities. */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StringNormalizer {
 
   private static final String EMPTY = "";
   private static final Pattern NAME_PATTERN = Pattern.compile("[\\-_\\s]");
   private static final Pattern LABEL_PATTERN = Pattern.compile("[\\s]");
   private static final Pattern NON_ALPHANUMERIC_PATTERN = Pattern.compile("[^A-Za-z0-9]");
-
-  private StringNormalizer() {}
 
   /**
    * Normalizes a name of a vocabulary entity.

@@ -1,6 +1,8 @@
 package org.gbif.vocabulary.model.normalizers;
 
 import com.google.common.base.Strings;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 /**
  * This class converts alphabetic, numeric, and symbolic Unicode characters which are not in the
@@ -50,9 +52,8 @@ import com.google.common.base.Strings;
  *
  * <p>For example, '&agrave;' will be replaced by 'a'.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class AsciiParser {
-
-  private AsciiParser() {}
 
   static String parse(String input) {
     if (Strings.isNullOrEmpty(input)) {

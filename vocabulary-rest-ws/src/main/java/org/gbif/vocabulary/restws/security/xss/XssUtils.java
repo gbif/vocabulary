@@ -3,14 +3,15 @@ package org.gbif.vocabulary.restws.security.xss;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Class copied from gbif-common-ws with utilities to detect XSS. */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class XssUtils {
   private static final Logger LOG = LoggerFactory.getLogger(XssUtils.class);
-
-  private XssUtils() {}
 
   private static final Pattern NULL_CHAR = Pattern.compile("\0");
   private static final Pattern[] PATTERNS =

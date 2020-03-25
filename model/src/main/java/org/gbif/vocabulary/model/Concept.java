@@ -7,142 +7,35 @@ import java.net.URI;
 import java.util.*;
 import javax.validation.constraints.NotNull;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 /**
  * Models a concept in a {@link Vocabulary}.
  *
  * <p>A concept must be linked to a {@link Vocabulary} and supports nesting in concepts. A concept
  * is identified by its name, which is unique.
  */
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@Data
 public class Concept extends AbstractVocabularyEntity implements LenientEquals<Concept> {
 
+  /** Vocabulary of the concept. */
   @NotNull private Long vocabularyKey;
 
-  private Long parentKey;
-  private Map<LanguageRegion, List<String>> alternativeLabels =
-      new EnumMap<>(LanguageRegion.class);
-  private Map<LanguageRegion, List<String>> misappliedLabels =
-      new EnumMap<>(LanguageRegion.class);
-  private List<URI> sameAsUris = new ArrayList<>();
-
-  /** Vocabulary of the concept. */
-  public Long getVocabularyKey() {
-    return vocabularyKey;
-  }
-
-  public void setVocabularyKey(Long vocabularyKey) {
-    this.vocabularyKey = vocabularyKey;
-  }
-
   /** Concept parent in case it exists. */
-  public Long getParentKey() {
-    return parentKey;
-  }
-
-  public void setParentKey(Long parentKey) {
-    this.parentKey = parentKey;
-  }
+  private Long parentKey;
 
   /** Indicates alternative labels commonly associated to the concept. */
-  public Map<LanguageRegion, List<String>> getAlternativeLabels() {
-    return alternativeLabels;
-  }
-
-  public void setAlternativeLabels(Map<LanguageRegion, List<String>> alternativeLabels) {
-    this.alternativeLabels = alternativeLabels;
-  }
+  private Map<LanguageRegion, List<String>> alternativeLabels = new EnumMap<>(LanguageRegion.class);
 
   /** Indicates misapplied labels commonly associated to the concept. */
-  public Map<LanguageRegion, List<String>> getMisappliedLabels() {
-    return misappliedLabels;
-  }
-
-  public void setMisappliedLabels(Map<LanguageRegion, List<String>> misappliedLabels) {
-    this.misappliedLabels = misappliedLabels;
-  }
+  private Map<LanguageRegion, List<String>> misappliedLabels = new EnumMap<>(LanguageRegion.class);
 
   /** External URIs for concepts considered equivalent. */
-  public List<URI> getSameAsUris() {
-    return sameAsUris;
-  }
-
-  public void setSameAsUris(List<URI> sameAsUris) {
-    this.sameAsUris = sameAsUris;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Concept concept = (Concept) o;
-    return Objects.equals(key, concept.key)
-        && Objects.equals(vocabularyKey, concept.vocabularyKey)
-        && Objects.equals(parentKey, concept.parentKey)
-        && Objects.equals(replacedByKey, concept.replacedByKey)
-        && Objects.equals(name, concept.name)
-        && Objects.equals(label, concept.label)
-        && Objects.equals(alternativeLabels, concept.alternativeLabels)
-        && Objects.equals(misappliedLabels, concept.misappliedLabels)
-        && Objects.equals(definition, concept.definition)
-        && Objects.equals(externalDefinitions, concept.externalDefinitions)
-        && Objects.equals(sameAsUris, concept.sameAsUris)
-        && Objects.equals(editorialNotes, concept.editorialNotes)
-        && Objects.equals(deprecated, concept.deprecated)
-        && Objects.equals(deprecatedBy, concept.deprecatedBy)
-        && Objects.equals(created, concept.created)
-        && Objects.equals(createdBy, concept.createdBy)
-        && Objects.equals(modified, concept.modified)
-        && Objects.equals(modifiedBy, concept.modifiedBy)
-        && Objects.equals(deleted, concept.deleted);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(
-        key,
-        vocabularyKey,
-        parentKey,
-        replacedByKey,
-        name,
-        label,
-        alternativeLabels,
-        misappliedLabels,
-        definition,
-        externalDefinitions,
-        sameAsUris,
-        editorialNotes,
-        deprecated,
-        deprecatedBy,
-        created,
-        createdBy,
-        modified,
-        modifiedBy,
-        deleted);
-  }
-
-  @Override
-  public String toString() {
-    return new StringJoiner(", ", Concept.class.getSimpleName() + "[", "]")
-        .add("vocabularyKey=" + vocabularyKey)
-        .add("parentKey=" + parentKey)
-        .add("alternativeLabels=" + alternativeLabels)
-        .add("misappliedLabels=" + misappliedLabels)
-        .add("sameAsUris=" + sameAsUris)
-        .add("key=" + key)
-        .add("name='" + name + "'")
-        .add("label=" + label)
-        .add("definition=" + definition)
-        .add("externalDefinitions=" + externalDefinitions)
-        .add("editorialNotes=" + editorialNotes)
-        .add("replacedByKey=" + replacedByKey)
-        .add("deprecated=" + deprecated)
-        .add("deprecatedBy='" + deprecatedBy + "'")
-        .add("created=" + created)
-        .add("createdBy='" + createdBy + "'")
-        .add("modified=" + modified)
-        .add("modifiedBy='" + modifiedBy + "'")
-        .add("deleted=" + deleted)
-        .toString();
-  }
+  private List<URI> sameAsUris = new ArrayList<>();
 
   @Override
   public boolean lenientEquals(Concept other) {

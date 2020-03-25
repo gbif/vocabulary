@@ -1,11 +1,11 @@
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.export.ExportMetadata;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.normalizers.StringNormalizer;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,8 +74,8 @@ public class VocabularyLookup implements AutoCloseable {
   }
 
   /**
-   * Same as {@link #lookup(String, TranslationLanguage)} but since there are no language provided
-   * we only try to use English if there are several candidates.
+   * Same as {@link #lookup(String, LanguageRegion)} but since there are no language provided we
+   * only try to use English if there are several candidates.
    *
    * @param value the value whose concept we are looking for
    * @return the {@link Concept} found. Empty {@link Optional} if there was no match.
@@ -91,10 +91,10 @@ public class VocabularyLookup implements AutoCloseable {
    * no match we try to use English as a fallback.
    *
    * @param value the value whose concept we are looking for
-   * @param contextLang {@link TranslationLanguage} to break ties
+   * @param contextLang {@link LanguageRegion} to break ties
    * @return the {@link Concept} found. Empty {@link Optional} if there was no match.
    */
-  public Optional<Concept> lookup(String value, TranslationLanguage contextLang) {
+  public Optional<Concept> lookup(String value, LanguageRegion contextLang) {
     checkArgument(!Strings.isNullOrEmpty(value), "A value to lookup for is required");
 
     // base normalization
@@ -146,16 +146,15 @@ public class VocabularyLookup implements AutoCloseable {
     return Optional.empty();
   }
 
-  private Optional<Concept> matchByLanguage(
-      LabelMatch match, TranslationLanguage lang, String value) {
+  private Optional<Concept> matchByLanguage(LabelMatch match, LanguageRegion lang, String value) {
     Set<Concept> langMatches = null;
     if (lang != null) {
       langMatches = match.matchesByLanguage.get(lang);
     }
 
     // we try with English as fallback
-    if ((langMatches == null || langMatches.size() != 1) && lang != TranslationLanguage.ENGLISH) {
-      lang = TranslationLanguage.ENGLISH;
+    if ((langMatches == null || langMatches.size() != 1) && lang != LanguageRegion.ENGLISH) {
+      lang = LanguageRegion.ENGLISH;
       langMatches = match.matchesByLanguage.get(lang);
     }
 
@@ -245,12 +244,11 @@ public class VocabularyLookup implements AutoCloseable {
     }
   }
 
-  private void addLabelsToCache(
-      List<String> values, Concept concept, TranslationLanguage language) {
+  private void addLabelsToCache(List<String> values, Concept concept, LanguageRegion language) {
     values.forEach(v -> addLabelToCache(v, concept, language));
   }
 
-  private void addLabelToCache(String value, Concept concept, TranslationLanguage language) {
+  private void addLabelToCache(String value, Concept concept, LanguageRegion language) {
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
 
     boolean added =
@@ -285,7 +283,6 @@ public class VocabularyLookup implements AutoCloseable {
 
   private static class LabelMatch {
     Set<Concept> allMatches = new HashSet<>();
-    Map<TranslationLanguage, Set<Concept>> matchesByLanguage =
-        new EnumMap<>(TranslationLanguage.class);
+    Map<LanguageRegion, Set<Concept>> matchesByLanguage = new EnumMap<>(LanguageRegion.class);
   }
 }

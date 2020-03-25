@@ -5,11 +5,11 @@ import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.api.model.registry.PostPersist;
 import org.gbif.api.model.registry.PrePersist;
-import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
@@ -286,7 +286,7 @@ public class DefaultConceptService implements ConceptService {
           NormalizedValuesParam.from(
               ALL_NODE, Collections.singletonList(normalizeName(concept.getName()))));
 
-      BiFunction<TranslationLanguage, List<String>, List<NormalizedValuesParam>> normalizer =
+      BiFunction<LanguageRegion, List<String>, List<NormalizedValuesParam>> normalizer =
           (lang, labels) -> {
             List<String> normalizedLabels = normalizeLabels(labels);
 

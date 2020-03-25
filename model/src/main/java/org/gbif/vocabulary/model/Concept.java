@@ -1,7 +1,7 @@
 package org.gbif.vocabulary.model;
 
 import org.gbif.api.model.registry.LenientEquals;
-import org.gbif.api.vocabulary.TranslationLanguage;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import java.net.URI;
 import java.util.*;
@@ -18,10 +18,10 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   @NotNull private Long vocabularyKey;
 
   private Long parentKey;
-  private Map<TranslationLanguage, List<String>> alternativeLabels =
-      new EnumMap<>(TranslationLanguage.class);
-  private Map<TranslationLanguage, List<String>> misappliedLabels =
-      new EnumMap<>(TranslationLanguage.class);
+  private Map<LanguageRegion, List<String>> alternativeLabels =
+      new EnumMap<>(LanguageRegion.class);
+  private Map<LanguageRegion, List<String>> misappliedLabels =
+      new EnumMap<>(LanguageRegion.class);
   private List<URI> sameAsUris = new ArrayList<>();
 
   /** Vocabulary of the concept. */
@@ -43,20 +43,20 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   }
 
   /** Indicates alternative labels commonly associated to the concept. */
-  public Map<TranslationLanguage, List<String>> getAlternativeLabels() {
+  public Map<LanguageRegion, List<String>> getAlternativeLabels() {
     return alternativeLabels;
   }
 
-  public void setAlternativeLabels(Map<TranslationLanguage, List<String>> alternativeLabels) {
+  public void setAlternativeLabels(Map<LanguageRegion, List<String>> alternativeLabels) {
     this.alternativeLabels = alternativeLabels;
   }
 
   /** Indicates misapplied labels commonly associated to the concept. */
-  public Map<TranslationLanguage, List<String>> getMisappliedLabels() {
+  public Map<LanguageRegion, List<String>> getMisappliedLabels() {
     return misappliedLabels;
   }
 
-  public void setMisappliedLabels(Map<TranslationLanguage, List<String>> misappliedLabels) {
+  public void setMisappliedLabels(Map<LanguageRegion, List<String>> misappliedLabels) {
     this.misappliedLabels = misappliedLabels;
   }
 

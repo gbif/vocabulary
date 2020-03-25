@@ -1,9 +1,9 @@
 package org.gbif.vocabulary.restws.resources.mock;
 
-import org.gbif.api.vocabulary.TranslationLanguage;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.restws.model.DeprecateAction;
 
 import java.util.Arrays;
@@ -176,7 +176,7 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     Vocabulary vocabulary = new Vocabulary();
     vocabulary.setName(name);
     vocabulary.setNamespace(NAMESPACE_TEST);
-    vocabulary.setLabel(Collections.singletonMap(TranslationLanguage.ENGLISH, "Label"));
+    vocabulary.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return vocabulary;

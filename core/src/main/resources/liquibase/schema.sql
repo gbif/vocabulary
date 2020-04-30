@@ -45,17 +45,17 @@ $func$
       res := coalesce(normalized_values,'{}'::jsonb);
       IF input IS NOT NULL then
         all_labels := coalesce(res::jsonb->'all','""'::jsonb);
+        -- the keys are the languages
       	for k in select distinct jsonb_object_keys(input) loop
       	  --get all normalized labels for the current key
       		for v in select input::jsonb->k loop
       		  norm_label := normalize_label(v)::jsonb;
-      		  normalized_labels := coalesce(normalized_labels || norm_label, norm_label);
       		end loop;
 
       		--add normalized labels to the current key
-          res := jsonb_set(res, array[k], coalesce(res::jsonb->k||normalized_labels, normalized_labels), true);
+          res := jsonb_set(res, array[k], coalesce(res::jsonb->k||norm_label, norm_label), true);
           --collect all normalized labels
-          all_labels := all_labels||normalized_labels;
+          all_labels := all_labels||norm_label;
       	end loop;
 
       	--add all normalized labels to the key that contains all values

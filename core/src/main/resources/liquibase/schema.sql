@@ -50,7 +50,6 @@ $func$
       	  --get all normalized labels for the current key
       		for v in select input::jsonb->k loop
       		  norm_label := normalize_label(v)::jsonb;
-      		  --normalized_labels := coalesce(normalized_labels || norm_label, norm_label);
       		end loop;
 
       		--add normalized labels to the current key

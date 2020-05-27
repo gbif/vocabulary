@@ -8,7 +8,6 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.gbif.vocabulary</groupId>
   <artifactId>vocabulary-lookup</artifactId>
   <version>0.22-SNAPSHOT</version>
 

@@ -2,6 +2,13 @@ spring:
   liquibase:
     change-log: classpath:/liquibase/master.xml
     enabled: true
+  application.name: vocabulary-rest-ws
+  jackson.default-property-inclusion: NON_EMPTY
+
+management:
+  server.port: 8081
+  endpoints.web.exposure.include: "*"
+  endpoint.shutdown.enabled: true
 
 logging:
   level:
@@ -9,3 +16,9 @@ logging:
 
 security:
   loginApiBasePath: http://localhost:8080
+  actuatorSecret: test
+
+export:
+  deployUser: test
+  deployPassword: test
+  deployRepository: test

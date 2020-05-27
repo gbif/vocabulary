@@ -14,4 +14,7 @@ public interface ExportService {
    *     org.gbif.vocabulary.model.export.VocabularyExport} serialized in json
    */
   Path exportVocabulary(@NotBlank String vocabularyName);
+
+  // TODO:
+  boolean deployExportToNexus(String vocabularyName, String version, Path vocabulary);
 }

@@ -5,3 +5,8 @@ spring:
 logging:
   level:
     liquibase: warn
+
+export:
+  deployUser: test
+  deployPassword: test
+  deployRepository: test

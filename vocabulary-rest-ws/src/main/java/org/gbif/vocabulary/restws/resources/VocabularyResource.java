@@ -1,5 +1,10 @@
 package org.gbif.vocabulary.restws.resources;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -9,17 +14,20 @@ import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
@@ -120,5 +128,23 @@ public class VocabularyResource {
         .header(
             "Content-Disposition", "attachment; filename=" + exportPath.getFileName().toString())
         .body(resource);
+  }
+
+  @PostMapping(value = "{name}/release")
+  public ResponseEntity<String> releaseVocabularyVersion(
+      @PathVariable("name") String vocabularyName, @RequestParam("version") String version) {
+
+    Path vocabularyExport = exportService.exportVocabulary(vocabularyName);
+
+    boolean deployed = exportService.deployExportToNexus(vocabularyName, version, vocabularyExport);
+
+    if (!deployed) {
+      return ResponseEntity.badRequest()
+          .body("Couldn't release the vocabulary " + vocabularyName + " with version " + version);
+    }
+
+    // TODO: link to nexus??
+    return ResponseEntity.ok(
+        "Vocabulary " + vocabularyName + " with version " + version + " released");
   }
 }

@@ -1,23 +1,30 @@
 package org.gbif.vocabulary.service;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.VocabularyExport;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -88,5 +95,13 @@ public class ExportServiceTest extends MockServiceBaseTest {
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);
     when(conceptService.list(any(), any()))
         .thenReturn(new PagingResponse<>(0, 100, 3L, Arrays.asList(c1, c2, c3)));
+  }
+
+  @Test
+  public void deployExportToNexusTest() {
+    // deploy disabled in the properties
+    boolean deployed =
+        exportService.deployExportToNexus("TypeStatus", "1", Paths.get("TypeStatus-test.zip"));
+    assertFalse(deployed);
   }
 }

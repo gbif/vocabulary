@@ -149,7 +149,6 @@
         <version>${cache2k-version}</version>
       </dependency>
 
-
       <!-- DB -->
       <dependency>
         <groupId>org.mybatis.spring.boot</groupId>

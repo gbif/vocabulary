@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 /**
@@ -52,5 +53,10 @@ public class SpringConfig {
   @Bean
   public MethodValidationPostProcessor methodValidationPostProcessor() {
     return new MethodValidationPostProcessor();
+  }
+
+  @Bean
+  public static Validator configurationPropertiesValidator() {
+    return new ExportConfig.ExportConfigValidator();
   }
 }

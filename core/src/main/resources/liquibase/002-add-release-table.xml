@@ -1,0 +1,21 @@
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+  <changeSet id="2" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+        CREATE TABLE vocabulary_release(
+          key bigserial NOT NULL PRIMARY KEY,
+          vocabulary_key bigint NOT NULL REFERENCES vocabulary(key),
+          version text NOT NULL CHECK (char_length(trim(version)) <= 255),
+          export_url text NOT NULL,
+          created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+          created timestamp with time zone NOT NULL DEFAULT now(),
+          UNIQUE(vocabulary_key, version)
+        );
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>

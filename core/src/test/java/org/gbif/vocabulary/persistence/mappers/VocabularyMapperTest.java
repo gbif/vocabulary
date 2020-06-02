@@ -1,13 +1,18 @@
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
-import java.net.URI;
-import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -23,7 +28,6 @@ import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -38,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ContextConfiguration(initializers = {VocabularyMapperTest.ContexInitializer.class})
 public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
+  // TODO: review comment about parallel tests
   /**
    * This is not in the base class because when running tests in parallel it uses the same DB for
    * all the children.

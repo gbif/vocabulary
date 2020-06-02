@@ -1,10 +1,11 @@
 package org.gbif.vocabulary.restws.advices;
 
-import org.gbif.vocabulary.model.VocabularyEntity;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 
+import org.gbif.vocabulary.model.VocabularyEntity;
+
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -22,9 +23,9 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
 
   @Override
   public boolean supports(
-      MethodParameter methodParameter,
+      @NotNull MethodParameter methodParameter,
       Type targetType,
-      Class<? extends HttpMessageConverter<?>> converterType) {
+      @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     try {
       return VocabularyEntity.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
     } catch (ClassNotFoundException e) {
@@ -32,24 +33,26 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
     }
   }
 
+  @NotNull
   @Override
   public HttpInputMessage beforeBodyRead(
-      HttpInputMessage inputMessage,
-      MethodParameter parameter,
-      Type targetType,
-      Class<? extends HttpMessageConverter<?>> converterType)
+      @NotNull HttpInputMessage inputMessage,
+      @NotNull MethodParameter parameter,
+      @NotNull Type targetType,
+      @NotNull Class<? extends HttpMessageConverter<?>> converterType)
       throws IOException {
     // do nothing
     return inputMessage;
   }
 
+  @NotNull
   @Override
   public Object afterBodyRead(
-      Object body,
-      HttpInputMessage inputMessage,
-      MethodParameter parameter,
-      Type targetType,
-      Class<? extends HttpMessageConverter<?>> converterType) {
+      @NotNull Object body,
+      @NotNull HttpInputMessage inputMessage,
+      @NotNull MethodParameter parameter,
+      @NotNull Type targetType,
+      @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     // set auditable fields
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     VocabularyEntity vocabularyEntity = (VocabularyEntity) body;
@@ -66,10 +69,10 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
   @Override
   public Object handleEmptyBody(
       Object body,
-      HttpInputMessage inputMessage,
-      MethodParameter parameter,
-      Type targetType,
-      Class<? extends HttpMessageConverter<?>> converterType) {
+      @NotNull HttpInputMessage inputMessage,
+      @NotNull MethodParameter parameter,
+      @NotNull Type targetType,
+      @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     // do nothing
     return body;
   }

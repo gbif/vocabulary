@@ -165,13 +165,13 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
   }
 
   @Test
-  public void downloadVocabularyTest() throws Exception {
+  public void exportVocabularyTest() throws Exception {
     Vocabulary vocabulary = createVocabulary("exportableVocab");
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
     when(conceptService.list(any(), any())).thenReturn(new PagingResponse<Concept>(0L, 0, 0L));
 
     mockMvc
-        .perform(get(getBasePath() + "/" + vocabulary.getName() + "/download"))
+        .perform(get(getBasePath() + "/" + vocabulary.getName() + "/export"))
         .andExpect(status().isOk())
         .andExpect(header().exists("Content-Disposition"));
   }

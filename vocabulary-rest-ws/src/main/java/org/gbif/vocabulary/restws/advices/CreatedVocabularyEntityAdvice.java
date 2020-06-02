@@ -2,9 +2,7 @@ package org.gbif.vocabulary.restws.advices;
 
 import org.gbif.vocabulary.model.VocabularyEntity;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +15,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Intercepts all the responses of POST requests to add a Location header and a {@link
  * HttpStatus#CREATED} code.
@@ -26,7 +27,7 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Vocabul
 
   @Override
   public boolean supports(
-      MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+      MethodParameter returnType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     try {
       return returnType.hasMethodAnnotation(PostMapping.class)
           && VocabularyEntity.class.isAssignableFrom(
@@ -39,11 +40,11 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Vocabul
   @Override
   public VocabularyEntity beforeBodyWrite(
       VocabularyEntity body,
-      MethodParameter returnType,
-      MediaType selectedContentType,
-      Class<? extends HttpMessageConverter<?>> selectedConverterType,
-      ServerHttpRequest request,
-      ServerHttpResponse response) {
+      @NotNull MethodParameter returnType,
+      @NotNull MediaType selectedContentType,
+      @NotNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
+      @NotNull ServerHttpRequest request,
+      @NotNull ServerHttpResponse response) {
 
     HttpServletResponse httpServletResponse =
         ((ServletServerHttpResponse) response).getServletResponse();

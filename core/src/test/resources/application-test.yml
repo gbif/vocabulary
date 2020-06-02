@@ -7,6 +7,4 @@ logging:
     liquibase: warn
 
 export:
-  deployUser: test
-  deployPassword: test
-  deployRepository: test
+  releaseEnabled: false

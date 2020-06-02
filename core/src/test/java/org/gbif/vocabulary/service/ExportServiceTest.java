@@ -13,9 +13,12 @@ import java.util.Map;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,7 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -38,6 +40,7 @@ public class ExportServiceTest extends MockServiceBaseTest {
   @Autowired private ExportService exportService;
   @MockBean private VocabularyService vocabularyService;
   @MockBean private ConceptService conceptService;
+  @Autowired private VocabularyReleaseMapper vocabularyReleaseMapper;
 
   @Test
   public void exportVocabularyTest() throws IOException {
@@ -98,10 +101,10 @@ public class ExportServiceTest extends MockServiceBaseTest {
   }
 
   @Test
-  public void deployExportToNexusTest() {
-    // deploy disabled in the properties
-    boolean deployed =
-        exportService.deployExportToNexus("TypeStatus", "1", Paths.get("TypeStatus-test.zip"));
-    assertFalse(deployed);
+  public void releaseVocabularyTest() {
+    // releases should be disabled in tests
+    Assertions.assertThrows(
+        UnsupportedOperationException.class,
+        () -> exportService.releaseVocabulary("test", "1.0", Paths.get("test"), "user"));
   }
 }

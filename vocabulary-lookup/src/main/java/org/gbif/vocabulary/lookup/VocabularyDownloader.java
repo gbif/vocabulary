@@ -25,6 +25,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 class VocabularyDownloader {
 
+  // TODO: I will have to change this to download the latest version
+
   private static final Logger LOG = LoggerFactory.getLogger(VocabularyDownloader.class);
 
   // http client

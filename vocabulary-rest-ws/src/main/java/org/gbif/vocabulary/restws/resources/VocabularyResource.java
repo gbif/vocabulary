@@ -1,6 +1,7 @@
 package org.gbif.vocabulary.restws.resources;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -8,9 +9,11 @@ import java.util.List;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
+import org.gbif.vocabulary.restws.model.VocabularyReleaseParameters;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 
@@ -19,6 +22,8 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
@@ -118,7 +125,7 @@ public class VocabularyResource {
     vocabularyService.restoreDeprecated(vocabulary.getKey(), restoreDeprecatedConcepts);
   }
 
-  @GetMapping(value = "{name}/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @GetMapping(value = "{name}/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<Resource> downloadVocabulary(@PathVariable("name") String vocabularyName)
       throws IOException {
     Path exportPath = exportService.exportVocabulary(vocabularyName);
@@ -130,21 +137,40 @@ public class VocabularyResource {
         .body(resource);
   }
 
-  @PostMapping(value = "{name}/release")
-  public ResponseEntity<String> releaseVocabularyVersion(
-      @PathVariable("name") String vocabularyName, @RequestParam("version") String version) {
+  // TODO: only admins should be allowed to do this
+  @PostMapping(value = "{name}/releases")
+  public ResponseEntity<VocabularyRelease> releaseVocabularyVersion(
+      @PathVariable("name") String vocabularyName,
+      @RequestBody() VocabularyReleaseParameters params,
+      HttpServletRequest httpServletRequest) {
 
+    // export the vocabulary first
     Path vocabularyExport = exportService.exportVocabulary(vocabularyName);
 
-    boolean deployed = exportService.deployExportToNexus(vocabularyName, version, vocabularyExport);
+    // release it and return
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    VocabularyRelease release =
+        exportService.releaseVocabulary(
+            vocabularyName, params.getVersion(), vocabularyExport, authentication.getName());
 
-    if (!deployed) {
-      return ResponseEntity.badRequest()
-          .body("Couldn't release the vocabulary " + vocabularyName + " with version " + version);
-    }
+    return ResponseEntity.created(
+            URI.create(httpServletRequest.getRequestURL() + "/" + release.getVersion()))
+        .body(release);
+  }
 
-    // TODO: link to nexus??
-    return ResponseEntity.ok(
-        "Vocabulary " + vocabularyName + " with version " + version + " released");
+  @GetMapping(value = "{name}/releases")
+  public List<VocabularyRelease> listReleases(
+      @PathVariable("name") String vocabularyName,
+      @RequestParam(value = "version", required = false) String version,
+      PagingRequest page) {
+    return exportService.listReleases(vocabularyName, version, page);
+  }
+
+  @GetMapping(value = "{name}/releases/{version}")
+  public VocabularyRelease getReleases(
+      @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
+    PagingRequest page = new PagingRequest(0, 1);
+    List<VocabularyRelease> releases = exportService.listReleases(vocabularyName, version, page);
+    return releases.isEmpty() ? null : releases.get(0);
   }
 }

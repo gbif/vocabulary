@@ -13,7 +13,7 @@ import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
-import org.gbif.vocabulary.restws.model.VocabularyReleaseParameters;
+import org.gbif.vocabulary.restws.model.VocabularyReleaseParams;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 
@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -137,11 +138,10 @@ public class VocabularyResource {
         .body(resource);
   }
 
-  // TODO: only admins should be allowed to do this
-  @PostMapping(value = "{name}/releases")
+  @PostMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH)
   public ResponseEntity<VocabularyRelease> releaseVocabularyVersion(
       @PathVariable("name") String vocabularyName,
-      @RequestBody() VocabularyReleaseParameters params,
+      @RequestBody() VocabularyReleaseParams params,
       HttpServletRequest httpServletRequest) {
 
     // export the vocabulary first
@@ -158,19 +158,20 @@ public class VocabularyResource {
         .body(release);
   }
 
-  @GetMapping(value = "{name}/releases")
-  public List<VocabularyRelease> listReleases(
+  @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH)
+  public PagingResponse<VocabularyRelease> listReleases(
       @PathVariable("name") String vocabularyName,
       @RequestParam(value = "version", required = false) String version,
       PagingRequest page) {
     return exportService.listReleases(vocabularyName, version, page);
   }
 
-  @GetMapping(value = "{name}/releases/{version}")
-  public VocabularyRelease getReleases(
+  @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}")
+  public VocabularyRelease getRelease(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
     PagingRequest page = new PagingRequest(0, 1);
-    List<VocabularyRelease> releases = exportService.listReleases(vocabularyName, version, page);
-    return releases.isEmpty() ? null : releases.get(0);
+    PagingResponse<VocabularyRelease> releases =
+        exportService.listReleases(vocabularyName, version, page);
+    return releases.getResults().isEmpty() ? null : releases.getResults().get(0);
   }
 }

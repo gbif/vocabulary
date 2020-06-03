@@ -13,7 +13,6 @@ import java.util.Map;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
@@ -32,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
+/** Tests the {@link ExportService}. */
 public class ExportServiceTest extends MockServiceBaseTest {
 
   private static final ObjectMapper OBJECT_MAPPER =
@@ -79,7 +79,7 @@ public class ExportServiceTest extends MockServiceBaseTest {
     alternativeLabels.put(LanguageRegion.SPANISH, Arrays.asList("label5", "label6"));
     c1.setAlternativeLabels(alternativeLabels);
 
-    // misspelt labels
+    // misapplied labels
     Map<LanguageRegion, List<String>> misappliedLabels = new HashMap<>();
     misappliedLabels.put(LanguageRegion.ENGLISH, Arrays.asList("labl2", "labl3", "labl4"));
     misappliedLabels.put(LanguageRegion.SPANISH, Arrays.asList("labl5", "labl6"));

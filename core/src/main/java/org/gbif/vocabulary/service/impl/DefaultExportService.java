@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
@@ -197,7 +196,7 @@ public class DefaultExportService implements ExportService {
   }
 
   @Override
-  public List<VocabularyRelease> listReleases(
+  public PagingResponse<VocabularyRelease> listReleases(
       @NotBlank String vocabularyName, @Nullable String version, @Nullable Pageable page) {
     page = page != null ? page : new PagingRequest();
 
@@ -206,9 +205,13 @@ public class DefaultExportService implements ExportService {
 
     if ("latest".equalsIgnoreCase(version)) {
       page = new PagingRequest(0, 1);
-      return vocabularyReleaseMapper.list(vocabulary.getKey(), null, page);
+      return new PagingResponse<>(
+          page, 1L, vocabularyReleaseMapper.list(vocabulary.getKey(), null, page));
     } else {
-      return vocabularyReleaseMapper.list(vocabulary.getKey(), version, page);
+      return new PagingResponse<>(
+          page,
+          vocabularyReleaseMapper.count(vocabulary.getKey(), version),
+          vocabularyReleaseMapper.list(vocabulary.getKey(), version, page));
     }
   }
 

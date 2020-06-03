@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -30,6 +31,7 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Vocabul
       MethodParameter returnType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     try {
       return returnType.hasMethodAnnotation(PostMapping.class)
+          && !ResponseEntity.class.isAssignableFrom(returnType.getParameterType())
           && VocabularyEntity.class.isAssignableFrom(
               Class.forName(returnType.getGenericParameterType().getTypeName()));
     } catch (ClassNotFoundException e) {

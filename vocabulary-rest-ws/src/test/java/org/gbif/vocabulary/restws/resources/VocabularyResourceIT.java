@@ -28,12 +28,7 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * IT for the {@link VocabularyResource}.
- *
- * <p>These tests are intended to run in parallel. This should be taken into account when adding new
- * tests since we're not cleaning the DB after each test and htis can interferred with other tests.
- */
+/** IT for the {@link VocabularyResource}. */
 @ContextConfiguration(initializers = {VocabularyResourceIT.ContexInitializer.class})
 public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
 

@@ -1,9 +1,9 @@
 package org.gbif.vocabulary.service;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.VocabularyRelease;
 
 import javax.annotation.Nullable;
@@ -46,6 +46,6 @@ public interface ExportService {
    * @param page paging parameters
    * @return list of {@link VocabularyRelease}
    */
-  List<VocabularyRelease> listReleases(
+  PagingResponse<VocabularyRelease> listReleases(
       @NotBlank String vocabularyName, @Nullable String version, @Nullable Pageable page);
 }

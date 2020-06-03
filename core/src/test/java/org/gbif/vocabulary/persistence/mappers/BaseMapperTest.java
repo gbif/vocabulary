@@ -1,11 +1,13 @@
 package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.model.registry.LenientEquals;
+import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +18,6 @@ import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertDeprecated;
 import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
 import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -38,6 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ActiveProfiles("test")
 abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
+
+  @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
 
   private final BaseMapper<T> baseMapper;
 

@@ -80,25 +80,35 @@ public class ExportServiceIT {
     vocabularyReleaseMapper.create(vr3);
 
     // test the list service
-    assertEquals(3, exportService.listReleases(vocabulary.getName(), null, null).size());
     assertEquals(
-        1, exportService.listReleases(vocabulary.getName(), null, new PagingRequest(0, 1)).size());
+        3, exportService.listReleases(vocabulary.getName(), null, null).getResults().size());
+    assertEquals(
+        1,
+        exportService
+            .listReleases(vocabulary.getName(), null, new PagingRequest(0, 1))
+            .getResults()
+            .size());
     assertThrows(
-        IllegalArgumentException.class, () -> exportService.listReleases("foo", null, null).size());
-    assertEquals(0, exportService.listReleases(vocabulary.getName(), "foo", null).size());
+        IllegalArgumentException.class,
+        () -> exportService.listReleases("foo", null, null).getResults().size());
+    assertEquals(
+        0, exportService.listReleases(vocabulary.getName(), "foo", null).getResults().size());
 
     // specific version
     List<VocabularyRelease> releases =
-        exportService.listReleases(vocabulary.getName(), vr1.getVersion(), null);
+        exportService.listReleases(vocabulary.getName(), vr1.getVersion(), null).getResults();
     assertEquals(1, releases.size());
     assertEquals(vr1.getKey(), releases.get(0).getKey());
 
     // latest version test
-    releases = exportService.listReleases(vocabulary.getName(), "latest", null);
+    releases = exportService.listReleases(vocabulary.getName(), "latest", null).getResults();
     assertEquals(1, releases.size());
     assertEquals(vr3.getKey(), releases.get(0).getKey());
 
-    releases = exportService.listReleases(vocabulary.getName(), "LATEST", new PagingRequest(0, 3));
+    releases =
+        exportService
+            .listReleases(vocabulary.getName(), "LATEST", new PagingRequest(0, 3))
+            .getResults();
     assertEquals(1, releases.size());
     assertEquals(vr3.getKey(), releases.get(0).getKey());
   }

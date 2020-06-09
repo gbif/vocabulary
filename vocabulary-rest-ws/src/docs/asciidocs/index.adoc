@@ -53,7 +53,13 @@ include::{snippets}/vocabulary-test-doc/restore-vocabulary-test/auto-section.ado
 
 include::{snippets}/vocabulary-test-doc/suggest-vocabulary-test/auto-section.adoc[]
 
-include::{snippets}/vocabulary-test-doc/download-vocabulary-test/auto-section.adoc[]
+include::{snippets}/vocabulary-test-doc/export-vocabulary-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/release-vocabulary-version-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/list-vocabulary-releases-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/get-vocabulary-release-test/auto-section.adoc[]
 
 == Concept
 

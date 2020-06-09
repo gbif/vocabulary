@@ -453,7 +453,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_deprecate">Deprecate</a></li>
 <li><a href="#resources-vocabulary-test-doc-restore-vocabulary-test">Restore Deprecated</a></li>
 <li><a href="#resources-vocabulary-test-doc-suggest-vocabulary-test">Suggest</a></li>
-<li><a href="#resources-vocabulary-test-doc-download-vocabulary-test">Download Vocabulary</a></li>
 </ul>
 </li>
 <li><a href="#_concept">Concept</a>
@@ -517,10 +516,13 @@ This call should be done using basic auth.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>400 Bad Request: returned when the JSON is invalid or the request is not well-formed.</p>
+<p>400 Bad Request: returned when the JSON is invalid or the request is not well-formed</p>
 </li>
 <li>
 <p>422 Unprocessable Entity: returned when the request is syntactically correct but the fields are invalid (required fields not set, duplicated keys, inconsistent keys, etc.)</p>
+</li>
+<li>
+<p>403 Forbidden: returned when the request is trying to perfom an unsupported operation</p>
 </li>
 </ul>
 </div>
@@ -749,7 +751,7 @@ Content-Length: 126
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
@@ -843,7 +845,7 @@ Content-Length: 126
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
@@ -999,7 +1001,7 @@ Content-Length: 100
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
@@ -1093,7 +1095,7 @@ Content-Length: 100
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
@@ -1416,66 +1418,8 @@ Content-Length: 74
 } ]</code></pre>
 </div>
 </div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="resources-vocabulary-test-doc-download-vocabulary-test">Download Vocabulary</h3>
 <div class="paragraph">
-<p><code>GET /vocabularies/{name}/download</code></p>
-</div>
-<div class="sect3">
-<h4 id="_path_parameters_8">Path parameters</h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Parameter</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Optional</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_query_parameters_8">Query parameters</h4>
-<div class="paragraph">
-<p>No parameters.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_example_request_8">Example request</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/exportableVocab/download' -i -X GET</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_example_response_8">Example response</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Disposition: attachment; filename=exportableVocab-15849824072987693465730762525152.json
-Accept-Ranges: bytes
-Content-Type: application/octet-stream
-Content-Length: 8
-
-&lt;binary&gt;</code></pre>
-</div>
+<p>Unresolved directive in index.adoc - include::/var/lib/jenkins/jobs/vocabulary/branches/master/workspace/vocabulary-rest-ws/target/generated-snippets/vocabulary-test-doc/download-vocabulary-test/auto-section.adoc[]</p>
 </div>
 </div>
 </div>
@@ -1493,7 +1437,7 @@ Content-Length: 8
 <p><code>GET /vocabularies/{vocabularyName}/concepts</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_9">Path parameters</h4>
+<h4 id="_path_parameters_8">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -1520,7 +1464,7 @@ Content-Length: 8
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_9">Query parameters</h4>
+<h4 id="_query_parameters_8">Query parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -1595,7 +1539,7 @@ Content-Length: 8
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_9">Example request</h4>
+<h4 id="_example_request_8">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts' -i -X GET</code></pre>
@@ -1603,7 +1547,7 @@ Content-Length: 8
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_9">Example response</h4>
+<h4 id="_example_response_8">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -1666,7 +1610,7 @@ Content-Length: 956
 <p><code>GET /vocabularies/{vocabularyName}/concepts/{name}</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_10">Path parameters</h4>
+<h4 id="_path_parameters_9">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -1699,7 +1643,7 @@ Content-Length: 956
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_10">Query parameters</h4>
+<h4 id="_query_parameters_9">Query parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -1726,7 +1670,7 @@ Content-Length: 956
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_10">Example request</h4>
+<h4 id="_example_request_9">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1' -i -X GET</code></pre>
@@ -1734,7 +1678,7 @@ Content-Length: 956
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_10">Example response</h4>
+<h4 id="_example_response_9">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -1765,7 +1709,7 @@ Content-Length: 260
 <p><code>POST /vocabularies/{vocabularyName}/concepts</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_11">Path parameters</h4>
+<h4 id="_path_parameters_10">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -1792,7 +1736,7 @@ Content-Length: 260
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_11">Query parameters</h4>
+<h4 id="_query_parameters_10">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
@@ -1841,7 +1785,7 @@ Content-Length: 260
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
@@ -1955,7 +1899,7 @@ Content-Length: 260
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
@@ -2026,7 +1970,7 @@ Content-Length: 260
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_11">Example request</h4>
+<h4 id="_example_request_10">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts' -i -u 'user:password' -X POST \
@@ -2036,7 +1980,7 @@ Content-Length: 260
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_11">Example response</h4>
+<h4 id="_example_response_10">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
@@ -2055,7 +1999,7 @@ Content-Length: 199
 <p><code>PUT /vocabularies/{vocabularyName}/concepts/{name}</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_12">Path parameters</h4>
+<h4 id="_path_parameters_11">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2088,7 +2032,7 @@ Content-Length: 199
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_12">Query parameters</h4>
+<h4 id="_query_parameters_11">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
@@ -2137,7 +2081,7 @@ Content-Length: 199
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
@@ -2251,7 +2195,7 @@ Content-Length: 199
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
@@ -2322,7 +2266,7 @@ Content-Length: 199
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_12">Example request</h4>
+<h4 id="_example_request_11">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1' -i -u 'user:password' -X PUT \
@@ -2332,7 +2276,7 @@ Content-Length: 199
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_12">Example response</h4>
+<h4 id="_example_response_11">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -2350,7 +2294,7 @@ Content-Length: 199
 <p><code>PUT /vocabularies/{vocabularyName}/concepts/{name}/deprecate</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_13">Path parameters</h4>
+<h4 id="_path_parameters_12">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2383,7 +2327,7 @@ Content-Length: 199
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_13">Query parameters</h4>
+<h4 id="_query_parameters_12">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
@@ -2423,7 +2367,7 @@ Content-Length: 199
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_13">Example request</h4>
+<h4 id="_example_request_12">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1/deprecate' -i -u 'user:password' -X PUT \
@@ -2433,7 +2377,7 @@ Content-Length: 199
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_13">Example response</h4>
+<h4 id="_example_response_12">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
@@ -2447,7 +2391,7 @@ Content-Length: 199
 <p><code>DELETE /vocabularies/{vocabularyName}/concepts/{name}/deprecate</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_14">Path parameters</h4>
+<h4 id="_path_parameters_13">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2480,7 +2424,7 @@ Content-Length: 199
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_14">Query parameters</h4>
+<h4 id="_query_parameters_13">Query parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2507,7 +2451,7 @@ Content-Length: 199
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_14">Example request</h4>
+<h4 id="_example_request_13">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1/deprecate' -i -u 'user:password' -X DELETE</code></pre>
@@ -2515,7 +2459,7 @@ Content-Length: 199
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_14">Example response</h4>
+<h4 id="_example_response_13">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
@@ -2529,7 +2473,7 @@ Content-Length: 199
 <p><code>GET /vocabularies/{vocabularyName}/concepts/suggest</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_15">Path parameters</h4>
+<h4 id="_path_parameters_14">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2556,7 +2500,7 @@ Content-Length: 199
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_15">Query parameters</h4>
+<h4 id="_query_parameters_14">Query parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2583,7 +2527,7 @@ Content-Length: 199
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_15">Example request</h4>
+<h4 id="_example_request_14">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts/suggest?q=foo' -i -X GET</code></pre>
@@ -2591,7 +2535,7 @@ Content-Length: 199
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_15">Example response</h4>
+<h4 id="_example_response_14">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -2614,7 +2558,7 @@ Content-Length: 74
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-23 16:53:03 UTC
+Last updated 2020-06-09 12:58:02 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">

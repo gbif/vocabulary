@@ -127,7 +127,7 @@ public class VocabularyResource {
   }
 
   @GetMapping(value = "{name}/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<Resource> downloadVocabulary(@PathVariable("name") String vocabularyName)
+  public ResponseEntity<Resource> exportVocabulary(@PathVariable("name") String vocabularyName)
       throws IOException {
     Path exportPath = exportService.exportVocabulary(vocabularyName);
     ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(exportPath));

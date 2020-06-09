@@ -226,7 +226,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     mockMvc
         .perform(
             get(getBasePath() + "/" + vocabulary.getName() + "/" + VOCABULARY_RELEASES_PATH)
-                .queryParam("version", "latest"))
+                .queryParam("version", "1.0"))
         .andExpect(status().isOk())
         .andReturn();
   }
@@ -240,7 +240,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     VocabularyRelease vr1 = new VocabularyRelease();
     vr1.setExportUrl("/vocab-1.0.zip");
     vr1.setVocabularyKey(vocabulary.getKey());
-    vr1.setVersion("1.0");
+    vr1.setVersion("latest");
 
     when(exportService.listReleases(anyString(), anyString(), any()))
         .thenReturn(
@@ -248,14 +248,14 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
 
     mockMvc
         .perform(
-            get(getBasePath()
+            get(
+                getBasePath()
                     + "/"
                     + vocabulary.getName()
                     + "/"
                     + VOCABULARY_RELEASES_PATH
                     + "/"
-                    + vr1.getVersion())
-                .queryParam("version", vr1.getVersion()))
+                    + vr1.getVersion()))
         .andExpect(status().isOk());
   }
 

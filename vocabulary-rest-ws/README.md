@@ -25,13 +25,23 @@ export:
   releaseEnabled: false
 ```
 
+Also, we need a bootstrap.yml file to disable the zookeeper registration in local development:
+```
+spring:
+  cloud:
+    zookeeper:
+      enabled: false
+      discovery:
+        enabled: false
+```
+
 The DB scheme can be recreated by using the [Liquibase files](core/src/main/resources/liquibase).
 
 After that, you can run the project with this command and by using your IDE: 
 
 ```
-java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-0.20-SNAPSHOT.jar --spring.config.location=vocabulary-rest-ws/src/main/resources/application.yml
-```
+java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-{your-version}.jar --spring.config.location=your_path/application.yml --spring.cloud.bootstrap.location=your_path/bootstrap.yml 
+``` 
 
 ## API Documentation
 There is an API documentation available as [HTML files](vocabulary-rest-ws/src/docs/generated-docs). A preview is available [here](https://htmlpreview.github.io/?https://github.com/gbif/vocabulary/blob/master/vocabulary-rest-ws/src/docs/generated-docs/index.html). 

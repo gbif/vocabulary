@@ -19,6 +19,7 @@ management:
   endpoint.shutdown.enabled: true
 
 security:
+  actuatorSecret: secret
   loginApiBasePath: http://api.gbif-dev.org/v1
 
 export:

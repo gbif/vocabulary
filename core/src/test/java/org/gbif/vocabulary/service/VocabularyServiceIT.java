@@ -1,16 +1,15 @@
 package org.gbif.vocabulary.service;
 
-import org.gbif.vocabulary.PostgresDBExtension;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import javax.sql.DataSource;
+
+import org.gbif.vocabulary.PostgresDBExtension;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,19 +26,20 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.gbif.vocabulary.TestUtils.*;
+import javax.sql.DataSource;
 
+import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+import static org.gbif.vocabulary.TestUtils.assertDeprecated;
+import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
+import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
+import static org.gbif.vocabulary.TestUtils.createBasicConcept;
+import static org.gbif.vocabulary.TestUtils.createBasicVocabulary;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Integration tests for the {@link VocabularyService}.
- *
- * <p>These tests are intended to run in parallel. This should be taken into account when adding new
- * tests since we're not cleaning the DB after each test and htis can interferred with other tests.
- */
+/** Integration tests for the {@link VocabularyService}. */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {VocabularyServiceIT.ContexInitializer.class})

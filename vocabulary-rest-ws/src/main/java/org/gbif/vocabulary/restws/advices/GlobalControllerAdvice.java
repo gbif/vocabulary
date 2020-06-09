@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import javax.validation.ConstraintViolationException;
 
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.validation.ConstraintViolationException;
+
 /** This class contains the setup that will be applied to all the controllers. */
 @ControllerAdvice
 public class GlobalControllerAdvice {
@@ -27,6 +28,7 @@ public class GlobalControllerAdvice {
   private static final String DB_ERROR = "DB error";
   private static final String DUPLICATED_ENTITY_ERROR = "Duplicated Entity";
   private static final String IO_ERROR = "IO error";
+  private static final String UNSUPPORTED_OPERATION_ERROR = "Unsupported Operation";
 
   @Autowired private ErrorAttributes errorAttributes;
 
@@ -64,6 +66,13 @@ public class GlobalControllerAdvice {
   @ExceptionHandler(IOException.class)
   public ResponseEntity<Object> handleIOException(WebRequest request, IOException ex) {
     return buildResponse(request, HttpStatus.INTERNAL_SERVER_ERROR, IO_ERROR, ex.getMessage());
+  }
+
+  @ExceptionHandler(UnsupportedOperationException.class)
+  public ResponseEntity<Object> handleUnsupportedOperationException(
+      WebRequest request, IOException ex) {
+    return buildResponse(
+        request, HttpStatus.FORBIDDEN, UNSUPPORTED_OPERATION_ERROR, ex.getMessage());
   }
 
   /**

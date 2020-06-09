@@ -1,13 +1,13 @@
 package org.gbif.vocabulary.restws;
 
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.gbif.api.vocabulary.UserRole;
 import org.gbif.vocabulary.SpringConfig;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
-
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -31,6 +31,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
 
 @SpringBootApplication
 @Import(SpringConfig.class)
@@ -96,7 +99,9 @@ public class Application {
   @Order(20)
   static class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static final String VOCABULARIES_PATTERN = "/vocabularies/**";
+    private static final String VOCABULARY_RELEASES_PATTERN =
+        "/" + VOCABULARIES_PATH + "/*/" + VOCABULARY_RELEASES_PATH + "/**";
+    private static final String VOCABULARIES_PATTERN = "/" + VOCABULARIES_PATH + "/**";
 
     @Autowired private AuthenticationProvider basicAuthAuthenticationProvider;
 
@@ -105,6 +110,8 @@ public class Application {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.authorizeRequests()
+          .antMatchers(HttpMethod.POST, VOCABULARY_RELEASES_PATTERN)
+          .hasAuthority(UserRole.VOCABULARY_ADMIN.name())
           .antMatchers(HttpMethod.POST, VOCABULARIES_PATTERN)
           .hasAnyAuthority(UserRole.VOCABULARY_ADMIN.name(), UserRole.VOCABULARY_EDITOR.name())
           .antMatchers(HttpMethod.PUT, VOCABULARIES_PATTERN)

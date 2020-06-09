@@ -15,11 +15,11 @@
     v.deprecated_by, v.deprecated, v.created_by, v.modified_by, v.created, v.modified, v.deleted
   </sql>
 
-  <sql id="VOCABULARY_WRITE_FIELDS">
+  <sql id="VOCABULARY_INSERT_FIELDS">
     namespace, name, label, definition, external_definition_urls, editorial_notes, created_by, modified_by, created, modified
   </sql>
 
-  <sql id="VOCABULARY_PARAMS_CREATE">
+  <sql id="VOCABULARY_INSERT_PARAMS">
     #{namespace,jdbcType=VARCHAR},
     #{name,jdbcType=VARCHAR},
     #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
@@ -49,8 +49,8 @@
   <!-- QUERIES FROM HERE -->
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO vocabulary(<include refid="VOCABULARY_WRITE_FIELDS"/>)
-    VALUES(<include refid="VOCABULARY_PARAMS_CREATE"/>)
+    INSERT INTO vocabulary(<include refid="VOCABULARY_INSERT_FIELDS"/>)
+    VALUES(<include refid="VOCABULARY_INSERT_PARAMS"/>)
   </insert>
 
   <update id="update">

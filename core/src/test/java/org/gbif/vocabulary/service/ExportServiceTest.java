@@ -1,21 +1,29 @@
 package org.gbif.vocabulary.service;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
+/** Tests the {@link ExportService}. */
 public class ExportServiceTest extends MockServiceBaseTest {
 
   private static final ObjectMapper OBJECT_MAPPER =
@@ -31,6 +40,7 @@ public class ExportServiceTest extends MockServiceBaseTest {
   @Autowired private ExportService exportService;
   @MockBean private VocabularyService vocabularyService;
   @MockBean private ConceptService conceptService;
+  @Autowired private VocabularyReleaseMapper vocabularyReleaseMapper;
 
   @Test
   public void exportVocabularyTest() throws IOException {
@@ -69,7 +79,7 @@ public class ExportServiceTest extends MockServiceBaseTest {
     alternativeLabels.put(LanguageRegion.SPANISH, Arrays.asList("label5", "label6"));
     c1.setAlternativeLabels(alternativeLabels);
 
-    // misspelt labels
+    // misapplied labels
     Map<LanguageRegion, List<String>> misappliedLabels = new HashMap<>();
     misappliedLabels.put(LanguageRegion.ENGLISH, Arrays.asList("labl2", "labl3", "labl4"));
     misappliedLabels.put(LanguageRegion.SPANISH, Arrays.asList("labl5", "labl6"));
@@ -88,5 +98,13 @@ public class ExportServiceTest extends MockServiceBaseTest {
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);
     when(conceptService.list(any(), any()))
         .thenReturn(new PagingResponse<>(0, 100, 3L, Arrays.asList(c1, c2, c3)));
+  }
+
+  @Test
+  public void releaseVocabularyTest() {
+    // releases should be disabled in tests
+    Assertions.assertThrows(
+        UnsupportedOperationException.class,
+        () -> exportService.releaseVocabulary("test", "1.0", Paths.get("test"), "user"));
   }
 }

@@ -141,7 +141,7 @@ public class VocabularyResource {
   @PostMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH)
   public ResponseEntity<VocabularyRelease> releaseVocabularyVersion(
       @PathVariable("name") String vocabularyName,
-      @RequestBody() VocabularyReleaseParams params,
+      @RequestBody VocabularyReleaseParams params,
       HttpServletRequest httpServletRequest) {
 
     // export the vocabulary first

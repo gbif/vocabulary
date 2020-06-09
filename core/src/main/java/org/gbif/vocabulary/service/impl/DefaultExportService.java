@@ -9,8 +9,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -38,6 +42,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
@@ -62,6 +67,9 @@ public class DefaultExportService implements ExportService {
           .registerModule(new JavaTimeModule())
           .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
+  private static final Pattern VERSION_PATTERN =
+      Pattern.compile("([0-9]+\\.[0-9]+\\.[0-9]+)([-].*)*?");
+
   // http client
   private static final long DEFAULT_TIMEOUT_CLIENT = 60; // timeout in seconds
   private static final OkHttpClient HTTP_CLIENT =
@@ -69,8 +77,7 @@ public class DefaultExportService implements ExportService {
           .connectTimeout(DEFAULT_TIMEOUT_CLIENT, TimeUnit.SECONDS)
           .readTimeout(DEFAULT_TIMEOUT_CLIENT, TimeUnit.SECONDS)
           .build();
-  private static final String REPOSITORY_PATH_TEMPLATE =
-      "/org/gbif/vocabulary/export/%s/%s/%s?upload-file=%s";
+  private static final String REPOSITORY_PATH_TEMPLATE = "/org/gbif/vocabulary/export/%s/%s/%s";
 
   private final VocabularyService vocabularyService;
   private final ConceptService conceptService;
@@ -146,10 +153,15 @@ public class DefaultExportService implements ExportService {
       throw new UnsupportedOperationException("Vocabulary releases are not enabled");
     }
 
+    checkVersionFormat(version);
+
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     if (vocabulary == null) {
       throw new IllegalArgumentException("vocabulary not found: " + vocabularyName);
     }
+
+    // check that the version is greater than the latest
+    checkVersionNumber(version, vocabulary.getKey());
 
     Path zipFile = Files.createFile(Paths.get(vocabularyName + "-" + version + ".zip"));
     toZipFile(vocabularyExport, zipFile);
@@ -157,17 +169,16 @@ public class DefaultExportService implements ExportService {
     String repositoryUrl =
         exportConfig.getDeployRepository()
             + String.format(
-                REPOSITORY_PATH_TEMPLATE,
-                vocabularyName,
-                version,
-                zipFile.toFile().getName(),
-                zipFile.toFile().getAbsolutePath());
+                REPOSITORY_PATH_TEMPLATE, vocabularyName, version, zipFile.toFile().getName());
 
     // upload it to nexus
+    RequestBody body = RequestBody.create(zipFile.toFile(), MediaType.parse("multipart/form-data"));
     Request request =
         new Request.Builder()
             .url(repositoryUrl)
-            .method("PUT", RequestBody.create("", MediaType.parse("text/plain")))
+            .method("PUT", body)
+            .addHeader("enctype", "multipart/form-data")
+            .addHeader("Content-Type", "multipart/form-data")
             .addHeader(
                 "Authorization",
                 Credentials.basic(exportConfig.getDeployUser(), exportConfig.getDeployPassword()))
@@ -175,13 +186,17 @@ public class DefaultExportService implements ExportService {
 
     Response response = HTTP_CLIENT.newCall(request).execute();
 
-    if (!response.isSuccessful()) {
-      throw new IllegalStateException("Couldn't upload to nexus: " + repositoryUrl);
-    }
+    Consumer<Path> fileDeleter =
+        path -> {
+          boolean deleted = path.toFile().delete();
+          if (!deleted) {
+            log.warn("Couldn't delete export file: {}", path.getFileName().toString());
+          }
+        };
 
-    boolean deleted = zipFile.toFile().delete();
-    if (!deleted) {
-      log.warn("Couldn't delete export file: {}", zipFile.getFileName().toString());
+    if (!response.isSuccessful()) {
+      fileDeleter.accept(zipFile);
+      throw new IllegalStateException("Couldn't upload to nexus: " + repositoryUrl);
     }
 
     // we store the release in the DB
@@ -191,6 +206,8 @@ public class DefaultExportService implements ExportService {
     release.setExportUrl(repositoryUrl);
     release.setVocabularyKey(vocabulary.getKey());
     vocabularyReleaseMapper.create(release);
+
+    fileDeleter.accept(zipFile);
 
     return vocabularyReleaseMapper.get(release.getKey());
   }
@@ -243,6 +260,22 @@ public class DefaultExportService implements ExportService {
     } while (!concepts.isEndOfRecords());
   }
 
+  private void checkVersionNumber(@NotBlank String version, long vocabularyKey) {
+    List<VocabularyRelease> latestRelease =
+        vocabularyReleaseMapper.list(vocabularyKey, null, new PagingRequest(0, 1));
+    if (latestRelease != null && !latestRelease.isEmpty()) {
+      VocabularyRelease latest = latestRelease.get(0);
+      long latestVersion = getVersionNumber(latest.getVersion());
+      long versionParam = getVersionNumber(version);
+
+      if (latestVersion >= versionParam) {
+        throw new IllegalArgumentException(
+            "Version has to be greater than the latest version for this vocabulary: "
+                + latest.getVersion());
+      }
+    }
+  }
+
   @SneakyThrows
   static void toZipFile(Path fileToZip, Path targetFile) {
     try (FileOutputStream fos = new FileOutputStream(targetFile.toFile().getName());
@@ -256,5 +289,22 @@ public class DefaultExportService implements ExportService {
         zipOut.write(bytes, 0, length);
       }
     }
+  }
+
+  @VisibleForTesting
+  static void checkVersionFormat(String version) {
+    if (!VERSION_PATTERN.matcher(version).find()) {
+      throw new IllegalArgumentException(
+          "Version doesn't comply with pattern " + VERSION_PATTERN.toString());
+    }
+  }
+
+  @VisibleForTesting
+  static long getVersionNumber(String version) {
+    Matcher matcher = VERSION_PATTERN.matcher(version);
+    if (matcher.find()) {
+      return Long.parseLong(matcher.group(0).replace(".", ""));
+    }
+    return 0;
   }
 }

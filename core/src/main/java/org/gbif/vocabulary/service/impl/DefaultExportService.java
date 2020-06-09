@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -186,16 +185,12 @@ public class DefaultExportService implements ExportService {
 
     Response response = HTTP_CLIENT.newCall(request).execute();
 
-    Consumer<Path> fileDeleter =
-        path -> {
-          boolean deleted = path.toFile().delete();
-          if (!deleted) {
-            log.warn("Couldn't delete export file: {}", path.getFileName().toString());
-          }
-        };
+    boolean deleted = zipFile.toFile().delete();
+    if (!deleted) {
+      log.warn("Couldn't delete export file: {}", zipFile.getFileName().toString());
+    }
 
     if (!response.isSuccessful()) {
-      fileDeleter.accept(zipFile);
       throw new IllegalStateException("Couldn't upload to nexus: " + repositoryUrl);
     }
 
@@ -206,8 +201,6 @@ public class DefaultExportService implements ExportService {
     release.setExportUrl(repositoryUrl);
     release.setVocabularyKey(vocabulary.getKey());
     vocabularyReleaseMapper.create(release);
-
-    fileDeleter.accept(zipFile);
 
     return vocabularyReleaseMapper.get(release.getKey());
   }

@@ -1,16 +1,27 @@
 package org.gbif.vocabulary.lookup;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.UnaryOperator;
+
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.export.ExportMetadata;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.normalizers.StringNormalizer;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.function.UnaryOperator;
+import org.cache2k.Cache;
+import org.cache2k.Cache2kBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -18,10 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import org.cache2k.Cache;
-import org.cache2k.Cache2kBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
@@ -60,7 +67,8 @@ public class VocabularyLookup implements AutoCloseable {
   }
 
   public static VocabularyLookup load(String apiUrl, String vocabularyName) {
-    return new VocabularyLookup(VocabularyDownloader.downloadVocabulary(apiUrl, vocabularyName));
+    return new VocabularyLookup(
+        VocabularyDownloader.downloadLatestVocabularyVersion(apiUrl, vocabularyName));
   }
 
   /**

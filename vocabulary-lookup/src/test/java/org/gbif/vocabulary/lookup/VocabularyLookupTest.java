@@ -1,19 +1,25 @@
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests the {@link VocabularyLookup}. */
 public class VocabularyLookupTest {
@@ -43,7 +49,8 @@ public class VocabularyLookupTest {
   @Disabled("manual test")
   @Test
   public void loadVocabularyFromApiUrl() throws IOException {
-    InputStream in = VocabularyDownloader.downloadVocabulary("http://localhost:8080", "a");
+    InputStream in =
+        VocabularyDownloader.downloadLatestVocabularyVersion("http://api.gbif-dev.org/v1/", "LifeStage");
 
     VocabularyExport export =
         new ObjectMapper()

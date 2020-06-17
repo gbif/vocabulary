@@ -91,6 +91,7 @@ public class VocabularyReleaseMapperTest {
     vr1.setVersion("1.0");
     vr1.setCreatedBy("test");
     vr1.setExportUrl("dummy url");
+    vr1.setComment("test comment");
     vocabularyReleaseMapper.create(vr1);
 
     VocabularyRelease vr2 = new VocabularyRelease();
@@ -98,6 +99,7 @@ public class VocabularyReleaseMapperTest {
     vr2.setVersion("2.0");
     vr2.setCreatedBy("test");
     vr2.setExportUrl("dummy url");
+    vr2.setComment("test comment");
     vocabularyReleaseMapper.create(vr2);
 
     VocabularyRelease vr3 = new VocabularyRelease();
@@ -105,6 +107,7 @@ public class VocabularyReleaseMapperTest {
     vr3.setVersion("3.0");
     vr3.setCreatedBy("test");
     vr3.setExportUrl("dummy url");
+    vr3.setComment("test comment");
     vocabularyReleaseMapper.create(vr3);
 
     assertEquals(3, vocabularyReleaseMapper.list(null, null, TestUtils.DEFAULT_PAGE).size());

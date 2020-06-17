@@ -71,6 +71,7 @@ public class ExportServiceIT {
     vr2.setVersion("2.0");
     vr2.setCreatedBy("test");
     vr2.setExportUrl("dummy url");
+    vr2.setComment("comment");
     vocabularyReleaseMapper.create(vr2);
 
     VocabularyRelease vr3 = new VocabularyRelease();
@@ -78,6 +79,7 @@ public class ExportServiceIT {
     vr3.setVersion("3.0");
     vr3.setCreatedBy("test");
     vr3.setExportUrl("dummy url");
+    vr3.setComment("comment");
     vocabularyReleaseMapper.create(vr3);
 
     // test the list service

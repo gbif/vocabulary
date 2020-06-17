@@ -29,13 +29,15 @@ public interface ExportService {
    * @param version version to release
    * @param vocabularyExport export file that contains the vocabulary
    * @param user user that created the release
+   * @param comment comment of the release
    * @return the created {@link VocabularyRelease}
    */
   VocabularyRelease releaseVocabulary(
       @NotBlank String vocabularyName,
       @NotBlank String version,
       @NotNull Path vocabularyExport,
-      @NotBlank String user);
+      @NotBlank String user,
+      @NotBlank String comment);
 
   /**
    * Lists the vocabulary releases for a vocabulary and optionally a specific version. If the

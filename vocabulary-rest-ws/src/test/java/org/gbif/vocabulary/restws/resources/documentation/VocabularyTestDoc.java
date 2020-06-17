@@ -197,14 +197,16 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     vr1.setVocabularyKey(vocabulary.getKey());
     vr1.setVersion("1.0");
 
-    when(exportService.releaseVocabulary(anyString(), anyString(), any(), anyString()))
+    when(exportService.releaseVocabulary(anyString(), anyString(), any(), anyString(), anyString()))
         .thenReturn(vr1);
 
     mockMvc
         .perform(
             post(getBasePath() + "/" + vocabulary.getName() + "/" + VOCABULARY_RELEASES_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(new VocabularyReleaseParams("1.0"))))
+                .content(
+                    OBJECT_MAPPER.writeValueAsString(
+                        new VocabularyReleaseParams("1.0", "comments"))))
         .andExpect(status().isCreated());
   }
 

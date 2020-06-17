@@ -105,6 +105,6 @@ public class ExportServiceTest extends MockServiceBaseTest {
     // releases should be disabled in tests
     Assertions.assertThrows(
         UnsupportedOperationException.class,
-        () -> exportService.releaseVocabulary("test", "1.0", Paths.get("test"), "user"));
+        () -> exportService.releaseVocabulary("test", "1.0", Paths.get("test"), "user", "comment"));
   }
 }

@@ -12,4 +12,5 @@ import lombok.Setter;
 public class VocabularyReleaseParams {
 
   private String version;
+  private String comment;
 }

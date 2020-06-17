@@ -151,7 +151,11 @@ public class VocabularyResource {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     VocabularyRelease release =
         exportService.releaseVocabulary(
-            vocabularyName, params.getVersion(), vocabularyExport, authentication.getName());
+            vocabularyName,
+            params.getVersion(),
+            vocabularyExport,
+            authentication.getName(),
+            params.getComment());
 
     return ResponseEntity.created(
             URI.create(httpServletRequest.getRequestURL() + "/" + release.getVersion()))

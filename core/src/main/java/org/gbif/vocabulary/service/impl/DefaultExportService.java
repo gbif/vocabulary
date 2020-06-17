@@ -146,7 +146,8 @@ public class DefaultExportService implements ExportService {
       @NotBlank String vocabularyName,
       @NotBlank String version,
       @NotNull Path vocabularyExport,
-      @NotBlank String user) {
+      @NotBlank String user,
+      @NotBlank String comment) {
 
     if (!exportConfig.isReleaseEnabled()) {
       throw new UnsupportedOperationException("Vocabulary releases are not enabled");
@@ -200,6 +201,7 @@ public class DefaultExportService implements ExportService {
     release.setCreatedBy(user);
     release.setExportUrl(repositoryUrl);
     release.setVocabularyKey(vocabulary.getKey());
+    release.setComment(comment);
     vocabularyReleaseMapper.create(release);
 
     return vocabularyReleaseMapper.get(release.getKey());

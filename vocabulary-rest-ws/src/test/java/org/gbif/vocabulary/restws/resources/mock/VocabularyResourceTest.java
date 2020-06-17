@@ -181,7 +181,9 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         .perform(
             post(getBasePath() + "/foo/" + VOCABULARY_RELEASES_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(new VocabularyReleaseParams("1.0"))))
+                .content(
+                    OBJECT_MAPPER.writeValueAsString(
+                        new VocabularyReleaseParams("1.0", "comment"))))
         .andExpect(status().isUnauthorized());
   }
 
@@ -192,7 +194,9 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         .perform(
             post(getBasePath() + "/foo/" + VOCABULARY_RELEASES_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(new VocabularyReleaseParams("1.0"))))
+                .content(
+                    OBJECT_MAPPER.writeValueAsString(
+                        new VocabularyReleaseParams("1.0", "comment"))))
         .andExpect(status().isForbidden());
   }
 
@@ -207,7 +211,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
     release.setExportUrl("/test.zip");
     release.setVocabularyKey(vocabulary.getKey());
     release.setVersion("1.0");
-    when(exportService.releaseVocabulary(anyString(), anyString(), any(), anyString()))
+    when(exportService.releaseVocabulary(anyString(), anyString(), any(), anyString(), anyString()))
         .thenReturn(release);
 
     // do the call
@@ -217,7 +221,9 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
             .perform(
                 post(url)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(OBJECT_MAPPER.writeValueAsString(new VocabularyReleaseParams("1.0"))))
+                    .content(
+                        OBJECT_MAPPER.writeValueAsString(
+                            new VocabularyReleaseParams("1.0", "comment"))))
             .andExpect(status().isCreated())
             .andExpect(header().string("Location", endsWith(url + "/" + release.getVersion())))
             .andReturn();

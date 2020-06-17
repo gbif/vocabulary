@@ -1,11 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-  <include file="liquibase/001-initial.xml"/>
-  <include file="liquibase/002-add-release-table.xml"/>
-  <include file="liquibase/003-add-comment-to-releases.xml"/>
-
+  <changeSet id="3" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+        ALTER TABLE vocabulary_release ADD COLUMN comment text NOT NULL;
+      ]]>
+    </sql>
+  </changeSet>
 </databaseChangeLog>

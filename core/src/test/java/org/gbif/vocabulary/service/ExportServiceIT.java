@@ -63,6 +63,7 @@ public class ExportServiceIT {
     vr1.setVersion("1.0");
     vr1.setCreatedBy("test");
     vr1.setExportUrl("dummy url");
+    vr1.setComment("comment");
     vocabularyReleaseMapper.create(vr1);
 
     VocabularyRelease vr2 = new VocabularyRelease();

@@ -14,9 +14,10 @@ public class VocabularyRelease implements LenientEquals<VocabularyRelease> {
   private Long key;
   private long vocabularyKey;
   @NotBlank private String version;
-  private String exportUrl;
+  @NotBlank private String exportUrl;
   LocalDateTime created;
-  String createdBy;
+  @NotBlank String createdBy;
+  @NotBlank String comment;
 
   @Override
   public boolean lenientEquals(VocabularyRelease other) {
@@ -25,6 +26,7 @@ public class VocabularyRelease implements LenientEquals<VocabularyRelease> {
     return Objects.equals(key, other.key)
         && Objects.equals(vocabularyKey, other.vocabularyKey)
         && Objects.equals(version, other.version)
-        && Objects.equals(exportUrl, other.exportUrl);
+        && Objects.equals(exportUrl, other.exportUrl)
+        && Objects.equals(comment, other.comment);
   }
 }

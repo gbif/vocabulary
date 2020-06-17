@@ -7,11 +7,11 @@
   </resultMap>
 
   <sql id="VOCABULARY_RELEASE_INSERT_FIELDS">
-    vocabulary_key, version, export_url, created_by, created
+    vocabulary_key, version, export_url, created_by, created, comment
   </sql>
 
   <sql id="VOCABULARY_RELEASE_READ_FIELDS">
-    vr.key, vr.vocabulary_key, vr.version, vr.export_url, vr.created_by, vr.created
+    vr.key, vr.vocabulary_key, vr.version, vr.export_url, vr.created_by, vr.created, vr.comment
   </sql>
 
   <sql id="VOCABULARY_RELEASE_INSERT_PARAMS">
@@ -19,7 +19,8 @@
     #{version,jdbcType=VARCHAR},
     #{exportUrl,jdbcType=VARCHAR},
     #{createdBy,jdbcType=VARCHAR},
-    now() <!-- created -->
+    now(), <!-- created -->
+    #{comment,jdbcType=VARCHAR}
   </sql>
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">

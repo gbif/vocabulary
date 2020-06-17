@@ -73,6 +73,7 @@ public class VocabularyReleaseMapperTest {
     vocabularyRelease.setVersion("1.0");
     vocabularyRelease.setCreatedBy("test");
     vocabularyRelease.setExportUrl("dummy url");
+    vocabularyRelease.setComment("test comment");
 
     // create release
     vocabularyReleaseMapper.create(vocabularyRelease);

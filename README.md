@@ -1,5 +1,6 @@
 # Vocabulary
 
+[![Build Status](https://builds.gbif.org/job/vocabulary/job/master/badge/icon)](https://builds.gbif.org/job/vocabulary/job/master/)
 [![Quality Gate Status](https://sonar.gbif.org/api/project_badges/measure?project=org.gbif.vocabulary%3Avocabulary-parent&metric=alert_status)](https://sonar.gbif.org/dashboard?id=org.gbif.vocabulary%3Avocabulary-parent) 
 [![Coverage](https://sonar.gbif.org/api/project_badges/measure?project=org.gbif.vocabulary%3Avocabulary-parent&metric=coverage)](https://sonar.gbif.org/dashboard?id=org.gbif.vocabulary%3Avocabulary-parent)
 

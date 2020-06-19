@@ -45,6 +45,7 @@ public class VocabularyLookup implements AutoCloseable {
 
   private final Cache<String, Concept> namesCache;
   private final Cache<String, LabelMatch> labelsCache;
+  private final Cache<String, Concept> hiddenLabelsCache;
   private ExportMetadata exportMetadata;
   private Vocabulary vocabulary;
 
@@ -59,6 +60,12 @@ public class VocabularyLookup implements AutoCloseable {
             .build();
     labelsCache =
         new Cache2kBuilder<String, LabelMatch>() {}.eternal(true)
+            .entryCapacity(Long.MAX_VALUE)
+            .suppressExceptions(false)
+            .build();
+    hiddenLabelsCache =
+        Cache2kBuilder.of(String.class, Concept.class)
+            .eternal(true)
             .entryCapacity(Long.MAX_VALUE)
             .suppressExceptions(false)
             .build();
@@ -123,17 +130,17 @@ public class VocabularyLookup implements AutoCloseable {
       }
 
       // if no match with names we try with labels
-      LabelMatch match = labelsCache.get(transformedValue);
-      if (match != null) {
-        if (match.allMatches.size() == 1) {
-          Concept conceptMatched = match.allMatches.iterator().next();
+      LabelMatch labelMatch = labelsCache.get(transformedValue);
+      if (labelMatch != null) {
+        if (labelMatch.allMatches.size() == 1) {
+          Concept conceptMatched = labelMatch.allMatches.iterator().next();
           LOG.info("value {} matched with concept {} by label", value, conceptMatched.getName());
           return Optional.of(conceptMatched);
         }
 
         // several candidates found. We try to match by using the language received as discriminator
         // or English as fallback
-        Optional<Concept> langMatch = matchByLanguage(match, contextLang, value);
+        Optional<Concept> langMatch = matchByLanguage(labelMatch, contextLang, value);
         if (langMatch.isPresent()) {
           LOG.info(
               "value {} matched with concept {} by language {}",
@@ -146,8 +153,16 @@ public class VocabularyLookup implements AutoCloseable {
         LOG.warn(
             "Couldn't resolve match between all the several candidates found for {}: {}",
             value,
-            match.allMatches);
+            labelMatch.allMatches);
       }
+
+      // if no match we try with the hidden labels
+      Concept hiddenMatch = hiddenLabelsCache.get(transformedValue);
+      if (hiddenMatch != null) {
+        LOG.info("value {} matched with concept {} by hidden label", value, hiddenMatch);
+        return Optional.of(hiddenMatch);
+      }
+
     }
 
     LOG.info("Couldn't find any match for {}", value);
@@ -225,10 +240,8 @@ public class VocabularyLookup implements AutoCloseable {
               .getAlternativeLabels()
               .forEach((key, value) -> addLabelsToCache(value, concept, key));
 
-          // add misapplied labels to the cache
-          concept
-              .getMisappliedLabels()
-              .forEach((key, value) -> addLabelsToCache(value, concept, key));
+          // add hidden labels to the cache
+          concept.getHiddenLabels().forEach(label -> addHiddenLabelToCache(label, concept));
 
           parser.nextValue();
         }
@@ -278,6 +291,19 @@ public class VocabularyLookup implements AutoCloseable {
 
     if (!added) {
       LOG.warn("Concept {} not added for value {}", concept, normalizedValue);
+    }
+  }
+
+  private void addHiddenLabelToCache(String hiddenLabel, Concept concept) {
+    String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(hiddenLabel));
+    Concept existing = hiddenLabelsCache.peekAndPut(normalizedValue, concept);
+
+    if (existing != null) {
+      throw new IllegalArgumentException(
+          "Incorrect vocabulary: concept hidden labels have to be unique. The concept hidden label "
+              + concept.toString()
+              + " has the same value as "
+              + existing.toString());
     }
   }
 

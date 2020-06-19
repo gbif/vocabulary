@@ -72,7 +72,7 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * @param normalizedValues values that we want to check that are unique in the vocabulary. <b>They
    *     must be normalized</b>
    * @param vocabularyKey key of the vocabulary whose concepts we'll check
-   * @param conceptKey if we are updating a concept we exclude it from the searh
+   * @param conceptKey if we are updating a concept we exclude it from the search
    */
   List<KeyNameResult> findSimilarities(
       @Param("normalizedValues") List<NormalizedValuesParam> normalizedValues,

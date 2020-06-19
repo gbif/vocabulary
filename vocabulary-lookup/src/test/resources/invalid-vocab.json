@@ -55,17 +55,13 @@
           "Ene."
         ]
       },
-      "misappliedLabels": {
-        "en": [
-          "Janauary",
-          "Januray",
-          "Juanuary"
-        ],
-        "es-ES": [
-          "Eniero",
-          "Eneiro"
-        ]
-      },
+      "hiddenLabels": [
+        "Janauary",
+        "Januray",
+        "Juanuary",
+        "Eniero",
+        "Eneiro"
+      ],
       "sameAsUris": []
     },
     {
@@ -102,14 +98,10 @@
           "fév"
         ]
       },
-      "misappliedLabels": {
-        "en": [
-          "F"
-        ],
-        "fr-FR": [
-          "Marzo"
-        ]
-      },
+      "hiddenLabels": [
+        "F",
+        "Marzo"
+      ],
       "sameAsUris": []
     },
     {
@@ -133,7 +125,7 @@
       "vocabularyKey": null,
       "parentKey": null,
       "alternativeLabels": {},
-      "misappliedLabels": {},
+      "hiddenLabels": [],
       "sameAsUris": []
     }
   ]

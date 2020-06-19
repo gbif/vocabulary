@@ -1,6 +1,5 @@
 package org.gbif.vocabulary.lookup;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -94,13 +93,13 @@ public class VocabularyLookupTest {
 
     assertFalse(vocabulary.lookup("Marzo").isPresent());
     assertFalse(vocabulary.lookup("Marzo", LanguageRegion.ENGLISH).isPresent());
-    assertFalse(vocabulary.lookup("Marzo", LanguageRegion.GERMAN).isPresent());
+    assertTrue(vocabulary.lookup("Marzo", LanguageRegion.GERMAN).isPresent());
 
     Optional<Concept> concept = vocabulary.lookup("Marzo", LanguageRegion.SPANISH);
     assertTrue(concept.isPresent());
     assertEquals("March", concept.get().getName());
 
-    concept = vocabulary.lookup("Marzo", LanguageRegion.FRENCH);
+    concept = vocabulary.lookup("Marzo", LanguageRegion.GERMAN);
     assertTrue(concept.isPresent());
     assertEquals("February", concept.get().getName());
   }

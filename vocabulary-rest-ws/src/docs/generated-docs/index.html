@@ -1475,7 +1475,7 @@ Content-Length: 74
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Disposition: attachment; filename=export7832671475478884518.json
+Content-Disposition: attachment; filename=export5069718634427833537.json
 Accept-Ranges: bytes
 Content-Type: application/octet-stream</code></pre>
 </div>
@@ -1526,7 +1526,7 @@ Content-Type: application/octet-stream</code></pre>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab/releases' -i -X POST \
     -H 'Content-Type: application/json' \
-    -d '{"version":"1.0"}'</code></pre>
+    -d '{"version":"1.0","comment":"comments"}'</code></pre>
 </div>
 </div>
 </div>
@@ -1836,7 +1836,7 @@ Content-Length: 83
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 956
+Content-Length: 881
 
 {
   "offset" : 0,
@@ -1853,9 +1853,7 @@ Content-Length: 956
     "alternativeLabels" : {
       "en" : [ "Alt label", "Another alt label" ]
     },
-    "misappliedLabels" : {
-      "en" : [ "Labl" ]
-    }
+    "hiddenLabels" : [ "Labl" ]
   }, {
     "name" : "concept2",
     "label" : {
@@ -1866,9 +1864,7 @@ Content-Length: 956
     "alternativeLabels" : {
       "en" : [ "Alt label", "Another alt label" ]
     },
-    "misappliedLabels" : {
-      "en" : [ "Labl" ]
-    }
+    "hiddenLabels" : [ "Labl" ]
   }, {
     "name" : "concept3",
     "label" : {
@@ -1879,9 +1875,7 @@ Content-Length: 956
     "alternativeLabels" : {
       "en" : [ "Alt label", "Another alt label" ]
     },
-    "misappliedLabels" : {
-      "en" : [ "Labl" ]
-    }
+    "hiddenLabels" : [ "Labl" ]
   } ]
 }</code></pre>
 </div>
@@ -1967,7 +1961,7 @@ Content-Length: 956
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 260
+Content-Length: 239
 
 {
   "name" : "concept1",
@@ -1979,9 +1973,7 @@ Content-Length: 260
   "alternativeLabels" : {
     "en" : [ "Alt label", "Another alt label" ]
   },
-  "misappliedLabels" : {
-    "en" : [ "Labl" ]
-  }
+  "hiddenLabels" : [ "Labl" ]
 }</code></pre>
 </div>
 </div>
@@ -2057,8 +2049,8 @@ Content-Length: 260
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misappliedLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hiddenLabels</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -2171,8 +2163,8 @@ Content-Length: 260
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misappliedLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hiddenLabels</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -2259,7 +2251,7 @@ Content-Length: 260
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts' -i -u 'user:password' -X POST \
     -H 'Content-Type: application/json' \
-    -d '{"key":null,"name":"concept1","label":{"en":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"en":["Alt label","Another alt label"]},"misappliedLabels":{"en":["Labl"]},"sameAsUris":[]}'</code></pre>
+    -d '{"key":null,"name":"concept1","label":{"en":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"],"sameAsUris":[]}'</code></pre>
 </div>
 </div>
 </div>
@@ -2270,9 +2262,9 @@ Content-Length: 260
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
 Location: http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1
 Content-Type: application/json
-Content-Length: 199
+Content-Length: 188
 
-{"key":1,"name":"concept1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"misappliedLabels":{"en":["Labl"]}}</code></pre>
+{"key":1,"name":"concept1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"]}</code></pre>
 </div>
 </div>
 </div>
@@ -2353,8 +2345,8 @@ Content-Length: 199
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misappliedLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hiddenLabels</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -2467,8 +2459,8 @@ Content-Length: 199
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>misappliedLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hiddenLabels</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -2555,7 +2547,7 @@ Content-Length: 199
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif-dev.org/vocabularies/vocab1/concepts/concept1' -i -u 'user:password' -X PUT \
     -H 'Content-Type: application/json' \
-    -d '{"key":1,"name":"concept1","label":{"en":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"en":["Alt label","Another alt label"]},"misappliedLabels":{"en":["Labl"]},"sameAsUris":[]}'</code></pre>
+    -d '{"key":1,"name":"concept1","label":{"en":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"replacedByKey":null,"deprecated":null,"deprecatedBy":null,"created":null,"createdBy":null,"modified":null,"modifiedBy":null,"deleted":null,"vocabularyKey":1,"parentKey":null,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"],"sameAsUris":[]}'</code></pre>
 </div>
 </div>
 </div>
@@ -2565,9 +2557,9 @@ Content-Length: 199
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 199
+Content-Length: 188
 
-{"key":1,"name":"concept1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"misappliedLabels":{"en":["Labl"]}}</code></pre>
+{"key":1,"name":"concept1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"]}</code></pre>
 </div>
 </div>
 </div>
@@ -2842,7 +2834,7 @@ Content-Length: 74
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-06-17 13:41:43 UTC
+Last updated 2020-06-19 12:09:30 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">

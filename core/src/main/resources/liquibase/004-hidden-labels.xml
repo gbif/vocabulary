@@ -1,0 +1,72 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+  <changeSet id="4" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+        ALTER TABLE concept DROP COLUMN misapplied_labels;
+        ALTER TABLE concept ADD COLUMN hidden_labels text[];
+
+        CREATE OR REPLACE FUNCTION concept_change_trigger()
+        RETURNS TRIGGER AS
+        $conceptchange$
+            DECLARE
+              labels text[];
+              alternative_labels text[];
+              definitions text[];
+              normalized_name jsonb;
+              normalized_label jsonb;
+              hidden text;
+            BEGIN
+              labels := COALESCE(get_json_values(NEW.label), array[]::text[]);
+              alternative_labels := COALESCE(get_json_values(NEW.alternative_labels), array[]::text[]);
+              definitions := COALESCE(get_json_values(NEW.definition), array[]::text[]);
+
+              NEW.fulltext_search :=
+                TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(NEW.name,''))) ||
+                TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(labels, ' '),''))) ||
+                TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(alternative_labels, ' '),''))) ||
+                TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.hidden_labels, ' '),''))) ||
+                TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(definitions, ' '),''))) ||
+                TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.external_definition_urls, ' '),''))) ||
+                TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.same_as_uris, ' '),''))) ||
+                TO_TSVECTOR('pg_catalog.english', unaccent(COALESCE(array_to_string(NEW.editorial_notes, ' '),'')));
+
+              --create normalized values as jsonb
+              NEW.normalized_values := '{}'::jsonb;
+
+              --add normalized name to the name and all nodes
+              normalized_name := to_jsonb(normalize_name(NEW.name));
+              NEW.normalized_values := jsonb_set(NEW.normalized_values, '{name}', normalized_name, true);
+              NEW.normalized_values := jsonb_set(NEW.normalized_values, '{all}', normalized_name, true);
+
+              --add hidden labels to all node
+              IF NEW.hidden_labels IS NOT NULL THEN
+                FOREACH hidden IN ARRAY NEW.hidden_labels
+                LOOP
+                  normalized_label := to_jsonb(normalize_label(hidden));
+                  NEW.normalized_values := jsonb_set(NEW.normalized_values,
+                                                     '{hidden}',
+                                                     coalesce(NEW.normalized_values::jsonb->'hidden'||normalized_label, normalized_label),
+                                                     true);
+                  NEW.normalized_values := jsonb_set(NEW.normalized_values,
+                                                     '{all}',
+                                                     NEW.normalized_values::jsonb->'all'||normalized_label,
+                                                     true);
+                END LOOP;
+              END IF;
+
+              --add normalized labels
+              NEW.normalized_values := add_normalized_values(NEW.label, NEW.normalized_values);
+              NEW.normalized_values := add_normalized_values(NEW.alternative_labels, NEW.normalized_values);
+
+              RETURN NEW;
+            END;
+        $conceptchange$
+        LANGUAGE plpgsql;
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>

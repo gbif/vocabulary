@@ -1,11 +1,11 @@
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +25,7 @@ public class ConceptTest {
     c1.setParentKey(2L);
     c1.setReplacedByKey(1L);
     c1.setAlternativeLabels(Collections.singletonMap(LanguageRegion.ENGLISH, Arrays.asList("alt")));
-    c1.setMisappliedLabels(
-        Collections.singletonMap(LanguageRegion.ENGLISH, Arrays.asList("misspelt")));
+    c1.setHiddenLabels(Collections.singletonList("misspelt"));
     c1.setDefinition(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
     c1.setSameAsUris(Collections.singletonList(URI.create("http://test.com")));
     c1.setEditorialNotes(Arrays.asList("n1", "n2"));
@@ -43,7 +42,7 @@ public class ConceptTest {
     c2.setParentKey(c1.getParentKey());
     c2.setReplacedByKey(c1.getReplacedByKey());
     c2.setAlternativeLabels(c1.getAlternativeLabels());
-    c2.setMisappliedLabels(c1.getMisappliedLabels());
+    c2.setHiddenLabels(c1.getHiddenLabels());
     c2.setDefinition(c1.getDefinition());
     c2.setSameAsUris(c1.getSameAsUris());
     c2.setEditorialNotes(c1.getEditorialNotes());

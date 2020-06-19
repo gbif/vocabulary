@@ -7,5 +7,6 @@
   <include file="liquibase/001-initial.xml"/>
   <include file="liquibase/002-add-release-table.xml"/>
   <include file="liquibase/003-add-comment-to-releases.xml"/>
+  <include file="liquibase/004-hidden-labels.xml"/>
 
 </databaseChangeLog>

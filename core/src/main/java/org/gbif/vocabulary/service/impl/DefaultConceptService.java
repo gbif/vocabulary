@@ -1,43 +1,51 @@
 package org.gbif.vocabulary.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.api.model.registry.PostPersist;
 import org.gbif.api.model.registry.PrePersist;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.ConceptService;
 
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import com.google.common.base.Preconditions;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
-import com.google.common.base.Preconditions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
+import static java.util.Objects.requireNonNull;
 
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.HIDDEN_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
-
-import static java.util.Objects.requireNonNull;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -292,7 +300,8 @@ public class DefaultConceptService implements ConceptService {
 
             return Arrays.asList(
                 NormalizedValuesParam.from(lang.getLocale(), normalizedLabels),
-                NormalizedValuesParam.from(NAME_NODE, normalizedLabels));
+                NormalizedValuesParam.from(NAME_NODE, normalizedLabels),
+                NormalizedValuesParam.from(HIDDEN_NODE, normalizedLabels));
           };
 
       // add labels
@@ -309,12 +318,9 @@ public class DefaultConceptService implements ConceptService {
               .flatMap(Collection::stream)
               .collect(Collectors.toList()));
 
-      // add misapplied labels
-      valuesToCheck.addAll(
-          concept.getMisappliedLabels().entrySet().stream()
-              .map(e -> normalizer.apply(e.getKey(), e.getValue()))
-              .flatMap(Collection::stream)
-              .collect(Collectors.toList()));
+      // add hidden labels
+      valuesToCheck.add(
+          NormalizedValuesParam.from(ALL_NODE, normalizeLabels(concept.getHiddenLabels())));
 
       return conceptMapper.findSimilarities(
           valuesToCheck, concept.getVocabularyKey(), update ? concept.getKey() : null);

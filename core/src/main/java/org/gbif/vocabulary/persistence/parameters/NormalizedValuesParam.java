@@ -22,6 +22,11 @@ public class NormalizedValuesParam {
   public static final String NAME_NODE = "name";
   /** This is the node used by the DB to store and retrieve the field with all normalized labels. */
   public static final String ALL_NODE = "all";
+  /**
+   * This is the node used by the DB to store and retrieve the field with the normalized hidden
+   * labels.
+   */
+  public static final String HIDDEN_NODE = "hidden";
 
   private String node;
   private List<String> values;

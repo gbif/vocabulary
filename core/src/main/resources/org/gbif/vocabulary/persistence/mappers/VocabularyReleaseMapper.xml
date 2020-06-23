@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper">
+
+  <resultMap id="VOCABULARY_RELEASE_MAP" type="VocabularyRelease" autoMapping="true">
+    <id property="key" column="key"/>
+  </resultMap>
+
+  <sql id="VOCABULARY_RELEASE_INSERT_FIELDS">
+    vocabulary_key, version, export_url, created_by, created, comment
+  </sql>
+
+  <sql id="VOCABULARY_RELEASE_READ_FIELDS">
+    vr.key, vr.vocabulary_key, vr.version, vr.export_url, vr.created_by, vr.created, vr.comment
+  </sql>
+
+  <sql id="VOCABULARY_RELEASE_INSERT_PARAMS">
+    #{vocabularyKey,jdbcType=BIGINT},
+    #{version,jdbcType=VARCHAR},
+    #{exportUrl,jdbcType=VARCHAR},
+    #{createdBy,jdbcType=VARCHAR},
+    now(), <!-- created -->
+    #{comment,jdbcType=VARCHAR}
+  </sql>
+
+  <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
+    INSERT INTO vocabulary_release(<include refid="VOCABULARY_RELEASE_INSERT_FIELDS"/>)
+    VALUES(<include refid="VOCABULARY_RELEASE_INSERT_PARAMS"/>)
+  </insert>
+
+  <select id="get" resultMap="VOCABULARY_RELEASE_MAP">
+    SELECT <include refid="VOCABULARY_RELEASE_READ_FIELDS"/>
+    FROM vocabulary_release vr
+    WHERE vr.key = #{key,jdbcType=BIGINT}
+  </select>
+
+  <select id="list" resultType="VocabularyRelease" resultMap="VOCABULARY_RELEASE_MAP">
+    SELECT <include refid="VOCABULARY_RELEASE_READ_FIELDS"/>
+    FROM vocabulary_release vr
+    <where>
+      <if test="vocabularyKey != null">
+        vr.vocabulary_key = #{vocabularyKey}
+      </if>
+      <if test="version != null">
+        AND vr.version = #{version}
+      </if>
+    </where>
+    ORDER BY version DESC
+    <if test="page != null">
+      LIMIT #{page.limit} OFFSET #{page.offset}
+    </if>
+  </select>
+
+  <select id="count" resultType="Long">
+  SELECT COUNT(*)
+  FROM vocabulary_release vr
+  <where>
+    <if test="vocabularyKey != null">
+      vr.vocabulary_key = #{vocabularyKey}
+    </if>
+    <if test="version != null">
+      AND vr.version = #{version}
+    </if>
+  </where>
+  </select>
+
+</mapper>

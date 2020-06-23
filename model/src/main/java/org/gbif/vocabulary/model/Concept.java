@@ -31,8 +31,8 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   /** Indicates alternative labels commonly associated to the concept. */
   private Map<LanguageRegion, List<String>> alternativeLabels = new EnumMap<>(LanguageRegion.class);
 
-  /** Indicates misapplied labels commonly associated to the concept. */
-  private Map<LanguageRegion, List<String>> misappliedLabels = new EnumMap<>(LanguageRegion.class);
+  /** Indicates hidden labels commonly associated to the concept. */
+  private List<String> hiddenLabels = new ArrayList<>();
 
   /** External URIs for concepts considered equivalent. */
   private List<URI> sameAsUris = new ArrayList<>();
@@ -47,7 +47,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
         && Objects.equals(name, other.name)
         && Objects.equals(label, other.label)
         && Objects.equals(alternativeLabels, other.alternativeLabels)
-        && Objects.equals(misappliedLabels, other.misappliedLabels)
+        && Objects.equals(hiddenLabels, other.hiddenLabels)
         && Objects.equals(definition, other.definition)
         && Objects.equals(externalDefinitions, other.externalDefinitions)
         && Objects.equals(sameAsUris, other.sameAsUris)

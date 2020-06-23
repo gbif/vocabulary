@@ -3,7 +3,11 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-  <changeSet id="1" author="mlopez">
-    <sqlFile path="liquibase/schema.sql" splitStatements="false"/>
+  <changeSet id="3" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+        ALTER TABLE vocabulary_release ADD COLUMN comment text NOT NULL;
+      ]]>
+    </sql>
   </changeSet>
 </databaseChangeLog>

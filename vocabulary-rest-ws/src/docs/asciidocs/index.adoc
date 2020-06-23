@@ -31,8 +31,9 @@ $ curl -X POST {{host}} -H 'Bearer: f5036eda-0da6-4099-9131-863a511e1cd1'
 
 There are basically 2 possible types of client errors:
 
-* 400 Bad Request: returned when the JSON is invalid or the request is not well-formed.
+* 400 Bad Request: returned when the JSON is invalid or the request is not well-formed
 * 422 Unprocessable Entity: returned when the request is syntactically correct but the fields are invalid (required fields not set, duplicated keys, inconsistent keys, etc.)
+* 403 Forbidden: returned when the request is trying to perfom an unsupported operation
 
 == Vocabulary
 
@@ -52,7 +53,13 @@ include::{snippets}/vocabulary-test-doc/restore-vocabulary-test/auto-section.ado
 
 include::{snippets}/vocabulary-test-doc/suggest-vocabulary-test/auto-section.adoc[]
 
-include::{snippets}/vocabulary-test-doc/download-vocabulary-test/auto-section.adoc[]
+include::{snippets}/vocabulary-test-doc/export-vocabulary-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/release-vocabulary-version-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/list-vocabulary-releases-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/get-vocabulary-release-test/auto-section.adoc[]
 
 == Concept
 

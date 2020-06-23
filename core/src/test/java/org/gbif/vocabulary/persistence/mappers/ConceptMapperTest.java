@@ -1,20 +1,23 @@
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.vocabulary.PostgresDBExtension;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.search.ChildrenCountResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
-import java.net.URI;
-import java.util.*;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -28,8 +31,9 @@ import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
+import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.HIDDEN_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -40,17 +44,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>It uses a embedded PostgreSQL provided by {@link PostgreSQLContainer} which is started before
  * the tests run and it's reused by all the tests.
- *
- * <p>All the methods are intended to be run in parallel.
  */
 @ContextConfiguration(initializers = {ConceptMapperTest.ContexInitializer.class})
 public class ConceptMapperTest extends BaseMapperTest<Concept> {
-
-  /**
-   * This is not in the base class because when running tests in parallel it uses the same DB for
-   * all the children.
-   */
-  @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
 
   private static final String DEFAULT_VOCABULARY = "default";
 
@@ -100,9 +96,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept concept2 = createNewEntity();
     concept2.setName("concept2");
     concept2.setParentKey(concept1.getKey());
-    concept2.setMisappliedLabels(
-        Collections.singletonMap(
-            LanguageRegion.ENGLISH, Collections.singletonList("misspelt example")));
+    concept2.setHiddenLabels(Collections.singletonList("misspelt example"));
     conceptMapper.create(concept2);
 
     Concept concept3 = createNewEntity();
@@ -175,33 +169,34 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void findSimilaritiesTest() {
     Concept concept1 = createNewEntity();
     concept1.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.SPANISH, "primero ")));
-    concept1.setMisappliedLabels(
-        Collections.singletonMap(
-            LanguageRegion.SPANISH, Arrays.asList("primeiro", "otro primeiro")));
+    concept1.setHiddenLabels(Arrays.asList("primeiro", "otro primeiro"));
     conceptMapper.create(concept1);
 
-    // check Spanish labels
-    NormalizedValuesParam spanishValues =
+    // check hidden labels
+    NormalizedValuesParam hiddenValues =
         NormalizedValuesParam.from(
-            LanguageRegion.SPANISH.getLocale(),
+            HIDDEN_NODE,
             Collections.singletonList(normalizeLabel("primeiro")));
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(spanishValues), concept1.getVocabularyKey(), null);
+            Collections.singletonList(hiddenValues), concept1.getVocabularyKey(), null);
     assertSimilarity(similarities, concept1);
 
-    // remove misapplied labels and there shouldn't be similarities
+    // remove hidden labels and there shouldn't be similarities
     concept1 = conceptMapper.get(concept1.getKey());
-    concept1.setMisappliedLabels(null);
+    concept1.setHiddenLabels(null);
     conceptMapper.update(concept1);
     assertEquals(
         0,
         conceptMapper
             .findSimilarities(
-                Collections.singletonList(spanishValues), concept1.getVocabularyKey(), null)
+                Collections.singletonList(hiddenValues), concept1.getVocabularyKey(), null)
             .size());
 
-    spanishValues.setValues(Collections.singletonList(normalizeLabel("primero")));
+    NormalizedValuesParam spanishValues =
+        NormalizedValuesParam.from(
+            LanguageRegion.SPANISH.getLocale(),
+            Collections.singletonList(normalizeLabel("Primero")));
     similarities =
         conceptMapper.findSimilarities(
             Collections.singletonList(spanishValues), concept1.getVocabularyKey(), null);
@@ -251,8 +246,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept1.setName("my-concept");
     concept1.setLabel(
         new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "normalization")));
-    concept1.setMisappliedLabels(
-        Collections.singletonMap(LanguageRegion.ENGLISH, Arrays.asList("norm", "another norm")));
+    concept1.setHiddenLabels(Arrays.asList("norm", "another norm"));
     conceptMapper.create(concept1);
 
     // check Spanish labels
@@ -265,10 +259,20 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             Collections.singletonList(englishValues), concept1.getVocabularyKey(), null);
     assertSimilarity(similarities, concept1);
 
-    englishValues.setValues(normalizeLabels(Arrays.asList(" aNotHer  NORM  ", "segundo")));
+    NormalizedValuesParam hiddenValues =
+        NormalizedValuesParam.from(
+            HIDDEN_NODE, normalizeLabels(Arrays.asList(" aNotHer  NORM  ", "segundo")));
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(englishValues), concept1.getVocabularyKey(), null);
+            Collections.singletonList(hiddenValues), concept1.getVocabularyKey(), null);
+    assertSimilarity(similarities, concept1);
+
+    hiddenValues =
+        NormalizedValuesParam.from(
+            ALL_NODE, normalizeLabels(Arrays.asList(" aNotHer  NORM  ", "segundo")));
+    similarities =
+        conceptMapper.findSimilarities(
+            Collections.singletonList(hiddenValues), concept1.getVocabularyKey(), null);
     assertSimilarity(similarities, concept1);
 
     NormalizedValuesParam nameValues =
@@ -287,25 +291,23 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept1.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "l1")));
     concept1.setAlternativeLabels(
         Collections.singletonMap(LanguageRegion.SPANISH, Collections.singletonList("l uno")));
-    concept1.setMisappliedLabels(
-        Collections.singletonMap(LanguageRegion.ENGLISH, Arrays.asList("ll1", "l1l")));
+    concept1.setHiddenLabels(Arrays.asList("ll1", "l1l"));
     conceptMapper.create(concept1);
 
     Concept concept2 = createNewEntity();
     concept2.setName("c2");
     concept2.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "l2")));
-    concept2.setMisappliedLabels(
-        Collections.singletonMap(LanguageRegion.SPANISH, Arrays.asList("ll2", "l2l")));
+    concept2.setHiddenLabels(Arrays.asList("ll2", "l2l"));
     conceptMapper.create(concept2);
 
     // check Spanish labels
     NormalizedValuesParam spanishValues =
         NormalizedValuesParam.from(
-            LanguageRegion.SPANISH.getLocale(), Collections.singletonList(normalizeLabel("ll2")));
+            LanguageRegion.SPANISH.getLocale(), Collections.singletonList(normalizeLabel("l UNo")));
 
     NormalizedValuesParam englishValues =
         NormalizedValuesParam.from(
-            LanguageRegion.ENGLISH.getLocale(), Collections.singletonList(normalizeLabel("l1")));
+            LanguageRegion.ENGLISH.getLocale(), Collections.singletonList(normalizeLabel("l2")));
 
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
@@ -317,6 +319,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         conceptMapper.findSimilarities(
             Arrays.asList(spanishValues, englishValues), concept1.getVocabularyKey(), null);
     assertEquals(1, similarities.size());
+
+    NormalizedValuesParam hiddenValues =
+        NormalizedValuesParam.from(HIDDEN_NODE, Collections.singletonList(normalizeLabel("LL1")));
+    similarities =
+        conceptMapper.findSimilarities(
+            Arrays.asList(englishValues, hiddenValues), concept1.getVocabularyKey(), null);
+    assertEquals(2, similarities.size());
   }
 
   @Test
@@ -510,8 +519,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     entity.setVocabularyKey(vocabularyKeys[0]);
     entity.setName(UUID.randomUUID().toString());
     entity.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Label")));
-    entity.setMisappliedLabels(
-        Collections.singletonMap(LanguageRegion.SPANISH, Arrays.asList("lab,l", "lbel")));
+    entity.setHiddenLabels(Arrays.asList("lab,l", "lbel"));
     entity.setDefinition(
         new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
@@ -527,7 +535,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
    * container.
    *
    * <p>NOTE: this initializer cannot be in the base class because it gets executed only once when
-   * we run several tests at the same time.
+   * we run several tests at the same time and provokes errors.
    */
   static class ContexInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {

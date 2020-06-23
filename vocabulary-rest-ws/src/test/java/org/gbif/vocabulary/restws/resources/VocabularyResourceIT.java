@@ -1,18 +1,16 @@
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -21,19 +19,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * IT for the {@link VocabularyResource}.
- *
- * <p>These tests are intended to run in parallel. This should be taken into account when adding new
- * tests since we're not cleaning the DB after each test and htis can interferred with other tests.
- */
+/** IT for the {@link VocabularyResource}. */
 @ContextConfiguration(initializers = {VocabularyResourceIT.ContexInitializer.class})
 public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
 
@@ -82,7 +77,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
         .post()
         .uri(getBasePath())
         .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromValue(v2))
+        .body(BodyInserters.fromObject(v2))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -102,7 +97,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
   }
 
   @Test
-  public void downloadVocabularyTest() throws IOException {
+  public void exportVocabularyTest() throws IOException {
     // create entity
     Vocabulary v1 = createEntity();
     v1 =
@@ -126,7 +121,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
         .post()
         .uri(getBasePath() + "/" + v1.getName() + "/" + CONCEPTS_PATH)
         .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromValue(c1))
+        .body(BodyInserters.fromObject(c1))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -135,7 +130,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     byte[] bytesResponse =
         webClient
             .get()
-            .uri(getBasePath() + "/" + v1.getName() + "/download")
+            .uri(getBasePath() + "/" + v1.getName() + "/export")
             .exchange()
             .expectStatus()
             .isOk()

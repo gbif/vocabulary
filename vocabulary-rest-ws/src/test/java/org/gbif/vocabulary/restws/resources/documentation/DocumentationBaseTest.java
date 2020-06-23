@@ -1,26 +1,17 @@
 package org.gbif.vocabulary.restws.resources.documentation;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.servlet.Filter;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
-import capital.scalable.restdocs.AutoDocumentation;
-import capital.scalable.restdocs.jackson.JacksonResultHandlers;
-import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +38,16 @@ import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import capital.scalable.restdocs.AutoDocumentation;
+import capital.scalable.restdocs.jackson.JacksonResultHandlers;
+import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import javax.servlet.Filter;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -141,8 +142,7 @@ abstract class DocumentationBaseTest {
     concept.setAlternativeLabels(
         Collections.singletonMap(
             LanguageRegion.ENGLISH, Arrays.asList("Alt label", "Another alt label")));
-    concept.setMisappliedLabels(
-        Collections.singletonMap(LanguageRegion.ENGLISH, Collections.singletonList("Labl")));
+    concept.setHiddenLabels(Collections.singletonList("Labl"));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

@@ -1,6 +1,6 @@
 # Vocabulary
 
-[![Join the chat at https://gitter.im/vocabularyserver/community](https://badges.gitter.im/vocabularyserver/community.svg)](https://gitter.im/vocabularyserver/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
+[![Build Status](https://builds.gbif.org/job/vocabulary/job/master/badge/icon)](https://builds.gbif.org/job/vocabulary/job/master/)
 [![Quality Gate Status](https://sonar.gbif.org/api/project_badges/measure?project=org.gbif.vocabulary%3Avocabulary-parent&metric=alert_status)](https://sonar.gbif.org/dashboard?id=org.gbif.vocabulary%3Avocabulary-parent) 
 [![Coverage](https://sonar.gbif.org/api/project_badges/measure?project=org.gbif.vocabulary%3Avocabulary-parent&metric=coverage)](https://sonar.gbif.org/dashboard?id=org.gbif.vocabulary%3Avocabulary-parent)
 
@@ -19,21 +19,9 @@ To compile the project just run
 mvn clean compile
 ```
 
-## REST WS
+## Modules
 
-### How to run the REST WS
-To run the project in your local machine you have to configure your database in the profile `local` of the [application.properties](vocabulary-rest-ws/src/main/resources/application.yml). The DB scheme can be recreated by using the [Liquibase files](core/src/main/resources/liquibase).
-
-After that, you can run the project by specifying the local profile: 
-
-```
-java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-0.20-SNAPSHOT.jar --spring.config.location=vocabulary-rest-ws/src/main/resources/application.yml --spring.profiles.active=local
-```
-
-### API Documentation
-There is an API documentation available as [HTML files](vocabulary-rest-ws/src/docs/generated-docs). A preview is available [here](https://htmlpreview.github.io/?https://github.com/gbif/vocabulary/blob/master/vocabulary-rest-ws/src/docs/generated-docs/index.html). 
-
-
-## Core module
-Some of the business rules applied in the core module are available as [notes](core/notes.md) along with a brief explanation.
-The DB model is also availabe in a [diagram](core/db_model.png)  
+- [Core](core/README.md): contains the persistence and the service layer
+- [Model](model/README.md): contains all the model classes
+- [Rest-WS](vocabulary-rest-ws/README.md): a REST ws that exposes the public API
+- [Vocabulary-lookup](vocabulary-lookup/README.md): utility library to do lookups in a vocabulary

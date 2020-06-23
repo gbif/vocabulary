@@ -1,16 +1,19 @@
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.vocabulary.PostgresDBExtension;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
-import java.net.URI;
-import java.util.*;
-
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -23,7 +26,6 @@ import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -32,17 +34,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  *
  * <p>It uses a embedded PostgreSQL provided by {@link PostgreSQLContainer} which is started before
  * the tests run and it's reused by all the tests.
- *
- * <p>All the methods are intended to be run in parallel.
  */
 @ContextConfiguration(initializers = {VocabularyMapperTest.ContexInitializer.class})
 public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
-
-  /**
-   * This is not in the base class because when running tests in parallel it uses the same DB for
-   * all the children.
-   */
-  @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
 
   private final VocabularyMapper vocabularyMapper;
 
@@ -255,7 +249,8 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
    * Initializes the Spring Context. Needed to create the datasource on the fly using the postgres
    * container.
    *
-   * <p>NOTE: this initializer cannot be in the base class because it gets executed only once.
+   * <p>NOTE: this initializer cannot be in the base class because it gets executed only once and
+   * provokes errors.
    */
   static class ContexInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {

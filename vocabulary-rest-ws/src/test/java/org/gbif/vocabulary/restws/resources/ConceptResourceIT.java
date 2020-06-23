@@ -1,14 +1,14 @@
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.restws.model.ConceptView;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.restws.model.ConceptView;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -26,15 +26,9 @@ import org.springframework.web.reactive.function.BodyInserters;
 import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * IT for the {@link ConceptResource}.
- *
- * <p>These tests are intended to run in parallel. This should be taken into account when adding new
- * tests since we're not cleaning the DB after each test and this can interferred with other tests.
- */
+/** IT for the {@link ConceptResource}. */
 @ContextConfiguration(initializers = {ConceptResourceIT.ContextInitializer.class})
 public class ConceptResourceIT extends BaseResourceIT<Concept> {
 

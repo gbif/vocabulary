@@ -20,7 +20,6 @@
     <module>model</module>
     <module>vocabulary-rest-ws</module>
     <module>vocabulary-lookup</module>
-    <module>vocabulary-importer</module>
   </modules>
 
   <scm>
@@ -54,15 +53,10 @@
     <postgresql-testcontainers.version>1.10.5</postgresql-testcontainers.version>
     <wiremock.version>2.21.0</wiremock.version>
     <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
-    <okhttp-version>4.3.1</okhttp-version>
-    <retrofit.version>2.7.1</retrofit.version>
-    <cache2k-version>1.2.4.Final</cache2k-version>
-
-    <!-- utils -->
     <javax-validation.version>2.0.1.Final</javax-validation.version>
+    <okhttp-version>4.2.2</okhttp-version>
+    <cache2k-version>1.2.4.Final</cache2k-version>
     <lombok.version>1.18.12</lombok.version>
-    <guava.version>28.2-jre</guava.version>
-    <commons-lang.version>3.10</commons-lang.version>
 
     <!-- maven release -->
     <minimumMavenVersion>3.0</minimumMavenVersion>
@@ -71,8 +65,11 @@
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 
     <!-- gbif -->
-    <gbif-api.version>0.108-jackson2-SNAPSHOT</gbif-api.version>
+    <gbif-api.version>0.113</gbif-api.version>
     <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
+
+    <!-- version limited by gbif-api -->
+    <guava.version>18.0</guava.version>
 
     <!-- ZK -->
     <spring-cloud-zookeeper.version>2.2.0.RELEASE</spring-cloud-zookeeper.version>
@@ -151,16 +148,6 @@
         <artifactId>cache2k-core</artifactId>
         <version>${cache2k-version}</version>
       </dependency>
-      <dependency>
-        <groupId>com.squareup.retrofit2</groupId>
-        <artifactId>retrofit</artifactId>
-        <version>${retrofit.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.squareup.retrofit2</groupId>
-        <artifactId>converter-jackson</artifactId>
-        <version>${retrofit.version}</version>
-      </dependency>
 
       <!-- DB -->
       <dependency>
@@ -189,11 +176,6 @@
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>${lombok.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>${commons-lang.version}</version>
       </dependency>
 
       <!-- logging -->

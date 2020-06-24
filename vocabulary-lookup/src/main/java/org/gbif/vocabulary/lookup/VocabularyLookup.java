@@ -199,6 +199,9 @@ public class VocabularyLookup implements AutoCloseable {
     if (labelsCache != null) {
       labelsCache.close();
     }
+    if (hiddenLabelsCache != null) {
+      hiddenLabelsCache.close();
+    }
   }
 
   private void importVocabulary(InputStream in) {

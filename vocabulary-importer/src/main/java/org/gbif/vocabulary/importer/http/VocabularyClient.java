@@ -19,6 +19,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -85,6 +86,10 @@ public class VocabularyClient {
     return syncCall(api.createConcept(vocabularyName, concept));
   }
 
+  public Concept updateConcept(String vocabularyName, String conceptName, Concept concept) {
+    return syncCall(api.updateConcept(vocabularyName, conceptName, concept));
+  }
+
   private interface API {
     @GET("vocabularies")
     Call<PagingResponse<Vocabulary>> listVocabularies(
@@ -96,5 +101,11 @@ public class VocabularyClient {
     @POST("vocabularies/{vocabularyName}/concepts")
     Call<Concept> createConcept(
         @Path("vocabularyName") String vocabularyName, @Body Concept concept);
+
+    @PUT("vocabularies/{vocabularyName}/concepts/{conceptName}")
+    Call<Concept> updateConcept(
+        @Path("vocabularyName") String vocabularyName,
+        @Path("conceptName") String conceptName,
+        @Body Concept concept);
   }
 }

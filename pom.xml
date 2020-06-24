@@ -20,6 +20,7 @@
     <module>model</module>
     <module>vocabulary-rest-ws</module>
     <module>vocabulary-lookup</module>
+    <module>vocabulary-importer</module>
   </modules>
 
   <scm>

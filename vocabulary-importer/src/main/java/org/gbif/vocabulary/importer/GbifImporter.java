@@ -1,15 +1,12 @@
 package org.gbif.vocabulary.importer;
 
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.gbif.vocabulary.importer.http.VocabularyClient;
@@ -19,7 +16,6 @@ import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
@@ -60,93 +56,112 @@ public class GbifImporter {
   }
 
   public static void main(String[] args) throws IOException {
+    //    VocabularyClient client =
+    //        VocabularyClient.create("http://localhost:8080/", "", "");
+
     VocabularyClient client =
-        VocabularyClient.create("http://localhost:8080/", "****", "****");
+        VocabularyClient.create("https://api.gbif-dev.org/v1/", "", "");
 
-//    VocabularyClient client =
-//        VocabularyClient.create("https://api.gbif-dev.org/v1/", "****", "****");
+    // create vocabulary
+    final Path vocabPath = Paths.get("/Users/rgz522/dev/vocabs/lifestage-vocabulary-export.csv");
+    Vocabulary vocab = new Vocabulary();
+    Files.lines(vocabPath)
+        .skip(1)
+        .limit(1) // we skip the column names
+        .filter(l -> !Strings.isNullOrEmpty(l))
+        .forEach(
+            l -> {
+              String[] values = l.split(";");
 
-    final Path path = Paths.get("/Users/rgz522/dev/vocabs/typeStatus.csv");
-    String vocab = path.getFileName().toString().replace(".csv", "");
-    String vocabularyName = StringUtils.capitalize(vocab);
-    Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName(vocabularyName);
+              vocab.setName(values[0]);
+              vocab.getLabel().put(LanguageRegion.ENGLISH, values[1]);
+              vocab.getDefinition().put(LanguageRegion.ENGLISH, values[2]);
+            });
 
-    Map<String, Concept> conceptMap = new HashMap<>();
-    PORTAL_LANGS.forEach(
-        (portalLang, langRegion) -> {
-          final String vocabsTranslationsUrl = String.format(VOCABS_TRANSLATIONS_URL, portalLang);
-          JsonNode vocabsTranslations = null;
-          try {
-            vocabsTranslations =
-                OBJECT_MAPPER.readTree(new URL(vocabsTranslationsUrl)).path("filterNames");
-          } catch (IOException e) {
-            log.error("Couldn't load translations from {}", vocabsTranslations);
-            return;
-          }
+    // create vocabulary in ws
+    Vocabulary vocabulary = client.createVocabulary(vocab);
 
-          vocabulary.getLabel().put(langRegion, vocabsTranslations.path(vocab).asText());
-
-          final String conceptsTranslationsUrl =
-              String.format(CONCEPT_TRANSLATIONS_URL, portalLang, vocab);
-          JsonNode conceptTranslations = null;
-          try {
-            conceptTranslations = OBJECT_MAPPER.readTree(new URL(conceptsTranslationsUrl));
-          } catch (IOException e) {
-            log.error("Couldn't load translations from {}", conceptsTranslationsUrl);
-            return;
-          }
-
-          Iterator<Entry<String, JsonNode>> iterator =
-              conceptTranslations.iterator().next().fields();
-          while (iterator.hasNext()) {
-            Entry<String, JsonNode> node = iterator.next();
-            Concept concept = conceptMap.get(node.getKey());
-
-            if (concept == null) {
-              concept = new Concept();
-              concept.setName(toPascalCase(node.getValue().asText()));
-              conceptMap.put(node.getKey(), concept);
-            }
-
-            concept.getLabel().put(langRegion, node.getValue().asText());
-          }
-        });
-
-    Files.lines(path)
+    final Path conceptsPath = Paths.get("/Users/rgz522/dev/vocabs/lifestage-concepts-export.csv");
+    Map<String, Concept> conceptsMap = new HashMap<>();
+    // we first create the concepts
+    Files.lines(conceptsPath)
         .skip(1) // we skip the column names
         .filter(l -> !Strings.isNullOrEmpty(l))
         .forEach(
             l -> {
               String[] values = l.split(";");
-              String conceptName = values[0];
+              String conceptName = values[0].trim();
 
-              Concept concept = conceptMap.get(conceptName);
-              if (concept == null) {
-                concept = new Concept();
-                concept.setName(toPascalCase(conceptName));
-                conceptMap.put(conceptName, concept);
+              if (conceptsMap.containsKey(conceptName)) {
+                throw new IllegalArgumentException("Concept duplicated: " + conceptName);
               }
 
-              // add label
+              Concept concept = new Concept();
+              concept.setName(conceptName);
+              conceptsMap.put(conceptName, concept);
+
+              // parent
               if (!Strings.isNullOrEmpty(values[1])) {
+                Concept parent = conceptsMap.get(values[1].trim());
+                concept.setParentKey(parent.getKey());
+              }
+
+              // add EN labels
+              if (!Strings.isNullOrEmpty(values[2])) {
+                concept.getLabel().put(LanguageRegion.ENGLISH, values[2].trim());
+              }
+
+              // add EN alternative labels
+              if (!Strings.isNullOrEmpty(values[3])) {
                 concept
                     .getAlternativeLabels()
                     .computeIfAbsent(LanguageRegion.ENGLISH, k -> new ArrayList<>())
-                    .add(toTitleCase(values[1]));
+                    .add(values[3].trim());
               }
+
+              // add ES labels
+              if (!Strings.isNullOrEmpty(values[4])) {
+                concept.getLabel().put(LanguageRegion.SPANISH, values[4].trim());
+              }
+
+              // add ES alternative labels
+              if (!Strings.isNullOrEmpty(values[5])) {
+                concept
+                    .getAlternativeLabels()
+                    .computeIfAbsent(LanguageRegion.SPANISH, k -> new ArrayList<>())
+                    .add(values[5].trim());
+              }
+
+              // add EN definitions
+              if (!Strings.isNullOrEmpty(values[6])) {
+                concept.getDefinition().put(LanguageRegion.ENGLISH, values[6].trim());
+              }
+
+              Concept created = client.createConcept(vocabulary.getName(), concept);
+              conceptsMap.put(created.getName(), created);
             });
 
-    // create in WS
-    client.createVocabulary(vocabulary);
-    conceptMap
-        .values()
+    // add hidden labels
+    final Path misappliedsPath =
+        Paths.get("/Users/rgz522/dev/vocabs/lifestage-misapplied-export.csv");
+    Files.lines(misappliedsPath)
+        .skip(1) // we skip the column names
+        .filter(l -> !Strings.isNullOrEmpty(l))
         .forEach(
-            c -> {
+            l -> {
+              String[] values = l.split(";");
+              String hiddenLabel = values[1].trim();
+              //              log.info("Hidden label: {}", hiddenLabel);
+              Concept concept = conceptsMap.get(values[0].trim());
+              concept.getHiddenLabels().add(hiddenLabel);
               try {
-                client.createConcept(vocabularyName, c);
+                Concept updated =
+                    client.updateConcept(vocabulary.getName(), concept.getName(), concept);
+                conceptsMap.put(concept.getName(), updated);
               } catch (Exception ex) {
-                log.error("Couldn't create concept: {}", c, ex);
+                concept.getHiddenLabels().remove(hiddenLabel);
+                log.error(
+                    "Couldn't add label: {} in concept: {}", hiddenLabel, concept.getName(), ex);
               }
             });
   }

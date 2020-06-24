@@ -56,6 +56,7 @@
     <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
     <javax-validation.version>2.0.1.Final</javax-validation.version>
     <okhttp-version>4.2.2</okhttp-version>
+    <retrofit.version>2.7.1</retrofit.version>
     <cache2k-version>1.2.4.Final</cache2k-version>
     <lombok.version>1.18.12</lombok.version>
 
@@ -148,6 +149,16 @@
         <groupId>org.cache2k</groupId>
         <artifactId>cache2k-core</artifactId>
         <version>${cache2k-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.squareup.retrofit2</groupId>
+        <artifactId>retrofit</artifactId>
+        <version>${retrofit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.squareup.retrofit2</groupId>
+        <artifactId>converter-jackson</artifactId>
+        <version>${retrofit.version}</version>
       </dependency>
 
       <!-- DB -->

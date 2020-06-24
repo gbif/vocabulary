@@ -20,15 +20,12 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.base.Strings;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Utility class to download the latest version of a Vocabulary. It reuses the same http client for
@@ -80,8 +77,12 @@ class VocabularyDownloader {
    * @return {@link InputStream} with the vocabulary downloaded
    */
   static InputStream downloadLatestVocabularyVersion(String apiUrl, String vocabularyName) {
-    checkArgument(!Strings.isNullOrEmpty(apiUrl));
-    checkArgument(!Strings.isNullOrEmpty(vocabularyName));
+    if (apiUrl == null || apiUrl.isEmpty()) {
+      throw new IllegalArgumentException("API URL is required");
+    }
+    if (vocabularyName == null || vocabularyName.isEmpty()) {
+      throw new IllegalArgumentException("Vocabulary name is required");
+    }
 
     if (apiUrl.charAt(apiUrl.length() - 1) != SLASH) {
       apiUrl += SLASH;

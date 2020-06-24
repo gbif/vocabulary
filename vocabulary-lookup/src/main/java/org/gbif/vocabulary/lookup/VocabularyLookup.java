@@ -2,6 +2,7 @@ package org.gbif.vocabulary.lookup;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,14 +27,10 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /** Class that allows to load a vocabulary export in memory to do fast lookups by concept labels. */
 public class VocabularyLookup implements AutoCloseable {
@@ -109,12 +106,15 @@ public class VocabularyLookup implements AutoCloseable {
    * @return the {@link Concept} found. Empty {@link Optional} if there was no match.
    */
   public Optional<Concept> lookup(String value, LanguageRegion contextLang) {
-    checkArgument(!Strings.isNullOrEmpty(value), "A value to lookup for is required");
+    if (value == null || value.isEmpty()) {
+      throw new IllegalArgumentException("A value to lookup for is required");
+    }
 
     // base normalization
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
 
-    List<UnaryOperator<String>> transformations = ImmutableList.of(UnaryOperator.identity());
+    List<UnaryOperator<String>> transformations =
+        Collections.singletonList(UnaryOperator.identity());
 
     for (UnaryOperator<String> t : transformations) {
       String transformedValue = t.apply(normalizedValue);

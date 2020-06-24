@@ -16,7 +16,6 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.export.ExportMetadata;
 import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.model.normalizers.StringNormalizer;
 
 import org.cache2k.Cache;
 import org.cache2k.Cache2kBuilder;
@@ -115,9 +114,7 @@ public class VocabularyLookup implements AutoCloseable {
     // base normalization
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
 
-    List<UnaryOperator<String>> transformations =
-        ImmutableList.of(
-            UnaryOperator.identity(), StringNormalizer::stripNonAlphanumericCharacters);
+    List<UnaryOperator<String>> transformations = ImmutableList.of(UnaryOperator.identity());
 
     for (UnaryOperator<String> t : transformations) {
       String transformedValue = t.apply(normalizedValue);
@@ -162,7 +159,6 @@ public class VocabularyLookup implements AutoCloseable {
         LOG.info("value {} matched with concept {} by hidden label", value, hiddenMatch);
         return Optional.of(hiddenMatch);
       }
-
     }
 
     LOG.info("Couldn't find any match for {}", value);
@@ -298,11 +294,13 @@ public class VocabularyLookup implements AutoCloseable {
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(hiddenLabel));
     Concept existing = hiddenLabelsCache.peekAndPut(normalizedValue, concept);
 
-    if (existing != null) {
+    if (existing != null && !existing.getName().equals(concept.getName())) {
       throw new IllegalArgumentException(
-          "Incorrect vocabulary: concept hidden labels have to be unique. The concept hidden label "
+          "Incorrect vocabulary: different concepts cannot have the same hidden label. The concept hidden label: "
+              + hiddenLabel
+              + " in the concept: "
               + concept.toString()
-              + " has the same value as "
+              + " is also present in: "
               + existing.toString());
     }
   }

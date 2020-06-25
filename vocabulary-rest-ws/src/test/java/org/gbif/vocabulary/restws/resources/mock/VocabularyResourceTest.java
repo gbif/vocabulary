@@ -211,7 +211,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
     release.setExportUrl("/test.zip");
     release.setVocabularyKey(vocabulary.getKey());
     release.setVersion("1.0");
-    when(exportService.releaseVocabulary(anyString(), anyString(), any(), anyString(), anyString()))
+    when(exportService.releaseVocabulary(anyString(), anyString(), anyString(), anyString()))
         .thenReturn(release);
 
     // do the call

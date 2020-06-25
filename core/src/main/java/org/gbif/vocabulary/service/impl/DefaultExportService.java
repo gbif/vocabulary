@@ -43,9 +43,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Credentials;
@@ -97,6 +97,11 @@ public class DefaultExportService implements ExportService {
 
   @Override
   public Path exportVocabulary(@NotBlank String vocabularyName) {
+    return exportVocabulary(vocabularyName, null);
+  }
+
+  @Override
+  public Path exportVocabulary(@NotBlank String vocabularyName, String version) {
     Vocabulary vocabulary =
         Optional.ofNullable(vocabularyService.getByName(vocabularyName))
             .orElseThrow(
@@ -120,6 +125,9 @@ public class DefaultExportService implements ExportService {
       // write metadata
       ExportMetadata metadata = new ExportMetadata();
       metadata.setCreatedDate(LocalDateTime.now());
+      if (!Strings.isNullOrEmpty(version)) {
+        metadata.setVersion(version);
+      }
       jsonGen.writeObjectField(VocabularyExport.METADATA_PROP, metadata);
 
       // write vocabulary
@@ -145,7 +153,6 @@ public class DefaultExportService implements ExportService {
   public VocabularyRelease releaseVocabulary(
       @NotBlank String vocabularyName,
       @NotBlank String version,
-      @NotNull Path vocabularyExport,
       @NotBlank String user,
       @NotBlank String comment) {
 
@@ -162,6 +169,9 @@ public class DefaultExportService implements ExportService {
 
     // check that the version is greater than the latest
     checkVersionNumber(version, vocabulary.getKey());
+
+    // export the vocabulary first
+    Path vocabularyExport = exportVocabulary(vocabularyName, version);
 
     Path zipFile = Files.createFile(Paths.get(vocabularyName + "-" + version + ".zip"));
     toZipFile(vocabularyExport, zipFile);

@@ -197,7 +197,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     vr1.setVocabularyKey(vocabulary.getKey());
     vr1.setVersion("1.0");
 
-    when(exportService.releaseVocabulary(anyString(), anyString(), any(), anyString(), anyString()))
+    when(exportService.releaseVocabulary(anyString(), anyString(), anyString(), anyString()))
         .thenReturn(vr1);
 
     mockMvc

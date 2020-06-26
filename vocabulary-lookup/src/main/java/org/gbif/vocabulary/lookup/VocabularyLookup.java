@@ -2,6 +2,7 @@ package org.gbif.vocabulary.lookup;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -33,7 +34,7 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeNa
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
 
 /** Class that allows to load a vocabulary export in memory to do fast lookups by concept labels. */
-public class VocabularyLookup implements AutoCloseable {
+public class VocabularyLookup implements AutoCloseable, Serializable {
 
   private static final Logger LOG = LoggerFactory.getLogger(VocabularyLookup.class);
   private static final ObjectMapper OBJECT_MAPPER =

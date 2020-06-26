@@ -54,6 +54,7 @@
         <artifactId>maven-shade-plugin</artifactId>
         <configuration>
           <createDependencyReducedPom>true</createDependencyReducedPom>
+          <shadedArtifactAttached>true</shadedArtifactAttached>
           <shadedClassifierName>shaded</shadedClassifierName>
           <filters>
             <filter>

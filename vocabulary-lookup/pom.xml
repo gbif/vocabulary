@@ -54,6 +54,7 @@
         <artifactId>maven-shade-plugin</artifactId>
         <configuration>
           <createDependencyReducedPom>true</createDependencyReducedPom>
+          <shadedClassifierName>shaded</shadedClassifierName>
           <filters>
             <filter>
               <artifact>*:*</artifact>
@@ -74,7 +75,6 @@
             <configuration>
               <createDependencyReducedPom>true</createDependencyReducedPom>
               <relocations>
-                <!-- Transient from core: conflicts with Beam on Spark -->
                 <relocation>
                   <pattern>okio</pattern>
                   <shadedPattern>vocab.okio</shadedPattern>

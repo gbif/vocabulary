@@ -54,8 +54,8 @@
         <artifactId>maven-shade-plugin</artifactId>
         <configuration>
           <createDependencyReducedPom>true</createDependencyReducedPom>
-          <shadedArtifactAttached>true</shadedArtifactAttached>
-          <shadedClassifierName>shaded</shadedClassifierName>
+<!--          <shadedArtifactAttached>true</shadedArtifactAttached>-->
+<!--          <shadedClassifierName>shaded</shadedClassifierName>-->
           <filters>
             <filter>
               <artifact>*:*</artifact>
@@ -74,6 +74,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <useBaseVersion>true</useBaseVersion>
               <createDependencyReducedPom>true</createDependencyReducedPom>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">

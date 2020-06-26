@@ -73,8 +73,8 @@
             </goals>
             <configuration>
               <createDependencyReducedPom>true</createDependencyReducedPom>
-              <shadedArtifactAttached>true</shadedArtifactAttached>
-              <shadedClassifierName>shaded</shadedClassifierName>
+<!--              <shadedArtifactAttached>true</shadedArtifactAttached>-->
+<!--              <shadedClassifierName>shaded</shadedClassifierName>-->
               <relocations>
                 <!-- Transient from core: conflicts with Beam on Spark -->
                 <relocation>

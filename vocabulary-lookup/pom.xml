@@ -74,6 +74,9 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>uber</shadedClassifierName>
+              <finalName>${artifactId}-${version}-shaded</finalName>
               <useBaseVersion>true</useBaseVersion>
               <createDependencyReducedPom>true</createDependencyReducedPom>
               <transformers>

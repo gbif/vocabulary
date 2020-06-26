@@ -108,7 +108,7 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
    */
   public Optional<Concept> lookup(String value, LanguageRegion contextLang) {
     if (value == null || value.isEmpty()) {
-      throw new IllegalArgumentException("A value to lookup for is required");
+      return Optional.empty();
     }
 
     // base normalization

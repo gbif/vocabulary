@@ -15,10 +15,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.gbif</groupId>
-      <artifactId>gbif-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
     </dependency>

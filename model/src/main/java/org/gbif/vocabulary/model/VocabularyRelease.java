@@ -3,7 +3,7 @@ package org.gbif.vocabulary.model;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import org.gbif.api.model.registry.LenientEquals;
+import org.gbif.vocabulary.model.utils.LenientEquals;
 
 import javax.validation.constraints.NotBlank;
 import lombok.Data;

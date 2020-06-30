@@ -15,16 +15,6 @@
     <dependency>
       <groupId>org.gbif.vocabulary</groupId>
       <artifactId>model</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.locationtech.spatial4j</groupId>
-          <artifactId>spatial4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.locationtech.jts</groupId>
-          <artifactId>jts-core</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>

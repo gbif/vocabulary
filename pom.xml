@@ -12,7 +12,7 @@
   <groupId>org.gbif.vocabulary</groupId>
   <artifactId>vocabulary-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.23</version>
+  <version>0.24-SNAPSHOT</version>
 
   <modules>
     <module>core</module>

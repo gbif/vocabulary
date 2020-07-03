@@ -11,4 +11,5 @@ import lombok.Setter;
 @Setter
 public class ExportMetadata implements Serializable {
   private LocalDateTime createdDate;
+  private String version;
 }

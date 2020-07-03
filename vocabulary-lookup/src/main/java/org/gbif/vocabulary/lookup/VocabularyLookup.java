@@ -2,6 +2,8 @@ package org.gbif.vocabulary.lookup;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +18,6 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.export.ExportMetadata;
 import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.model.normalizers.StringNormalizer;
 
 import org.cache2k.Cache;
 import org.cache2k.Cache2kBuilder;
@@ -27,17 +28,13 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 /** Class that allows to load a vocabulary export in memory to do fast lookups by concept labels. */
-public class VocabularyLookup implements AutoCloseable {
+public class VocabularyLookup implements AutoCloseable, Serializable {
 
   private static final Logger LOG = LoggerFactory.getLogger(VocabularyLookup.class);
   private static final ObjectMapper OBJECT_MAPPER =
@@ -110,14 +107,15 @@ public class VocabularyLookup implements AutoCloseable {
    * @return the {@link Concept} found. Empty {@link Optional} if there was no match.
    */
   public Optional<Concept> lookup(String value, LanguageRegion contextLang) {
-    checkArgument(!Strings.isNullOrEmpty(value), "A value to lookup for is required");
+    if (value == null || value.isEmpty()) {
+      return Optional.empty();
+    }
 
     // base normalization
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
 
     List<UnaryOperator<String>> transformations =
-        ImmutableList.of(
-            UnaryOperator.identity(), StringNormalizer::stripNonAlphanumericCharacters);
+        Collections.singletonList(UnaryOperator.identity());
 
     for (UnaryOperator<String> t : transformations) {
       String transformedValue = t.apply(normalizedValue);
@@ -162,7 +160,6 @@ public class VocabularyLookup implements AutoCloseable {
         LOG.info("value {} matched with concept {} by hidden label", value, hiddenMatch);
         return Optional.of(hiddenMatch);
       }
-
     }
 
     LOG.info("Couldn't find any match for {}", value);
@@ -196,12 +193,15 @@ public class VocabularyLookup implements AutoCloseable {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     if (namesCache != null) {
       namesCache.close();
     }
     if (labelsCache != null) {
       labelsCache.close();
+    }
+    if (hiddenLabelsCache != null) {
+      hiddenLabelsCache.close();
     }
   }
 
@@ -298,11 +298,13 @@ public class VocabularyLookup implements AutoCloseable {
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(hiddenLabel));
     Concept existing = hiddenLabelsCache.peekAndPut(normalizedValue, concept);
 
-    if (existing != null) {
+    if (existing != null && !existing.getName().equals(concept.getName())) {
       throw new IllegalArgumentException(
-          "Incorrect vocabulary: concept hidden labels have to be unique. The concept hidden label "
+          "Incorrect vocabulary: different concepts cannot have the same hidden label. The concept hidden label: "
+              + hiddenLabel
+              + " in the concept: "
               + concept.toString()
-              + " has the same value as "
+              + " is also present in: "
               + existing.toString());
     }
   }

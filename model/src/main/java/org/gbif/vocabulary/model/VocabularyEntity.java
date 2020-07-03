@@ -1,14 +1,14 @@
 package org.gbif.vocabulary.model;
 
-import org.gbif.api.model.registry.PostPersist;
-import org.gbif.api.model.registry.PrePersist;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
+
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.utils.PostPersist;
+import org.gbif.vocabulary.model.utils.PrePersist;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
@@ -17,7 +17,6 @@ import javax.validation.constraints.Null;
 public interface VocabularyEntity extends Auditable, Deprecable, Serializable {
 
   /** Unique identifier for persistence. */
-  @Nullable
   @Null(groups = {PrePersist.class})
   @NotNull(groups = {PostPersist.class})
   Long getKey();

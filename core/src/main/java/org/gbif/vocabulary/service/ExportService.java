@@ -8,7 +8,6 @@ import org.gbif.vocabulary.model.VocabularyRelease;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /** Service to create exports of the vocabularies. */
 public interface ExportService {
@@ -23,11 +22,20 @@ public interface ExportService {
   Path exportVocabulary(@NotBlank String vocabularyName);
 
   /**
+   * Exports a vocabulary with all its concepts for an specific version.
+   *
+   * @param vocabularyName name of the vocabulary to import
+   * @param version version to set in the metadata
+   * @return path of the file that contains the {@link
+   *     org.gbif.vocabulary.model.export.VocabularyExport} serialized in json
+   */
+  Path exportVocabulary(@NotBlank String vocabularyName, String version);
+
+  /**
    * Releases a vocabulary for an specific version.
    *
    * @param vocabularyName name of the vocabulary to release
    * @param version version to release
-   * @param vocabularyExport export file that contains the vocabulary
    * @param user user that created the release
    * @param comment comment of the release
    * @return the created {@link VocabularyRelease}
@@ -35,7 +43,6 @@ public interface ExportService {
   VocabularyRelease releaseVocabulary(
       @NotBlank String vocabularyName,
       @NotBlank String version,
-      @NotNull Path vocabularyExport,
       @NotBlank String user,
       @NotBlank String comment);
 

@@ -1,8 +1,8 @@
 package org.gbif.vocabulary.model;
 
-import org.gbif.api.model.registry.LenientEquals;
-
 import java.util.Objects;
+
+import org.gbif.vocabulary.model.utils.LenientEquals;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

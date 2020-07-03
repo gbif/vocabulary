@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.model.registry.LenientEquals;
+import org.gbif.vocabulary.model.utils.LenientEquals;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.enums.LanguageRegion;

@@ -81,8 +81,7 @@ public class VocabularyLookupTest {
     assertEquals("January", concept.get().getName());
 
     concept = vocabulary.lookup("eneiro.");
-    assertTrue(concept.isPresent());
-    assertEquals("January", concept.get().getName());
+    assertFalse(concept.isPresent());
   }
 
   @Test

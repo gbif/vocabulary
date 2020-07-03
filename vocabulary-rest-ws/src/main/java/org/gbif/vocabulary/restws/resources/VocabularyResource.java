@@ -144,18 +144,11 @@ public class VocabularyResource {
       @RequestBody VocabularyReleaseParams params,
       HttpServletRequest httpServletRequest) {
 
-    // export the vocabulary first
-    Path vocabularyExport = exportService.exportVocabulary(vocabularyName);
-
-    // release it and return
+    // release the vocabulary and return
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     VocabularyRelease release =
         exportService.releaseVocabulary(
-            vocabularyName,
-            params.getVersion(),
-            vocabularyExport,
-            authentication.getName(),
-            params.getComment());
+            vocabularyName, params.getVersion(), authentication.getName(), params.getComment());
 
     return ResponseEntity.created(
             URI.create(httpServletRequest.getRequestURL() + "/" + release.getVersion()))

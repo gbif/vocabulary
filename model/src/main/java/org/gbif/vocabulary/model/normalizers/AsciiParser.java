@@ -1,6 +1,5 @@
 package org.gbif.vocabulary.model.normalizers;
 
-import com.google.common.base.Strings;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -56,7 +55,7 @@ import lombok.NoArgsConstructor;
 final class AsciiParser {
 
   static String parse(String input) {
-    if (Strings.isNullOrEmpty(input)) {
+    if (input == null || input.isEmpty()) {
       return input;
     } else {
       StringBuilder sb = new StringBuilder();

@@ -2,7 +2,6 @@ package org.gbif.vocabulary.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -105,6 +104,6 @@ public class ExportServiceTest extends MockServiceBaseTest {
     // releases should be disabled in tests
     Assertions.assertThrows(
         UnsupportedOperationException.class,
-        () -> exportService.releaseVocabulary("test", "1.0", Paths.get("test"), "user", "comment"));
+        () -> exportService.releaseVocabulary("test", "1.0", "user", "comment"));
   }
 }

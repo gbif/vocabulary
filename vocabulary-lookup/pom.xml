@@ -3,12 +3,12 @@
   <parent>
     <artifactId>vocabulary-parent</artifactId>
     <groupId>org.gbif.vocabulary</groupId>
-    <version>0.23-SNAPSHOT</version>
+    <version>0.23</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>vocabulary-lookup</artifactId>
-  <version>0.23-SNAPSHOT</version>
+  <version>0.23</version>
 
   <dependencies>
     <dependency>

@@ -20,7 +20,11 @@ import java.io.IOException;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.KeyDeserializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -446,6 +450,22 @@ public enum LanguageRegion {
             "Unable to deserialize language from provided value (hint: are you using the locale?): "
                 + key);
       }
+    }
+  }
+
+  /** Serializes a {@link LanguageRegion} by writing all its fields. */
+  public static class LanguageRegionAllFieldsSerializer extends JsonSerializer<LanguageRegion> {
+
+    @Override
+    public void serialize(LanguageRegion value, JsonGenerator gen, SerializerProvider serializers)
+        throws IOException {
+      gen.writeStartObject();
+      gen.writeStringField("locale", value.getLocale());
+      gen.writeStringField("iso2LetterCode", value.getIso2LetterCode());
+      gen.writeStringField("iso3LetterCode", value.getIso3LetterCode());
+      gen.writeStringField("name", value.getName());
+
+      gen.writeEndObject();
     }
   }
 }

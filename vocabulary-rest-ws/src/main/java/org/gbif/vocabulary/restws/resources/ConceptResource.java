@@ -34,7 +34,6 @@ public class ConceptResource {
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
 
-  @Autowired
   ConceptResource(ConceptService conceptService, VocabularyService vocabularyService) {
     this.conceptService = conceptService;
     this.vocabularyService = vocabularyService;

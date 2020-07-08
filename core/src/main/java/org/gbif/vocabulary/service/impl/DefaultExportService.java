@@ -1,21 +1,15 @@
 package org.gbif.vocabulary.service.impl;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
@@ -24,13 +18,14 @@ import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.export.ExportMetadata;
+import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
-import org.gbif.vocabulary.service.config.ExportConfig;
+import org.gbif.vocabulary.service.export.ReleasePersister;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,12 +43,6 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Credentials;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 /** Default implementation for {@link ExportService}. */
 @Service
@@ -69,30 +58,21 @@ public class DefaultExportService implements ExportService {
   private static final Pattern VERSION_PATTERN =
       Pattern.compile("([0-9]+\\.[0-9]+\\.[0-9]+)([-].*)*?");
 
-  // http client
-  private static final long DEFAULT_TIMEOUT_CLIENT = 60; // timeout in seconds
-  private static final OkHttpClient HTTP_CLIENT =
-      new OkHttpClient.Builder()
-          .connectTimeout(DEFAULT_TIMEOUT_CLIENT, TimeUnit.SECONDS)
-          .readTimeout(DEFAULT_TIMEOUT_CLIENT, TimeUnit.SECONDS)
-          .build();
-  private static final String REPOSITORY_PATH_TEMPLATE = "/org/gbif/vocabulary/export/%s/%s/%s";
-
   private final VocabularyService vocabularyService;
   private final ConceptService conceptService;
   private final VocabularyReleaseMapper vocabularyReleaseMapper;
-  private final ExportConfig exportConfig;
+  private final ReleasePersister releasePersister;
 
   @Autowired
   public DefaultExportService(
       VocabularyService vocabularyService,
       ConceptService conceptService,
       VocabularyReleaseMapper vocabularyReleaseMapper,
-      ExportConfig exportConfig) {
+      ReleasePersister releasePersister) {
     this.vocabularyService = vocabularyService;
     this.conceptService = conceptService;
     this.vocabularyReleaseMapper = vocabularyReleaseMapper;
-    this.exportConfig = exportConfig;
+    this.releasePersister = releasePersister;
   }
 
   @Override
@@ -150,68 +130,32 @@ public class DefaultExportService implements ExportService {
 
   @Override
   @SneakyThrows
-  public VocabularyRelease releaseVocabulary(
-      @NotBlank String vocabularyName,
-      @NotBlank String version,
-      @NotBlank String user,
-      @NotBlank String comment) {
+  public VocabularyRelease releaseVocabulary(ExportParams exportParams) {
+    checkVersionFormat(exportParams.getVersion());
 
-    if (!exportConfig.isReleaseEnabled()) {
-      throw new UnsupportedOperationException("Vocabulary releases are not enabled");
-    }
-
-    checkVersionFormat(version);
-
-    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    Vocabulary vocabulary = vocabularyService.getByName(exportParams.getVocabularyName());
     if (vocabulary == null) {
-      throw new IllegalArgumentException("vocabulary not found: " + vocabularyName);
+      throw new IllegalArgumentException(
+          "vocabulary not found: " + exportParams.getVocabularyName());
     }
 
     // check that the version is greater than the latest
-    checkVersionNumber(version, vocabulary.getKey());
+    checkVersionNumber(exportParams.getVersion(), vocabulary.getKey());
 
     // export the vocabulary first
-    Path vocabularyExport = exportVocabulary(vocabularyName, version);
+    Path vocabularyExport =
+        exportVocabulary(exportParams.getVocabularyName(), exportParams.getVersion());
 
-    Path zipFile = Files.createFile(Paths.get(vocabularyName + "-" + version + ".zip"));
-    toZipFile(vocabularyExport, zipFile);
-
-    String repositoryUrl =
-        exportConfig.getDeployRepository()
-            + String.format(
-                REPOSITORY_PATH_TEMPLATE, vocabularyName, version, zipFile.toFile().getName());
-
-    // upload it to nexus
-    RequestBody body = RequestBody.create(zipFile.toFile(), MediaType.parse("multipart/form-data"));
-    Request request =
-        new Request.Builder()
-            .url(repositoryUrl)
-            .method("PUT", body)
-            .addHeader("enctype", "multipart/form-data")
-            .addHeader("Content-Type", "multipart/form-data")
-            .addHeader(
-                "Authorization",
-                Credentials.basic(exportConfig.getDeployUser(), exportConfig.getDeployPassword()))
-            .build();
-
-    Response response = HTTP_CLIENT.newCall(request).execute();
-
-    boolean deleted = zipFile.toFile().delete();
-    if (!deleted) {
-      log.warn("Couldn't delete export file: {}", zipFile.getFileName().toString());
-    }
-
-    if (!response.isSuccessful()) {
-      throw new IllegalStateException("Couldn't upload to nexus: " + repositoryUrl);
-    }
+    // upload to nexus
+    String repositoryUrl = releasePersister.uploadToNexus(exportParams, vocabularyExport);
 
     // we store the release in the DB
     VocabularyRelease release = new VocabularyRelease();
-    release.setVersion(version);
-    release.setCreatedBy(user);
+    release.setVersion(exportParams.getVersion());
+    release.setCreatedBy(exportParams.getUser());
     release.setExportUrl(repositoryUrl);
     release.setVocabularyKey(vocabulary.getKey());
-    release.setComment(comment);
+    release.setComment(exportParams.getComment());
     vocabularyReleaseMapper.create(release);
 
     return vocabularyReleaseMapper.get(release.getKey());
@@ -277,21 +221,6 @@ public class DefaultExportService implements ExportService {
         throw new IllegalArgumentException(
             "Version has to be greater than the latest version for this vocabulary: "
                 + latest.getVersion());
-      }
-    }
-  }
-
-  @SneakyThrows
-  static void toZipFile(Path fileToZip, Path targetFile) {
-    try (FileOutputStream fos = new FileOutputStream(targetFile.toFile().getName());
-        ZipOutputStream zipOut = new ZipOutputStream(fos);
-        FileInputStream fis = new FileInputStream(fileToZip.toFile())) {
-      ZipEntry zipEntry = new ZipEntry(fileToZip.toFile().getName());
-      zipOut.putNextEntry(zipEntry);
-      byte[] bytes = new byte[1024];
-      int length;
-      while ((length = fis.read(bytes)) >= 0) {
-        zipOut.write(bytes, 0, length);
       }
     }
   }

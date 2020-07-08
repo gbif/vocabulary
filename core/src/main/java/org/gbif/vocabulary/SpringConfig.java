@@ -3,16 +3,13 @@ package org.gbif.vocabulary;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.mybatis.type.StringArrayTypeHandler;
 import org.gbif.mybatis.type.UriArrayTypeHandler;
-import org.gbif.vocabulary.service.config.ExportConfig;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 /**
@@ -23,7 +20,6 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @PropertySource(value = "classpath:core.properties")
 @ComponentScan("org.gbif.vocabulary.service")
 @MapperScan("org.gbif.vocabulary.persistence.mappers")
-@EnableConfigurationProperties(ExportConfig.class)
 public class SpringConfig {
 
   /**
@@ -53,10 +49,5 @@ public class SpringConfig {
   @Bean
   public MethodValidationPostProcessor methodValidationPostProcessor() {
     return new MethodValidationPostProcessor();
-  }
-
-  @Bean
-  public static Validator configurationPropertiesValidator() {
-    return new ExportConfig.ExportConfigValidator();
   }
 }

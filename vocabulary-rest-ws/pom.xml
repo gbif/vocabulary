@@ -16,9 +16,14 @@
   </properties>
 
   <dependencies>
+    <!-- GBIF -->
     <dependency>
       <groupId>org.gbif.vocabulary</groupId>
       <artifactId>core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.gbif.common</groupId>
+      <artifactId>gbif-postal-service</artifactId>
     </dependency>
 
     <!-- spring -->

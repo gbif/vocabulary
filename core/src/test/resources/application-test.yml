@@ -5,6 +5,3 @@ spring:
 logging:
   level:
     liquibase: warn
-
-export:
-  releaseEnabled: false

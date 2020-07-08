@@ -19,4 +19,10 @@ security:
   actuatorSecret: test
 
 export:
-  releaseEnabled: false
+  releaseEnabled: true
+  deployUser: test
+  deployPassword: test
+  deployRepository: test
+
+messaging:
+  enabled: false

@@ -178,7 +178,8 @@ public class VocabularyResource {
 
     if (messagePublisher != null) {
       messagePublisher.send(
-          new VocabularyReleasedMessage("test", "1.0", URI.create("http://test.com")));
+          new VocabularyReleasedMessage(
+              vocabularyName, release.getVersion(), URI.create(release.getExportUrl())));
     } else {
       log.warn("Message publisher not instantiated");
     }

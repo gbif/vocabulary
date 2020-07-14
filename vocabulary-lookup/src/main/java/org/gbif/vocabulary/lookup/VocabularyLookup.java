@@ -28,12 +28,14 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
 
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
 
 /** Class that allows to load a vocabulary export in memory to do fast lookups by concept labels. */
+@Slf4j
 public class VocabularyLookup implements AutoCloseable, Serializable {
 
   private static final Logger LOG = LoggerFactory.getLogger(VocabularyLookup.class);
@@ -257,11 +259,10 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
     Concept existing = namesCache.peekAndPut(normalizedValue, concept);
 
     if (existing != null) {
-      throw new IllegalArgumentException(
-          "Incorrect vocabulary: concept names have to be unique. The concept name "
-              + concept.toString()
-              + " has the same name as "
-              + existing.toString());
+      log.warn(
+          "Incorrect vocabulary: concept names have to be unique. The concept name {} has the same name as {}",
+          concept.toString(),
+          existing.toString());
     }
   }
 
@@ -299,13 +300,12 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
     Concept existing = hiddenLabelsCache.peekAndPut(normalizedValue, concept);
 
     if (existing != null && !existing.getName().equals(concept.getName())) {
-      throw new IllegalArgumentException(
-          "Incorrect vocabulary: different concepts cannot have the same hidden label. The concept hidden label: "
-              + hiddenLabel
-              + " in the concept: "
-              + concept.toString()
-              + " is also present in: "
-              + existing.toString());
+      log.warn(
+          "Incorrect vocabulary: different concepts cannot have the same hidden label. "
+              + "The concept hidden label: {} in the concept: {} is also present in: {}",
+          hiddenLabel,
+          concept.toString(),
+          existing.toString());
     }
   }
 

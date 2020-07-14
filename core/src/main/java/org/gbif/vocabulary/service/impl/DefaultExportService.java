@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -183,7 +182,7 @@ public class DefaultExportService implements ExportService {
 
   private Path createExportFile(String vocabularyName) {
     try {
-      return Files.createTempFile(vocabularyName + "-" + Instant.now().toEpochMilli(), ".json");
+      return Files.createTempFile(vocabularyName, ".json");
     } catch (IOException e) {
       throw new IllegalStateException(
           "Couldn't create export file for vocabulary " + vocabularyName);

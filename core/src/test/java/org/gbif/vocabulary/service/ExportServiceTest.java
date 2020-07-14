@@ -16,7 +16,6 @@ import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -97,13 +96,5 @@ public class ExportServiceTest extends MockServiceBaseTest {
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);
     when(conceptService.list(any(), any()))
         .thenReturn(new PagingResponse<>(0, 100, 3L, Arrays.asList(c1, c2, c3)));
-  }
-
-  @Test
-  public void releaseVocabularyTest() {
-    // releases should be disabled in tests
-    Assertions.assertThrows(
-        UnsupportedOperationException.class,
-        () -> exportService.releaseVocabulary("test", "1.0", "user", "comment"));
   }
 }

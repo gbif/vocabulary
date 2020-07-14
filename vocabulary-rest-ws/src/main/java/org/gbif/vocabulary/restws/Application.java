@@ -1,17 +1,26 @@
 package org.gbif.vocabulary.restws;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 
 import org.gbif.api.vocabulary.UserRole;
+import org.gbif.common.messaging.ConnectionParameters;
+import org.gbif.common.messaging.DefaultMessagePublisher;
+import org.gbif.common.messaging.api.MessagePublisher;
 import org.gbif.vocabulary.SpringConfig;
+import org.gbif.vocabulary.restws.config.ConfigPropertiesValidator;
+import org.gbif.vocabulary.restws.config.ExportConfig;
+import org.gbif.vocabulary.restws.config.MessagingConfig;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +46,7 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PAT
 
 @SpringBootApplication
 @Import(SpringConfig.class)
+@EnableConfigurationProperties({ExportConfig.class, MessagingConfig.class})
 public class Application {
 
   public static void main(String[] args) {
@@ -54,6 +64,24 @@ public class Application {
               return execution.execute(request, body);
             })
         .build();
+  }
+
+  @Bean
+  @ConditionalOnProperty(value = "messaging.enabled", havingValue = "true")
+  @Autowired
+  public MessagePublisher messagePublisher(MessagingConfig config) throws IOException {
+    return new DefaultMessagePublisher(
+        new ConnectionParameters(
+            config.getHost(),
+            config.getPort(),
+            config.getUsername(),
+            config.getPassword(),
+            config.getVirtualHost()));
+  }
+
+  @Bean
+  public static ConfigPropertiesValidator configurationPropertiesValidator() {
+    return new ConfigPropertiesValidator();
   }
 
   @Configuration

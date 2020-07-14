@@ -8,10 +8,14 @@ import java.util.List;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.common.messaging.api.MessagePublisher;
+import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.restws.model.VocabularyReleaseParams;
 import org.gbif.vocabulary.service.ExportService;
@@ -35,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
@@ -42,17 +47,25 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PAT
 import static com.google.common.base.Preconditions.checkArgument;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
+@Slf4j
 @RestController
 @RequestMapping(VOCABULARIES_PATH)
 public class VocabularyResource {
 
   private final VocabularyService vocabularyService;
   private final ExportService exportService;
+  private final ExportConfig exportConfig;
+  private final MessagePublisher messagePublisher;
 
-  @Autowired
-  VocabularyResource(VocabularyService vocabularyService, ExportService exportService) {
+  VocabularyResource(
+      VocabularyService vocabularyService,
+      ExportService exportService,
+      ExportConfig exportConfig,
+      @Autowired(required = false) MessagePublisher messagePublisher) {
     this.vocabularyService = vocabularyService;
     this.exportService = exportService;
+    this.exportConfig = exportConfig;
+    this.messagePublisher = messagePublisher;
   }
 
   @GetMapping
@@ -142,13 +155,34 @@ public class VocabularyResource {
   public ResponseEntity<VocabularyRelease> releaseVocabularyVersion(
       @PathVariable("name") String vocabularyName,
       @RequestBody VocabularyReleaseParams params,
-      HttpServletRequest httpServletRequest) {
+      HttpServletRequest httpServletRequest)
+      throws IOException {
+
+    if (!exportConfig.isReleaseEnabled()) {
+      throw new UnsupportedOperationException("Vocabulary releases are not enabled");
+    }
 
     // release the vocabulary and return
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     VocabularyRelease release =
         exportService.releaseVocabulary(
-            vocabularyName, params.getVersion(), authentication.getName(), params.getComment());
+            ExportParams.builder()
+                .vocabularyName(vocabularyName)
+                .version(params.getVersion())
+                .user(authentication.getName())
+                .comment(params.getComment())
+                .deployRepository(exportConfig.getDeployRepository())
+                .deployUser(exportConfig.getDeployUser())
+                .deployPassword(exportConfig.getDeployPassword())
+                .build());
+
+    if (messagePublisher != null) {
+      messagePublisher.send(
+          new VocabularyReleasedMessage(
+              vocabularyName, release.getVersion(), URI.create(release.getExportUrl())));
+    } else {
+      log.warn("Message publisher not instantiated");
+    }
 
     return ResponseEntity.created(
             URI.create(httpServletRequest.getRequestURL() + "/" + release.getVersion()))

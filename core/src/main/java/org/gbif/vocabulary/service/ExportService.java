@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.export.ExportParams;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
@@ -34,17 +35,10 @@ public interface ExportService {
   /**
    * Releases a vocabulary for an specific version.
    *
-   * @param vocabularyName name of the vocabulary to release
-   * @param version version to release
-   * @param user user that created the release
-   * @param comment comment of the release
+   * @param exportParams params for the release
    * @return the created {@link VocabularyRelease}
    */
-  VocabularyRelease releaseVocabulary(
-      @NotBlank String vocabularyName,
-      @NotBlank String version,
-      @NotBlank String user,
-      @NotBlank String comment);
+  VocabularyRelease releaseVocabulary(ExportParams exportParams);
 
   /**
    * Lists the vocabulary releases for a vocabulary and optionally a specific version. If the

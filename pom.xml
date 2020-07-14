@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.2.4.RELEASE</version>
-    <relativePath />
+    <relativePath/>
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
@@ -19,6 +20,7 @@
     <module>model</module>
     <module>vocabulary-rest-ws</module>
     <module>vocabulary-lookup</module>
+    <module>vocabulary-cli</module>
   </modules>
 
   <scm>
@@ -32,6 +34,10 @@
     <repository>
       <id>gbif-all</id>
       <url>http://repository.gbif.org/content/groups/gbif</url>
+    </repository>
+    <repository>
+      <id>cloudera-release</id>
+      <url>http://repository.cloudera.com/artifactory/cloudera-repos/</url>
     </repository>
   </repositories>
 
@@ -47,25 +53,31 @@
   </distributionManagement>
 
   <properties>
+    <!-- gbif -->
+    <gbif-api.version>0.113</gbif-api.version>
+    <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
+    <postal-service.version>0.46-SNAPSHOT</postal-service.version>
+    <gbif-cli.version>0.14</gbif-cli.version>
+
+    <!-- DB -->
     <postgresql-embedded.version>2.10</postgresql-embedded.version>
-    <junit-vintage.version>5.3.2</junit-vintage.version>
     <postgresql-testcontainers.version>1.10.5</postgresql-testcontainers.version>
-    <wiremock.version>2.21.0</wiremock.version>
     <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
+
+    <!-- utils -->
+    <wiremock.version>2.21.0</wiremock.version>
     <javax-validation.version>2.0.1.Final</javax-validation.version>
     <okhttp-version>4.2.2</okhttp-version>
     <cache2k-version>1.2.4.Final</cache2k-version>
     <lombok.version>1.18.12</lombok.version>
+    <metainf-services.version>1.8</metainf-services.version>
+    <jcommander.version>1.58</jcommander.version>
 
     <!-- maven release -->
     <minimumMavenVersion>3.0</minimumMavenVersion>
     <jdkLevel>1.8</jdkLevel>
     <release.tagNameBase>${project.artifactId}</release.tagNameBase>
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-
-    <!-- gbif -->
-    <gbif-api.version>0.113</gbif-api.version>
-    <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
 
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
@@ -74,11 +86,18 @@
     <spring-cloud-zookeeper.version>2.2.0.RELEASE</spring-cloud-zookeeper.version>
     <zookeeper.version>3.4.14</zookeeper.version>
 
+    <!-- Hadoop -->
+    <hadoop.version>2.6.0-cdh5.16.2</hadoop.version>
+    <hadoop-core.version>2.6.0-mr1-cdh5.16.2</hadoop-core.version>
+
     <!-- logging -->
     <slf4j.version>1.7.26</slf4j.version>
     <logback.version>1.2.3</logback.version>
     <janino.version>2.5.10</janino.version>
     <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
+
+    <!-- test -->
+    <junit-vintage.version>5.3.2</junit-vintage.version>
 
     <!-- documentation -->
     <spring.auto-rest-docs.version>2.0.4</spring.auto-rest-docs.version>
@@ -98,6 +117,7 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- GBIF -->
       <dependency>
         <groupId>org.gbif</groupId>
         <artifactId>gbif-api</artifactId>
@@ -133,19 +153,14 @@
         <version>${gbif.common-mybatis.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.squareup.okhttp3</groupId>
-        <artifactId>okhttp</artifactId>
-        <version>${okhttp-version}</version>
+        <groupId>org.gbif.common</groupId>
+        <artifactId>gbif-postal-service</artifactId>
+        <version>${postal-service.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.cache2k</groupId>
-        <artifactId>cache2k-api</artifactId>
-        <version>${cache2k-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.cache2k</groupId>
-        <artifactId>cache2k-core</artifactId>
-        <version>${cache2k-version}</version>
+        <groupId>org.gbif.common</groupId>
+        <artifactId>gbif-cli</artifactId>
+        <version>${gbif-cli.version}</version>
       </dependency>
 
       <!-- DB -->
@@ -176,6 +191,31 @@
         <artifactId>lombok</artifactId>
         <version>${lombok.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp</artifactId>
+        <version>${okhttp-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.cache2k</groupId>
+        <artifactId>cache2k-api</artifactId>
+        <version>${cache2k-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.cache2k</groupId>
+        <artifactId>cache2k-core</artifactId>
+        <version>${cache2k-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.kohsuke.metainf-services</groupId>
+        <artifactId>metainf-services</artifactId>
+        <version>${metainf-services.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.beust</groupId>
+        <artifactId>jcommander</artifactId>
+        <version>${jcommander.version}</version>
+      </dependency>
 
       <!-- logging -->
       <dependency>
@@ -200,7 +240,7 @@
         <version>${logstash-logback-encoder.version}</version>
       </dependency>
 
-      <!-- dependencies to register to ZK -->
+      <!-- ZK -->
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
@@ -243,6 +283,23 @@
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-zookeeper-config</artifactId>
         <version>${spring-cloud-zookeeper.version}</version>
+      </dependency>
+
+      <!-- Hadoop -->
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-hdfs</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-core</artifactId>
+        <version>${hadoop-core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>${hadoop.version}</version>
       </dependency>
 
       <!-- tests -->

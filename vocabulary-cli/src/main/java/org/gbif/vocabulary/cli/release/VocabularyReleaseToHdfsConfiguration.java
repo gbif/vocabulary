@@ -35,4 +35,7 @@ public class VocabularyReleaseToHdfsConfiguration {
   @Parameter(names = "--hdfs-prefix")
   @NotNull
   public String hdfsPrefix = "hdfs://ha-nn";
+
+  @Parameter(names = "--enabled-snapshots-copy")
+  public boolean enabledSnapshotsCopy;
 }

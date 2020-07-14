@@ -61,6 +61,15 @@ public class VocabularyReleaseToHdfsCallback
       return;
     }
 
+    if (!config.enabledSnapshotsCopy
+        && vocabularyReleasedMessage.getVersion().endsWith("SNAPSHOT")) {
+      log.warn(
+          "Copy of snapshost versions disabled. The copy to HDFS of the vocabulary {} with version {} was skipped",
+          vocabularyReleasedMessage.getVocabularyName(),
+          vocabularyReleasedMessage.getVersion());
+      return;
+    }
+
     try {
       // request to download the released vocabulary
       Request request =

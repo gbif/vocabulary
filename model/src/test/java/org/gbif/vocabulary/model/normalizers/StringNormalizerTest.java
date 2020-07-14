@@ -24,10 +24,4 @@ public class StringNormalizerTest {
         "IObDGHLTZo aeiouancuuuuALEO",
         StringNormalizer.replaceNonAsciiCharactersWithEquivalents("ƗØƀĐǤĦŁŦƵø àéîoüåñçǖǘǚǜǍĽĒŎ"));
   }
-
-  @Test
-  public void replaceNonAlphanumericCharactersTest() {
-    assertEquals(
-        "abc123", StringNormalizer.stripNonAlphanumericCharacters("!?|%#&*<>abc123{)];' "));
-  }
 }

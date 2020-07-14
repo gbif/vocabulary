@@ -20,7 +20,7 @@
     <module>model</module>
     <module>vocabulary-rest-ws</module>
     <module>vocabulary-lookup</module>
-    <module>cli</module>
+    <module>vocabulary-cli</module>
   </modules>
 
   <scm>

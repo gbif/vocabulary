@@ -9,10 +9,13 @@ public class LifeStageLookupTest {
 
   private static final String LIFE_STAGE_VOCAB_FILE = "LifeStage.json";
   private static final VocabularyLookup LOOKUP =
-      VocabularyLookup.load(
-          Thread.currentThread()
-              .getContextClassLoader()
-              .getResourceAsStream(LIFE_STAGE_VOCAB_FILE));
+      VocabularyLookup.newBuilder()
+          .from(
+              Thread.currentThread()
+                  .getContextClassLoader()
+                  .getResourceAsStream(LIFE_STAGE_VOCAB_FILE))
+          .withPrefilter(PreFilters.REMOVE_NUMERIC_PREFIX)
+          .build();
 
   @Test
   public void adultTest() {

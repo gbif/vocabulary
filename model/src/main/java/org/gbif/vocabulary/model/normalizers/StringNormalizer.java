@@ -15,7 +15,6 @@ public class StringNormalizer {
   private static final String EMPTY = "";
   private static final Pattern NAME_PATTERN = Pattern.compile("[\\-_\\s]");
   private static final Pattern LABEL_PATTERN = Pattern.compile("[\\s]");
-  private static final Pattern NON_ALPHANUMERIC_PATTERN = Pattern.compile("[^A-Za-z0-9]");
 
   /**
    * Normalizes a name of a vocabulary entity.
@@ -59,15 +58,5 @@ public class StringNormalizer {
    */
   public static String replaceNonAsciiCharactersWithEquivalents(String input) {
     return AsciiParser.parse(input);
-  }
-
-  /**
-   * Strips all non-alphanumeric characters. It doesn't change the case.
-   *
-   * @param input text to normalize
-   * @return text without non-alphanumeric characters
-   */
-  public static String stripNonAlphanumericCharacters(String input) {
-    return NON_ALPHANUMERIC_PATTERN.matcher(input).replaceAll(EMPTY);
   }
 }

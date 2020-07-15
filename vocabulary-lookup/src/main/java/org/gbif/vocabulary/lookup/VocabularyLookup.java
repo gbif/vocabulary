@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import org.gbif.vocabulary.model.Concept;
@@ -34,7 +35,45 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLa
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
 
-/** Class that allows to load a vocabulary export in memory to do fast lookups by concept labels. */
+/**
+ * Class that allows to load a vocabulary export in memory to do fast lookups by concept labels.
+ *
+ * <p>Instances of this class have to be created by using a {@link VocabularyLookupBuilder}. There
+ * are 2 ways to create these instances:
+ *
+ * <ul>
+ *   <li>Load the vocabulary from an {@link InputStream}:
+ *       <pre>
+ *            VocabularyLookup.newBuilder().from(new InputStream(...)).build();
+ *       </pre>
+ *   <li>Download the latest version of the vocabulary via the vocabulary API:
+ *       <pre>
+ *            VocabularyLookup.newBuilder().from("http://api.gbif.org/v1/", "LifeStage").build();
+ *       </pre>
+ * </ul>
+ *
+ * Optionally, a pre-filter can be added. The pre-filter will be applied to the value received
+ * before performing the lookup. There are some predefined pre-filters in {@link PreFilters} that
+ * can be reused. They should be set in the {@link VocabularyLookupBuilder} when creating the
+ * instance and they will be applied to all the lookups:
+ *
+ * <pre>
+ *      VocabularyLookup.newBuilder().from(new InputStream(...))
+ *          .withPrefilter(PreFilters.REMOVE_NON_ALPHANUMERIC).build();
+ * </pre>
+ *
+ * Also, multiple prefilters can be chained:
+ *
+ * <pre>
+ *        VocabularyLookup.newBuilder().from(new InputStream(...))
+ *            .withPrefilter(
+ *             PreFilters.REMOVE_NON_ALPHANUMERIC.andThen(
+ *                 PreFilters.REMOVE_PARENTHESIS_CONTENT_SUFFIX)).build();
+ * </pre>
+ *
+ * Notice that there is no need to remove whitespaces or take care of non-ASCII characters. This is
+ * already handled by this class and will be normalized before performing a lookup.
+ */
 @Slf4j
 public class VocabularyLookup implements AutoCloseable, Serializable {
 
@@ -45,11 +84,13 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
   private final Cache<String, Concept> namesCache;
   private final Cache<String, LabelMatch> labelsCache;
   private final Cache<String, Concept> hiddenLabelsCache;
+  private final Function<String, String> prefilter;
   private ExportMetadata exportMetadata;
   private Vocabulary vocabulary;
 
-  private VocabularyLookup(InputStream in) {
+  private VocabularyLookup(InputStream in, Function<String, String> prefilter) {
     Objects.requireNonNull(in);
+    this.prefilter = prefilter;
 
     namesCache =
         Cache2kBuilder.of(String.class, Concept.class)
@@ -72,21 +113,6 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
     importVocabulary(in);
   }
 
-  public static VocabularyLookup load(String apiUrl, String vocabularyName) {
-    return new VocabularyLookup(
-        VocabularyDownloader.downloadLatestVocabularyVersion(apiUrl, vocabularyName));
-  }
-
-  /**
-   * Creates a {@link VocabularyLookup} from the vocabulary received.
-   *
-   * @param in {@link VocabularyExport} as a {@link InputStream}.
-   * @return {@link VocabularyLookup} with the vocabulary loaded in memory.
-   */
-  public static VocabularyLookup load(InputStream in) {
-    return new VocabularyLookup(in);
-  }
-
   /**
    * Same as {@link #lookup(String, LanguageRegion)} but since there are no language provided we
    * only try to use English if there are several candidates.
@@ -102,7 +128,8 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
    * Looks up for a value in the vocabulary.
    *
    * <p>If there is more than 1 match we use the contextLang as a discriminator. If there is still
-   * no match we try to use English as a fallback.
+   * no match it tries to use English as a fallback. Otherwise, it returns an empty {@link
+   * Optional}.
    *
    * @param value the value whose concept we are looking for
    * @param contextLang {@link LanguageRegion} to break ties
@@ -111,6 +138,11 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
   public Optional<Concept> lookup(String value, LanguageRegion contextLang) {
     if (value == null || value.isEmpty()) {
       return Optional.empty();
+    }
+
+    // apply the pre-filters
+    if (prefilter != null) {
+      value = prefilter.apply(value);
     }
 
     // base normalization
@@ -271,6 +303,10 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
   }
 
   private void addLabelToCache(String value, Concept concept, LanguageRegion language) {
+    if (prefilter != null) {
+      value = prefilter.apply(value);
+    }
+
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
 
     boolean added =
@@ -296,6 +332,10 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
   }
 
   private void addHiddenLabelToCache(String hiddenLabel, Concept concept) {
+    if (prefilter != null) {
+      hiddenLabel = prefilter.apply(hiddenLabel);
+    }
+
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(hiddenLabel));
     Concept existing = hiddenLabelsCache.peekAndPut(normalizedValue, concept);
 
@@ -320,5 +360,50 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
   private static class LabelMatch {
     Set<Concept> allMatches = new HashSet<>();
     Map<LanguageRegion, Set<Concept>> matchesByLanguage = new EnumMap<>(LanguageRegion.class);
+  }
+
+  public static VocabularyLookupBuilder newBuilder() {
+    return new VocabularyLookupBuilder();
+  }
+
+  /**
+   * Builder to create instances of {@link VocabularyLookup}.
+   *
+   * <p>It is required to call one of the 2 available from methods.
+   */
+  public static class VocabularyLookupBuilder {
+    private InputStream inputStream;
+    private String apiUrl;
+    private String vocabularyName;
+    private Function<String, String> prefilter;
+
+    public VocabularyLookupBuilder from(InputStream inputStream) {
+      this.inputStream = inputStream;
+      return this;
+    }
+
+    public VocabularyLookupBuilder from(String apiUrl, String vocabularyName) {
+      this.apiUrl = apiUrl;
+      this.vocabularyName = vocabularyName;
+      return this;
+    }
+
+    public VocabularyLookupBuilder withPrefilter(Function<String, String> prefilter) {
+      this.prefilter = prefilter;
+      return this;
+    }
+
+    public VocabularyLookup build() {
+      if (inputStream != null) {
+        return new VocabularyLookup(inputStream, prefilter);
+      } else if (apiUrl != null && vocabularyName != null) {
+        return new VocabularyLookup(
+            VocabularyDownloader.downloadLatestVocabularyVersion(apiUrl, vocabularyName),
+            prefilter);
+      }
+
+      throw new IllegalArgumentException(
+          "Either the inputstream or the api url and the vocabulary name are required");
+    }
   }
 }

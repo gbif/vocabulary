@@ -29,8 +29,10 @@ public class VocabularyLookupTest {
   @Test
   public void loadVocabularyFromInputStreamTest() {
     VocabularyLookup lookup =
-        VocabularyLookup.load(
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE));
+        VocabularyLookup.newBuilder()
+            .from(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE))
+            .build();
     assertNotNull(lookup);
   }
 
@@ -39,17 +41,20 @@ public class VocabularyLookupTest {
     assertThrows(
         IllegalArgumentException.class,
         () ->
-            VocabularyLookup.load(
-                Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResourceAsStream(INVALID_VOCAB_FILE)));
+            VocabularyLookup.newBuilder()
+                .from(
+                    Thread.currentThread()
+                        .getContextClassLoader()
+                        .getResourceAsStream(INVALID_VOCAB_FILE))
+                .build());
   }
 
   @Disabled("manual test")
   @Test
   public void loadVocabularyFromApiUrl() throws IOException {
     InputStream in =
-        VocabularyDownloader.downloadLatestVocabularyVersion("http://api.gbif-dev.org/v1/", "LifeStage");
+        VocabularyDownloader.downloadLatestVocabularyVersion(
+            "http://api.gbif-dev.org/v1/", "LifeStage");
 
     VocabularyExport export =
         new ObjectMapper()
@@ -61,8 +66,10 @@ public class VocabularyLookupTest {
   @Test
   public void lookupTest() {
     VocabularyLookup vocabulary =
-        VocabularyLookup.load(
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE));
+        VocabularyLookup.newBuilder()
+            .from(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE))
+            .build();
 
     Optional<Concept> concept = vocabulary.lookup("February");
     assertTrue(concept.isPresent());
@@ -87,8 +94,10 @@ public class VocabularyLookupTest {
   @Test
   public void lookupWithLanguageTest() {
     VocabularyLookup vocabulary =
-        VocabularyLookup.load(
-            Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE));
+        VocabularyLookup.newBuilder()
+            .from(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE))
+            .build();
 
     assertFalse(vocabulary.lookup("Marzo").isPresent());
     assertFalse(vocabulary.lookup("Marzo", LanguageRegion.ENGLISH).isPresent());
@@ -101,5 +110,35 @@ public class VocabularyLookupTest {
     concept = vocabulary.lookup("Marzo", LanguageRegion.GERMAN);
     assertTrue(concept.isPresent());
     assertEquals("February", concept.get().getName());
+  }
+
+  @Test
+  public void lookupWithPrefiltersTest() {
+    VocabularyLookup lookup =
+        VocabularyLookup.newBuilder()
+            .from(
+                Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream("LifeStage.json"))
+            .withPrefilter(PreFilters.REMOVE_NUMERIC_PREFIX)
+            .build();
+
+    assertEquals("Adult", lookup.lookup("1325 adult").get().getName());
+
+    lookup =
+        VocabularyLookup.newBuilder()
+            .from(
+                Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream("LifeStage.json"))
+            .withPrefilter(
+                PreFilters.REMOVE_NUMERIC_PREFIX.andThen(
+                    PreFilters.REMOVE_PARENTHESIS_CONTENT_SUFFIX))
+            .build();
+
+    assertEquals("Adult", lookup.lookup("1325 adult").get().getName());
+    assertEquals("Adult", lookup.lookup("1325 adult (dsgds)").get().getName());
+    assertEquals("Adult", lookup.lookup("adult (dsgds)").get().getName());
+
   }
 }

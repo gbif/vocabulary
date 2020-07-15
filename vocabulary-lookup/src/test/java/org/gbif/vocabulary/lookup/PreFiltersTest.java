@@ -41,6 +41,10 @@ public class PreFiltersTest {
     assertEquals(" abc 123", PreFilters.REMOVE_SIGNED_DECIMAL_NUMBERS_PREFIX.apply("23,4 abc 123"));
     assertEquals(" abc 123", PreFilters.REMOVE_SIGNED_DECIMAL_NUMBERS_PREFIX.apply(",44 abc 123"));
     assertEquals(" abc 123", PreFilters.REMOVE_SIGNED_DECIMAL_NUMBERS_PREFIX.apply(".45 abc 123"));
+    assertEquals("abc", PreFilters.REMOVE_SIGNED_DECIMAL_NUMBERS_PREFIX.apply("-23abc"));
+    assertEquals("+-23abc", PreFilters.REMOVE_SIGNED_DECIMAL_NUMBERS_PREFIX.apply("+-23abc"));
+    assertEquals("--23abc", PreFilters.REMOVE_SIGNED_DECIMAL_NUMBERS_PREFIX.apply("--23abc"));
+    assertEquals("abc", PreFilters.REMOVE_SIGNED_DECIMAL_NUMBERS_PREFIX.apply("+23.4abc"));
   }
 
   @Test

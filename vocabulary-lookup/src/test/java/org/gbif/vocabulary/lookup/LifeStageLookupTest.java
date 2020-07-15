@@ -14,6 +14,7 @@ public class LifeStageLookupTest {
               Thread.currentThread()
                   .getContextClassLoader()
                   .getResourceAsStream(LIFE_STAGE_VOCAB_FILE))
+          .withPrefilter(PreFilters.REMOVE_NUMERIC_PREFIX)
           .build();
 
   @Test

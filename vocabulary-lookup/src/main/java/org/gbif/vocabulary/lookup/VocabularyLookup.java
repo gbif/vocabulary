@@ -52,10 +52,10 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonA
  *       </pre>
  * </ul>
  *
- * Optionally, a prefilter can be added. The prefilter will be applied to the value received before
- * performing the lookup. There are some predefined prefilters in {@link PreFilters} that can be
- * reused. They should be set in the {@link VocabularyLookupBuilder} when creating the instance and
- * they will be applied to all the lookups:
+ * Optionally, a pre-filter can be added. The pre-filter will be applied to the value received
+ * before performing the lookup. There are some predefined pre-filters in {@link PreFilters} that
+ * can be reused. They should be set in the {@link VocabularyLookupBuilder} when creating the
+ * instance and they will be applied to all the lookups:
  *
  * <pre>
  *      VocabularyLookup.newBuilder().from(new InputStream(...))
@@ -72,7 +72,7 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonA
  * </pre>
  *
  * Notice that there is no need to remove whitespaces or take care of non-ASCII characters. This is
- * already handle by this class and will be normalized before performing a lookup.
+ * already handled by this class and will be normalized before performing a lookup.
  */
 @Slf4j
 public class VocabularyLookup implements AutoCloseable, Serializable {
@@ -307,10 +307,16 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
   }
 
   private void addLabelsToCache(List<String> values, Concept concept, LanguageRegion language) {
-    values.forEach(v -> addLabelToCache(v, concept, language));
+    values.stream()
+        .map(v -> prefilter != null ? prefilter.apply(v) : v)
+        .forEach(v -> addLabelToCache(v, concept, language));
   }
 
   private void addLabelToCache(String value, Concept concept, LanguageRegion language) {
+    if (prefilter != null) {
+      value = prefilter.apply(value);
+    }
+
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
 
     boolean added =
@@ -336,6 +342,10 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
   }
 
   private void addHiddenLabelToCache(String hiddenLabel, Concept concept) {
+    if (prefilter != null) {
+      hiddenLabel = prefilter.apply(hiddenLabel);
+    }
+
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(hiddenLabel));
     Concept existing = hiddenLabelsCache.peekAndPut(normalizedValue, concept);
 

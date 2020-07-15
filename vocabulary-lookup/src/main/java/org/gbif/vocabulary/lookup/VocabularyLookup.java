@@ -140,7 +140,7 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
       return Optional.empty();
     }
 
-    // apply the prefilters
+    // apply the pre-filters
     if (prefilter != null) {
       value = prefilter.apply(value);
     }
@@ -299,9 +299,7 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
   }
 
   private void addLabelsToCache(List<String> values, Concept concept, LanguageRegion language) {
-    values.stream()
-        .map(v -> prefilter != null ? prefilter.apply(v) : v)
-        .forEach(v -> addLabelToCache(v, concept, language));
+    values.forEach(v -> addLabelToCache(v, concept, language));
   }
 
   private void addLabelToCache(String value, Concept concept, LanguageRegion language) {

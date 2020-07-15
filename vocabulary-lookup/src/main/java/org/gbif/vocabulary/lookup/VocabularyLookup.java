@@ -90,14 +90,6 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
 
   private VocabularyLookup(InputStream in, Function<String, String> prefilter) {
     Objects.requireNonNull(in);
-
-    VocabularyLookup.newBuilder().withPrefilter(PreFilters.REMOVE_NON_ALPHANUMERIC);
-
-    VocabularyLookup.newBuilder()
-        .withPrefilter(
-            PreFilters.REMOVE_NON_ALPHANUMERIC.andThen(
-                PreFilters.REMOVE_PARENTHESIS_CONTENT_SUFFIX));
-
     this.prefilter = prefilter;
 
     namesCache =

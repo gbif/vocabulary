@@ -9,7 +9,6 @@
   </parent>
 
   <artifactId>core</artifactId>
-  <version>0.25-SNAPSHOT</version>
 
   <dependencies>
     <dependency>

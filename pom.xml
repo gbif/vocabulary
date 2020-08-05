@@ -4,10 +4,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.2.4.RELEASE</version>
-    <relativePath/>
+    <groupId>org.gbif</groupId>
+    <artifactId>motherpom</artifactId>
+    <version>48-SNAPSHOT</version>
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
@@ -53,10 +52,12 @@
   </distributionManagement>
 
   <properties>
+    <spring-boot.version>2.2.4.RELEASE</spring-boot.version>
+
     <!-- gbif -->
     <gbif-api.version>0.113</gbif-api.version>
     <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
-    <postal-service.version>0.46-SNAPSHOT</postal-service.version>
+    <postal-service.version>0.46</postal-service.version>
     <gbif-cli.version>0.14</gbif-cli.version>
 
     <!-- DB -->
@@ -72,12 +73,6 @@
     <lombok.version>1.18.12</lombok.version>
     <metainf-services.version>1.8</metainf-services.version>
     <jcommander.version>1.58</jcommander.version>
-
-    <!-- maven release -->
-    <minimumMavenVersion>3.0</minimumMavenVersion>
-    <jdkLevel>1.8</jdkLevel>
-    <release.tagNameBase>${project.artifactId}</release.tagNameBase>
-    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
 
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
@@ -96,15 +91,11 @@
     <janino.version>2.5.10</janino.version>
     <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
 
-    <!-- test -->
-    <junit-vintage.version>5.3.2</junit-vintage.version>
-
     <!-- documentation -->
     <spring.auto-rest-docs.version>2.0.4</spring.auto-rest-docs.version>
     <ascii-doctor-plugin.version>1.5.7</ascii-doctor-plugin.version>
 
     <!-- JaCoCo & Sonar-->
-    <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.jacoco.reportPath>${project.build.directory}/target/jacoco.exec</sonar.jacoco.reportPath>
@@ -112,11 +103,18 @@
     <sonar.exclusions>**/AsciiParser.java</sonar.exclusions>
     <sonar.cpd.exclusions>**/AsciiParser.java</sonar.cpd.exclusions>
     <sonar.coverage.exclusions>**/AsciiParser.java</sonar.coverage.exclusions>
-    <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
       <!-- GBIF -->
       <dependency>
         <groupId>org.gbif</groupId>
@@ -168,11 +166,6 @@
         <groupId>org.mybatis.spring.boot</groupId>
         <artifactId>mybatis-spring-boot-starter</artifactId>
         <version>${mybatis.spring.boot.starter}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>${postgresql.version}</version>
       </dependency>
 
       <!-- utils -->
@@ -310,12 +303,6 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
-        <version>${junit-jupiter.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>postgresql</artifactId>
         <version>${postgresql-testcontainers.version}</version>
@@ -342,105 +329,24 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>${maven-release-plugin.version}</version>
-        <configuration>
-          <goals>deploy</goals>
-          <preparationGoals>install</preparationGoals>
-          <resume>false</resume>
-          <useReleaseProfile>true</useReleaseProfile>
-          <releaseProfiles>vocabulary-release</releaseProfiles>
-          <tagNameFormat>${release.tagNameBase}-@{project.version}</tagNameFormat>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>${maven-deploy-plugin.version}</version>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco-maven-plugin.version}</version>
-        <configuration>
-          <destFile>${sonar.jacoco.reportPath}</destFile>
-          <append>true</append>
-        </configuration>
-        <executions>
-          <execution>
-            <id>agent</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
 
   <profiles>
-    <!-- automatically used by the release plugin -->
-    <profile>
-      <id>vocabulary-release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>enforce</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <rules>
-                <requireMavenVersion>
-                  <version>[${minimumMavenVersion},)</version>
-                </requireMavenVersion>
-                <requireJavaVersion>
-                  <version>[${jdkLevel},)</version>
-                </requireJavaVersion>
-                <requirePluginVersions>
-                  <message>Best Practice is to always define plugin versions!</message>
-                </requirePluginVersions>
-                <requireReleaseDeps>
-                  <message>No Snapshot dependencies allowed!</message>
-                </requireReleaseDeps>
-              </rules>
-            </configuration>
-          </plugin>
-          <plugin>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                  <goal>test-jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-                <configuration>
-                  <doclint>none</doclint>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
     <profile>
       <id>default</id>
       <activation>
@@ -451,7 +357,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>${maven-surefire-plugin.version}</version>
             <configuration>
               <excludes>
                 <exclude>**/*TestDoc.java</exclude>
@@ -469,12 +374,10 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${maven-failsafe-plugin.version}</version>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>${maven-surefire-plugin.version}</version>
             <configuration>
               <excludes>
                 <exclude>**/*.java</exclude>

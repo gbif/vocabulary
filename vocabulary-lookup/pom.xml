@@ -9,7 +9,6 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>vocabulary-lookup</artifactId>
-  <version>0.25-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
@@ -70,6 +69,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>${spring-boot.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <filters>
             <filter>

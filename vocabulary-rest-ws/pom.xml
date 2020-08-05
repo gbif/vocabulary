@@ -9,7 +9,6 @@
   </parent>
 
   <artifactId>vocabulary-rest-ws</artifactId>
-  <version>0.25-SNAPSHOT</version>
 
   <properties>
     <snippetsDirectory>${project.build.directory}/generated-snippets</snippetsDirectory>

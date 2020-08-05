@@ -53,6 +53,7 @@
 
   <properties>
     <spring-boot.version>2.2.4.RELEASE</spring-boot.version>
+    <main.basedir>${project.basedir}</main.basedir>
 
     <!-- gbif -->
     <gbif-api.version>0.113</gbif-api.version>
@@ -342,6 +343,10 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

@@ -12,6 +12,7 @@
 
   <properties>
     <snippetsDirectory>${project.build.directory}/generated-snippets</snippetsDirectory>
+    <main.basedir>${project.parent.basedir}</main.basedir>
   </properties>
 
   <dependencies>
@@ -140,7 +141,6 @@
       <artifactId>spring-restdocs-webtestclient</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <build>

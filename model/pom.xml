@@ -11,6 +11,10 @@
   <artifactId>model</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <main.basedir>${project.parent.basedir}</main.basedir>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>javax.validation</groupId>
@@ -38,6 +42,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
 
 </project>

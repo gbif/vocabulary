@@ -334,16 +334,16 @@
         <configuration combine.self="override">
           <source>${java.version}</source>
           <target>${java.version}</target>
-          <showDeprecation>true</showDeprecation>
-          <showWarnings>true</showWarnings>
-          <compilerId>javac-with-errorprone</compilerId>
-          <forceJavacCompilerUse>true</forceJavacCompilerUse>
-          <compilerArgs>
-            <arg>-XepExcludedPaths:.*/src/main/java-generated/.*</arg>
-            <arg>-XepDisableWarningsInGeneratedCode</arg>
-            <arg>-Xep:MissingOverride:OFF</arg>
-            <arg>-Xep:ParameterName:OFF</arg>
-          </compilerArgs>
+<!--          <showDeprecation>true</showDeprecation>-->
+<!--          <showWarnings>true</showWarnings>-->
+<!--          <compilerId>javac-with-errorprone</compilerId>-->
+<!--          <forceJavacCompilerUse>true</forceJavacCompilerUse>-->
+<!--          <compilerArgs>-->
+<!--            <arg>-XepExcludedPaths:.*/src/main/java-generated/.*</arg>-->
+<!--            <arg>-XepDisableWarningsInGeneratedCode</arg>-->
+<!--            <arg>-Xep:MissingOverride:OFF</arg>-->
+<!--            <arg>-Xep:ParameterName:OFF</arg>-->
+<!--          </compilerArgs>-->
         </configuration>
       </plugin>
       <plugin>

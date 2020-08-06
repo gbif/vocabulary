@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.gbif</groupId>
     <artifactId>motherpom</artifactId>
-    <version>48</version>
+    <version>49-SNAPSHOT</version>
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>

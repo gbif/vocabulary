@@ -19,13 +19,14 @@ import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.enums.LanguageRegion.LanguageRegionAllFieldsSerializer;
 import org.gbif.vocabulary.restws.utils.Constants;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @RestController
@@ -33,15 +34,15 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 public class VocabularyLanguageResource {
 
   private static final SimpleModule LANGUAGE_SERIALIZER_MODULE =
-      new SimpleModule()
-          .addSerializer(LanguageRegion.class, new LanguageRegionAllFieldsSerializer());
+      new SimpleModule().setMixInAnnotation(LanguageRegion.class, LanguageRegionMixin.class);
   private static final ObjectMapper OBJECT_MAPPER =
-      new ObjectMapper()
-          .disable(MapperFeature.USE_ANNOTATIONS)
-          .registerModule(LANGUAGE_SERIALIZER_MODULE);
+      new ObjectMapper().registerModule(LANGUAGE_SERIALIZER_MODULE);
 
-  @GetMapping
+  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   public String listLanguageRegions() throws JsonProcessingException {
     return OBJECT_MAPPER.writeValueAsString(LanguageRegion.values());
   }
+
+  @JsonSerialize(using = LanguageRegionAllFieldsSerializer.class)
+  public abstract static class LanguageRegionMixin {}
 }

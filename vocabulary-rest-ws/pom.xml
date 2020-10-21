@@ -148,7 +148,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven-jar-plugin.version}</version>
         <configuration>
           <excludes>
             <!-- Excluding config files -->
@@ -189,7 +188,6 @@
           <plugin>
             <groupId>org.asciidoctor</groupId>
             <artifactId>asciidoctor-maven-plugin</artifactId>
-            <version>${ascii-doctor-plugin.version}</version>
             <executions>
               <execution>
                 <id>generate-docs</id>

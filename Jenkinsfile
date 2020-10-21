@@ -46,7 +46,7 @@ pipeline {
             configFileProvider([configFile(
                     fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                     variable: 'MAVEN_SETTINGS_XML')]) {
-              sh 'mvn clean verify -Pintegration'
+              sh 'mvn clean verify -Pintegration -U'
             }
           }
         }

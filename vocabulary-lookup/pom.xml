@@ -122,6 +122,10 @@
                   <shadedPattern>vocab.okio</shadedPattern>
                 </relocation>
                 <relocation>
+                  <pattern>okhttp</pattern>
+                  <shadedPattern>vocab.okhttp</shadedPattern>
+                </relocation>
+                <relocation>
                   <pattern>com.fasterxml.jackson</pattern>
                   <shadedPattern>vocab.com.fasterxml.jackson</shadedPattern>
                 </relocation>

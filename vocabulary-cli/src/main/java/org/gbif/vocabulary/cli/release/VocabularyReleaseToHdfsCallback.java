@@ -15,19 +15,20 @@
  */
 package org.gbif.vocabulary.cli.release;
 
+import org.gbif.common.messaging.AbstractMessageCallback;
+import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 
-import org.gbif.common.messaging.AbstractMessageCallback;
-import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
-import org.gbif.vocabulary.tools.VocabularyDownloader;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 
 import com.google.common.base.Strings;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 

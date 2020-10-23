@@ -15,10 +15,10 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import java.util.Optional;
-
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 

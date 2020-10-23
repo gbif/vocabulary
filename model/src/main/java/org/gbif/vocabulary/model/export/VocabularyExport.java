@@ -15,13 +15,14 @@
  */
 package org.gbif.vocabulary.model.export;
 
-import java.io.Serializable;
-import java.util.List;
-
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 
+import java.io.Serializable;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
 import lombok.Setter;
 

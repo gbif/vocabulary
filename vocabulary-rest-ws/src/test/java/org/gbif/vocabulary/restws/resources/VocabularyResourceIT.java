@@ -15,16 +15,16 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.export.VocabularyExport;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.util.TestPropertyValues;

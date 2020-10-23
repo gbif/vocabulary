@@ -20,6 +20,7 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
@@ -28,12 +29,14 @@ import org.gbif.vocabulary.restws.model.VocabularyReleaseParams;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
 
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -54,6 +57,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -237,7 +241,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
 
     when(exportService.listReleases(anyString(), anyString(), any()))
         .thenReturn(
-            new PagingResponse<>(new PagingRequest(0, 5), 2L, Collections.singletonList(vr1)));
+            new PagingResponse<>(new PagingRequest(0, 5), 1L, Collections.singletonList(vr1)));
 
     mockMvc
         .perform(
@@ -260,7 +264,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
 
     when(exportService.listReleases(anyString(), anyString(), any()))
         .thenReturn(
-            new PagingResponse<>(new PagingRequest(0, 5), 2L, Collections.singletonList(vr1)));
+            new PagingResponse<>(new PagingRequest(0, 5), 1L, Collections.singletonList(vr1)));
 
     mockMvc
         .perform(
@@ -273,6 +277,42 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                     + "/"
                     + vr1.getVersion()))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void getReleaseExportTest() throws Exception {
+    Vocabulary vocabulary = createVocabulary("vocab");
+    vocabulary.setKey(TEST_KEY);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+
+    VocabularyRelease vr1 = new VocabularyRelease();
+    vr1.setExportUrl("/vocab-1.0.zip");
+    vr1.setVocabularyKey(vocabulary.getKey());
+    vr1.setVersion("latest");
+
+    when(exportService.listReleases(anyString(), anyString(), any()))
+        .thenReturn(
+            new PagingResponse<>(new PagingRequest(0, 5), 1L, Collections.singletonList(vr1)));
+
+    try (MockedStatic<VocabularyDownloader> vocabDownloader =
+        mockStatic(VocabularyDownloader.class)) {
+      vocabDownloader
+          .when(() -> VocabularyDownloader.downloadVocabularyExport(vr1.getExportUrl()))
+          .thenReturn(new VocabularyExport());
+
+      mockMvc
+          .perform(
+              get(
+                  getBasePath()
+                      + "/"
+                      + vocabulary.getName()
+                      + "/"
+                      + VOCABULARY_RELEASES_PATH
+                      + "/"
+                      + vr1.getVersion()
+                      + "/export"))
+          .andExpect(status().isOk());
+    }
   }
 
   @Override

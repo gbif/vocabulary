@@ -17,17 +17,10 @@ package org.gbif.vocabulary.lookup;
 
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.export.VocabularyExport;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -62,20 +55,6 @@ public class VocabularyLookupTest {
                         .getContextClassLoader()
                         .getResourceAsStream(INVALID_VOCAB_FILE))
                 .build());
-  }
-
-  @Disabled("manual test")
-  @Test
-  public void loadVocabularyFromApiUrl() throws IOException {
-    InputStream in =
-        VocabularyDownloader.downloadLatestVocabularyVersion(
-            "http://api.gbif-dev.org/v1/", "LifeStage");
-
-    VocabularyExport export =
-        new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .readValue(in, VocabularyExport.class);
-    assertNotNull(export);
   }
 
   @Test

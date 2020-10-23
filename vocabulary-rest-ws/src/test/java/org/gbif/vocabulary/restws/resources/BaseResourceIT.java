@@ -47,7 +47,14 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import static org.gbif.vocabulary.restws.TestCredentials.*;
+import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
+import static org.gbif.vocabulary.restws.TestCredentials.EDITOR;
+import static org.gbif.vocabulary.restws.TestCredentials.INVALID_JWT_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.INVALID_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_ADMIN;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_EDITOR;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.USER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -101,7 +108,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
             .post()
             .uri(getBasePath())
             .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-            .body(BodyInserters.fromObject(entity))
+            .body(BodyInserters.fromValue(entity))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -133,7 +140,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .put()
         .uri(String.format(urlEntityFormat, created.getName()))
         .header("Authorization", BASIC_AUTH_HEADER.apply(EDITOR))
-        .body(BodyInserters.fromObject(created))
+        .body(BodyInserters.fromValue(created))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -152,7 +159,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .post()
         .uri(getBasePath())
         .header("Authorization", BASIC_AUTH_HEADER.apply(INVALID_USER))
-        .body(BodyInserters.fromObject(createEntity()))
+        .body(BodyInserters.fromValue(createEntity()))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -166,7 +173,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .post()
         .uri(getBasePath())
         .header("Authorization", BASIC_AUTH_HEADER.apply(USER))
-        .body(BodyInserters.fromObject(createEntity()))
+        .body(BodyInserters.fromValue(createEntity()))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -180,7 +187,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .post()
         .uri(getBasePath())
         .header("Authorization", JWT_AUTH_HEADER.apply(JWT_ADMIN))
-        .body(BodyInserters.fromObject(createEntity()))
+        .body(BodyInserters.fromValue(createEntity()))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -197,7 +204,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .post()
         .uri(getBasePath())
         .header("Authorization", JWT_AUTH_HEADER.apply(JWT_EDITOR))
-        .body(BodyInserters.fromObject(createEntity()))
+        .body(BodyInserters.fromValue(createEntity()))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -217,7 +224,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .post()
         .uri(getBasePath())
         .header("Authorization", JWT_AUTH_HEADER.apply(JWT_USER))
-        .body(BodyInserters.fromObject(createEntity()))
+        .body(BodyInserters.fromValue(createEntity()))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -230,7 +237,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .post()
         .uri(getBasePath())
         .header("Authorization", JWT_AUTH_HEADER.apply(INVALID_JWT_USER))
-        .body(BodyInserters.fromObject(createEntity()))
+        .body(BodyInserters.fromValue(createEntity()))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -246,7 +253,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .post()
         .uri(getBasePath())
         .header("Authorization", BASIC_AUTH_HEADER.apply(TestCredentials.ADMIN))
-        .body(BodyInserters.fromObject(entity1))
+        .body(BodyInserters.fromValue(entity1))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -259,7 +266,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
         .post()
         .uri(getBasePath())
         .header("Authorization", BASIC_AUTH_HEADER.apply(TestCredentials.ADMIN))
-        .body(BodyInserters.fromObject(entity2))
+        .body(BodyInserters.fromValue(entity2))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
@@ -288,7 +295,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals> {
             .post()
             .uri(getBasePath())
             .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-            .body(BodyInserters.fromObject(createEntity()))
+            .body(BodyInserters.fromValue(createEntity()))
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()

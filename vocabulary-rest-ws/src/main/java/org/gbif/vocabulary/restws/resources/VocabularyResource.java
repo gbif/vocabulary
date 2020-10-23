@@ -22,6 +22,7 @@ import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.export.ExportParams;
+import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.config.ExportConfig;
@@ -29,6 +30,7 @@ import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.restws.model.VocabularyReleaseParams;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
 
 import java.io.IOException;
 import java.net.URI;
@@ -219,5 +221,21 @@ public class VocabularyResource {
     PagingResponse<VocabularyRelease> releases =
         exportService.listReleases(vocabularyName, version, page);
     return releases.getResults().isEmpty() ? null : releases.getResults().get(0);
+  }
+
+  @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}/export")
+  public VocabularyExport getReleaseExport(
+      @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
+    PagingRequest page = new PagingRequest(0, 1);
+    PagingResponse<VocabularyRelease> releases =
+        exportService.listReleases(vocabularyName, version, page);
+    VocabularyRelease release =
+        releases.getResults().isEmpty() ? null : releases.getResults().get(0);
+
+    if (release == null) {
+      return null;
+    }
+
+    return VocabularyDownloader.downloadVocabularyExport(release.getExportUrl());
   }
 }

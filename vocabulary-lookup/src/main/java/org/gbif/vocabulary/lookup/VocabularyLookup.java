@@ -20,6 +20,7 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.export.ExportMetadata;
 import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
 
 import java.io.IOException;
 import java.io.InputStream;

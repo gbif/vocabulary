@@ -18,15 +18,13 @@
       <groupId>org.gbif.vocabulary</groupId>
       <artifactId>model</artifactId>
     </dependency>
-
-    <!-- http client -->
     <dependency>
-      <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>okhttp</artifactId>
+      <groupId>org.gbif.vocabulary</groupId>
+      <artifactId>tools</artifactId>
     </dependency>
-    <dependency>
 
       <!-- cache -->
+    <dependency>
       <groupId>org.cache2k</groupId>
       <artifactId>cache2k-api</artifactId>
     </dependency>
@@ -57,6 +55,12 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <!-- utils -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
 
     <!-- test -->

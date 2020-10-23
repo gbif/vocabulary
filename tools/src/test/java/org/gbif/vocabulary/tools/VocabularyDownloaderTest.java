@@ -43,5 +43,4 @@ public class VocabularyDownloaderTest {
             .readValue(in, VocabularyExport.class);
     assertNotNull(export);
   }
-
 }

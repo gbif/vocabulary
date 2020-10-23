@@ -182,12 +182,12 @@ public class VocabularyDownloader {
       ZipEntry zipEntry = zis.getNextEntry();
       if (zipEntry != null) {
         unzipFile = Files.createTempFile(zipEntry.getName(), ".json");
-        FileOutputStream fos = new FileOutputStream(unzipFile.toFile());
-        int len;
-        while ((len = zis.read(buffer)) > 0) {
-          fos.write(buffer, 0, len);
+        try (FileOutputStream fos = new FileOutputStream(unzipFile.toFile())) {
+          int len;
+          while ((len = zis.read(buffer)) > 0) {
+            fos.write(buffer, 0, len);
+          }
         }
-        fos.close();
       }
       zis.closeEntry();
     }

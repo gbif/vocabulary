@@ -15,11 +15,18 @@
  */
 package org.gbif.vocabulary.restws.resources.documentation;
 
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.ExportMetadata;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
@@ -30,10 +37,6 @@ import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.nio.file.Files;
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -296,9 +299,25 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
 
     try (MockedStatic<VocabularyDownloader> vocabDownloader =
         mockStatic(VocabularyDownloader.class)) {
+
+      VocabularyExport export = new VocabularyExport();
+
+      ExportMetadata metadata = new ExportMetadata();
+      metadata.setVersion("1.0.0");
+      metadata.setCreatedDate(LocalDateTime.now());
+      export.setMetadata(metadata);
+
+      export.setVocabulary(vocabulary);
+
+      Concept concept = new Concept();
+      concept.setKey(1l);
+      concept.setName("Concept");
+      concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "concept"));
+      export.setConcepts(Collections.singletonList(concept));
+
       vocabDownloader
           .when(() -> VocabularyDownloader.downloadVocabularyExport(vr1.getExportUrl()))
-          .thenReturn(new VocabularyExport());
+          .thenReturn(export);
 
       mockMvc
           .perform(

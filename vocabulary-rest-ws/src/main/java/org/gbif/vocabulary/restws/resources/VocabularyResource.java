@@ -15,6 +15,12 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -22,6 +28,7 @@ import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.export.ExportParams;
+import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.config.ExportConfig;
@@ -29,14 +36,7 @@ import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
 import org.gbif.vocabulary.restws.model.VocabularyReleaseParams;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -55,11 +55,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @Slf4j
@@ -219,5 +221,21 @@ public class VocabularyResource {
     PagingResponse<VocabularyRelease> releases =
         exportService.listReleases(vocabularyName, version, page);
     return releases.getResults().isEmpty() ? null : releases.getResults().get(0);
+  }
+
+  @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}/export")
+  public VocabularyExport getReleaseExport(
+      @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
+    PagingRequest page = new PagingRequest(0, 1);
+    PagingResponse<VocabularyRelease> releases =
+        exportService.listReleases(vocabularyName, version, page);
+    VocabularyRelease release =
+        releases.getResults().isEmpty() ? null : releases.getResults().get(0);
+
+    if (release == null) {
+      return null;
+    }
+
+    return VocabularyDownloader.downloadVocabularyExport(release.getExportUrl());
   }
 }

@@ -15,12 +15,6 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.export.ExportMetadata;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -35,6 +29,13 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.ExportMetadata;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
+
 import org.cache2k.Cache;
 import org.cache2k.Cache2kBuilder;
 import org.slf4j.Logger;
@@ -44,7 +45,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import lombok.extern.slf4j.Slf4j;
 
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;

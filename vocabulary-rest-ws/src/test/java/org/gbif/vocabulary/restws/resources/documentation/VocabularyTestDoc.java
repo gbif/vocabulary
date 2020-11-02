@@ -15,6 +15,11 @@
  */
 package org.gbif.vocabulary.restws.resources.documentation;
 
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
@@ -32,11 +37,6 @@ import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.nio.file.Files;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -228,7 +228,8 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                 .content(
                     OBJECT_MAPPER.writeValueAsString(
                         new VocabularyReleaseParams("1.0", "comments"))))
-        .andExpect(status().isCreated());
+        .andExpect(status().isCreated())
+        .andDo(documentRequestFields(VocabularyReleaseParams.class));
   }
 
   @Test

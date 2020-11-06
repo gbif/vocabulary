@@ -15,11 +15,9 @@ pipeline {
     booleanParam(name: 'DOCUMENTATION',
             defaultValue: false,
             description: 'Generate API documentation')
-    activeChoiceReactiveParam('version') {
-      description('release version')
-      choiceType('TEXT')
-      referencedParameter('RELEASE')
-    }
+    activeChoiceReactiveParam(name: 'version',
+            description: 'select release verion',
+            referencedParameter: 'RELEASE')
   }
   stages {
     stage('Build') {

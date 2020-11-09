@@ -15,13 +15,13 @@ pipeline {
     booleanParam(name: 'DOCUMENTATION',
             defaultValue: false,
             description: 'Generate API documentation')
-    activeChoiceReactiveParam('Version') {
-      description('Select version')
-      choiceType('SINGLE_SELECT')
-      referencedParameter('RELEASE')
-    }
   }
   stages {
+    stage('Input') {
+      steps {
+        input('Do you want to proceed?')
+      }
+    }
     stage('Build') {
       when {
         allOf {
@@ -86,7 +86,7 @@ pipeline {
         }
       }
     }
-    stage('Release version to nexus') {
+    stage('Release version to nexus') { // TODO: que sea solo en master??
       when { expression { params.RELEASE } }
       steps {
         configFileProvider(

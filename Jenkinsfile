@@ -23,7 +23,7 @@ pipeline {
   stages {
     stage('Preconditions') {
       steps {
-        scmSkip(skipPattern:'.*(\\[maven-release-plugin\\]|Generated API documentation).*')
+        scmSkip(skipPattern:'.*(\\[maven-release-plugin\\] prepare release |Generated API documentation|Google Java Format).*')
       }
     }
     stage('Build') {

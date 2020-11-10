@@ -9,19 +9,18 @@ pipeline {
     timestamps ()
   }
   parameters {
-    booleanParam(name: 'RELEASE',
-            defaultValue: false,
-            description: 'Do a Maven release (it also generates API documentation)')
     booleanParam(name: 'DOCUMENTATION',
             defaultValue: false,
             description: 'Generate API documentation')
+    separator(name: "release_separator", sectionHeader: "Release Parameters")
+    booleanParam(name: 'RELEASE',
+            defaultValue: false,
+            description: 'Do a Maven release (it also generates API documentation)')
+    text(name: 'RELEASE_VERSION', description: 'Release version (optional)')
+    text(name: 'DEVELOPMENT_VERSION', description: 'Development version (optional)')
+    booleanParam(name: 'DRY_RUN_RELEASE', defaultValue: false, description: 'Dry Run Maven release')
   }
   stages {
-    stage('Input') {
-      steps {
-        input('Do you want to proceed?')
-      }
-    }
     stage('Build') {
       when {
         allOf {
@@ -86,14 +85,22 @@ pipeline {
         }
       }
     }
-    stage('Release version to nexus') { // TODO: que sea solo en master??
-      when { expression { params.RELEASE } }
+    stage('Release version to nexus') {
+      when {
+        allOf {
+          expression { params.RELEASE };
+          branch 'master';
+        }
+      }
+      environment {
+        RELEASE_ARGS = createReleaseArgs()
+      }
       steps {
         configFileProvider(
                 [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                         variable: 'MAVEN_SETTINGS_XML')]) {
           git 'https://github.com/gbif/vocabulary.git'
-          sh 'mvn -s $MAVEN_SETTINGS_XML -B release:prepare release:perform'
+          sh 'mvn -s $MAVEN_SETTINGS_XML -B release:prepare release:perform ${RELEASE_ARGS}'
         }
       }
     }
@@ -209,4 +216,19 @@ void createHostsFile() {
     nagios
     EOF
   """.stripIndent()
+}
+
+def createReleaseArgs() {
+  def args = ""
+  if (params.RELEASE_VERSION != '') {
+    args += "-DreleaseVersion=${params.RELEASE_VERSION} "
+  }
+  if (params.DEVELOPMENT_VERSION != '') {
+    args += "-DdevelopmentVersion=${params.DEVELOPMENT_VERSION} "
+  }
+  if (params.DRY_RUN_RELEASE) {
+    args += "-DdryRun=true"
+  }
+
+  return args
 }

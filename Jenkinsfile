@@ -70,7 +70,7 @@ pipeline {
       }
       steps {
         withSonarQubeEnv('GBIF Sonarqube') {
-          sh 'mvn sonar:sonar'
+          sh 'mvn clean install sonar:sonar'
         }
       }
     }

@@ -94,7 +94,7 @@ pipeline {
       when {
         allOf {
           expression { params.RELEASE };
-          branch 'master';
+//          branch 'master';
         }
       }
       environment {
@@ -111,7 +111,11 @@ pipeline {
       }
     }
     stage('Generate API documentation') {
-      when { anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION } } }
+      when {
+        allOf {
+          anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION } };
+          branch 'master';
+        }
       steps {
         sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
           git 'https://github.com/gbif/vocabulary.git'

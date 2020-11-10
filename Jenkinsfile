@@ -94,7 +94,7 @@ pipeline {
       when {
         allOf {
           expression { params.RELEASE };
-//          branch 'master';
+          branch 'master';
         }
       }
       environment {
@@ -105,8 +105,7 @@ pipeline {
                 [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                         variable: 'MAVEN_SETTINGS_XML')]) {
           git 'https://github.com/gbif/vocabulary.git'
-          echo '-s $MAVEN_SETTINGS_XML -B release:prepare release:perform ${RELEASE_ARGS}'
-//          sh 'mvn -s $MAVEN_SETTINGS_XML -B release:prepare release:perform ${RELEASE_ARGS}'
+          sh 'mvn -s $MAVEN_SETTINGS_XML -B release:prepare release:perform $RELEASE_ARGS'
         }
       }
     }

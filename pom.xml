@@ -108,6 +108,7 @@
     <ascii-doctor-plugin.version>1.5.7</ascii-doctor-plugin.version>
 
     <!-- JaCoCo & Sonar-->
+    <sonar.projectName>GBIF Vocabulary</sonar.projectName>
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.jacoco.reportPath>${project.build.directory}/target/jacoco.exec</sonar.jacoco.reportPath>

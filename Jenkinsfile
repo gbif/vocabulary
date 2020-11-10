@@ -16,8 +16,8 @@ pipeline {
     booleanParam(name: 'RELEASE',
             defaultValue: false,
             description: 'Do a Maven release (it also generates API documentation)')
-    text(name: 'RELEASE_VERSION', description: 'Release version (optional)')
-    text(name: 'DEVELOPMENT_VERSION', description: 'Development version (optional)')
+    text(name: 'RELEASE_VERSION', defaultValue: '', description: 'Release version (optional)')
+    text(name: 'DEVELOPMENT_VERSION', defaultValue: '', description: 'Development version (optional)')
     booleanParam(name: 'DRY_RUN_RELEASE', defaultValue: false, description: 'Dry Run Maven release')
   }
   stages {

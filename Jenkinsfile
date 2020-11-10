@@ -21,6 +21,11 @@ pipeline {
     booleanParam(name: 'DRY_RUN_RELEASE', defaultValue: false, description: 'Dry Run Maven release')
   }
   stages {
+    stage('Preconditions') {
+      steps {
+        scmSkip(skipPattern:'.*(\\[maven-release-plugin\\]|Generated API documentation).*')
+      }
+    }
     stage('Build') {
       when {
         allOf {

@@ -15,6 +15,12 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.AbstractVocabularyEntity;
@@ -28,17 +34,20 @@ import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import org.springframework.web.bind.annotation.*;
-
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
 @RequestMapping(VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH)
@@ -64,6 +73,7 @@ public class ConceptResource {
       @RequestParam(value = "hasParent", required = false) Boolean hasParent,
       @RequestParam(value = "hasReplacement", required = false) Boolean hasReplacement,
       @RequestParam(value = "includeChildrenCount", required = false) boolean includeChildrenCount,
+      @RequestParam(value = "includeParents", required = false) boolean includeParents,
       PagingRequest page) {
 
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
@@ -109,6 +119,16 @@ public class ConceptResource {
       viewStream =
           viewStream.map(
               v -> v.setChildrenCount(childrenByConcept.getOrDefault(v.getConcept().getKey(), 0)));
+    }
+
+    // parents
+    if (includeParents) {
+      viewStream =
+          viewStream.map(
+              v ->
+                  v.getConcept().getParentKey() != null
+                      ? v.setParents(conceptService.findParents(v.getConcept().getKey()))
+                      : v);
     }
 
     return new PagingResponse<>(

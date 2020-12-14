@@ -108,6 +108,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         .jsonPath("results")
         .value(r -> Assertions.assertEquals(1, r.size()), List.class);
 
+    // Add another concept
     Concept c2 = createEntity();
     c2.setName("concept2");
     c2.setParentKey(created1.getKey());
@@ -160,7 +161,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         .jsonPath("results")
         .value(r -> Assertions.assertEquals(1, r.size()), List.class);
 
-    // list entities
+    // list entities with children count
     webClient
         .get()
         .uri(
@@ -178,6 +179,25 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         .value(r -> Assertions.assertEquals(1, r.size()), List.class)
         .jsonPath("results[0].childrenCount")
         .value(Matchers.equalTo(1));
+
+    // list entities with parents
+    webClient
+        .get()
+        .uri(
+            builder ->
+                builder
+                    .path(getBasePath())
+                    .queryParam("name", c2.getName())
+                    .queryParam("includeParents", true)
+                    .build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("results")
+        .value(r -> Assertions.assertEquals(1, r.size()), List.class)
+        .jsonPath("results[0].parents[0]")
+        .value(Matchers.equalTo(c1.getName()));
   }
 
   @Test

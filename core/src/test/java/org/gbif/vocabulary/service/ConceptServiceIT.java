@@ -76,7 +76,7 @@ public class ConceptServiceIT {
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
 
-  private final static long[] vocabularyKeys = new long[2];
+  private static final long[] vocabularyKeys = new long[2];
 
   @Autowired
   ConceptServiceIT(ConceptService conceptService, VocabularyService vocabularyService) {

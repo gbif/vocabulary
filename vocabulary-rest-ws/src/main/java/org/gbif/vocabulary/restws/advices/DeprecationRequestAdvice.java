@@ -31,11 +31,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Intercepts all the deprecation requests and sets the auditable fields. The user is taken from the
  * security context.
  */
 @ControllerAdvice
+@Slf4j
 public class DeprecationRequestAdvice implements RequestBodyAdvice {
 
   private static final BiPredicate<Class, Type> IS_ASSIGNABLE =
@@ -43,7 +46,8 @@ public class DeprecationRequestAdvice implements RequestBodyAdvice {
         try {
           return expected.isAssignableFrom(Class.forName(targetType.getTypeName()));
         } catch (ClassNotFoundException e) {
-          throw new IllegalStateException("Unexpected target type", e);
+          log.debug("Unexpected parameter type", e);
+          return false;
         }
       };
 

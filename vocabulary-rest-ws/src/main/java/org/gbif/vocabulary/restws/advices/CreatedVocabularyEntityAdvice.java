@@ -19,6 +19,7 @@ import org.gbif.vocabulary.model.VocabularyEntity;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
@@ -39,6 +40,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  * HttpStatus#CREATED} code.
  */
 @ControllerAdvice
+@Slf4j
 public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<VocabularyEntity> {
 
   @Override
@@ -50,7 +52,8 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Vocabul
           && VocabularyEntity.class.isAssignableFrom(
               Class.forName(returnType.getGenericParameterType().getTypeName()));
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Unexpected parameter type", e);
+      log.debug("Unexpected parameter type", e);
+      return false;
     }
   }
 

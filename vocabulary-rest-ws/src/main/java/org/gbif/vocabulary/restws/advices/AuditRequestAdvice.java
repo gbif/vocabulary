@@ -15,10 +15,10 @@
  */
 package org.gbif.vocabulary.restws.advices;
 
-import org.gbif.vocabulary.model.VocabularyEntity;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
+
+import org.gbif.vocabulary.model.VocabularyEntity;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
@@ -29,11 +29,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Intercepts all the requests with a {@link org.gbif.vocabulary.model.VocabularyEntity} in the body
  * and assigns the required {@link org.gbif.vocabulary.model.Auditable} fields.
  */
 @ControllerAdvice
+@Slf4j
 public class AuditRequestAdvice implements RequestBodyAdvice {
 
   @Override
@@ -44,7 +47,8 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
     try {
       return VocabularyEntity.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Unexpected target type", e);
+      log.debug("Unexpected target type", e);
+      return false;
     }
   }
 

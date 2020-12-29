@@ -15,10 +15,10 @@
  */
 package org.gbif.vocabulary.restws.advices;
 
+import org.gbif.vocabulary.model.VocabularyEntity;
+
 import java.io.IOException;
 import java.lang.reflect.Type;
-
-import org.gbif.vocabulary.model.VocabularyEntity;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;

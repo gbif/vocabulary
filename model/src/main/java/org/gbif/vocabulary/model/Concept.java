@@ -15,6 +15,9 @@
  */
 package org.gbif.vocabulary.model;
 
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.utils.LenientEquals;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -22,10 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.utils.LenientEquals;
-
 import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

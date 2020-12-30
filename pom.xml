@@ -229,6 +229,11 @@
         <artifactId>jcommander</artifactId>
         <version>${jcommander.version}</version>
       </dependency>
+      <dependency>
+        <groupId>de.codecentric</groupId>
+        <artifactId>spring-boot-admin-starter-client</artifactId>
+        <version>${spring-boot-admin.version}</version>
+      </dependency>
 
       <!-- logging -->
       <dependency>
@@ -359,13 +364,6 @@
         <artifactId>spring-auto-restdocs-core</artifactId>
         <version>${spring.auto-rest-docs.version}</version>
         <scope>test</scope>
-      </dependency>
-
-
-      <dependency>
-        <groupId>de.codecentric</groupId>
-        <artifactId>spring-boot-admin-starter-client</artifactId>
-        <version>${spring-boot-admin.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

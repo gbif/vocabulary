@@ -31,5 +31,6 @@ import lombok.Setter;
 @Setter
 public class SecurityConfig {
   @NotBlank private String loginApiBasePath;
+  @NotBlank private String actuatorUser;
   @NotBlank private String actuatorSecret;
 }

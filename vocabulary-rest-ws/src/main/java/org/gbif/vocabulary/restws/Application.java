@@ -15,6 +15,11 @@
  */
 package org.gbif.vocabulary.restws;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.gbif.api.vocabulary.UserRole;
 import org.gbif.common.messaging.ConnectionParameters;
 import org.gbif.common.messaging.DefaultMessagePublisher;
@@ -25,11 +30,6 @@ import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.restws.config.MessagingConfig;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -103,8 +103,6 @@ public class Application {
   @Order(10)
   static class ActuatorSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static final String ACTUATOR_USER = "actuatorAdmin";
-
     @Autowired private SecurityConfig securityConfig;
 
     @Override
@@ -127,7 +125,7 @@ public class Application {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
       auth.inMemoryAuthentication()
-          .withUser(ACTUATOR_USER)
+          .withUser(securityConfig.getActuatorUser())
           .password(passwordEncoder().encode(securityConfig.getActuatorSecret()))
           .roles("ACTUATOR");
     }

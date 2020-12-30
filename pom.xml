@@ -81,6 +81,7 @@
     <lombok.version>1.18.12</lombok.version>
     <metainf-services.version>1.8</metainf-services.version>
     <jcommander.version>1.58</jcommander.version>
+    <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
 
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
@@ -358,6 +359,13 @@
         <artifactId>spring-auto-restdocs-core</artifactId>
         <version>${spring.auto-rest-docs.version}</version>
         <scope>test</scope>
+      </dependency>
+
+
+      <dependency>
+        <groupId>de.codecentric</groupId>
+        <artifactId>spring-boot-admin-starter-client</artifactId>
+        <version>${spring-boot-admin.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

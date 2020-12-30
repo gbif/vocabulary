@@ -15,11 +15,6 @@
  */
 package org.gbif.vocabulary.restws;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.gbif.api.vocabulary.UserRole;
 import org.gbif.common.messaging.ConnectionParameters;
 import org.gbif.common.messaging.DefaultMessagePublisher;
@@ -30,6 +25,11 @@ import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.restws.config.MessagingConfig;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

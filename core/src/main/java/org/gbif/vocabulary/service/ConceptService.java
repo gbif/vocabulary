@@ -18,7 +18,7 @@ package org.gbif.vocabulary.service;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.search.ChildrenCountResult;
+import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
@@ -104,7 +104,7 @@ public interface ConceptService extends BaseService<Concept> {
    * Counts the number of children of each of the concept parents specified.
    *
    * @param conceptParents keys of the concepts whose children we'll count
-   * @return list of {@link ChildrenCountResult}
+   * @return list of {@link ChildrenResult}
    */
-  List<ChildrenCountResult> countChildren(List<Long> conceptParents);
+  List<ChildrenResult> countChildren(List<Long> conceptParents);
 }

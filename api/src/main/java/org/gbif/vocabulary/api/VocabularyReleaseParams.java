@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.model.search;
+package org.gbif.vocabulary.api;
 
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-/** Utility container to hold a concept key and its number of children. */
 @Getter
+@Setter
 @AllArgsConstructor
-@EqualsAndHashCode
-public class ChildrenCountResult {
-  private final long conceptKey;
-  private final int childrenCount;
+@NoArgsConstructor
+public class VocabularyReleaseParams {
+
+  private String version;
+  private String comment;
 }

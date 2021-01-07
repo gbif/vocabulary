@@ -13,25 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.restws.model;
-
-import org.gbif.vocabulary.model.Concept;
+package org.gbif.vocabulary.api;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import org.gbif.vocabulary.model.Concept;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /** Custom view to represent a {@link Concept} plus some additional information. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@EqualsAndHashCode
 public class ConceptView implements Serializable {
 
   @JsonUnwrapped private Concept concept;
   private List<String> parents;
   private Integer childrenCount;
+  private List<String> children;
 
   public ConceptView(Concept concept) {
     this.concept = concept;
@@ -66,6 +68,15 @@ public class ConceptView implements Serializable {
 
   public ConceptView setChildrenCount(Integer childrenCount) {
     this.childrenCount = childrenCount;
+    return this;
+  }
+
+  public List<String> getChildren() {
+    return children;
+  }
+
+  public ConceptView setChildren(List<String> children) {
+    this.children = children;
     return this;
   }
 }

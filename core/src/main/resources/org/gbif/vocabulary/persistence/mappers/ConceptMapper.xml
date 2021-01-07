@@ -147,36 +147,42 @@
     SELECT
     <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
-    <if test="query != null">
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    <if test="params.query != null">
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    </if>
+    <if test="params.parent != null">
+      INNER JOIN concept parent ON parent.key = c.parent_key
     </if>
     WHERE
     c.deleted IS NULL
-    <if test="vocabularyKey != null">
-      AND c.vocabulary_key = #{vocabularyKey}
+    <if test="params.vocabularyKey != null">
+      AND c.vocabulary_key = #{params.vocabularyKey}
     </if>
-    <if test="parentKey != null">
-      AND c.parent_key = #{parentKey}
+    <if test="params.parentKey != null">
+      AND c.parent_key = #{params.parentKey}
     </if>
-    <if test="replacedByKey != null">
-      AND c.replaced_by_key = #{replacedByKey}
+    <if test="params.replacedByKey != null">
+      AND c.replaced_by_key = #{params.replacedByKey}
     </if>
-    <if test="name != null">
-      AND c.name = #{name}
+    <if test="params.name != null">
+      AND c.name = #{params.name}
     </if>
-    <if test="deprecated != null">
-      AND c.deprecated IS <if test="deprecated">NOT</if> NULL
+    <if test="params.deprecated != null">
+      AND c.deprecated IS <if test="params.deprecated">NOT</if> NULL
     </if>
-    <if test="key != null">
-      AND c.key = #{key}
+    <if test="params.key != null">
+      AND c.key = #{params.key}
     </if>
-    <if test="hasParent != null">
-      AND c.parent_key IS <if test="hasParent">NOT</if> NULL
+    <if test="params.hasParent != null">
+      AND c.parent_key IS <if test="params.hasParent">NOT</if> NULL
     </if>
-    <if test="hasReplacement != null">
-      AND c.replaced_by_key IS <if test="hasReplacement">NOT</if> NULL
+    <if test="params.hasReplacement != null">
+      AND c.replaced_by_key IS <if test="params.hasReplacement">NOT</if> NULL
     </if>
-    ORDER BY <if test="query != null">ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
+    <if test="params.parent != null">
+      And parent.name = #{params.parent}
+    </if>
+    ORDER BY <if test="params.query != null">ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>
@@ -185,33 +191,39 @@
   <select id="count" resultType="Long">
     SELECT COUNT(*)
     FROM concept c
-    <if test="query != null">
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    <if test="params.query != null">
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    </if>
+    <if test="params.parent != null">
+      INNER JOIN concept parent ON parent.key = c.parent_key
     </if>
     WHERE c.deleted IS NULL
-    <if test="vocabularyKey != null">
-      AND c.vocabulary_key = #{vocabularyKey}
+    <if test="params.vocabularyKey != null">
+      AND c.vocabulary_key = #{params.vocabularyKey}
     </if>
-    <if test="parentKey != null">
-      AND c.parent_key = #{parentKey}
+    <if test="params.parentKey != null">
+      AND c.parent_key = #{params.parentKey}
     </if>
-    <if test="replacedByKey != null">
-      AND c.replaced_by_key = #{replacedByKey}
+    <if test="params.replacedByKey != null">
+      AND c.replaced_by_key = #{params.replacedByKey}
     </if>
-    <if test="name != null">
-      AND c.name = #{name}
+    <if test="params.name != null">
+      AND c.name = #{params.name}
     </if>
-    <if test="deprecated != null">
-      AND c.deprecated IS <if test="deprecated">NOT</if> NULL
+    <if test="params.deprecated != null">
+      AND c.deprecated IS <if test="params.deprecated">NOT</if> NULL
     </if>
-    <if test="key != null">
-      AND c.key = #{key}
+    <if test="params.key != null">
+      AND c.key = #{params.key}
     </if>
-    <if test="hasParent != null">
-      AND c.parent_key IS <if test="hasParent">NOT</if> NULL
+    <if test="params.hasParent != null">
+      AND c.parent_key IS <if test="params.hasParent">NOT</if> NULL
     </if>
-    <if test="hasReplacement != null">
-      AND c.replaced_by_key IS <if test="hasReplacement">NOT</if> NULL
+    <if test="params.hasReplacement != null">
+      AND c.replaced_by_key IS <if test="params.hasReplacement">NOT</if> NULL
+    </if>
+    <if test="params.parent != null">
+      And parent.name = #{params.parent}
     </if>
   </select>
 
@@ -295,14 +307,13 @@
     WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL
   </select>
 
-  <select id="countChildren" resultType="ChildrenCountResult">
-    SELECT c.parent_key as conceptKey, count(*) as childrenCount
+  <select id="countChildren" resultType="ChildrenResult">
+    SELECT c.parent_key as parentKey, c.name as childName
     FROM concept c
     WHERE c.parent_key IN
     <foreach collection="parentConcepts" item="key" separator="," open="(" close=")">
       #{key}
     </foreach>
-    GROUP BY c.parent_key
   </select>
 
 </mapper>

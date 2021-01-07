@@ -15,36 +15,28 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import javax.annotation.Nullable;
 
 /** Mapper for {@link Vocabulary}. */
 @Mapper
 public interface VocabularyMapper extends BaseMapper<Vocabulary> {
 
   List<Vocabulary> list(
-      @Nullable @Param("query") String query,
-      @Nullable @Param("name") String name,
-      @Nullable @Param("namespace") String namespace,
-      @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Long key,
+      @Nullable @Param("params") VocabularySearchParams params,
       @Nullable @Param("page") Pageable page);
 
-  long count(
-      @Nullable @Param("query") String query,
-      @Nullable @Param("name") String name,
-      @Nullable @Param("namespace") String namespace,
-      @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Long key);
+  long count(@Nullable @Param("params") VocabularySearchParams params);
 
   Vocabulary getByName(@Param("name") String name);
 

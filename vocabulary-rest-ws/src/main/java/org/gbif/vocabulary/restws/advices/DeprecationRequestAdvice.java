@@ -15,13 +15,13 @@
  */
 package org.gbif.vocabulary.restws.advices;
 
-import org.gbif.vocabulary.restws.model.DeprecateAction;
-import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
-import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.function.BiPredicate;
+
+import org.gbif.vocabulary.api.DeprecateAction;
+import org.gbif.vocabulary.api.DeprecateConceptAction;
+import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;

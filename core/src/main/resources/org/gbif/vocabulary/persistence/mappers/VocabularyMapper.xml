@@ -78,23 +78,23 @@
     SELECT
     <include refid="VOCABULARY_READ_FIELDS"/>
     FROM vocabulary v
-    <if test="query != null">
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    <if test="params.query != null">
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     WHERE v.deleted IS NULL
-    <if test="deprecated != null">
-      AND v.deprecated IS <if test="deprecated">NOT</if> NULL
+    <if test="params.deprecated != null">
+      AND v.deprecated IS <if test="params.deprecated">NOT</if> NULL
     </if>
-    <if test="name != null">
-      AND v.name = #{name}
+    <if test="params.name != null">
+      AND v.name = #{params.name}
     </if>
-    <if test="namespace != null">
-      AND v.namespace = #{namespace}
+    <if test="params.namespace != null">
+      AND v.namespace = #{params.namespace}
     </if>
-    <if test="key != null">
-      AND v.key = #{key}
+    <if test="params.key != null">
+      AND v.key = #{params.key}
     </if>
-    ORDER BY <if test="query != null">ts_rank_cd(v.fulltext_search, query) DESC,</if> v.created DESC, v.key
+    ORDER BY <if test="params.query != null">ts_rank_cd(v.fulltext_search, query) DESC,</if> v.created DESC, v.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>
@@ -103,21 +103,21 @@
   <select id="count" resultType="Long">
     SELECT COUNT(*)
     FROM vocabulary v
-    <if test="query != null">
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    <if test="params.query != null">
+      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     WHERE v.deleted IS NULL
-    <if test="deprecated != null">
-      AND v.deprecated IS <if test="deprecated">NOT</if> NULL
+    <if test="params.deprecated != null">
+      AND v.deprecated IS <if test="params.deprecated">NOT</if> NULL
     </if>
-    <if test="name != null">
-      AND v.name = #{name}
+    <if test="params.name != null">
+      AND v.name = #{params.name}
     </if>
-    <if test="namespace != null">
-      AND v.namespace = #{namespace}
+    <if test="params.namespace != null">
+      AND v.namespace = #{params.namespace}
     </if>
-    <if test="key != null">
-      AND v.key = #{key}
+    <if test="params.key != null">
+      AND v.key = #{params.key}
     </if>
   </select>
 

@@ -28,12 +28,13 @@ public class ConceptSearchParams implements Serializable {
   private final String query;
   private final Long vocabularyKey;
   private final Long parentKey;
+  private final String parent;
   private final Long replacedByKey;
   private final String name;
   private final Boolean deprecated;
   private final Long key;
-  private Boolean hasParent;
-  private Boolean hasReplacement;
+  private final Boolean hasParent;
+  private final Boolean hasReplacement;
 
   public static ConceptSearchParams empty() {
     return builder().build();

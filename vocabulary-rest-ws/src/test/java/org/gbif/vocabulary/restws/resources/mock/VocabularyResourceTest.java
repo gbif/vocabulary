@@ -15,23 +15,23 @@
  */
 package org.gbif.vocabulary.restws.resources.mock;
 
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.VocabularyRelease;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.restws.model.DeprecateAction;
-import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
-import org.gbif.vocabulary.restws.model.VocabularyReleaseParams;
-import org.gbif.vocabulary.restws.resources.VocabularyResource;
-import org.gbif.vocabulary.service.ExportService;
-import org.gbif.vocabulary.service.VocabularyService;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.DeprecateAction;
+import org.gbif.vocabulary.api.DeprecateVocabularyAction;
+import org.gbif.vocabulary.api.VocabularyReleaseParams;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.restws.resources.VocabularyResource;
+import org.gbif.vocabulary.service.ExportService;
+import org.gbif.vocabulary.service.VocabularyService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;

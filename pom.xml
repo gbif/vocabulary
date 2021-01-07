@@ -20,6 +20,8 @@
     <module>vocabulary-lookup</module>
     <module>vocabulary-cli</module>
     <module>tools</module>
+    <module>vocabulary-rest-ws-client</module>
+    <module>api</module>
   </modules>
 
   <scm>
@@ -61,6 +63,7 @@
 
   <properties>
     <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+    <spring-cloud-openfeign.version>2.2.6.RELEASE</spring-cloud-openfeign.version>
     <main.basedir>${project.basedir}</main.basedir>
 
     <!-- gbif -->
@@ -68,6 +71,7 @@
     <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
     <postal-service.version>0.46</postal-service.version>
     <gbif-cli.version>0.14</gbif-cli.version>
+    <gbif-common-ws.version>1.12</gbif-common-ws.version>
 
     <!-- DB -->
     <postgresql-embedded.version>2.10</postgresql-embedded.version>
@@ -82,6 +86,7 @@
     <metainf-services.version>1.8</metainf-services.version>
     <jcommander.version>1.58</jcommander.version>
     <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
+    <feign.version>10.11</feign.version>
 
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
@@ -121,12 +126,18 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Spring -->
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
         <version>${spring-boot.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
+        <version>${spring-cloud-openfeign.version}</version>
       </dependency>
 
       <!-- GBIF -->
@@ -137,12 +148,22 @@
       </dependency>
       <dependency>
         <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
         <artifactId>core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.gbif.vocabulary</groupId>
         <artifactId>tools</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>vocabulary-rest-ws-client</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -178,6 +199,11 @@
         <groupId>org.gbif.common</groupId>
         <artifactId>gbif-cli</artifactId>
         <version>${gbif-cli.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif</groupId>
+        <artifactId>gbif-common-ws</artifactId>
+        <version>${gbif-common-ws.version}</version>
       </dependency>
 
       <!-- DB -->
@@ -233,6 +259,11 @@
         <groupId>de.codecentric</groupId>
         <artifactId>spring-boot-admin-starter-client</artifactId>
         <version>${spring-boot-admin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-jackson</artifactId>
+        <version>${feign.version}</version>
       </dependency>
 
       <!-- logging -->

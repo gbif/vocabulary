@@ -15,45 +15,29 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.search.ChildrenCountResult;
+import org.gbif.vocabulary.model.search.ChildrenResult;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import javax.annotation.Nullable;
 
 /** Mapper for {@link Concept}. */
 @Mapper
 public interface ConceptMapper extends BaseMapper<Concept> {
 
   List<Concept> list(
-      @Nullable @Param("query") String query,
-      @Nullable @Param("vocabularyKey") Long vocabularyKey,
-      @Nullable @Param("parentKey") Long parentKey,
-      @Nullable @Param("replacedByKey") Long replacedByKey,
-      @Nullable @Param("name") String name,
-      @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Long key,
-      @Nullable @Param("hasParent") Boolean hasParent,
-      @Nullable @Param("hasReplacement") Boolean hasReplacement,
+      @Nullable @Param("params") ConceptSearchParams params,
       @Nullable @Param("page") Pageable page);
 
-  long count(
-      @Nullable @Param("query") String query,
-      @Nullable @Param("vocabularyKey") Long vocabularyKey,
-      @Nullable @Param("parentKey") Long parentKey,
-      @Nullable @Param("replacedByKey") Long replacedByKey,
-      @Nullable @Param("name") String name,
-      @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Long key,
-      @Nullable @Param("hasParent") Boolean hasParent,
-      @Nullable @Param("hasReplacement") Boolean hasReplacement);
+  long count(@Nullable @Param("params") ConceptSearchParams params);
 
   Concept getByNameAndVocabulary(
       @Param("name") String name, @Param("vocabularyName") String vocabularyName);
@@ -108,7 +92,7 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * Given a list of concepts, it finds the number of children that each concept has.
    *
    * @param parentConcepts list with a key of all the concepts to look for
-   * @return list of {@link ChildrenCountResult}
+   * @return list of {@link ChildrenResult}
    */
-  List<ChildrenCountResult> countChildren(@Param("parentConcepts") List<Long> parentConcepts);
+  List<ChildrenResult> countChildren(@Param("parentConcepts") List<Long> parentConcepts);
 }

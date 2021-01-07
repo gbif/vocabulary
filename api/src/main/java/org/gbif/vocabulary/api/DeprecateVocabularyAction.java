@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.restws.model;
+package org.gbif.vocabulary.api;
 
 import lombok.Getter;
 import lombok.Setter;

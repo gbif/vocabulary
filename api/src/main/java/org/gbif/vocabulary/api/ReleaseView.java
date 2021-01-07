@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.restws.model;
+package org.gbif.vocabulary.api;
 
-/** Common interface for deprecating actions. */
-public interface DeprecateAction {
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
 
-  Long getReplacementKey();
+import java.io.Serializable;
+import java.util.List;
 
-  void setReplacementKey(Long replacementKey);
+import lombok.Data;
 
-  String getDeprecatedBy();
+/** View to display the content of a vocabulary release in the API. */
+@Data
+public class ReleaseView implements Serializable {
 
-  void setDeprecatedBy(String deprecatedBy);
+  private Vocabulary vocabulary;
+  private List<Concept> concepts;
 }

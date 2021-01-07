@@ -15,24 +15,27 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.model.common.paging.PagingRequest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.ConceptApi;
+import org.gbif.vocabulary.api.ConceptListParams;
+import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.AbstractVocabularyEntity;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.ChildrenCountResult;
+import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.restws.model.ConceptView;
-import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,13 +47,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 @RestController
 @RequestMapping(VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH)
-public class ConceptResource {
+public class ConceptResource implements ConceptApi {
 
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
@@ -60,20 +64,10 @@ public class ConceptResource {
     this.vocabularyService = vocabularyService;
   }
 
+  @Override
   @GetMapping()
   public PagingResponse<ConceptView> listConcepts(
-      @PathVariable("vocabularyName") String vocabularyName,
-      @RequestParam(value = "q", required = false) String query,
-      @RequestParam(value = "name", required = false) String name,
-      @RequestParam(value = "parentKey", required = false) Long parentKey,
-      @RequestParam(value = "replacedByKey", required = false) Long replacedByKey,
-      @RequestParam(value = "deprecated", required = false) Boolean deprecated,
-      @RequestParam(value = "key", required = false) Long key,
-      @RequestParam(value = "hasParent", required = false) Boolean hasParent,
-      @RequestParam(value = "hasReplacement", required = false) Boolean hasReplacement,
-      @RequestParam(value = "includeChildrenCount", required = false) boolean includeChildrenCount,
-      @RequestParam(value = "includeParents", required = false) boolean includeParents,
-      PagingRequest page) {
+      @PathVariable("vocabularyName") String vocabularyName, ConceptListParams params) {
 
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
@@ -81,47 +75,65 @@ public class ConceptResource {
     PagingResponse<Concept> conceptsPage =
         conceptService.list(
             ConceptSearchParams.builder()
-                .vocabularyKey(vocabulary.getKey())
-                .query(query)
-                .name(name)
-                .parentKey(parentKey)
-                .replacedByKey(replacedByKey)
-                .deprecated(deprecated)
-                .key(key)
-                .hasParent(hasParent)
-                .hasReplacement(hasReplacement)
+                .vocabularyKey(params.getVocabularyKey())
+                .query(params.getQuery())
+                .name(params.getName())
+                .parentKey(params.getParentKey())
+                .parent(params.getParent())
+                .replacedByKey(params.getReplacedByKey())
+                .deprecated(params.getDeprecated())
+                .key(params.getKey())
+                .hasParent(params.getHasParent())
+                .hasReplacement(params.getHasReplacement())
                 .build(),
-            page);
+            params.getPage());
 
     Stream<ConceptView> viewStream = conceptsPage.getResults().stream().map(ConceptView::new);
 
-    if (includeChildrenCount) {
+    // this could be simplified by keeping only 1 param but we leave the 2 of them for backwards
+    // compatibility
+    if (params.isIncludeChildrenCount() || params.isIncludeChildren()) {
       // get the keys of all the concepts
       List<Long> parentKeys =
           conceptsPage.getResults().stream()
               .map(AbstractVocabularyEntity::getKey)
               .collect(Collectors.toList());
 
-      // get the children counts
-      List<ChildrenCountResult> counts = new ArrayList<>();
+      // get the children
+      List<ChildrenResult> children = new ArrayList<>();
       if (!parentKeys.isEmpty()) {
-        counts = conceptService.countChildren(parentKeys);
+        children = conceptService.countChildren(parentKeys);
       }
 
-      Map<Long, Integer> childrenByConcept =
-          counts.stream()
-              .collect(
-                  Collectors.toMap(
-                      ChildrenCountResult::getConceptKey, ChildrenCountResult::getChildrenCount));
+      Map<Long, Set<ChildrenResult>> childrenByConcept =
+          children.stream()
+              .collect(Collectors.groupingBy(ChildrenResult::getParentKey, Collectors.toSet()));
 
       // set it to the view
-      viewStream =
-          viewStream.map(
-              v -> v.setChildrenCount(childrenByConcept.getOrDefault(v.getConcept().getKey(), 0)));
+      if (params.isIncludeChildrenCount()) {
+        viewStream =
+            viewStream.map(
+                v ->
+                    v.setChildrenCount(
+                        childrenByConcept
+                            .getOrDefault(v.getConcept().getKey(), Collections.emptySet())
+                            .size()));
+      }
+      if (params.isIncludeChildren()) {
+        viewStream =
+            viewStream.map(
+                v ->
+                    v.setChildren(
+                        childrenByConcept
+                            .getOrDefault(v.getConcept().getKey(), Collections.emptySet())
+                            .stream()
+                            .map(ChildrenResult::getChildName)
+                            .collect(Collectors.toList())));
+      }
     }
 
     // parents
-    if (includeParents) {
+    if (params.isIncludeParents()) {
       viewStream =
           viewStream.map(
               v ->
@@ -137,11 +149,13 @@ public class ConceptResource {
         viewStream.collect(Collectors.toList()));
   }
 
+  @Override
   @GetMapping("{name}")
   public ConceptView get(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      @RequestParam(value = "includeParents", required = false) boolean includeParents) {
+      @RequestParam(value = "includeParents", required = false) boolean includeParents,
+      @RequestParam(value = "includeChildren", required = false) boolean includeChildren) {
     Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
 
     if (concept == null) {
@@ -153,9 +167,20 @@ public class ConceptResource {
       conceptView.setParents(conceptService.findParents(concept.getKey()));
     }
 
+    if (includeChildren) {
+      // get the children
+      List<ChildrenResult> children =
+          conceptService.countChildren(Collections.singletonList(concept.getKey()));
+
+      // set it to the view
+      conceptView.setChildren(
+          children.stream().map(ChildrenResult::getChildName).collect(Collectors.toList()));
+    }
+
     return conceptView;
   }
 
+  @Override
   @PostMapping
   public Concept create(
       @PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
@@ -167,6 +192,7 @@ public class ConceptResource {
     return conceptService.get(key);
   }
 
+  @Override
   @PutMapping("{name}")
   public Concept update(
       @PathVariable("vocabularyName") String vocabularyName,
@@ -185,6 +211,7 @@ public class ConceptResource {
     return conceptService.get(concept.getKey());
   }
 
+  @Override
   @GetMapping("suggest")
   public List<KeyNameResult> suggest(
       @PathVariable("vocabularyName") String vocabularyName, @RequestParam("q") String query) {
@@ -194,6 +221,7 @@ public class ConceptResource {
     return conceptService.suggest(query, vocabulary.getKey());
   }
 
+  @Override
   @PutMapping("{name}/deprecate")
   public void deprecate(
       @PathVariable("vocabularyName") String vocabularyName,
@@ -211,6 +239,7 @@ public class ConceptResource {
         deprecateConceptAction.isDeprecateChildren());
   }
 
+  @Override
   @DeleteMapping("{name}/deprecate")
   public void restoreDeprecated(
       @PathVariable("vocabularyName") String vocabularyName,

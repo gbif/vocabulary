@@ -15,10 +15,20 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.common.messaging.api.MessagePublisher;
 import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
+import org.gbif.vocabulary.api.DeprecateVocabularyAction;
+import org.gbif.vocabulary.api.VocabularyApi;
+import org.gbif.vocabulary.api.VocabularyListParams;
+import org.gbif.vocabulary.api.VocabularyReleaseParams;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.export.ExportParams;
@@ -26,19 +36,9 @@ import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.config.ExportConfig;
-import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
-import org.gbif.vocabulary.restws.model.VocabularyReleaseParams;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -57,17 +57,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @Slf4j
 @RestController
 @RequestMapping(VOCABULARIES_PATH)
-public class VocabularyResource {
+public class VocabularyResource implements VocabularyApi {
+
+  // TODO: hacer service para usar en los clientes??
 
   private final VocabularyService vocabularyService;
   private final ExportService exportService;
@@ -85,37 +89,34 @@ public class VocabularyResource {
     this.messagePublisher = messagePublisher;
   }
 
+  @Override
   @GetMapping
-  public PagingResponse<Vocabulary> listVocabularies(
-      @RequestParam(value = "q", required = false) String query,
-      @RequestParam(value = "name", required = false) String name,
-      @RequestParam(value = "namespace", required = false) String namespace,
-      @RequestParam(value = "deprecated", required = false) Boolean deprecated,
-      @RequestParam(value = "key", required = false) Long key,
-      PagingRequest page) {
-
+  public PagingResponse<Vocabulary> listVocabularies(VocabularyListParams params) {
     return vocabularyService.list(
         VocabularySearchParams.builder()
-            .query(query)
-            .name(name)
-            .namespace(namespace)
-            .deprecated(deprecated)
-            .key(key)
+            .namespace(params.getNamespace())
+            .name(params.getName())
+            .deprecated(params.getDeprecated())
+            .key(params.getKey())
+            .query(params.getQuery())
             .build(),
-        page);
+        params.getPage());
   }
 
+  @Override
   @GetMapping("{name}")
   public Vocabulary get(@PathVariable("name") String vocabularyName) {
     return vocabularyService.getByName(vocabularyName);
   }
 
+  @Override
   @PostMapping
   public Vocabulary create(@RequestBody Vocabulary vocabulary) {
     long key = vocabularyService.create(vocabulary);
     return vocabularyService.get(key);
   }
 
+  @Override
   @PutMapping("{name}")
   public Vocabulary update(
       @PathVariable("name") String vocabularyName, @RequestBody Vocabulary vocabulary) {
@@ -126,11 +127,13 @@ public class VocabularyResource {
     return vocabularyService.get(vocabulary.getKey());
   }
 
+  @Override
   @GetMapping("suggest")
   public List<KeyNameResult> suggest(@RequestParam("q") String query) {
     return vocabularyService.suggest(query);
   }
 
+  @Override
   @PutMapping("{name}/deprecate")
   public void deprecate(
       @PathVariable("name") String vocabularyName,
@@ -145,6 +148,7 @@ public class VocabularyResource {
         deprecateVocabularyAction.isDeprecateConcepts());
   }
 
+  @Override
   @DeleteMapping("{name}/deprecate")
   public void restoreDeprecated(
       @PathVariable("name") String vocabularyName,
@@ -156,9 +160,15 @@ public class VocabularyResource {
     vocabularyService.restoreDeprecated(vocabulary.getKey(), restoreDeprecatedConcepts);
   }
 
+  @Override
+  public byte[] exportVocabulary(String vocabularyName) throws IOException {
+    Path exportPath = exportService.exportVocabulary(vocabularyName);
+    return Files.readAllBytes(exportPath);
+  }
+
   @GetMapping(value = "{name}/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<Resource> exportVocabulary(@PathVariable("name") String vocabularyName)
-      throws IOException {
+  public ResponseEntity<Resource> exportVocabularyResource(
+      @PathVariable("name") String vocabularyName) throws IOException {
     Path exportPath = exportService.exportVocabulary(vocabularyName);
     ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(exportPath));
 
@@ -168,12 +178,9 @@ public class VocabularyResource {
         .body(resource);
   }
 
-  @PostMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH)
-  public ResponseEntity<VocabularyRelease> releaseVocabularyVersion(
-      @PathVariable("name") String vocabularyName,
-      @RequestBody VocabularyReleaseParams params,
-      HttpServletRequest httpServletRequest)
-      throws IOException {
+  @Override
+  public VocabularyRelease releaseVocabularyVersion(
+      String vocabularyName, VocabularyReleaseParams params) throws IOException {
 
     if (!exportConfig.isReleaseEnabled()) {
       throw new UnsupportedOperationException("Vocabulary releases are not enabled");
@@ -201,11 +208,24 @@ public class VocabularyResource {
       log.warn("Message publisher not instantiated");
     }
 
+    return release;
+  }
+
+  @PostMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH)
+  public ResponseEntity<VocabularyRelease> releaseVocabularyVersion(
+      @PathVariable("name") String vocabularyName,
+      @RequestBody VocabularyReleaseParams params,
+      HttpServletRequest httpServletRequest)
+      throws IOException {
+
+    VocabularyRelease release = releaseVocabularyVersion(vocabularyName, params);
+
     return ResponseEntity.created(
             URI.create(httpServletRequest.getRequestURL() + "/" + release.getVersion()))
         .body(release);
   }
 
+  @Override
   @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH)
   public PagingResponse<VocabularyRelease> listReleases(
       @PathVariable("name") String vocabularyName,
@@ -214,6 +234,7 @@ public class VocabularyResource {
     return exportService.listReleases(vocabularyName, version, page);
   }
 
+  @Override
   @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}")
   public VocabularyRelease getRelease(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
@@ -223,6 +244,7 @@ public class VocabularyResource {
     return releases.getResults().isEmpty() ? null : releases.getResults().get(0);
   }
 
+  @Override
   @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}/export")
   public VocabularyExport getReleaseExport(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {

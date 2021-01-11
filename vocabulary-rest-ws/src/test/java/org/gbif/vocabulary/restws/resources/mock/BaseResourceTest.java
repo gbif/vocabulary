@@ -15,15 +15,15 @@
  */
 package org.gbif.vocabulary.restws.resources.mock;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.gbif.vocabulary.api.DeprecateAction;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

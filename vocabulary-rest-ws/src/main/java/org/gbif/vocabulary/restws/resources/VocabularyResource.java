@@ -71,8 +71,6 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PAT
 @RequestMapping(VOCABULARIES_PATH)
 public class VocabularyResource implements VocabularyApi {
 
-  // TODO: hacer service para usar en los clientes??
-
   private final VocabularyService vocabularyService;
   private final ExportService exportService;
   private final ExportConfig exportConfig;

@@ -34,19 +34,19 @@ public class LifeStageLookupTest {
 
   @Test
   public void adultTest() {
-    assertEquals("Adult", LOOKUP.lookup("1 adult").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("1 adult(s)").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("1 ADult").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("1 adulto").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("10 adult").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("A").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("Ad").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("adulta").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("adults").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("old").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("old   adult").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("teneral").get().getName());
-    assertEquals("Adult", LOOKUP.lookup("young adult").get().getName());
+    assertEquals("Adult", LOOKUP.lookup("1 adult").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("1 adult(s)").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("1 ADult").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("1 adulto").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("10 adult").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("A").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("Ad").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("adulta").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("adults").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("old").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("old   adult").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("teneral").get().getConcept().getName());
+    assertEquals("Adult", LOOKUP.lookup("young adult").get().getConcept().getName());
 
     assertFalse(LOOKUP.lookup("adult?").isPresent());
     assertFalse(LOOKUP.lookup("Adult or juvenile").isPresent());
@@ -58,56 +58,56 @@ public class LifeStageLookupTest {
 
   @Test
   public void subadultTest() {
-    assertEquals("Subadult", LOOKUP.lookup("subadult").get().getName());
-    assertEquals("Subadult", LOOKUP.lookup("subimago").get().getName());
-    assertEquals("Subadult", LOOKUP.lookup("sub-adult").get().getName());
-    assertEquals("Subadult", LOOKUP.lookup("subad").get().getName());
-    assertEquals("Subadult", LOOKUP.lookup("subadulto").get().getName());
-    assertEquals("Subadult", LOOKUP.lookup("sub-Adult").get().getName());
-    assertEquals("Subadult", LOOKUP.lookup("sub adult").get().getName());
+    assertEquals("Subadult", LOOKUP.lookup("subadult").get().getConcept().getName());
+    assertEquals("Subadult", LOOKUP.lookup("subimago").get().getConcept().getName());
+    assertEquals("Subadult", LOOKUP.lookup("sub-adult").get().getConcept().getName());
+    assertEquals("Subadult", LOOKUP.lookup("subad").get().getConcept().getName());
+    assertEquals("Subadult", LOOKUP.lookup("subadulto").get().getConcept().getName());
+    assertEquals("Subadult", LOOKUP.lookup("sub-Adult").get().getConcept().getName());
+    assertEquals("Subadult", LOOKUP.lookup("sub adult").get().getConcept().getName());
 
     assertFalse(LOOKUP.lookup("subadult?").isPresent());
   }
 
   @Test
   public void juvenileTest() {
-    assertEquals("Juvenile", LOOKUP.lookup("young").get().getName());
+    assertEquals("Juvenile", LOOKUP.lookup("young").get().getConcept().getName());
   }
 
   @Test
   public void imagoTest() {
-    assertEquals("Imago", LOOKUP.lookup("imago").get().getName());
-    assertEquals("Imago", LOOKUP.lookup("fresh imago").get().getName());
-    assertEquals("Imago", LOOKUP.lookup("imago/adult").get().getName());
-    assertEquals("Imago", LOOKUP.lookup("imago:1").get().getName());
+    assertEquals("Imago", LOOKUP.lookup("imago").get().getConcept().getName());
+    assertEquals("Imago", LOOKUP.lookup("fresh imago").get().getConcept().getName());
+    assertEquals("Imago", LOOKUP.lookup("imago/adult").get().getConcept().getName());
+    assertEquals("Imago", LOOKUP.lookup("imago:1").get().getConcept().getName());
   }
 
   @Test
   public void larvaTest() {
-    assertEquals("Larva", LOOKUP.lookup("1 larva").get().getName());
-    assertEquals("Larva", LOOKUP.lookup("1st instar").get().getName());
-    assertEquals("Larva", LOOKUP.lookup("2 larva").get().getName());
-    assertEquals("Larva", LOOKUP.lookup("3 larvae").get().getName());
-    assertEquals("Larva", LOOKUP.lookup("larvae").get().getName());
-    assertEquals("Larva", LOOKUP.lookup("larvas").get().getName());
-    assertEquals("Larva", LOOKUP.lookup("larval").get().getName());
-    assertEquals("Larva", LOOKUP.lookup("metacercaria").get().getName());
-    assertEquals("Larva", LOOKUP.lookup("larve").get().getName());
+    assertEquals("Larva", LOOKUP.lookup("1 larva").get().getConcept().getName());
+    assertEquals("Larva", LOOKUP.lookup("1st instar").get().getConcept().getName());
+    assertEquals("Larva", LOOKUP.lookup("2 larva").get().getConcept().getName());
+    assertEquals("Larva", LOOKUP.lookup("3 larvae").get().getConcept().getName());
+    assertEquals("Larva", LOOKUP.lookup("larvae").get().getConcept().getName());
+    assertEquals("Larva", LOOKUP.lookup("larvas").get().getConcept().getName());
+    assertEquals("Larva", LOOKUP.lookup("larval").get().getConcept().getName());
+    assertEquals("Larva", LOOKUP.lookup("metacercaria").get().getConcept().getName());
+    assertEquals("Larva", LOOKUP.lookup("larve").get().getConcept().getName());
 
-    assertEquals("Veliger", LOOKUP.lookup("veliger").get().getName());
+    assertEquals("Veliger", LOOKUP.lookup("veliger").get().getConcept().getName());
 
-    assertEquals("Nymph", LOOKUP.lookup("larva, nymph").get().getName());
-    assertEquals("Nymph", LOOKUP.lookup("larva/nymph").get().getName());
+    assertEquals("Nymph", LOOKUP.lookup("larva, nymph").get().getConcept().getName());
+    assertEquals("Nymph", LOOKUP.lookup("larva/nymph").get().getConcept().getName());
 
-    assertEquals("Nauplius", LOOKUP.lookup("nauplii").get().getName());
+    assertEquals("Nauplius", LOOKUP.lookup("nauplii").get().getConcept().getName());
 
-    assertEquals("Tadpole", LOOKUP.lookup("tadpole").get().getName());
-    assertEquals("Tadpole", LOOKUP.lookup("tadpoles").get().getName());
-    assertEquals("Tadpole", LOOKUP.lookup("têtard").get().getName());
-    assertEquals("Tadpole", LOOKUP.lookup("Renacuajo").get().getName());
-    assertEquals("Tadpole", LOOKUP.lookup("renacuajos").get().getName());
+    assertEquals("Tadpole", LOOKUP.lookup("tadpole").get().getConcept().getName());
+    assertEquals("Tadpole", LOOKUP.lookup("tadpoles").get().getConcept().getName());
+    assertEquals("Tadpole", LOOKUP.lookup("têtard").get().getConcept().getName());
+    assertEquals("Tadpole", LOOKUP.lookup("Renacuajo").get().getConcept().getName());
+    assertEquals("Tadpole", LOOKUP.lookup("renacuajos").get().getConcept().getName());
 
-    assertEquals("Cyprid", LOOKUP.lookup("cyprid").get().getName());
+    assertEquals("Cyprid", LOOKUP.lookup("cyprid").get().getConcept().getName());
 
     assertFalse(LOOKUP.lookup("larva; adult").isPresent());
     assertFalse(LOOKUP.lookup("adult, larva").isPresent());
@@ -117,18 +117,18 @@ public class LifeStageLookupTest {
 
   @Test
   public void unknownTest() {
-    assertEquals("Unknown", LOOKUP.lookup("undetermined").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("unknown").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("não informado").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("not recorded").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("indeterminado").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("No se cuenta con el dato").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("Life Stage Not Recorded").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("Indéterminé").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("  desconocido").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("1K").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("1k+").get().getName());
-    assertEquals("Unknown", LOOKUP.lookup("1st calendar year").get().getName());
+    assertEquals("Unknown", LOOKUP.lookup("undetermined").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("unknown").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("não informado").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("not recorded").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("indeterminado").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("No se cuenta con el dato").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("Life Stage Not Recorded").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("Indéterminé").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("  desconocido").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("1K").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("1k+").get().getConcept().getName());
+    assertEquals("Unknown", LOOKUP.lookup("1st calendar year").get().getConcept().getName());
 
     assertFalse(LOOKUP.lookup("not applicable").isPresent());
     assertFalse(LOOKUP.lookup("No Aplica").isPresent());

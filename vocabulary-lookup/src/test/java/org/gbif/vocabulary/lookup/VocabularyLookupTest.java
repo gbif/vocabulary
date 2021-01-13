@@ -15,10 +15,10 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
+import java.util.Arrays;
 import java.util.Optional;
+
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class VocabularyLookupTest {
 
   private static final String TEST_VOCAB_FILE = "test-vocab.json";
-  private static final String INVALID_VOCAB_FILE = "invalid-vocab.json";
 
   @Test
   public void loadVocabularyFromInputStreamTest() {
@@ -45,19 +44,6 @@ public class VocabularyLookupTest {
   }
 
   @Test
-  public void invalidVocabularyLoadTest() {
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            VocabularyLookup.newBuilder()
-                .from(
-                    Thread.currentThread()
-                        .getContextClassLoader()
-                        .getResourceAsStream(INVALID_VOCAB_FILE))
-                .build());
-  }
-
-  @Test
   public void lookupTest() {
     VocabularyLookup vocabulary =
         VocabularyLookup.newBuilder()
@@ -65,24 +51,32 @@ public class VocabularyLookupTest {
                 Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE))
             .build();
 
-    Optional<Concept> concept = vocabulary.lookup("February");
+    Optional<LookupConcept> concept = vocabulary.lookup("February");
     assertTrue(concept.isPresent());
-    assertEquals("February", concept.get().getName());
+    assertEquals("February", concept.get().getConcept().getName());
+    assertEquals(1, concept.get().getParents().size());
+    assertTrue(concept.get().getParents().contains("January"));
 
     concept = vocabulary.lookup("Fev");
     assertTrue(concept.isPresent());
-    assertEquals("February", concept.get().getName());
+    assertEquals("February", concept.get().getConcept().getName());
 
     concept = vocabulary.lookup("Fév");
     assertTrue(concept.isPresent());
-    assertEquals("February", concept.get().getName());
+    assertEquals("February", concept.get().getConcept().getName());
 
     concept = vocabulary.lookup("ÉnERo");
     assertTrue(concept.isPresent());
-    assertEquals("January", concept.get().getName());
+    assertEquals("January", concept.get().getConcept().getName());
+    assertEquals(0, concept.get().getParents().size());
 
     concept = vocabulary.lookup("eneiro.");
     assertFalse(concept.isPresent());
+
+    concept = vocabulary.lookup("march");
+    assertTrue(concept.isPresent());
+    assertEquals(2, concept.get().getParents().size());
+    assertEquals(Arrays.asList("February", "January"), concept.get().getParents());
   }
 
   @Test
@@ -97,13 +91,13 @@ public class VocabularyLookupTest {
     assertFalse(vocabulary.lookup("Marzo", LanguageRegion.ENGLISH).isPresent());
     assertTrue(vocabulary.lookup("Marzo", LanguageRegion.GERMAN).isPresent());
 
-    Optional<Concept> concept = vocabulary.lookup("Marzo", LanguageRegion.SPANISH);
+    Optional<LookupConcept> concept = vocabulary.lookup("Marzo", LanguageRegion.SPANISH);
     assertTrue(concept.isPresent());
-    assertEquals("March", concept.get().getName());
+    assertEquals("March", concept.get().getConcept().getName());
 
     concept = vocabulary.lookup("Marzo", LanguageRegion.GERMAN);
     assertTrue(concept.isPresent());
-    assertEquals("February", concept.get().getName());
+    assertEquals("February", concept.get().getConcept().getName());
   }
 
   @Test
@@ -117,7 +111,7 @@ public class VocabularyLookupTest {
             .withPrefilter(PreFilters.REMOVE_NUMERIC_PREFIX)
             .build();
 
-    assertEquals("Adult", lookup.lookup("1325 adult").get().getName());
+    assertEquals("Adult", lookup.lookup("1325 adult").get().getConcept().getName());
 
     lookup =
         VocabularyLookup.newBuilder()
@@ -130,8 +124,8 @@ public class VocabularyLookupTest {
                     PreFilters.REMOVE_PARENTHESIS_CONTENT_SUFFIX))
             .build();
 
-    assertEquals("Adult", lookup.lookup("1325 adult").get().getName());
-    assertEquals("Adult", lookup.lookup("1325 adult (dsgds)").get().getName());
-    assertEquals("Adult", lookup.lookup("adult (dsgds)").get().getName());
+    assertEquals("Adult", lookup.lookup("1325 adult").get().getConcept().getName());
+    assertEquals("Adult", lookup.lookup("1325 adult (dsgds)").get().getConcept().getName());
+    assertEquals("Adult", lookup.lookup("adult (dsgds)").get().getConcept().getName());
   }
 }

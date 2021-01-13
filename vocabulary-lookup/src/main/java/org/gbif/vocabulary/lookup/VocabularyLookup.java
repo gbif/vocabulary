@@ -15,16 +15,9 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.export.ExportMetadata;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -36,16 +29,19 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
+
 import org.cache2k.Cache;
 import org.cache2k.Cache2kBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
@@ -101,14 +97,12 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
   private final Cache<String, Concept> namesCache;
   private final Cache<String, LabelMatch> labelsCache;
   private final Cache<String, Concept> hiddenLabelsCache;
+  private final Cache<Long, Concept> conceptsByKeyCache;
   private final Function<String, String> prefilter;
-  private ExportMetadata exportMetadata;
-  private Vocabulary vocabulary;
 
   private VocabularyLookup(InputStream in, Function<String, String> prefilter) {
     Objects.requireNonNull(in);
     this.prefilter = prefilter;
-
     namesCache =
         Cache2kBuilder.of(String.class, Concept.class)
             .eternal(true)
@@ -126,6 +120,12 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
             .entryCapacity(Long.MAX_VALUE)
             .suppressExceptions(false)
             .build();
+    conceptsByKeyCache =
+        Cache2kBuilder.of(Long.class, Concept.class)
+            .eternal(true)
+            .entryCapacity(Long.MAX_VALUE)
+            .suppressExceptions(false)
+            .build();
 
     importVocabulary(in);
   }
@@ -135,9 +135,9 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
    * only try to use English if there are several candidates.
    *
    * @param value the value whose concept we are looking for
-   * @return the {@link Concept} found. Empty {@link Optional} if there was no match.
+   * @return the {@link LookupConcept} found. Empty {@link Optional} if there was no match.
    */
-  public Optional<Concept> lookup(String value) {
+  public Optional<LookupConcept> lookup(String value) {
     return lookup(value, null);
   }
 
@@ -150,9 +150,9 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
    *
    * @param value the value whose concept we are looking for
    * @param contextLang {@link LanguageRegion} to break ties
-   * @return the {@link Concept} found. Empty {@link Optional} if there was no match.
+   * @return the {@link LookupConcept} found. Empty {@link Optional} if there was no match.
    */
-  public Optional<Concept> lookup(String value, LanguageRegion contextLang) {
+  public Optional<LookupConcept> lookup(String value, LanguageRegion contextLang) {
     if (value == null || value.isEmpty()) {
       return Optional.empty();
     }
@@ -175,7 +175,7 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
       Concept nameMatch = namesCache.get(transformedValue);
       if (nameMatch != null) {
         LOG.info("value {} matched with concept {} by name", value, nameMatch.getName());
-        return Optional.of(nameMatch);
+        return Optional.of(toLookupConcept(nameMatch));
       }
 
       // if no match with names we try with labels
@@ -184,7 +184,7 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
         if (labelMatch.allMatches.size() == 1) {
           Concept conceptMatched = labelMatch.allMatches.iterator().next();
           LOG.info("value {} matched with concept {} by label", value, conceptMatched.getName());
-          return Optional.of(conceptMatched);
+          return Optional.of(toLookupConcept(conceptMatched));
         }
 
         // several candidates found. We try to match by using the language received as discriminator
@@ -196,7 +196,7 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
               value,
               langMatch.get().getName(),
               contextLang);
-          return langMatch;
+          return Optional.of(toLookupConcept(langMatch.get()));
         }
 
         LOG.warn(
@@ -209,7 +209,7 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
       Concept hiddenMatch = hiddenLabelsCache.get(transformedValue);
       if (hiddenMatch != null) {
         LOG.info("value {} matched with concept {} by hidden label", value, hiddenMatch);
-        return Optional.of(hiddenMatch);
+        return Optional.of(toLookupConcept(hiddenMatch));
       }
     }
 
@@ -254,51 +254,30 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
     if (hiddenLabelsCache != null) {
       hiddenLabelsCache.close();
     }
+    if (conceptsByKeyCache != null) {
+      conceptsByKeyCache.close();
+    }
   }
 
+  @SneakyThrows
   private void importVocabulary(InputStream in) {
-    try (JsonParser parser = OBJECT_MAPPER.getFactory().createParser(in)) {
-      // root
-      parser.nextToken();
+    VocabularyExport export = OBJECT_MAPPER.readValue(in, VocabularyExport.class);
 
-      // first element
-      parser.nextToken();
-      if (parser.getCurrentName().equals(VocabularyExport.METADATA_PROP)) {
-        parser.nextToken();
-        exportMetadata = OBJECT_MAPPER.readValue(parser, ExportMetadata.class);
-        parser.nextValue();
-      }
+    for (Concept concept : export.getConcepts()) {
+      // add to the cache concepts
+      conceptsByKeyCache.put(concept.getKey(), concept);
 
-      if (parser.getCurrentName().equals(VocabularyExport.VOCABULARY_PROP)) {
-        parser.nextToken();
-        vocabulary = OBJECT_MAPPER.readValue(parser, Vocabulary.class);
-        parser.nextValue();
-      }
+      // add name to the cache
+      addNameToCache(concept);
 
-      if (parser.getCurrentName().equals(VocabularyExport.CONCEPTS_PROP)) {
-        parser.nextToken();
-        while (parser.nextToken() != JsonToken.END_OBJECT) {
-          Concept concept = OBJECT_MAPPER.readValue(parser, Concept.class);
+      // add labels to the cache
+      concept.getLabel().forEach((key, value) -> addLabelToCache(value, concept, key));
 
-          // add name to the cache
-          addNameToCache(concept);
+      // add alternative labels to the cache
+      concept.getAlternativeLabels().forEach((key, value) -> addLabelsToCache(value, concept, key));
 
-          // add labels to the cache
-          concept.getLabel().forEach((key, value) -> addLabelToCache(value, concept, key));
-
-          // add alternative labels to the cache
-          concept
-              .getAlternativeLabels()
-              .forEach((key, value) -> addLabelsToCache(value, concept, key));
-
-          // add hidden labels to the cache
-          concept.getHiddenLabels().forEach(label -> addHiddenLabelToCache(label, concept));
-
-          parser.nextValue();
-        }
-      }
-    } catch (IOException e) {
-      throw new IllegalArgumentException("Couldn't parse json vocabulary", e);
+      // add hidden labels to the cache
+      concept.getHiddenLabels().forEach(label -> addHiddenLabelToCache(label, concept));
     }
   }
 
@@ -366,12 +345,23 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
     }
   }
 
-  public ExportMetadata getExportMetadata() {
-    return exportMetadata;
-  }
+  private LookupConcept toLookupConcept(Concept concept) {
+    // find parents
+    List<String> parents = new ArrayList<>();
+    Long parentKey = concept.getParentKey();
+    while (parentKey != null) {
+      Concept parent = conceptsByKeyCache.get(parentKey);
+      parents.add(parent.getName());
 
-  public Vocabulary getVocabulary() {
-    return vocabulary;
+      if (parentKey.equals(parent.getParentKey())) {
+        // this should never happen but we protect against it
+        break;
+      }
+
+      parentKey = parent.getParentKey();
+    }
+
+    return LookupConcept.of(concept, parents);
   }
 
   private static class LabelMatch {

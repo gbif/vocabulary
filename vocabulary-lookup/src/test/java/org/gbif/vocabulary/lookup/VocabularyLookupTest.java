@@ -15,17 +15,16 @@
  */
 package org.gbif.vocabulary.lookup;
 
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+
 import java.util.Arrays;
 import java.util.Optional;
-
-import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests the {@link VocabularyLookup}. */

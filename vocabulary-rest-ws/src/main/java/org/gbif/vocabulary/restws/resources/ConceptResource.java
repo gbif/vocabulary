@@ -75,7 +75,7 @@ public class ConceptResource implements ConceptApi {
         conceptService.list(
             ConceptSearchParams.builder()
                 .vocabularyKey(params.getVocabularyKey())
-                .query(params.getQuery())
+                .query(params.getQ())
                 .name(params.getName())
                 .parentKey(params.getParentKey())
                 .parent(params.getParent())

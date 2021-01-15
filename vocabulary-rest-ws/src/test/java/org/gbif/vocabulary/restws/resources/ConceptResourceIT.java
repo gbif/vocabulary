@@ -100,20 +100,20 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     // list entities
     concepts =
         conceptClient.listConcepts(
-            defaultVocabularyName, ConceptListParams.builder().query("concept").build());
+            defaultVocabularyName, ConceptListParams.builder().q("concept").build());
     assertEquals(2, concepts.getResults().size());
 
     // list entities
     concepts =
         conceptClient.listConcepts(
             defaultVocabularyName,
-            ConceptListParams.builder().query("concept").parentKey(created1.getKey()).build());
+            ConceptListParams.builder().q("concept").parentKey(created1.getKey()).build());
     assertEquals(1, concepts.getResults().size());
 
     concepts =
         conceptClient.listConcepts(
             defaultVocabularyName,
-            ConceptListParams.builder().query("concept").parent(created1.getName()).build());
+            ConceptListParams.builder().q("concept").parent(created1.getName()).build());
     assertEquals(1, concepts.getResults().size());
 
     // list entities with parent

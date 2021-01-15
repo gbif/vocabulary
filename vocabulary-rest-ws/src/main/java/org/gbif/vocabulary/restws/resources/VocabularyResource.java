@@ -96,7 +96,7 @@ public class VocabularyResource implements VocabularyApi {
             .name(params.getName())
             .deprecated(params.getDeprecated())
             .key(params.getKey())
-            .query(params.getQuery())
+            .query(params.getQ())
             .build(),
         params.getPage());
   }

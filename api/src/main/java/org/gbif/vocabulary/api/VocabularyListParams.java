@@ -34,7 +34,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 public class VocabularyListParams extends PageableBase implements Serializable {
 
-  private String query;
+  private String q;
   private String name;
   private String namespace;
   private Boolean deprecated;

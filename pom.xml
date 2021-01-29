@@ -62,7 +62,7 @@
   </distributionManagement>
 
   <properties>
-    <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+    <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
     <spring-cloud-openfeign.version>2.2.6.RELEASE</spring-cloud-openfeign.version>
     <main.basedir>${project.basedir}</main.basedir>
 
@@ -92,7 +92,7 @@
     <guava.version>18.0</guava.version>
 
     <!-- ZK -->
-    <spring-cloud-zookeeper.version>2.2.0.RELEASE</spring-cloud-zookeeper.version>
+    <spring-cloud-zookeeper.version>2.2.4.RELEASE</spring-cloud-zookeeper.version>
     <zookeeper.version>3.4.14</zookeeper.version>
 
     <!-- Hadoop -->
@@ -100,7 +100,7 @@
     <hadoop-core.version>2.6.0-mr1-cdh5.16.2</hadoop-core.version>
 
     <!-- logging -->
-    <slf4j.version>1.7.26</slf4j.version>
+    <slf4j.version>1.7.30</slf4j.version>
     <logback.version>1.2.3</logback.version>
     <janino.version>2.5.10</janino.version>
     <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>

@@ -62,7 +62,7 @@
   </distributionManagement>
 
   <properties>
-    <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
+    <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
     <spring-cloud-openfeign.version>2.2.6.RELEASE</spring-cloud-openfeign.version>
     <main.basedir>${project.basedir}</main.basedir>
 

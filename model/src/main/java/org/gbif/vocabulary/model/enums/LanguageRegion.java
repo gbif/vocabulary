@@ -38,7 +38,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  */
 @JsonSerialize(
     using = LanguageRegion.LocaleSerializer.class,
-    keyUsing = LanguageRegion.LocaleSerializer.class)
+    keyUsing = LanguageRegion.LocaleKeySerializer.class)
 @JsonDeserialize(
     using = LanguageRegion.LocaleDeserializer.class,
     keyUsing = LanguageRegion.LocaleKeyDeserializer.class)
@@ -411,6 +411,16 @@ public enum LanguageRegion {
     public void serialize(LanguageRegion value, JsonGenerator jgen, SerializerProvider provider)
         throws IOException {
       jgen.writeString(value.getLocale());
+    }
+  }
+
+  /** Serializes the value using the locale. */
+  public static class LocaleKeySerializer extends JsonSerializer<LanguageRegion> {
+
+    @Override
+    public void serialize(LanguageRegion value, JsonGenerator jgen, SerializerProvider provider)
+        throws IOException {
+      jgen.writeFieldName(value.getLocale());
     }
   }
 

@@ -74,7 +74,7 @@ public class ConceptResource implements ConceptApi {
     PagingResponse<Concept> conceptsPage =
         conceptService.list(
             ConceptSearchParams.builder()
-                .vocabularyKey(params.getVocabularyKey())
+                .vocabularyKey(vocabulary.getKey())
                 .query(params.getQ())
                 .name(params.getName())
                 .parentKey(params.getParentKey())

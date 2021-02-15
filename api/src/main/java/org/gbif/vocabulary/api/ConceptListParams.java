@@ -35,7 +35,6 @@ import lombok.NoArgsConstructor;
 public class ConceptListParams extends PageableBase implements Serializable {
 
   private String q;
-  private Long vocabularyKey;
   private Long parentKey;
   private String parent;
   private Long replacedByKey;

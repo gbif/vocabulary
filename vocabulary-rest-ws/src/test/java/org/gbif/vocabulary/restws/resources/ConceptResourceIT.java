@@ -51,6 +51,9 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
   private static String defaultVocabularyName;
   private static long defaultVocabularyKey;
+  private static String otherVocabularyName;
+  private static long otherVocabularyKey;
+
 
   ConceptResourceIT(@LocalServerPort int localServerPort) {
     super(Concept.class, localServerPort);
@@ -77,6 +80,26 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
     defaultVocabularyName = created.getName();
     defaultVocabularyKey = created.getKey();
+
+    Vocabulary other = new Vocabulary();
+    other.setName("v2");
+
+    Vocabulary otherCreated =
+        webClient
+            .post()
+            .uri("/" + VOCABULARIES_PATH)
+            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
+            .body(BodyInserters.fromValue(other))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(Vocabulary.class)
+            .returnResult()
+            .getResponseBody();
+
+    otherVocabularyName = otherCreated.getName();
+    otherVocabularyKey = otherCreated.getKey();
   }
 
   @Test
@@ -84,6 +107,12 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     Concept c1 = createEntity();
     c1.setName("concept1");
     Concept created1 = conceptClient.create(defaultVocabularyName, c1);
+
+    // create a concept in other vocab to see that the list concepts filters by vocab key
+    Concept otherVocabConcept = createEntity();
+    otherVocabConcept.setVocabularyKey(otherVocabularyKey);
+    otherVocabConcept.setName("otherVocabConcept");
+    conceptClient.create(otherVocabularyName, otherVocabConcept);
 
     // list entities
     PagingResponse<ConceptView> concepts =

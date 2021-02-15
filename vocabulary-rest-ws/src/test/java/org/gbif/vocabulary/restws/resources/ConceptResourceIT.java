@@ -54,7 +54,6 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   private static String otherVocabularyName;
   private static long otherVocabularyKey;
 
-
   ConceptResourceIT(@LocalServerPort int localServerPort) {
     super(Concept.class, localServerPort);
   }

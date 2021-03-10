@@ -206,6 +206,12 @@
               <goal>repackage</goal>
             </goals>
           </execution>
+          <execution>
+            <id>build-info</id>
+            <goals>
+              <goal>build-info</goal>
+            </goals>
+          </execution>
         </executions>
         <configuration>
           <mainClass>org.gbif.vocabulary.restws.Application</mainClass>

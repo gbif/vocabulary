@@ -1,21 +1,36 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.restws.resources;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.ConceptListParams;
+import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.restws.model.ConceptView;
 
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.MediaType;
@@ -36,9 +51,11 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
   private static String defaultVocabularyName;
   private static long defaultVocabularyKey;
+  private static String otherVocabularyName;
+  private static long otherVocabularyKey;
 
-  ConceptResourceIT() {
-    super(Concept.class);
+  ConceptResourceIT(@LocalServerPort int localServerPort) {
+    super(Concept.class, localServerPort);
   }
 
   @BeforeAll
@@ -62,186 +79,133 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
     defaultVocabularyName = created.getName();
     defaultVocabularyKey = created.getKey();
+
+    Vocabulary other = new Vocabulary();
+    other.setName("v2");
+
+    Vocabulary otherCreated =
+        webClient
+            .post()
+            .uri("/" + VOCABULARIES_PATH)
+            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
+            .body(BodyInserters.fromValue(other))
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(Vocabulary.class)
+            .returnResult()
+            .getResponseBody();
+
+    otherVocabularyName = otherCreated.getName();
+    otherVocabularyKey = otherCreated.getKey();
   }
 
   @Test
   void listTest() {
     Concept c1 = createEntity();
     c1.setName("concept1");
-    Concept created1 =
-        webClient
-            .post()
-            .uri(getBasePath())
-            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-            .body(BodyInserters.fromValue(c1))
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(Concept.class)
-            .returnResult()
-            .getResponseBody();
+    Concept created1 = conceptClient.create(defaultVocabularyName, c1);
+
+    // create a concept in other vocab to see that the list concepts filters by vocab key
+    Concept otherVocabConcept = createEntity();
+    otherVocabConcept.setVocabularyKey(otherVocabularyKey);
+    otherVocabConcept.setName("otherVocabConcept");
+    conceptClient.create(otherVocabularyName, otherVocabConcept);
 
     // list entities
-    webClient
-        .get()
-        .uri(builder -> builder.path(getBasePath()).queryParam("name", c1.getName()).build())
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("results")
-        .value(r -> Assertions.assertEquals(1, r.size()), List.class);
+    PagingResponse<ConceptView> concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName, ConceptListParams.builder().name(c1.getName()).build());
+    assertEquals(1, concepts.getResults().size());
 
+    // Add another concept
     Concept c2 = createEntity();
     c2.setName("concept2");
     c2.setParentKey(created1.getKey());
-    webClient
-        .post()
-        .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromValue(c2))
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isCreated();
+    c2 = conceptClient.create(defaultVocabularyName, c2);
 
     // list entities
-    webClient
-        .get()
-        .uri(builder -> builder.path(getBasePath()).queryParam("q", "concept").build())
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("results")
-        .value(r -> Assertions.assertEquals(2, r.size()), List.class);
+    concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName, ConceptListParams.builder().q("concept").build());
+    assertEquals(2, concepts.getResults().size());
 
     // list entities
-    webClient
-        .get()
-        .uri(
-            builder ->
-                builder
-                    .path(getBasePath())
-                    .queryParam("q", "concept")
-                    .queryParam("parentKey", created1.getKey())
-                    .build())
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("results")
-        .value(r -> Assertions.assertEquals(1, r.size()), List.class);
+    concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName,
+            ConceptListParams.builder().q("concept").parentKey(created1.getKey()).build());
+    assertEquals(1, concepts.getResults().size());
+
+    concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName,
+            ConceptListParams.builder().q("concept").parent(created1.getName()).build());
+    assertEquals(1, concepts.getResults().size());
 
     // list entities with parent
-    webClient
-        .get()
-        .uri(builder -> builder.path(getBasePath()).queryParam("hasParent", true).build())
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("results")
-        .value(r -> Assertions.assertEquals(1, r.size()), List.class);
+    concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName, ConceptListParams.builder().hasParent(true).build());
+    assertEquals(1, concepts.getResults().size());
 
-    // list entities
-    webClient
-        .get()
-        .uri(
-            builder ->
-                builder
-                    .path(getBasePath())
-                    .queryParam("name", c1.getName())
-                    .queryParam("includeChildrenCount", true)
-                    .build())
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("results")
-        .value(r -> Assertions.assertEquals(1, r.size()), List.class)
-        .jsonPath("results[0].childrenCount")
-        .value(Matchers.equalTo(1));
+    // list entities with children count
+    concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName,
+            ConceptListParams.builder()
+                .name(created1.getName())
+                .includeChildrenCount(true)
+                .build());
+    assertEquals(1, concepts.getResults().size());
+    assertEquals(1, concepts.getResults().get(0).getChildrenCount());
+
+    // list entities with children
+    concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName,
+            ConceptListParams.builder().name(created1.getName()).includeChildren(true).build());
+    assertEquals(1, concepts.getResults().size());
+    assertEquals(c2.getName(), concepts.getResults().get(0).getChildren().get(0));
+
+    // list entities with parents
+    concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName,
+            ConceptListParams.builder().name(c2.getName()).includeParents(true).build());
+    assertEquals(1, concepts.getResults().size());
+    assertEquals(c1.getName(), concepts.getResults().get(0).getParents().get(0));
   }
 
   @Test
-  public void getWithParents() {
+  public void getWithParentsAndChildren() {
     // create entity
     Concept c1 = createEntity();
-    Concept created1 =
-        webClient
-            .post()
-            .uri(getBasePath())
-            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-            .body(BodyInserters.fromValue(c1))
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectHeader()
-            .value("Location", Matchers.endsWith(getBasePath() + "/" + c1.getName()))
-            .expectBody(Concept.class)
-            .value(
-                v -> {
-                  assertEquals(ADMIN.getUsername(), v.getCreatedBy());
-                  assertEquals(ADMIN.getUsername(), v.getModifiedBy());
-                })
-            .returnResult()
-            .getResponseBody();
+    Concept created1 = conceptClient.create(defaultVocabularyName, c1);
 
     Concept c2 = createEntity();
-    c2.setParentKey(c1.getKey());
-    Concept created2 =
-        webClient
-            .post()
-            .uri(getBasePath())
-            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-            .body(BodyInserters.fromValue(c2))
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectHeader()
-            .value("Location", Matchers.endsWith(getBasePath() + "/" + c2.getName()))
-            .expectBody(Concept.class)
-            .value(
-                v -> {
-                  assertEquals(ADMIN.getUsername(), v.getCreatedBy());
-                  assertEquals(ADMIN.getUsername(), v.getModifiedBy());
-                })
-            .returnResult()
-            .getResponseBody();
+    c2.setParentKey(created1.getKey());
+    Concept created2 = conceptClient.create(defaultVocabularyName, c2);
 
-    // get vocabulary with parents
-    ConceptView expected = new ConceptView(c2);
+    // get concept with parents
+    ConceptView expected = new ConceptView(created2);
     expected.setParents(Collections.singletonList(created1.getName()));
-    webClient
-        .get()
-        .uri(
-            uriBuilder ->
-                uriBuilder
-                    .path(String.format(urlEntityFormat, created2.getName()))
-                    .queryParam("includeParents", true)
-                    .build())
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody(ConceptView.class)
-        .equals(expected);
 
-    // get vocabulary without parents
-    expected = new ConceptView(c2);
-    webClient
-        .get()
-        .uri(
-            uriBuilder ->
-                uriBuilder.path(String.format(urlEntityFormat, created2.getName())).build())
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody(ConceptView.class)
-        .equals(expected);
+    ConceptView conceptView =
+        conceptClient.get(defaultVocabularyName, created2.getName(), true, false);
+    assertEquals(expected, conceptView);
+
+    // get concept without parents
+    expected = new ConceptView(created2);
+    conceptView = conceptClient.get(defaultVocabularyName, created2.getName(), false, false);
+    assertEquals(expected, conceptView);
+
+    // include children test
+    expected = new ConceptView(created1);
+    expected.setChildren(Collections.singletonList(created2.getName()));
+    conceptView = conceptClient.get(defaultVocabularyName, created1.getName(), false, true);
+    assertEquals(expected, conceptView);
   }
 
   @Override

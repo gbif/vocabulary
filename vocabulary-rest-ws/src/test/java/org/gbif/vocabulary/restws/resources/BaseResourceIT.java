@@ -1,18 +1,37 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.vocabulary.model.utils.LenientEquals;
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.VocabularyClient;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.utils.LenientEquals;
 import org.gbif.vocabulary.restws.LoginServerExtension;
 import org.gbif.vocabulary.restws.PostgresDBExtension;
 import org.gbif.vocabulary.restws.TestCredentials;
+import org.gbif.ws.client.ClientBuilder;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.function.Function;
+
 import javax.sql.DataSource;
 
 import org.hamcrest.Matchers;
@@ -31,8 +50,17 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.reactive.function.BodyInserters;
 
-import static org.gbif.vocabulary.restws.TestCredentials.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
+import static org.gbif.vocabulary.restws.TestCredentials.EDITOR;
+import static org.gbif.vocabulary.restws.TestCredentials.INVALID_JWT_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.INVALID_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_ADMIN;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_EDITOR;
+import static org.gbif.vocabulary.restws.TestCredentials.JWT_USER;
+import static org.gbif.vocabulary.restws.TestCredentials.USER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -44,6 +72,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
 
+  protected static final ObjectMapper OBJECT_MAPPER =
+      new ObjectMapper().registerModule(new JavaTimeModule());
+
   @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
 
   @RegisterExtension static LoginServerExtension loginServer = new LoginServerExtension();
@@ -51,6 +82,9 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
   @Autowired private DataSource dataSource;
 
   @Autowired WebTestClient webClient;
+
+  protected final VocabularyClient vocabularyClient;
+  protected final ConceptClient conceptClient;
 
   static final Function<TestCredentials, String> BASIC_AUTH_HEADER =
       testCredentials ->
@@ -66,8 +100,21 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
   private final Class<T> clazz;
   protected final String urlEntityFormat = getBasePath() + "/%s";
 
-  BaseResourceIT(Class<T> clazz) {
+  BaseResourceIT(Class<T> clazz, int localServerPort) {
     this.clazz = clazz;
+    ClientBuilder clientBuilder = new ClientBuilder();
+    vocabularyClient =
+        clientBuilder
+            .withUrl("http://localhost:" + localServerPort)
+            .withCredentials(ADMIN.getUsername(), ADMIN.getPassword())
+            .withObjectMapper(OBJECT_MAPPER)
+            .build(VocabularyClient.class);
+    conceptClient =
+        clientBuilder
+            .withUrl("http://localhost:" + localServerPort)
+            .withCredentials(ADMIN.getUsername(), ADMIN.getPassword())
+            .withObjectMapper(OBJECT_MAPPER)
+            .build(ConceptClient.class);
   }
 
   @BeforeEach

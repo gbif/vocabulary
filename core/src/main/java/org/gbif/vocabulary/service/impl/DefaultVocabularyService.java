@@ -1,22 +1,44 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.service.impl;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.utils.PostPersist;
-import org.gbif.vocabulary.model.utils.PrePersist;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.model.utils.PostPersist;
+import org.gbif.vocabulary.model.utils.PrePersist;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.VocabularyService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -28,15 +50,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
-
-import static java.util.Objects.requireNonNull;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /** Default implementation for {@link VocabularyService}. */
 @Service
@@ -114,20 +134,7 @@ public class DefaultVocabularyService implements VocabularyService {
     params = params != null ? params : VocabularySearchParams.empty();
 
     return new PagingResponse<>(
-        page,
-        vocabularyMapper.count(
-            params.getQuery(),
-            params.getName(),
-            params.getNamespace(),
-            params.getDeprecated(),
-            params.getKey()),
-        vocabularyMapper.list(
-            params.getQuery(),
-            params.getName(),
-            params.getNamespace(),
-            params.getDeprecated(),
-            params.getKey(),
-            page));
+        page, vocabularyMapper.count(params), vocabularyMapper.list(params, page));
   }
 
   @Override
@@ -172,7 +179,13 @@ public class DefaultVocabularyService implements VocabularyService {
 
   private List<Long> findConceptsKeys(long vocabularyKey, boolean deprecated) {
     return conceptMapper
-        .list(null, vocabularyKey, null, null, null, deprecated, null, null, null, null).stream()
+        .list(
+            ConceptSearchParams.builder()
+                .vocabularyKey(vocabularyKey)
+                .deprecated(deprecated)
+                .build(),
+            null)
+        .stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
   }

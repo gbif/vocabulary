@@ -1,29 +1,39 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.restws.resources;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.web.reactive.function.BodyInserters;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
-import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,12 +44,10 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
 
   private static final String CLEAN_DB_SCRIPT = "/clean-db.sql";
 
-  private static final ObjectMapper OBJECT_MAPPER =
-      new ObjectMapper().registerModule(new JavaTimeModule());
   private static final String TEST_NAMESPACE = "ns";
 
-  VocabularyResourceIT() {
-    super(Vocabulary.class);
+  VocabularyResourceIT(@LocalServerPort int localServerPort) {
+    super(Vocabulary.class, localServerPort);
   }
 
   @Test
@@ -49,101 +57,55 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     // create entity
     Vocabulary v1 = createEntity();
     v1.setNamespace(namespace);
-    webClient
-        .post()
-        .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromValue(v1))
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isCreated();
+    vocabularyClient.create(v1);
+    v1 = vocabularyClient.get(v1.getName());
 
     // list entities
-    webClient
-        .get()
-        .uri(builder -> builder.path(getBasePath()).queryParam("namespace", namespace).build())
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("results")
-        .value(r -> assertEquals(1, r.size()), List.class);
+    PagingResponse<Vocabulary> vocabularies =
+        vocabularyClient.listVocabularies(
+            VocabularyListParams.builder().namespace(namespace).build());
+    assertEquals(1, vocabularies.getResults().size());
 
     // create entity
     Vocabulary v2 = createEntity();
     v2.setNamespace(namespace);
-    webClient
-        .post()
-        .uri(getBasePath())
-        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromObject(v2))
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isCreated();
+    v2 = vocabularyClient.create(v2);
+    assertNotNull(v2.getKey());
 
     // list entities
-    webClient
-        .get()
-        .uri(builder -> builder.path(getBasePath()).queryParam("namespace", namespace).build())
-        .attribute("namespace", namespace)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("results")
-        .value(r -> assertEquals(2, r.size()), List.class);
+    vocabularies =
+        vocabularyClient.listVocabularies(
+            VocabularyListParams.builder().namespace(namespace).build());
+    assertEquals(2, vocabularies.getResults().size());
   }
 
   @Test
   public void exportVocabularyTest() throws IOException {
     // create entity
     Vocabulary v1 = createEntity();
-    v1 =
-        webClient
-            .post()
-            .uri(getBasePath())
-            .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-            .body(BodyInserters.fromValue(v1))
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .expectBody(Vocabulary.class)
-            .returnResult()
-            .getResponseBody();
+    v1 = vocabularyClient.create(v1);
+    assertNotNull(v1.getKey());
 
     Concept c1 = new Concept();
     c1.setName("c1");
     c1.setVocabularyKey(v1.getKey());
-    webClient
-        .post()
-        .uri(getBasePath() + "/" + v1.getName() + "/" + CONCEPTS_PATH)
-        .header("Authorization", BASIC_AUTH_HEADER.apply(ADMIN))
-        .body(BodyInserters.fromObject(c1))
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isCreated();
+    c1 = conceptClient.create(v1.getName(), c1);
 
-    byte[] bytesResponse =
-        webClient
-            .get()
-            .uri(getBasePath() + "/" + v1.getName() + "/export")
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectHeader()
-            .exists("Content-Disposition")
-            .expectBody()
-            .returnResult()
-            .getResponseBody();
-
+    byte[] bytesResponse = vocabularyClient.exportVocabulary(v1.getName());
     VocabularyExport export = OBJECT_MAPPER.readValue(bytesResponse, VocabularyExport.class);
     assertNotNull(export.getMetadata().getCreatedDate());
     assertEquals(v1.getName(), export.getVocabulary().getName());
     assertEquals(1, export.getConcepts().size());
+
+    // test the headers in the response
+    webClient
+        .get()
+        .uri(getBasePath() + "/" + v1.getName() + "/export")
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectHeader()
+        .exists("Content-Disposition");
   }
 
   @Override

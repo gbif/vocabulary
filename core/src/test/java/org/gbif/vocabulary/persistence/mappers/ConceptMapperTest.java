@@ -1,4 +1,27 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.persistence.mappers;
+
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.search.ChildrenResult;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -7,14 +30,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.search.ChildrenCountResult;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -116,7 +131,9 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertList(ConceptSearchParams.builder().query("oncept").build(), 0);
     assertList(ConceptSearchParams.builder().vocabularyKey(vocabularyKeys[0]).build(), 3);
     assertList(ConceptSearchParams.builder().parentKey(concept1.getKey()).build(), 2);
+    assertList(ConceptSearchParams.builder().parent(concept1.getName()).build(), 2);
     assertList(ConceptSearchParams.builder().parentKey(concept2.getKey()).build(), 0);
+    assertList(ConceptSearchParams.builder().parent(concept2.getName()).build(), 0);
     assertList(ConceptSearchParams.builder().name("concept1").build(), 1);
     assertList(ConceptSearchParams.builder().name("concepto").build(), 0);
     assertList(
@@ -175,8 +192,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     // check hidden labels
     NormalizedValuesParam hiddenValues =
         NormalizedValuesParam.from(
-            HIDDEN_NODE,
-            Collections.singletonList(normalizeLabel("primeiro")));
+            HIDDEN_NODE, Collections.singletonList(normalizeLabel("primeiro")));
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
             Collections.singletonList(hiddenValues), concept1.getVocabularyKey(), null);
@@ -342,12 +358,12 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     conceptMapper.deprecateInBulk(
         Arrays.asList(concept1.getKey(), concept2.getKey()), DEPRECATED_BY, null);
     assertEquals(
-        2, conceptMapper.list(null, null, null, null, null, true, null, null, null, null).size());
+        2, conceptMapper.list(ConceptSearchParams.builder().deprecated(true).build(), null).size());
 
     // undeprecate in bulk
     conceptMapper.restoreDeprecatedInBulk(Arrays.asList(concept1.getKey(), concept2.getKey()));
     assertEquals(
-        0, conceptMapper.list(null, null, null, null, null, true, null, null, null, null).size());
+        0, conceptMapper.list(ConceptSearchParams.builder().deprecated(true).build(), null).size());
   }
 
   @Test
@@ -468,43 +484,19 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept4.setParentKey(concept3.getKey());
     conceptMapper.create(concept4);
 
-    List<ChildrenCountResult> counts =
+    List<ChildrenResult> counts =
         conceptMapper.countChildren(
             Arrays.asList(
                 concept1.getKey(), concept2.getKey(), concept3.getKey(), concept4.getKey()));
-    assertEquals(2, counts.size());
-    assertTrue(counts.contains(new ChildrenCountResult(concept1.getKey(), 2)));
-    assertTrue(counts.contains(new ChildrenCountResult(concept3.getKey(), 1)));
+    assertEquals(3, counts.size());
+    assertTrue(counts.contains(new ChildrenResult(concept1.getKey(), concept2.getName())));
+    assertTrue(counts.contains(new ChildrenResult(concept1.getKey(), concept3.getName())));
+    assertTrue(counts.contains(new ChildrenResult(concept3.getKey(), concept4.getName())));
   }
 
   private void assertList(ConceptSearchParams searchParams, int expectedResult) {
-    assertEquals(
-        expectedResult,
-        conceptMapper
-            .list(
-                searchParams.getQuery(),
-                searchParams.getVocabularyKey(),
-                searchParams.getParentKey(),
-                searchParams.getReplacedByKey(),
-                searchParams.getName(),
-                searchParams.getDeprecated(),
-                searchParams.getKey(),
-                searchParams.getHasParent(),
-                searchParams.getHasReplacement(),
-                DEFAULT_PAGE)
-            .size());
-    assertEquals(
-        expectedResult,
-        conceptMapper.count(
-            searchParams.getQuery(),
-            searchParams.getVocabularyKey(),
-            searchParams.getParentKey(),
-            searchParams.getReplacedByKey(),
-            searchParams.getName(),
-            searchParams.getDeprecated(),
-            searchParams.getKey(),
-            searchParams.getHasParent(),
-            searchParams.getHasReplacement()));
+    assertEquals(expectedResult, conceptMapper.list(searchParams, DEFAULT_PAGE).size());
+    assertEquals(expectedResult, conceptMapper.count(searchParams));
   }
 
   private void assertSimilarity(List<KeyNameResult> similarities, Concept concept) {

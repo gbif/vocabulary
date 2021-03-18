@@ -5,18 +5,27 @@ pipeline {
     jdk 'JDK8'
   }
   options {
-    buildDiscarder(logRotator(numToKeepStr: '5'))
+    buildDiscarder(logRotator(numToKeepStr: '10'))
     timestamps ()
   }
   parameters {
-    booleanParam(name: 'RELEASE',
-            defaultValue: false,
-            description: 'Do a Maven release (it also generates API documentation)')
     booleanParam(name: 'DOCUMENTATION',
             defaultValue: false,
             description: 'Generate API documentation')
+    separator(name: "release_separator", sectionHeader: "Release Parameters")
+    booleanParam(name: 'RELEASE',
+            defaultValue: false,
+            description: 'Do a Maven release (it also generates API documentation)')
+    string(name: 'RELEASE_VERSION', defaultValue: '', description: 'Release version (optional)')
+    string(name: 'DEVELOPMENT_VERSION', defaultValue: '', description: 'Development version (optional)')
+    booleanParam(name: 'DRY_RUN_RELEASE', defaultValue: false, description: 'Dry Run Maven release')
   }
   stages {
+    stage('Preconditions') {
+      steps {
+        scmSkip(skipPattern:'.*(\\[maven-release-plugin\\] prepare release |Generated API documentation|Google Java Format).*')
+      }
+    }
     stage('Build') {
       when {
         allOf {
@@ -46,7 +55,7 @@ pipeline {
             configFileProvider([configFile(
                     fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                     variable: 'MAVEN_SETTINGS_XML')]) {
-              sh 'mvn clean verify -Pintegration'
+              sh 'mvn clean verify -Pintegration -U'
             }
           }
         }
@@ -61,7 +70,7 @@ pipeline {
       }
       steps {
         withSonarQubeEnv('GBIF Sonarqube') {
-          sh 'mvn sonar:sonar'
+          sh 'mvn clean install sonar:sonar'
         }
       }
     }
@@ -77,23 +86,36 @@ pipeline {
         configFileProvider(
                 [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                         variable: 'MAVEN_SETTINGS_XML')]) {
-          sh 'mvn -s $MAVEN_SETTINGS_XML deploy'
+          sh 'mvn -s $MAVEN_SETTINGS_XML -B -DskipTests deploy'
         }
       }
     }
     stage('Release version to nexus') {
-      when { expression { params.RELEASE } }
+      when {
+        allOf {
+          expression { params.RELEASE };
+          branch 'master';
+        }
+      }
+      environment {
+        RELEASE_ARGS = createReleaseArgs()
+      }
       steps {
         configFileProvider(
                 [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                         variable: 'MAVEN_SETTINGS_XML')]) {
           git 'https://github.com/gbif/vocabulary.git'
-          sh 'mvn -s $MAVEN_SETTINGS_XML -B release:prepare release:perform'
+          sh 'mvn -s $MAVEN_SETTINGS_XML -B release:prepare release:perform $RELEASE_ARGS'
         }
       }
     }
     stage('Generate API documentation') {
-      when { anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION } } }
+      when {
+        allOf {
+          anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION }; };
+          branch 'master';
+        }
+      }
       steps {
         sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
           git 'https://github.com/gbif/vocabulary.git'
@@ -204,4 +226,19 @@ void createHostsFile() {
     nagios
     EOF
   """.stripIndent()
+}
+
+def createReleaseArgs() {
+  def args = ""
+  if (params.RELEASE_VERSION != '') {
+    args += "-DreleaseVersion=${params.RELEASE_VERSION} "
+  }
+  if (params.DEVELOPMENT_VERSION != '') {
+    args += "-DdevelopmentVersion=${params.DEVELOPMENT_VERSION} "
+  }
+  if (params.DRY_RUN_RELEASE) {
+    args += "-DdryRun=true"
+  }
+
+  return args
 }

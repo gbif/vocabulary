@@ -1,4 +1,22 @@
-package org.gbif.vocabulary.lookup;
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.gbif.vocabulary.tools;
+
+import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.export.VocabularyExport;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,15 +31,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.gbif.vocabulary.model.VocabularyRelease;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -32,9 +47,9 @@ import okhttp3.Response;
  * all the calls.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-class VocabularyDownloader {
+@Slf4j
+public class VocabularyDownloader {
 
-  private static final Logger LOG = LoggerFactory.getLogger(VocabularyDownloader.class);
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper().registerModule(new JavaTimeModule());
 
@@ -76,7 +91,7 @@ class VocabularyDownloader {
    * @param vocabularyName name of the vocabulary to download
    * @return {@link InputStream} with the vocabulary downloaded
    */
-  static InputStream downloadLatestVocabularyVersion(String apiUrl, String vocabularyName) {
+  public static InputStream downloadLatestVocabularyVersion(String apiUrl, String vocabularyName) {
     if (apiUrl == null || apiUrl.isEmpty()) {
       throw new IllegalArgumentException("API URL is required");
     }
@@ -113,21 +128,46 @@ class VocabularyDownloader {
             "Couldn't find any release for the vocabulary: " + vocabularyName);
       }
 
-      // request to download the latest release that we've found before
-      request = new Request.Builder().url(release.getExportUrl()).build();
-      response = HTTP_CLIENT.newCall(request).execute();
-
-      // the response returns a zip file
-      Path downloadedFile =
-          Files.createTempFile(vocabularyName + Instant.now().toEpochMilli(), ".zip");
-      Files.copy(response.body().byteStream(), downloadedFile, StandardCopyOption.REPLACE_EXISTING);
-
       // inside the zip file there is a json file with the vocabulary export
-      Path vocabularyJsonFile = unzipVocabularyRelease(downloadedFile);
+      Path vocabularyJsonFile = downloadVocabularyFile(release.getExportUrl());
 
       return vocabularyJsonFile != null ? Files.newInputStream(vocabularyJsonFile) : null;
     } catch (IOException e) {
       throw new IllegalArgumentException(String.format(ERROR_MSG, vocabularyName, apiUrl), e);
+    }
+  }
+
+  public static VocabularyExport downloadVocabularyExport(String exportUrl) {
+    Path vocabularyJsonFile = downloadVocabularyFile(exportUrl);
+
+    if (vocabularyJsonFile == null || vocabularyJsonFile.toFile().length() == 0) {
+      log.error("Empty vocabulary in url {} ", exportUrl);
+      throw new IllegalArgumentException("Empty vocabulary");
+    }
+
+    try {
+      return OBJECT_MAPPER.readValue(vocabularyJsonFile.toFile(), VocabularyExport.class);
+    } catch (IOException e) {
+      throw new IllegalStateException("Couldn't read the vocabulary in " + exportUrl, e);
+    }
+  }
+
+  public static Path downloadVocabularyFile(String url) {
+    try {
+      // request to download the latest release that we've found before
+      Request request = new Request.Builder().url(url).build();
+      Response response = HTTP_CLIENT.newCall(request).execute();
+
+      // the response returns a zip file
+      Path downloadedFile =
+          Files.createTempFile("download-" + Instant.now().toEpochMilli(), ".zip");
+      Files.copy(response.body().byteStream(), downloadedFile, StandardCopyOption.REPLACE_EXISTING);
+
+      // return the json file with the vocabulary export which is inside the zip file
+      return unzipVocabularyRelease(downloadedFile);
+    } catch (IOException e) {
+      log.error("Couldn't copy vocabulary to hdfs", e);
+      throw new IllegalArgumentException("Couldn't download vocabulary from " + url, e);
     }
   }
 
@@ -137,13 +177,12 @@ class VocabularyDownloader {
    * @return a new instance of file based cache
    */
   private static Cache createCache() {
-
     try {
       // use a new file cache for the current session
       String cacheName = System.currentTimeMillis() + "-downloadCache";
       File httpCacheDirectory = Files.createTempDirectory(cacheName).toFile();
       httpCacheDirectory.deleteOnExit();
-      LOG.info("Cache file created - {}", httpCacheDirectory.getAbsolutePath());
+      log.info("Cache file created - {}", httpCacheDirectory.getAbsolutePath());
       // create cache
       return new Cache(httpCacheDirectory, DEFAULT_CACHE_SIZE);
     } catch (IOException e) {
@@ -159,12 +198,12 @@ class VocabularyDownloader {
       ZipEntry zipEntry = zis.getNextEntry();
       if (zipEntry != null) {
         unzipFile = Files.createTempFile(zipEntry.getName(), ".json");
-        FileOutputStream fos = new FileOutputStream(unzipFile.toFile());
-        int len;
-        while ((len = zis.read(buffer)) > 0) {
-          fos.write(buffer, 0, len);
+        try (FileOutputStream fos = new FileOutputStream(unzipFile.toFile())) {
+          int len;
+          while ((len = zis.read(buffer)) > 0) {
+            fos.write(buffer, 0, len);
+          }
         }
-        fos.close();
       }
       zis.closeEntry();
     }

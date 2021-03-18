@@ -1,17 +1,41 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.restws;
 
+import org.gbif.api.vocabulary.UserRole;
+import org.gbif.common.messaging.ConnectionParameters;
+import org.gbif.common.messaging.DefaultMessagePublisher;
+import org.gbif.common.messaging.api.MessagePublisher;
+import org.gbif.vocabulary.SpringConfig;
+import org.gbif.vocabulary.restws.config.ConfigPropertiesValidator;
+import org.gbif.vocabulary.restws.config.ExportConfig;
+import org.gbif.vocabulary.restws.config.MessagingConfig;
+import org.gbif.vocabulary.restws.security.SecurityConfig;
+import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
+
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.gbif.api.vocabulary.UserRole;
-import org.gbif.vocabulary.SpringConfig;
-import org.gbif.vocabulary.restws.security.SecurityConfig;
-import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +61,7 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PAT
 
 @SpringBootApplication
 @Import(SpringConfig.class)
+@EnableConfigurationProperties({ExportConfig.class, MessagingConfig.class})
 public class Application {
 
   public static void main(String[] args) {
@@ -56,11 +81,27 @@ public class Application {
         .build();
   }
 
+  @Bean
+  @ConditionalOnProperty(value = "messaging.enabled", havingValue = "true")
+  @Autowired
+  public MessagePublisher messagePublisher(MessagingConfig config) throws IOException {
+    return new DefaultMessagePublisher(
+        new ConnectionParameters(
+            config.getHost(),
+            config.getPort(),
+            config.getUsername(),
+            config.getPassword(),
+            config.getVirtualHost()));
+  }
+
+  @Bean
+  public static ConfigPropertiesValidator configurationPropertiesValidator() {
+    return new ConfigPropertiesValidator();
+  }
+
   @Configuration
   @Order(10)
   static class ActuatorSecurityConfig extends WebSecurityConfigurerAdapter {
-
-    private static final String ACTUATOR_USER = "actuatorAdmin";
 
     @Autowired private SecurityConfig securityConfig;
 
@@ -84,7 +125,7 @@ public class Application {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
       auth.inMemoryAuthentication()
-          .withUser(ACTUATOR_USER)
+          .withUser(securityConfig.getActuatorUser())
           .password(passwordEncoder().encode(securityConfig.getActuatorSecret()))
           .roles("ACTUATOR");
     }

@@ -1,4 +1,25 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.persistence.mappers;
+
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -7,11 +28,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,20 +79,33 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabularyGbif.setNamespace("namespace gbif");
     vocabularyMapper.create(vocabularyGbif);
 
-    assertList("vocab1", null, null, null, Long.MAX_VALUE, 0);
-    assertList("vocab1", null, null, null, vocabulary1.getKey(), 1);
-    assertList(null, null, null, null, vocabulary2.getKey(), 1);
-    assertList("voc", null, null, null, null, 3);
-    assertList("ocab", null, null, null, null, 0);
-    assertList("namesp gb", null, null, null, null, 1);
-    assertList(null, "vocab1", null, null, null, 1);
-    assertList(null, "vocab", null, null, null, 0);
-    assertList(null, null, "namespace gbif", null, null, 1);
-    assertList(null, null, "namespace", null, null, 0);
-    assertList(null, "vocab2", "namespace2", null, null, 1);
-    assertList("voc", "vocab1", "namespace1", null, null, 1);
-    assertList("oca", "vocab2", "namespace2", null, null, 0);
-    assertList("v gbif", "vocab gbif", null, null, null, 1);
+    assertList(VocabularySearchParams.builder().query("vocab1").key(Long.MAX_VALUE).build(), 0);
+    assertList(
+        VocabularySearchParams.builder().query("vocab1").key(vocabulary1.getKey()).build(), 1);
+    assertList(VocabularySearchParams.builder().key(vocabulary2.getKey()).build(), 1);
+    assertList(VocabularySearchParams.builder().query("voc").build(), 3);
+    assertList(VocabularySearchParams.builder().query("ocab").build(), 0);
+    assertList(VocabularySearchParams.builder().query("namesp gb").build(), 1);
+    assertList(VocabularySearchParams.builder().name("vocab1").build(), 1);
+    assertList(VocabularySearchParams.builder().name("vocab").build(), 0);
+    assertList(VocabularySearchParams.builder().namespace("namespace gbif").build(), 1);
+    assertList(VocabularySearchParams.builder().namespace("namespace").build(), 0);
+    assertList(VocabularySearchParams.builder().name("vocab2").namespace("namespace2").build(), 1);
+    assertList(
+        VocabularySearchParams.builder()
+            .query("voc")
+            .name("vocab1")
+            .namespace("namespace1")
+            .build(),
+        1);
+    assertList(
+        VocabularySearchParams.builder()
+            .query("oca")
+            .name("vocab2")
+            .namespace("namespace2")
+            .build(),
+        0);
+    assertList(VocabularySearchParams.builder().query("v gbif").name("vocab gbif").build(), 1);
   }
 
   @Test
@@ -89,14 +118,14 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     vocabulary2.setNamespace("n1");
     vocabularyMapper.create(vocabulary2);
 
-    assertList(null, null, null, true, null, 0);
-    assertList(null, null, "n1", true, null, 0);
-    assertList(null, null, "n1", null, null, 2);
-    assertList(null, null, "n1", false, null, 2);
+    assertList(VocabularySearchParams.builder().deprecated(true).build(), 0);
+    assertList(VocabularySearchParams.builder().namespace("n1").deprecated(true).build(), 0);
+    assertList(VocabularySearchParams.builder().namespace("n1").build(), 2);
+    assertList(VocabularySearchParams.builder().namespace("n1").deprecated(false).build(), 2);
 
     vocabularyMapper.deprecate(vocabulary1.getKey(), DEPRECATED_BY, null);
-    assertList(null, null, null, true, null, 1);
-    assertList(null, null, "n1", true, null, 1);
+    assertList(VocabularySearchParams.builder().deprecated(true).build(), 1);
+    assertList(VocabularySearchParams.builder().namespace("n1").deprecated(true).build(), 1);
   }
 
   @Test
@@ -208,17 +237,9 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertEquals(vocabulary.getName(), similarities.get(0).getName());
   }
 
-  private void assertList(
-      String query,
-      String name,
-      String namespace,
-      Boolean deprecated,
-      Long key,
-      int expectedResult) {
-    assertEquals(
-        expectedResult,
-        vocabularyMapper.list(query, name, namespace, deprecated, key, DEFAULT_PAGE).size());
-    assertEquals(expectedResult, vocabularyMapper.count(query, name, namespace, deprecated, key));
+  private void assertList(VocabularySearchParams params, int expectedResult) {
+    assertEquals(expectedResult, vocabularyMapper.list(params, DEFAULT_PAGE).size());
+    assertEquals(expectedResult, vocabularyMapper.count(params));
   }
 
   @Test

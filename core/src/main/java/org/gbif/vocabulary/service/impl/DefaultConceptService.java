@@ -1,4 +1,34 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.service.impl;
+
+import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.search.ChildrenResult;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.utils.PostPersist;
+import org.gbif.vocabulary.model.utils.PrePersist;
+import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
+import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
+import org.gbif.vocabulary.service.ConceptService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,20 +41,11 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.gbif.api.model.common.paging.Pageable;
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.utils.PostPersist;
-import org.gbif.vocabulary.model.utils.PrePersist;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.search.ChildrenCountResult;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
-import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-import org.gbif.vocabulary.service.ConceptService;
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,22 +53,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Preconditions;
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
-
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.HIDDEN_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /** Default implementation for {@link ConceptService}. */
 @Service
@@ -154,28 +168,7 @@ public class DefaultConceptService implements ConceptService {
     params = params != null ? params : ConceptSearchParams.empty();
 
     return new PagingResponse<>(
-        page,
-        conceptMapper.count(
-            params.getQuery(),
-            params.getVocabularyKey(),
-            params.getParentKey(),
-            params.getReplacedByKey(),
-            params.getName(),
-            params.getDeprecated(),
-            params.getKey(),
-            params.getHasParent(),
-            params.getHasReplacement()),
-        conceptMapper.list(
-            params.getQuery(),
-            params.getVocabularyKey(),
-            params.getParentKey(),
-            params.getReplacedByKey(),
-            params.getName(),
-            params.getDeprecated(),
-            params.getKey(),
-            params.getHasParent(),
-            params.getHasReplacement(),
-            page));
+        page, conceptMapper.count(params), conceptMapper.list(params, page));
   }
 
   @Override
@@ -263,7 +256,7 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public List<ChildrenCountResult> countChildren(List<Long> conceptParents) {
+  public List<ChildrenResult> countChildren(List<Long> conceptParents) {
     Preconditions.checkArgument(
         conceptParents != null && !conceptParents.isEmpty(), "concept parents are required");
     return conceptMapper.countChildren(conceptParents);
@@ -271,7 +264,9 @@ public class DefaultConceptService implements ConceptService {
 
   /** Returns the keys of all the children of the given concept. */
   private List<Long> findChildrenKeys(long parentKey, boolean deprecated) {
-    return conceptMapper.list(null, null, parentKey, null, null, deprecated, null, null, null, null)
+    return conceptMapper
+        .list(
+            ConceptSearchParams.builder().parentKey(parentKey).deprecated(deprecated).build(), null)
         .stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());

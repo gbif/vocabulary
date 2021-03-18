@@ -1,9 +1,24 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.restws.advices;
+
+import org.gbif.vocabulary.model.VocabularyEntity;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-
-import org.gbif.vocabulary.model.VocabularyEntity;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
@@ -14,11 +29,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Intercepts all the requests with a {@link org.gbif.vocabulary.model.VocabularyEntity} in the body
  * and assigns the required {@link org.gbif.vocabulary.model.Auditable} fields.
  */
 @ControllerAdvice
+@Slf4j
 public class AuditRequestAdvice implements RequestBodyAdvice {
 
   @Override
@@ -29,7 +47,8 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
     try {
       return VocabularyEntity.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Unexpected target type", e);
+      log.debug("Unexpected target type", e);
+      return false;
     }
   }
 

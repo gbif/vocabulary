@@ -1,12 +1,29 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.search.ChildrenCountResult;
+import org.gbif.vocabulary.model.search.ChildrenResult;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import java.util.List;
+
 import javax.annotation.Nullable;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -17,27 +34,10 @@ import org.apache.ibatis.annotations.Param;
 public interface ConceptMapper extends BaseMapper<Concept> {
 
   List<Concept> list(
-      @Nullable @Param("query") String query,
-      @Nullable @Param("vocabularyKey") Long vocabularyKey,
-      @Nullable @Param("parentKey") Long parentKey,
-      @Nullable @Param("replacedByKey") Long replacedByKey,
-      @Nullable @Param("name") String name,
-      @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Long key,
-      @Nullable @Param("hasParent") Boolean hasParent,
-      @Nullable @Param("hasReplacement") Boolean hasReplacement,
+      @Nullable @Param("params") ConceptSearchParams params,
       @Nullable @Param("page") Pageable page);
 
-  long count(
-      @Nullable @Param("query") String query,
-      @Nullable @Param("vocabularyKey") Long vocabularyKey,
-      @Nullable @Param("parentKey") Long parentKey,
-      @Nullable @Param("replacedByKey") Long replacedByKey,
-      @Nullable @Param("name") String name,
-      @Nullable @Param("deprecated") Boolean deprecated,
-      @Nullable @Param("key") Long key,
-      @Nullable @Param("hasParent") Boolean hasParent,
-      @Nullable @Param("hasReplacement") Boolean hasReplacement);
+  long count(@Nullable @Param("params") ConceptSearchParams params);
 
   Concept getByNameAndVocabulary(
       @Param("name") String name, @Param("vocabularyName") String vocabularyName);
@@ -92,7 +92,7 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * Given a list of concepts, it finds the number of children that each concept has.
    *
    * @param parentConcepts list with a key of all the concepts to look for
-   * @return list of {@link ChildrenCountResult}
+   * @return list of {@link ChildrenResult}
    */
-  List<ChildrenCountResult> countChildren(@Param("parentConcepts") List<Long> parentConcepts);
+  List<ChildrenResult> countChildren(@Param("parentConcepts") List<Long> parentConcepts);
 }

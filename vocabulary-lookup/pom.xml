@@ -3,23 +3,27 @@
   <parent>
     <artifactId>vocabulary-parent</artifactId>
     <groupId>org.gbif.vocabulary</groupId>
-    <version>0.25-SNAPSHOT</version>
+    <version>0.36-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>vocabulary-lookup</artifactId>
-  <version>0.25-SNAPSHOT</version>
+
+  <properties>
+    <main.basedir>${project.parent.basedir}</main.basedir>
+  </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.gbif.vocabulary</groupId>
       <artifactId>model</artifactId>
     </dependency>
-
     <dependency>
-      <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>okhttp</artifactId>
+      <groupId>org.gbif.vocabulary</groupId>
+      <artifactId>tools</artifactId>
     </dependency>
+
+      <!-- cache -->
     <dependency>
       <groupId>org.cache2k</groupId>
       <artifactId>cache2k-api</artifactId>
@@ -28,6 +32,8 @@
       <groupId>org.cache2k</groupId>
       <artifactId>cache2k-core</artifactId>
     </dependency>
+
+    <!-- jackson -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
@@ -44,9 +50,17 @@
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
+
+    <!-- logs -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <!-- utils -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
 
     <!-- test -->
@@ -62,6 +76,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>${spring-boot.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
           <filters>
             <filter>
@@ -99,6 +120,10 @@
                 <relocation>
                   <pattern>okio</pattern>
                   <shadedPattern>vocab.okio</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>okhttp</pattern>
+                  <shadedPattern>vocab.okhttp</shadedPattern>
                 </relocation>
                 <relocation>
                   <pattern>com.fasterxml.jackson</pattern>

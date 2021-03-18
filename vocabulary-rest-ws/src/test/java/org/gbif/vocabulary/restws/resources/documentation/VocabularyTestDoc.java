@@ -1,24 +1,45 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.restws.resources.documentation;
-
-import java.nio.file.Files;
-import java.util.Collections;
-import java.util.List;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.DeprecateConceptAction;
+import org.gbif.vocabulary.api.DeprecateVocabularyAction;
+import org.gbif.vocabulary.api.VocabularyReleaseParams;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.ExportMetadata;
+import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
-import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
-import org.gbif.vocabulary.restws.model.VocabularyReleaseParams;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
+
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -39,6 +60,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -197,8 +219,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     vr1.setVocabularyKey(vocabulary.getKey());
     vr1.setVersion("1.0");
 
-    when(exportService.releaseVocabulary(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(vr1);
+    when(exportService.releaseVocabulary(any())).thenReturn(vr1);
 
     mockMvc
         .perform(
@@ -207,7 +228,8 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                 .content(
                     OBJECT_MAPPER.writeValueAsString(
                         new VocabularyReleaseParams("1.0", "comments"))))
-        .andExpect(status().isCreated());
+        .andExpect(status().isCreated())
+        .andDo(documentRequestFields(VocabularyReleaseParams.class));
   }
 
   @Test
@@ -223,7 +245,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
 
     when(exportService.listReleases(anyString(), anyString(), any()))
         .thenReturn(
-            new PagingResponse<>(new PagingRequest(0, 5), 2L, Collections.singletonList(vr1)));
+            new PagingResponse<>(new PagingRequest(0, 5), 1L, Collections.singletonList(vr1)));
 
     mockMvc
         .perform(
@@ -246,7 +268,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
 
     when(exportService.listReleases(anyString(), anyString(), any()))
         .thenReturn(
-            new PagingResponse<>(new PagingRequest(0, 5), 2L, Collections.singletonList(vr1)));
+            new PagingResponse<>(new PagingRequest(0, 5), 1L, Collections.singletonList(vr1)));
 
     mockMvc
         .perform(
@@ -259,6 +281,58 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                     + "/"
                     + vr1.getVersion()))
         .andExpect(status().isOk());
+  }
+
+  @Test
+  public void getReleaseExportTest() throws Exception {
+    Vocabulary vocabulary = createVocabulary("vocab");
+    vocabulary.setKey(TEST_KEY);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+
+    VocabularyRelease vr1 = new VocabularyRelease();
+    vr1.setExportUrl("/vocab-1.0.zip");
+    vr1.setVocabularyKey(vocabulary.getKey());
+    vr1.setVersion("latest");
+
+    when(exportService.listReleases(anyString(), anyString(), any()))
+        .thenReturn(
+            new PagingResponse<>(new PagingRequest(0, 5), 1L, Collections.singletonList(vr1)));
+
+    try (MockedStatic<VocabularyDownloader> vocabDownloader =
+        mockStatic(VocabularyDownloader.class)) {
+
+      VocabularyExport export = new VocabularyExport();
+
+      ExportMetadata metadata = new ExportMetadata();
+      metadata.setVersion("1.0.0");
+      metadata.setCreatedDate(LocalDateTime.now());
+      export.setMetadata(metadata);
+
+      export.setVocabulary(vocabulary);
+
+      Concept concept = new Concept();
+      concept.setKey(1l);
+      concept.setName("Concept");
+      concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "concept"));
+      export.setConcepts(Collections.singletonList(concept));
+
+      vocabDownloader
+          .when(() -> VocabularyDownloader.downloadVocabularyExport(vr1.getExportUrl()))
+          .thenReturn(export);
+
+      mockMvc
+          .perform(
+              get(
+                  getBasePath()
+                      + "/"
+                      + vocabulary.getName()
+                      + "/"
+                      + VOCABULARY_RELEASES_PATH
+                      + "/"
+                      + vr1.getVersion()
+                      + "/export"))
+          .andExpect(status().isOk());
+    }
   }
 
   @Override

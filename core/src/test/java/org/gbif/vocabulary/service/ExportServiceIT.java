@@ -1,20 +1,39 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.service;
-
-import java.util.List;
-import java.util.UUID;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
+import org.gbif.vocabulary.service.export.ReleasePersister;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -23,7 +42,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 /** Integration tests for the {@link ExportService}. */
 @ExtendWith(SpringExtension.class)
@@ -37,6 +59,7 @@ public class ExportServiceIT {
   private final VocabularyReleaseMapper vocabularyReleaseMapper;
   private final ExportService exportService;
   private final VocabularyMapper vocabularyMapper;
+  @MockBean private ReleasePersister releasePersister;
 
   @Autowired
   ExportServiceIT(
@@ -114,6 +137,36 @@ public class ExportServiceIT {
             .getResults();
     assertEquals(1, releases.size());
     assertEquals(vr3.getKey(), releases.get(0).getKey());
+  }
+
+  @Test
+  public void releaseVocabularyTest() throws IOException {
+    // create vocabulary
+    Vocabulary vocabulary = new Vocabulary();
+    vocabulary.setName(UUID.randomUUID().toString());
+    vocabulary.setCreatedBy("test");
+    vocabulary.setModifiedBy("test");
+    vocabularyMapper.create(vocabulary);
+
+    String exportUrl = "http://test.com";
+    when(releasePersister.uploadToNexus(any(), any())).thenReturn(exportUrl);
+
+    ExportParams exportParams =
+        ExportParams.builder()
+            .vocabularyName(vocabulary.getName())
+            .version("1.0.0")
+            .user("user")
+            .comment("comment")
+            .build();
+
+    VocabularyRelease release = exportService.releaseVocabulary(exportParams);
+
+    assertNotNull(release.getKey());
+    assertEquals(exportUrl, release.getExportUrl());
+    assertEquals(exportParams.getComment(), release.getComment());
+    assertEquals(exportParams.getVersion(), release.getVersion());
+    assertEquals(exportParams.getUser(), release.getCreatedBy());
+    assertEquals(vocabulary.getKey(), release.getVocabularyKey());
   }
 
   static class ContexInitializer

@@ -1,10 +1,26 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.service;
-
-import java.nio.file.Path;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.export.ExportParams;
+
+import java.nio.file.Path;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
@@ -34,17 +50,10 @@ public interface ExportService {
   /**
    * Releases a vocabulary for an specific version.
    *
-   * @param vocabularyName name of the vocabulary to release
-   * @param version version to release
-   * @param user user that created the release
-   * @param comment comment of the release
+   * @param exportParams params for the release
    * @return the created {@link VocabularyRelease}
    */
-  VocabularyRelease releaseVocabulary(
-      @NotBlank String vocabularyName,
-      @NotBlank String version,
-      @NotBlank String user,
-      @NotBlank String comment);
+  VocabularyRelease releaseVocabulary(ExportParams exportParams);
 
   /**
    * Lists the vocabulary releases for a vocabulary and optionally a specific version. If the

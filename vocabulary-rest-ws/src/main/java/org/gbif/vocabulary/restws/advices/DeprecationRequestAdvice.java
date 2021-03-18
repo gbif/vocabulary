@@ -1,8 +1,23 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.restws.advices;
 
-import org.gbif.vocabulary.restws.model.DeprecateAction;
-import org.gbif.vocabulary.restws.model.DeprecateConceptAction;
-import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
+import org.gbif.vocabulary.api.DeprecateAction;
+import org.gbif.vocabulary.api.DeprecateConceptAction;
+import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -16,11 +31,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Intercepts all the deprecation requests and sets the auditable fields. The user is taken from the
  * security context.
  */
 @ControllerAdvice
+@Slf4j
 public class DeprecationRequestAdvice implements RequestBodyAdvice {
 
   private static final BiPredicate<Class, Type> IS_ASSIGNABLE =
@@ -28,7 +46,8 @@ public class DeprecationRequestAdvice implements RequestBodyAdvice {
         try {
           return expected.isAssignableFrom(Class.forName(targetType.getTypeName()));
         } catch (ClassNotFoundException e) {
-          throw new IllegalStateException("Unexpected target type", e);
+          log.debug("Unexpected parameter type", e);
+          return false;
         }
       };
 

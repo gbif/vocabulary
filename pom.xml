@@ -3,16 +3,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.2.4.RELEASE</version>
-    <relativePath />
+    <groupId>org.gbif</groupId>
+    <artifactId>motherpom</artifactId>
+    <version>49</version>
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
   <artifactId>vocabulary-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.25-SNAPSHOT</version>
+  <version>0.36-SNAPSHOT</version>
 
   <modules>
     <module>core</module>
@@ -20,19 +19,35 @@
     <module>vocabulary-rest-ws</module>
     <module>vocabulary-lookup</module>
     <module>vocabulary-importer</module>
+    <module>vocabulary-cli</module>
+    <module>tools</module>
+    <module>vocabulary-rest-ws-client</module>
+    <module>api</module>
   </modules>
 
   <scm>
     <connection>scm:git:git@github.com:gbif/vocabulary.git</connection>
     <url>https://github.com/gbif/vocabulary</url>
     <developerConnection>scm:git:git@github.com:gbif/vocabulary.git</developerConnection>
-    <tag>vocabulary-parent-0.23</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
     <repository>
       <id>gbif-all</id>
       <url>http://repository.gbif.org/content/groups/gbif</url>
+    </repository>
+    <repository>
+      <id>gbif-thirdparty</id>
+      <url>http://repository.gbif.org/content/repositories/thirdparty</url>
+    </repository>
+    <repository>
+      <id>gbif-mirror</id>
+      <url>http://repository.gbif.org/content/groups/public/</url>
+    </repository>
+    <repository>
+      <id>cloudera-release</id>
+      <url>http://repository.cloudera.com/artifactory/cloudera-repos/</url>
     </repository>
   </repositories>
 
@@ -48,46 +63,60 @@
   </distributionManagement>
 
   <properties>
+    <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+    <spring-cloud-openfeign.version>2.2.6.RELEASE</spring-cloud-openfeign.version>
+    <main.basedir>${project.basedir}</main.basedir>
+
+    <!-- gbif -->
+    <gbif-api.version>0.113</gbif-api.version>
+    <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
+    <postal-service.version>0.46</postal-service.version>
+    <gbif-cli.version>0.14</gbif-cli.version>
+    <gbif-common-ws.version>1.12</gbif-common-ws.version>
+
+    <!-- DB -->
     <postgresql-embedded.version>2.10</postgresql-embedded.version>
-    <junit-vintage.version>5.3.2</junit-vintage.version>
-    <postgresql-testcontainers.version>1.10.5</postgresql-testcontainers.version>
-    <wiremock.version>2.21.0</wiremock.version>
+    <postgresql-testcontainers.version>1.15.0-rc2</postgresql-testcontainers.version>
     <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
+
+    <!-- utils -->
     <javax-validation.version>2.0.1.Final</javax-validation.version>
     <okhttp-version>4.2.2</okhttp-version>
     <retrofit.version>2.7.1</retrofit.version>
     <cache2k-version>1.2.4.Final</cache2k-version>
     <lombok.version>1.18.12</lombok.version>
-
-    <!-- maven release -->
-    <minimumMavenVersion>3.0</minimumMavenVersion>
-    <jdkLevel>1.8</jdkLevel>
-    <release.tagNameBase>${project.artifactId}</release.tagNameBase>
-    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-
-    <!-- gbif -->
-    <gbif-api.version>0.113</gbif-api.version>
-    <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
+    <metainf-services.version>1.8</metainf-services.version>
+    <jcommander.version>1.58</jcommander.version>
+    <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
+    <feign.version>10.11</feign.version>
 
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
 
     <!-- ZK -->
-    <spring-cloud-zookeeper.version>2.2.0.RELEASE</spring-cloud-zookeeper.version>
+    <spring-cloud-zookeeper.version>2.2.4.RELEASE</spring-cloud-zookeeper.version>
     <zookeeper.version>3.4.14</zookeeper.version>
 
+    <!-- Hadoop -->
+    <hadoop.version>2.6.0-cdh5.16.2</hadoop.version>
+    <hadoop-core.version>2.6.0-mr1-cdh5.16.2</hadoop-core.version>
+
     <!-- logging -->
-    <slf4j.version>1.7.26</slf4j.version>
+    <slf4j.version>1.7.30</slf4j.version>
     <logback.version>1.2.3</logback.version>
     <janino.version>2.5.10</janino.version>
     <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
+
+    <!-- testing -->
+    <mockito.version>3.4.0</mockito.version>
+    <wiremock.version>2.21.0</wiremock.version>
 
     <!-- documentation -->
     <spring.auto-rest-docs.version>2.0.4</spring.auto-rest-docs.version>
     <ascii-doctor-plugin.version>1.5.7</ascii-doctor-plugin.version>
 
     <!-- JaCoCo & Sonar-->
-    <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
+    <sonar.projectName>GBIF Vocabulary</sonar.projectName>
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
     <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
     <sonar.jacoco.reportPath>${project.build.directory}/target/jacoco.exec</sonar.jacoco.reportPath>
@@ -95,11 +124,50 @@
     <sonar.exclusions>**/AsciiParser.java</sonar.exclusions>
     <sonar.cpd.exclusions>**/AsciiParser.java</sonar.cpd.exclusions>
     <sonar.coverage.exclusions>**/AsciiParser.java</sonar.coverage.exclusions>
-    <maven-jar-plugin.version>2.6</maven-jar-plugin.version>
   </properties>
 
   <dependencyManagement>
     <dependencies>
+      <!-- Spring -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
+        <version>${spring-cloud-openfeign.version}</version>
+      </dependency>
+
+      <!-- GBIF -->
+      <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>model</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>tools</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gbif.vocabulary</groupId>
+        <artifactId>vocabulary-rest-ws-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
       <dependency>
         <groupId>org.gbif</groupId>
         <artifactId>gbif-api</artifactId>
@@ -120,34 +188,24 @@
         </exclusions>
       </dependency>
       <dependency>
-        <groupId>org.gbif.vocabulary</groupId>
-        <artifactId>model</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.gbif.vocabulary</groupId>
-        <artifactId>core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.gbif</groupId>
         <artifactId>gbif-common-mybatis</artifactId>
         <version>${gbif.common-mybatis.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.squareup.okhttp3</groupId>
-        <artifactId>okhttp</artifactId>
-        <version>${okhttp-version}</version>
+        <groupId>org.gbif.common</groupId>
+        <artifactId>gbif-postal-service</artifactId>
+        <version>${postal-service.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.cache2k</groupId>
-        <artifactId>cache2k-api</artifactId>
-        <version>${cache2k-version}</version>
+        <groupId>org.gbif.common</groupId>
+        <artifactId>gbif-cli</artifactId>
+        <version>${gbif-cli.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.cache2k</groupId>
-        <artifactId>cache2k-core</artifactId>
-        <version>${cache2k-version}</version>
+        <groupId>org.gbif</groupId>
+        <artifactId>gbif-common-ws</artifactId>
+        <version>${gbif-common-ws.version}</version>
       </dependency>
       <dependency>
         <groupId>com.squareup.retrofit2</groupId>
@@ -166,11 +224,6 @@
         <artifactId>mybatis-spring-boot-starter</artifactId>
         <version>${mybatis.spring.boot.starter}</version>
       </dependency>
-      <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>${postgresql.version}</version>
-      </dependency>
 
       <!-- utils -->
       <dependency>
@@ -187,6 +240,42 @@
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
         <version>${lombok.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp</artifactId>
+        <version>${okhttp-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.cache2k</groupId>
+        <artifactId>cache2k-api</artifactId>
+        <version>${cache2k-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.cache2k</groupId>
+        <artifactId>cache2k-core</artifactId>
+        <version>${cache2k-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.kohsuke.metainf-services</groupId>
+        <artifactId>metainf-services</artifactId>
+        <version>${metainf-services.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.beust</groupId>
+        <artifactId>jcommander</artifactId>
+        <version>${jcommander.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>de.codecentric</groupId>
+        <artifactId>spring-boot-admin-starter-client</artifactId>
+        <version>${spring-boot-admin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.openfeign</groupId>
+        <artifactId>feign-jackson</artifactId>
+        <version>${feign.version}</version>
       </dependency>
 
       <!-- logging -->
@@ -212,7 +301,7 @@
         <version>${logstash-logback-encoder.version}</version>
       </dependency>
 
-      <!-- dependencies to register to ZK -->
+      <!-- ZK -->
       <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
@@ -257,17 +346,28 @@
         <version>${spring-cloud-zookeeper.version}</version>
       </dependency>
 
+      <!-- Hadoop -->
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-hdfs</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-core</artifactId>
+        <version>${hadoop-core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <version>${hadoop.version}</version>
+      </dependency>
+
       <!-- tests -->
       <dependency>
         <groupId>org.mybatis.spring.boot</groupId>
         <artifactId>mybatis-spring-boot-starter-test</artifactId>
         <version>${mybatis.spring.boot.starter}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
-        <version>${junit-jupiter.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -282,6 +382,24 @@
         <version>${wiremock.version}</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-inline</artifactId>
+        <version>${mockito.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-junit-jupiter</artifactId>
+        <version>${mockito.version}</version>
+        <scope>test</scope>
+      </dependency>
 
       <!-- documentation -->
       <dependency>
@@ -294,108 +412,64 @@
   </dependencyManagement>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+          <configuration combine.self="override">
+            <argLine>${surefireArgLine}</argLine>
+            <runOrder>random</runOrder>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.asciidoctor</groupId>
+          <artifactId>asciidoctor-maven-plugin</artifactId>
+          <version>${ascii-doctor-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>${maven-release-plugin.version}</version>
-        <configuration>
-          <goals>deploy</goals>
-          <preparationGoals>install</preparationGoals>
-          <resume>false</resume>
-          <useReleaseProfile>true</useReleaseProfile>
-          <releaseProfiles>vocabulary-release</releaseProfiles>
-          <tagNameFormat>${release.tagNameBase}-@{project.version}</tagNameFormat>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration combine.self="override">
+          <source>${java.version}</source>
+          <target>${java.version}</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
-        <version>${maven-deploy-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco-maven-plugin.version}</version>
-        <configuration>
-          <destFile>${sonar.jacoco.reportPath}</destFile>
-          <append>true</append>
-        </configuration>
-        <executions>
-          <execution>
-            <id>agent</id>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
 
   <profiles>
-    <!-- automatically used by the release plugin -->
-    <profile>
-      <id>vocabulary-release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>enforce</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <rules>
-                <requireMavenVersion>
-                  <version>[${minimumMavenVersion},)</version>
-                </requireMavenVersion>
-                <requireJavaVersion>
-                  <version>[${jdkLevel},)</version>
-                </requireJavaVersion>
-                <requirePluginVersions>
-                  <message>Best Practice is to always define plugin versions!</message>
-                </requirePluginVersions>
-                <requireReleaseDeps>
-                  <message>No Snapshot dependencies allowed!</message>
-                </requireReleaseDeps>
-              </rules>
-            </configuration>
-          </plugin>
-          <plugin>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                  <goal>test-jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-                <configuration>
-                  <doclint>none</doclint>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
     <profile>
       <id>default</id>
       <activation>
@@ -406,7 +480,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>${maven-surefire-plugin.version}</version>
             <configuration>
               <excludes>
                 <exclude>**/*TestDoc.java</exclude>
@@ -424,12 +497,10 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
-            <version>${maven-failsafe-plugin.version}</version>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>${maven-surefire-plugin.version}</version>
             <configuration>
               <excludes>
                 <exclude>**/*.java</exclude>

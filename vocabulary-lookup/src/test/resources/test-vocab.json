@@ -3,7 +3,7 @@
     "createdDate": "2019-10-08T16:24:47.218"
   },
   "vocabulary": {
-    "key": null,
+    "key": 1,
     "name": "Months",
     "label": {
       "en": "Months",
@@ -24,7 +24,7 @@
   },
   "concepts": [
     {
-      "key": null,
+      "key": 1,
       "name": "January",
       "label": {
         "en": "January",
@@ -65,7 +65,7 @@
       "sameAsUris": []
     },
     {
-      "key": null,
+      "key": 2,
       "name": "February",
       "label": {
         "en": "February",
@@ -84,7 +84,7 @@
       "modifiedBy": null,
       "deleted": null,
       "vocabularyKey": null,
-      "parentKey": null,
+      "parentKey": 1,
       "alternativeLabels": {
         "en": [
           "Feb",
@@ -107,7 +107,7 @@
       "sameAsUris": []
     },
     {
-      "key": null,
+      "key": 3,
       "name": "March",
       "label": {
         "en": "March",
@@ -125,7 +125,7 @@
       "modifiedBy": null,
       "deleted": null,
       "vocabularyKey": null,
-      "parentKey": null,
+      "parentKey": 2,
       "alternativeLabels": {},
       "hiddenLabels": [],
       "sameAsUris": []

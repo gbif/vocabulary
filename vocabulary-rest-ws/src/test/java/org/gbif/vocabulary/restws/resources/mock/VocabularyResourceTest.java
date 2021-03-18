@@ -1,22 +1,37 @@
+/*
+ * Copyright 2020 Global Biodiversity Information Facility (GBIF)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.gbif.vocabulary.restws.resources.mock;
+
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.DeprecateAction;
+import org.gbif.vocabulary.api.DeprecateVocabularyAction;
+import org.gbif.vocabulary.api.VocabularyReleaseParams;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.restws.resources.VocabularyResource;
+import org.gbif.vocabulary.service.ExportService;
+import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.VocabularyRelease;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.restws.model.DeprecateAction;
-import org.gbif.vocabulary.restws.model.DeprecateVocabularyAction;
-import org.gbif.vocabulary.restws.model.VocabularyReleaseParams;
-import org.gbif.vocabulary.restws.resources.VocabularyResource;
-import org.gbif.vocabulary.service.ExportService;
-import org.gbif.vocabulary.service.VocabularyService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
@@ -211,8 +226,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
     release.setExportUrl("/test.zip");
     release.setVocabularyKey(vocabulary.getKey());
     release.setVersion("1.0");
-    when(exportService.releaseVocabulary(anyString(), anyString(), anyString(), anyString()))
-        .thenReturn(release);
+    when(exportService.releaseVocabulary(any())).thenReturn(release);
 
     // do the call
     String url = getBasePath() + "/" + vocabulary.getName() + "/" + VOCABULARY_RELEASES_PATH;

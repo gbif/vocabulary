@@ -5,12 +5,15 @@
   <parent>
     <groupId>org.gbif.vocabulary</groupId>
     <artifactId>vocabulary-parent</artifactId>
-    <version>0.25-SNAPSHOT</version>
+    <version>0.36-SNAPSHOT</version>
   </parent>
 
   <artifactId>model</artifactId>
-  <version>0.25-SNAPSHOT</version>
   <packaging>jar</packaging>
+
+  <properties>
+    <main.basedir>${project.parent.basedir}</main.basedir>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -39,6 +42,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
 
 </project>

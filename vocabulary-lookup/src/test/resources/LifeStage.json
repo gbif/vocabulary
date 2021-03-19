@@ -1,335 +1,31 @@
 {
   "metadata" : {
-    "createdDate" : "2020-06-24T08:50:39.409"
+    "createdDate" : "2021-03-19T09:05:46.026",
+    "version" : null
   },
   "vocabulary" : {
-    "key" : 65,
+    "key" : 1,
     "name" : "LifeStage",
     "label" : {
       "en" : "Life stage"
     },
     "definition" : {
-      "en" : "A vocabulary to capture the broad stages that an organism passes through during it's life cycle. This vocabulary was assembled based on the observed terms commonly used by the open data community, including those from citizen scientists. "
+      "en" : "A vocabulary to capture the broad stages that an organism passes through during its life cycle. This vocabulary was assembled based on the observed terms commonly used by the open data community, including those from citizen scientists."
     },
     "externalDefinitions" : [ ],
     "editorialNotes" : [ ],
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:46.382719",
+    "created" : "2020-07-13T11:52:18.276347",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:46.382719",
-    "modifiedBy" : "mlopezg",
+    "modified" : "2020-07-13T11:52:18.276347",
+    "modifiedBy" : "MattBlissett",
     "deleted" : null,
     "namespace" : null
   },
   "concepts" : [ {
-    "key" : 1452,
-    "name" : "Seedling",
-    "label" : {
-      "en" : "Seedling",
-      "es-ES" : "Plántula"
-    },
-    "definition" : {
-      "en" : "A seedling is a young plant sporophyte developing out of a plant embryo from a seed"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:24.030875",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:24.030875",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "sprouting" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1448,
-    "name" : "Fledgling",
-    "label" : {
-      "en" : "Fledgling"
-    },
-    "definition" : {
-      "en" : "Fledging is the stage in a flying animal's life between hatching or birth and becoming capable of flight"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:23.856132",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:23.856132",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1445,
-    "alternativeLabels" : {
-      "en" : [ "Pullus" ]
-    },
-    "hiddenLabels" : [ "pullus" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1446,
-    "name" : "Hatchling",
-    "label" : {
-      "en" : "Hatchling",
-      "es-ES" : "Pichón"
-    },
-    "definition" : {
-      "en" : "A hatchling is a young bird that has recently come out of its egg"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:23.688204",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:23.688204",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1445,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "hatchlings" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1456,
-    "name" : "Immature",
-    "label" : {
-      "en" : "Immature",
-      "es-ES" : "Inmaduro"
-    },
-    "definition" : {
-      "en" : "Not fully developed"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:23.529699",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:23.529699",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Imm", "imm." ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1482,
-    "name" : "Unknown",
-    "label" : {
-      "en" : "Unknown"
-    },
-    "definition" : {
-      "en" : "Unknown life stage"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:23.201138",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:23.201138",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "1K", "1K+", "1st calendar year", "2 adultos, 1 juvenil", "Life Stage Not Recorded", "Indeterminante", "Desconocido", "Indeterminado", "Indéterminé", "No determinado", "No se cuenta con el dato", "Not Determined", "Not recorded", "não informado", "Undetermined" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1474,
-    "name" : "Tadpole",
-    "label" : {
-      "en" : "Tadpole",
-      "es-ES" : "Renacuajo"
-    },
-    "definition" : {
-      "en" : "The tailed aquatic larva of an amphibian (frog, toad, newt, or salamander), breathing through gills and lacking legs until the later stages of its development."
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:20.778307",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:20.778307",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Renacuajo", "Renacuajos", "Tadpoles", "Têtard", "tadpoles" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1450,
-    "name" : "Subadult",
-    "label" : {
-      "en" : "Subadult",
-      "es-ES" : "Subadulto"
-    },
-    "definition" : {
-      "en" : "A subadult is an organism that is not fully adult"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:19.965883",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:19.965883",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Sub-Adult", "Sub-adult", "Subadult", "Subadulto", "sub-adult", "subad", "subimago" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1464,
-    "name" : "Pupa",
-    "label" : {
-      "en" : "Pupa",
-      "es-ES" : "Pupa"
-    },
-    "definition" : {
-      "en" : "A pupa is the life stage of some insects undergoing transformation between immature and mature stages"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:18.828999",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:18.828999",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : {
-      "en" : [ "Chrysalis" ],
-      "es-ES" : [ "Crisálida" ]
-    },
-    "hiddenLabels" : [ "Cocoon", "Pupae", "pupal case" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1466,
-    "name" : "Nymph",
-    "label" : {
-      "en" : "Nymph",
-      "es-ES" : "Ninfa"
-    },
-    "definition" : {
-      "en" : "A nymph is the immature form of some invertebrates, particularly insects, which undergoes gradual metamorphosis (hemimetabolism) before reaching its adult stage"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:18.354491",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:18.354491",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Larva/nymph", "Ninfa", "Nymphe", "larva, nymph", "nymphs" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1459,
-    "name" : "Neonate",
-    "label" : {
-      "en" : "Neonate",
-      "es-ES" : "Neonato"
-    },
-    "definition" : {
-      "en" : "A neonate is a newborn mammal"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:17.548404",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:17.548404",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : {
-      "en" : [ "Newborn" ]
-    },
-    "hiddenLabels" : [ "Neonato", "newborn", "natal" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1470,
-    "name" : "Nauplius",
-    "label" : {
-      "en" : "Nauplius",
-      "es-ES" : "Nauplio"
-    },
-    "definition" : {
-      "en" : "The first larval stage of many crustaceans, having an unsegmented body and a single eye."
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:17.056907",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:17.056907",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Nauplii" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1467,
-    "name" : "Medusa",
-    "label" : {
-      "en" : "Medusa",
-      "es-ES" : "Medusa"
-    },
-    "definition" : {
-      "en" : "A medusa is a form of cnidarian in which the body is shaped like an umbrella"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:16.897775",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:16.897775",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "medusae" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1465,
+    "key" : 22,
     "name" : "Larva",
     "label" : {
       "en" : "Larva",
@@ -343,18 +39,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:16.737618",
+    "created" : "2021-03-19T08:43:19.919361",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:16.737618",
-    "modifiedBy" : "mlopezg",
+    "modified" : "2021-03-19T08:43:19.919361",
+    "modifiedBy" : "mgrosjean",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
-    "hiddenLabels" : [ "1 larva", "2 larva", "3 larvae", "7 larva", "Larvae", "Larval", "Larvas", "Larve", "1st instar", "metacercaria" ],
+    "hiddenLabels" : [ "Larvae", "Larval", "Larvas", "Larve", "1st instar", "metacercaria" ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1449,
+    "key" : 6,
     "name" : "Juvenile",
     "label" : {
       "en" : "Juvenile",
@@ -368,166 +64,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:15.083299",
+    "created" : "2021-03-19T08:42:18.367058",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:15.083299",
-    "modifiedBy" : "mlopezg",
+    "modified" : "2021-03-19T08:42:18.367058",
+    "modifiedBy" : "mgrosjean",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
-    "hiddenLabels" : [ "1 juvenil", "1 juvenile", "10 juveniles", "11 juveniles", "15 juveniles", "17 juveniles", "2 Juveniles", "2 juvenile", "21 juveniles", "28 juveniles", "3 juvenile", "3 juveniles", "4 juveniles", "5 juveniles", "6 juveniles", "7 juveniles", "8 juveniles", "Cría", "J", "Joven", "Juv", "Juv.", "Juvenil", "Juveniles", "Smolt", "Young", "calf", "cría", "cub", "duckling", "infant", "jovem", "juvenal", "juveniel", "\"juvenile", "juvinile" ],
+    "hiddenLabels" : [ "Cría", "J", "Joven", "Juv", "Juv.", "Juvenil", "Juveniles", "Smolt", "Young", "calf", "cría", "cub", "duckling", "infant", "jovem", "juvenal", "juveniel", "\"juvenile", "juvinile" ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1455,
-    "name" : "Fruiting",
-    "label" : {
-      "en" : "Fruiting"
-    },
-    "definition" : {
-      "en" : "The process of a tree or other plant producing fruit"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:08.984232",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:08.984232",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Flor y Fruto", "Flowering and Fruiting", "Fruit", "Fruto", "In fruit", "flowers & fruits", "fruit-bearing", "fruiting body", "fruits" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1453,
-    "name" : "Flowering",
-    "label" : {
-      "en" : "Flowering",
-      "es-ES" : "Floración"
-    },
-    "definition" : {
-      "en" : "The flowering stage refers to the phase where plants produce their flower sets, vegetables, and fruits"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:07.470126",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:07.470126",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Flor", "Flower", "Flowers", "flower bud" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1460,
-    "name" : "Fetus",
-    "label" : {
-      "en" : "Fetus",
-      "es-ES" : "Feto"
-    },
-    "definition" : {
-      "en" : "A fetus is the unborn offspring of an animal that develops from an embryo"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:06.808135",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:06.808135",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Foetus" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1458,
-    "name" : "Embryo",
-    "label" : {
-      "en" : "Embryo",
-      "es-ES" : "Embrión"
-    },
-    "definition" : {
-      "en" : "An embryo refers to the early developmental stage of eukaryotic organisms following the fertilization of an egg (derived from a female) by sperm (derived from a male) as a method of sexual reproduction"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:06.650983",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:06.650983",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Embrión", "Embryos" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1444,
-    "name" : "Egg",
-    "label" : {
-      "en" : "Egg",
-      "es-ES" : "Huevo"
-    },
-    "definition" : {
-      "en" : "The egg is the organic vessel containing the zygote in which an embryo develops until it can survive on its own, at which point the animal hatches"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:06.329628",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:06.329628",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "Eggs", "Huevo", "Huevos" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1463,
-    "name" : "Cyst",
-    "label" : {
-      "en" : "Cyst"
-    },
-    "definition" : {
-      "en" : "A cyst is a closed sac, having a distinct envelop and division compared with the nearby tissue"
-    },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "replacedByKey" : null,
-    "deprecated" : null,
-    "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:05.852747",
-    "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:05.852747",
-    "modifiedBy" : "mlopezg",
-    "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : null,
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ "cysts" ],
-    "sameAsUris" : [ ]
-  }, {
-    "key" : 1451,
+    "key" : 8,
     "name" : "Adult",
     "label" : {
       "en" : "Adult",
@@ -541,18 +89,471 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:05.515296",
+    "created" : "2021-03-19T08:40:27.133324",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:05.515296",
-    "modifiedBy" : "mlopezg",
+    "modified" : "2021-03-19T08:40:27.133324",
+    "modifiedBy" : "mgrosjean",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
-    "hiddenLabels" : [ "1 Adult", "1 Adult(s)", "1 adulto", "10 adult", "11 adult", "12 adult", "13 adult", "14 adult", "15 adult", "16 adult", "17 adult", "18 adult", "2 Adult(s)", "2 ad", "2 adult", "2 adultos", "2 adults", "20 adult", "21 adult", "22 adult", "23 adult", "24 adult", "25 adult", "27 adult", "3 Adult(s)", "3 adult", "3 adultos", "3 adults", "30 adult", "32 adult", "37 adult", "4 Adult(s)", "4 adult", "4 adultos", "5 Adult(s)", "5 adult", "5 adultos", "6 Adult(s)", "6 adult", "6 adultos", "6 adults", "7 adult", "8 adult", "8 adultos", "9 adult", "A", "Ad", "Adulta", "Adulte", "Adulto", "Adultos", "Adults", "Young adult", "Young-Adult", "a", "ad", "ad.", "adult breeding", "adult female", "adult female - worker", "adult male", "adult non-breeding", "adult unsexed", "\"adult", "old", "old adult", "Postmetamorfico", "young adult", "teneral" ],
+    "hiddenLabels" : [ "Adult(s)", "A", "Ad", "Adulta", "Adulte", "Adulto", "Adultos", "Adults", "Young adult", "Young-Adult", "a", "ad", "ad.", "adult breeding", "adult female", "adult female - worker", "adult male", "adult non-breeding", "adult unsexed", "\"adult", "old", "old adult", "Postmetamorfico", "young adult", "teneral" ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1481,
+    "key" : 9,
+    "name" : "Seedling",
+    "label" : {
+      "en" : "Seedling",
+      "es-ES" : "Plántula"
+    },
+    "definition" : {
+      "en" : "A seedling is a young plant sporophyte developing out of a plant embryo from a seed"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:22.33361",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:22.33361",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "sprouting" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 5,
+    "name" : "Fledgling",
+    "label" : {
+      "en" : "Fledgling"
+    },
+    "definition" : {
+      "en" : "Fledging is the stage in a flying animal's life between hatching or birth and becoming capable of flight"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:22.212752",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:22.212752",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : 2,
+    "alternativeLabels" : {
+      "en" : [ "Pullus" ]
+    },
+    "hiddenLabels" : [ "pullus" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 3,
+    "name" : "Hatchling",
+    "label" : {
+      "en" : "Hatchling",
+      "es-ES" : "Pichón"
+    },
+    "definition" : {
+      "en" : "A hatchling is a young bird that has recently come out of its egg"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:22.111554",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:22.111554",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : 2,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "hatchlings" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 13,
+    "name" : "Immature",
+    "label" : {
+      "en" : "Immature",
+      "es-ES" : "Inmaduro"
+    },
+    "definition" : {
+      "en" : "Not fully developed"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:22.00552",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:22.00552",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Imm", "imm." ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 39,
+    "name" : "Unknown",
+    "label" : {
+      "en" : "Unknown"
+    },
+    "definition" : {
+      "en" : "Unknown life stage"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:21.787481",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:21.787481",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "1K", "1K+", "1st calendar year", "2 adultos, 1 juvenil", "Life Stage Not Recorded", "Indeterminante", "Desconocido", "Indeterminado", "Indéterminé", "No determinado", "No se cuenta con el dato", "Not Determined", "Not recorded", "não informado", "Undetermined" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 31,
+    "name" : "Tadpole",
+    "label" : {
+      "en" : "Tadpole",
+      "es-ES" : "Renacuajo"
+    },
+    "definition" : {
+      "en" : "The tailed aquatic larva of an amphibian (frog, toad, newt, or salamander), breathing through gills and lacking legs until the later stages of its development."
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:20.213287",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:20.213287",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Renacuajo", "Renacuajos", "Tadpoles", "Têtard" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 7,
+    "name" : "Subadult",
+    "label" : {
+      "en" : "Subadult",
+      "es-ES" : "Subadulto"
+    },
+    "definition" : {
+      "en" : "A subadult is an organism that is not fully adult"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:19.815687",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:19.815687",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Sub-Adult", "Sub-adult", "Subadult", "Subadulto", "sub-adult", "subad", "subimago" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 21,
+    "name" : "Pupa",
+    "label" : {
+      "en" : "Pupa",
+      "es-ES" : "Pupa"
+    },
+    "definition" : {
+      "en" : "A pupa is the life stage of some insects undergoing transformation between immature and mature stages"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:19.033746",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:19.033746",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : {
+      "en" : [ "Chrysalis" ],
+      "es-ES" : [ "Crisálida" ]
+    },
+    "hiddenLabels" : [ "Cocoon", "Pupae", "pupal case" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 23,
+    "name" : "Nymph",
+    "label" : {
+      "en" : "Nymph",
+      "es-ES" : "Ninfa"
+    },
+    "definition" : {
+      "en" : "A nymph is the immature form of some invertebrates, particularly insects, which undergoes gradual metamorphosis (hemimetabolism) before reaching its adult stage"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:18.728366",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:18.728366",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Larva/nymph", "Ninfa", "Nymphe", "larva, nymph", "nymphs" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 16,
+    "name" : "Neonate",
+    "label" : {
+      "en" : "Neonate",
+      "es-ES" : "Neonato"
+    },
+    "definition" : {
+      "en" : "A neonate is a newborn mammal"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:18.204757",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:18.204757",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : {
+      "en" : [ "Newborn" ]
+    },
+    "hiddenLabels" : [ "Neonato", "newborn", "natal" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 27,
+    "name" : "Nauplius",
+    "label" : {
+      "en" : "Nauplius",
+      "es-ES" : "Nauplio"
+    },
+    "definition" : {
+      "en" : "The first larval stage of many crustaceans, having an unsegmented body and a single eye."
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:17.881764",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:17.881764",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Nauplii" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 24,
+    "name" : "Medusa",
+    "label" : {
+      "en" : "Medusa",
+      "es-ES" : "Medusa"
+    },
+    "definition" : {
+      "en" : "A medusa is a form of cnidarian in which the body is shaped like an umbrella"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:17.781508",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:17.781508",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "medusae" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 12,
+    "name" : "Fruiting",
+    "label" : {
+      "en" : "Fruiting"
+    },
+    "definition" : {
+      "en" : "The process of a tree or other plant producing fruit"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:12.702829",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:12.702829",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Flor y Fruto", "Flowering and Fruiting", "Fruit", "Fruto", "In fruit", "flowers & fruits", "fruit-bearing", "fruiting body", "fruits" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 10,
+    "name" : "Flowering",
+    "label" : {
+      "en" : "Flowering",
+      "es-ES" : "Floración"
+    },
+    "definition" : {
+      "en" : "The flowering stage refers to the phase where plants produce their flower sets, vegetables, and fruits"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:11.508331",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:11.508331",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Flor", "Flower", "Flowers", "flower bud" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 17,
+    "name" : "Fetus",
+    "label" : {
+      "en" : "Fetus",
+      "es-ES" : "Feto"
+    },
+    "definition" : {
+      "en" : "A fetus is the unborn offspring of an animal that develops from an embryo"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:11.056892",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:11.056892",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Foetus" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 15,
+    "name" : "Embryo",
+    "label" : {
+      "en" : "Embryo",
+      "es-ES" : "Embrión"
+    },
+    "definition" : {
+      "en" : "An embryo refers to the early developmental stage of eukaryotic organisms following the fertilization of an egg (derived from a female) by sperm (derived from a male) as a method of sexual reproduction"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:10.95582",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:10.95582",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Embrión", "Embryos" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 1,
+    "name" : "Egg",
+    "label" : {
+      "en" : "Egg",
+      "es-ES" : "Huevo"
+    },
+    "definition" : {
+      "en" : "The egg is the organic vessel containing the zygote in which an embryo develops until it can survive on its own, at which point the animal hatches"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:10.76337",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:10.76337",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "Eggs", "Huevo", "Huevos" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 20,
+    "name" : "Cyst",
+    "label" : {
+      "en" : "Cyst"
+    },
+    "definition" : {
+      "en" : "A cyst is a closed sac, having a distinct envelop and division compared with the nearby tissue"
+    },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : "2020-07-09T10:07:10.429014",
+    "createdBy" : "mlopezg",
+    "modified" : "2020-07-09T10:07:10.429014",
+    "modifiedBy" : "mlopezg",
+    "deleted" : null,
+    "vocabularyKey" : 1,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ "cysts" ],
+    "sameAsUris" : [ ]
+  }, {
+    "key" : 38,
     "name" : "Imago",
     "label" : {
       "en" : "Imago"
@@ -565,18 +566,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:49:04.493155",
+    "created" : "2020-07-09T10:07:09.558167",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:49:04.493155",
+    "modified" : "2020-07-09T10:07:09.558167",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
     "hiddenLabels" : [ "Imago/adult", "fresh imago", "imago/adult", "imago: 1" ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1480,
+    "key" : 37,
     "name" : "Polyp",
     "label" : {
       "en" : "Polyp"
@@ -589,18 +590,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:52.9013",
+    "created" : "2020-07-09T10:06:57.641917",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:52.9013",
+    "modified" : "2020-07-09T10:06:57.641917",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1479,
+    "key" : 36,
     "name" : "Caterpillar",
     "label" : {
       "en" : "Caterpillar",
@@ -614,18 +615,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:52.734012",
+    "created" : "2020-07-09T10:06:57.508535",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:52.734012",
+    "modified" : "2020-07-09T10:06:57.508535",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1478,
+    "key" : 35,
     "name" : "Veliger",
     "label" : { },
     "definition" : {
@@ -636,18 +637,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:52.568869",
+    "created" : "2020-07-09T10:06:57.386954",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:52.568869",
+    "modified" : "2020-07-09T10:06:57.386954",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1477,
+    "key" : 34,
     "name" : "Cyprid",
     "label" : {
       "en" : "Cyprid"
@@ -660,18 +661,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:52.343474",
+    "created" : "2020-07-09T10:06:57.276782",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:52.343474",
+    "modified" : "2020-07-09T10:06:57.276782",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1476,
+    "key" : 33,
     "name" : "Megalopa",
     "label" : {
       "en" : "Megalopa",
@@ -685,18 +686,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:52.182801",
+    "created" : "2020-07-09T10:06:57.157669",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:52.182801",
+    "modified" : "2020-07-09T10:06:57.157669",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1475,
+    "key" : 32,
     "name" : "Zoea",
     "label" : {
       "en" : "Zoea",
@@ -710,18 +711,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:52.014501",
+    "created" : "2020-07-09T10:06:57.040321",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:52.014501",
+    "modified" : "2020-07-09T10:06:57.040321",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1473,
+    "key" : 30,
     "name" : "Furcilia",
     "label" : {
       "en" : "Furcilia",
@@ -735,18 +736,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:51.681732",
+    "created" : "2020-07-09T10:06:56.783203",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:51.681732",
+    "modified" : "2020-07-09T10:06:56.783203",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1472,
+    "key" : 29,
     "name" : "Calyptopsis",
     "label" : {
       "en" : "Calyptopsis",
@@ -760,18 +761,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:51.512693",
+    "created" : "2020-07-09T10:06:56.653398",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:51.512693",
+    "modified" : "2020-07-09T10:06:56.653398",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1471,
+    "key" : 28,
     "name" : "Metanauplius",
     "label" : {
       "en" : "Metanauplius",
@@ -785,18 +786,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:51.349899",
+    "created" : "2020-07-09T10:06:56.535816",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:51.349899",
+    "modified" : "2020-07-09T10:06:56.535816",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1469,
+    "key" : 26,
     "name" : "Deutonymph",
     "label" : {
       "en" : "Deutonymph",
@@ -810,18 +811,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:51.007054",
+    "created" : "2020-07-09T10:06:56.299969",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:51.007054",
+    "modified" : "2020-07-09T10:06:56.299969",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1465,
+    "vocabularyKey" : 1,
+    "parentKey" : 22,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1468,
+    "key" : 25,
     "name" : "Eft",
     "label" : {
       "en" : "Eft"
@@ -834,18 +835,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:50.840251",
+    "created" : "2020-07-09T10:06:56.177497",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:50.840251",
+    "modified" : "2020-07-09T10:06:56.177497",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1462,
+    "key" : 19,
     "name" : "Zygote",
     "label" : {
       "en" : "Zygote",
@@ -859,18 +860,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:49.834675",
+    "created" : "2020-07-09T10:06:55.488179",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:49.834675",
+    "modified" : "2020-07-09T10:06:55.488179",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1461,
+    "key" : 18,
     "name" : "Gametophyte",
     "label" : {
       "en" : "Gametophyte",
@@ -884,18 +885,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:49.665509",
+    "created" : "2020-07-09T10:06:55.378354",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:49.665509",
+    "modified" : "2020-07-09T10:06:55.378354",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1457,
+    "key" : 14,
     "name" : "Mature",
     "label" : {
       "en" : "Mature",
@@ -909,18 +910,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:48.997854",
+    "created" : "2020-07-09T10:06:54.84365",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:48.997854",
+    "modified" : "2020-07-09T10:06:54.84365",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1454,
+    "key" : 11,
     "name" : "Vegetative",
     "label" : {
       "en" : "Vegetative",
@@ -934,18 +935,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:48.547391",
+    "created" : "2020-07-09T10:06:54.493944",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:48.547391",
+    "modified" : "2020-07-09T10:06:54.493944",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1447,
+    "key" : 4,
     "name" : "Nestling",
     "label" : {
       "en" : "Nestling"
@@ -958,18 +959,18 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:47.335854",
+    "created" : "2020-07-09T10:06:53.579656",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:47.335854",
+    "modified" : "2020-07-09T10:06:53.579656",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
-    "parentKey" : 1445,
+    "vocabularyKey" : 1,
+    "parentKey" : 2,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],
     "sameAsUris" : [ ]
   }, {
-    "key" : 1445,
+    "key" : 2,
     "name" : "Chick",
     "label" : {
       "en" : "Chick",
@@ -983,12 +984,12 @@
     "replacedByKey" : null,
     "deprecated" : null,
     "deprecatedBy" : null,
-    "created" : "2020-06-24T08:48:46.983808",
+    "created" : "2020-07-09T10:06:53.327955",
     "createdBy" : "mlopezg",
-    "modified" : "2020-06-24T08:48:46.983808",
+    "modified" : "2020-07-09T10:06:53.327955",
     "modifiedBy" : "mlopezg",
     "deleted" : null,
-    "vocabularyKey" : 65,
+    "vocabularyKey" : 1,
     "parentKey" : null,
     "alternativeLabels" : { },
     "hiddenLabels" : [ ],

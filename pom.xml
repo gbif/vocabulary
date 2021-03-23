@@ -18,6 +18,7 @@
     <module>model</module>
     <module>vocabulary-rest-ws</module>
     <module>vocabulary-lookup</module>
+    <module>vocabulary-importer</module>
     <module>vocabulary-cli</module>
     <module>tools</module>
     <module>vocabulary-rest-ws-client</module>
@@ -84,7 +85,7 @@
     <cache2k-version>1.2.4.Final</cache2k-version>
     <lombok.version>1.18.12</lombok.version>
     <metainf-services.version>1.8</metainf-services.version>
-    <jcommander.version>1.58</jcommander.version>
+    <jcommander.version>1.78</jcommander.version>
     <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
     <feign.version>10.11</feign.version>
 

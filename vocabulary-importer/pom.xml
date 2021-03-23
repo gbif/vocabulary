@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>vocabulary-importer</artifactId>
-  <version>0.36-SNAPSHOT</version>
+  <version>0.37-SNAPSHOT</version>
 
   <dependencies>
     <dependency>

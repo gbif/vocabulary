@@ -204,6 +204,10 @@ public class VocabularyImporter {
 
   @SneakyThrows
   private void printErrorsToFile(List<Error> errors) {
+    if (errors.isEmpty()) {
+      return;
+    }
+
     Path errorsFile = Paths.get("errors_" + System.currentTimeMillis());
     try (BufferedWriter writer = Files.newBufferedWriter(errorsFile)) {
       for (Error error : errors) {

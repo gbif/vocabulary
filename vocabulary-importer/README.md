@@ -114,7 +114,7 @@ or downloaded from our nexus repository:
 
 https://repository.gbif.org/service/rest/repository/browse/gbif/org/gbif/vocabulary/vocabulary-importer/
 
-When the import is done the tool creates a file called `errors_{timestamp}` in the directory where it was run. This file contains the issues found during the import.
+If there were issues during the import the tool creates a file called `errors_{timestamp}` in the directory where it was run where we can see all these issues. 
 
 Most of the issues should be related with duplicates that cannot be imported. Some of the restrictions are documented in the [core module](https://github.com/gbif/vocabulary/blob/master/core/notes.md).
 

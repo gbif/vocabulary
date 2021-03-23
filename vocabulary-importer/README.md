@@ -52,39 +52,39 @@ Egg;Huevos
 
 This tool can be run via command line by sending these params:
 
-* --vocabularyName, -vn
+* *--vocabularyName, -vn*
     
     Name of the vocabulary to import. It's the unique identifier of the vocabulary that will be used in the URLs
 
-* -vocabularyLabelEN, -vlen
+* *-vocabularyLabelEN, -vlen*
 
     Label for the vocabulary in EN language
 
-* --vocabularyDefinitionEN, -vden (Optional)
+* *--vocabularyDefinitionEN, -vden (Optional)*
     
     Definition of the vocabulary in EN language
 
-* --conceptsPath, -cp
+* *--conceptsPath, -cp*
 
     Path of the CSV that contains the concepts of the vocabulary
 
-* --hiddenLabelsPath, -hp
+* *--hiddenLabelsPath, -hp*
 
     Path of the CSV that contains the hidden labels of the vocabulary
     
-* --csvDelimiter, --d  (Optional)   
+* *--csvDelimiter, --d  (Optional)*  
     
     Delimiter of the CSV files for concepts and hidden labels. If not specified it uses a comma (",")
     
-* --apiUrl, -a
+* *--apiUrl, -a*
     
     Base URL of the vocabulary API where the vocabulary will be created, e.g.: https://api.gbif-dev.org/v1/
 
-* --apiUser, -au
+* *--apiUser, -au*
     
     User for the API. It has to be a vocabulary admin
 
-* --apiPassword, -ap
+* *--apiPassword, -ap*
     
     Password of the user. It has to be blank in the command and it will be prompted on the console
 

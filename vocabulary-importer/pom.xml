@@ -18,10 +18,6 @@
     </dependency>
     <dependency>
       <groupId>org.gbif.vocabulary</groupId>
-      <artifactId>model</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.gbif.vocabulary</groupId>
       <artifactId>vocabulary-rest-ws-client</artifactId>
     </dependency>
     <dependency>

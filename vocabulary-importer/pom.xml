@@ -11,6 +11,10 @@
   <artifactId>vocabulary-importer</artifactId>
   <version>0.37-SNAPSHOT</version>
 
+  <properties>
+    <main.basedir>${project.parent.basedir}</main.basedir>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.gbif.vocabulary</groupId>

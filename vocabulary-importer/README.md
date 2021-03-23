@@ -25,8 +25,8 @@ Egg;;Egg;;Huevo;;The egg is the organic vessel containing the zygote in whic
 Chick;;Chick;;Polluelo;;A chick is a bird that has not yet reached adulthood
 ```
 
-If we want to have more than 1 alternative label per concept you should use a delimiter to separate them. A pipe("|") should be used
-as default but another one can be used if it's conflicting in some vocabularies (see below how to specify a custom delimiter in the tool).
+If we want to have more than 1 alternative label per concept we should use a delimiter to separate them. A pipe("|") should be used
+as default but another one can be used if it conflicts in some vocabularies (see below how to specify a custom delimiter in the tool).
 
 * **Hidden labels**
 
@@ -76,12 +76,12 @@ This tool can be run via command line by sending these params:
 * *--csvDelimiter, --d  (Optional)*  
     
     Delimiter of the CSV files for concepts and hidden labels. If not specified it uses a comma (","). 
-    Note that some delimiters may need to be escaped, e.g.: \\|
+    Note that some delimiters may need to be escaped for Java, e.g.: \\\\|
     
 * *--listDelimiter, -ld (Optional)*  
     
     Delimiter to specify multiple values in the alternative labels. If not specified it uses a pipe ("|").
-    Note that some delimiters may need to be escaped, e.g.: \\|
+    Note that some delimiters may need to be escaped for Java, e.g.: \\\\|
     
 * *--apiUrl, -a*
     

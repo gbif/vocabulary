@@ -7,7 +7,7 @@ The rest of the fields have to be added manually through the API or the UI after
 The vocabulary concepts and labels have to be in CSV format - other separators are also accepted.
 
 It's necessary to have the following 2 CSVs:
-* Concepts
+* **Concepts**
 
 It contains the concepts of the vocabulary with its labels and alternative labels. At this moment, both EN and ES labels are accepted.
 
@@ -25,9 +25,9 @@ Egg;;Egg;;Huevo;;The egg is the organic vessel containing the zygote in whic
 Chick;;Chick;;Polluelo;;A chick is a bird that has not yet reached adulthood
 ```
 
-If we want to add more than 1 label or alternative label we must add another row for it.
+If we want to have more than 1 label or alternative label per concept we must add another row for it.
 
-* Hidden labels
+* **Hidden labels**
 
 It contains the hidden labels of the concepts of the vocabulary. Each row can contain only 1 hidden label.
 
@@ -104,17 +104,17 @@ java -jar vocabulary-importer/target/vocabulary-importer-0.36-SNAPSHOT.jar \
 --apiPassword 
 ```
 
-The jar can be obtained from this project after building the project:
+The jar can be obtained from this source code after building the project:
 
 ```
 mvn clean package
 ```
 
-or download from our nexus repository:
+or downloaded from our nexus repository:
 
 https://repository.gbif.org/service/rest/repository/browse/gbif/org/gbif/vocabulary/vocabulary-importer/
 
-When the import is done, the tool creates a file in the current folder called errors_{timestamp} where we can find the issues found during the import.
+When the import is done, the tool creates a file in the current folder called `errors_{timestamp}` where we can find the issues found during the import.
 
 Most of the issues should be related with duplicates that cannot be imported. Some of the restrictions are documented in the [core module](https://github.com/gbif/vocabulary/blob/master/core/notes.md).
 

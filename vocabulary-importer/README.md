@@ -76,12 +76,12 @@ This tool can be run via command line by sending these params:
 * *--csvDelimiter, --d  (Optional)*  
     
     Delimiter of the CSV files for concepts and hidden labels. If not specified it uses a comma (","). 
-    Note that some delimiters may need to be escaped, e.g.: \\\\|
+    Note that some delimiters may need to be escaped for Java, e.g.: \\\\|
     
 * *--listDelimiter, -ld (Optional)*  
     
     Delimiter to specify multiple values in the alternative labels. If not specified it uses a pipe ("|").
-    Note that some delimiters may need to be escaped, e.g.: \\\\|
+    Note that some delimiters may need to be escaped for Java, e.g.: \\\\|
     
 * *--apiUrl, -a*
     

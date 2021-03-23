@@ -15,12 +15,6 @@
  */
 package org.gbif.vocabulary.importer;
 
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,9 +23,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import com.google.common.base.Strings;
-
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +52,7 @@ public class VocabularyImporter {
   @SneakyThrows
   public void importVocabulary(
       String csvDelimiter,
+      String listDelimiter,
       String vocabName,
       String vocabLabelEN,
       String vocabDefinitionEN,
@@ -84,16 +87,15 @@ public class VocabularyImporter {
                 return;
               }
 
-              Concept concept;
-              boolean conceptExists = false;
               if (conceptsMap.containsKey(conceptName)) {
-                concept = conceptsMap.get(conceptName);
-                conceptExists = true;
-              } else {
-                concept = new Concept();
-                concept.setName(conceptName);
-                conceptsMap.put(conceptName, concept);
+                errors.add(Error.of("Concept " + conceptName + " already exists", null));
+                log.error("Concept {} already exists", conceptName);
+                return;
               }
+
+              Concept concept = new Concept();
+              concept.setName(conceptName);
+              conceptsMap.put(conceptName, concept);
 
               // parent
               if (values.length > 1 && !Strings.isNullOrEmpty(values[1])) {
@@ -116,10 +118,14 @@ public class VocabularyImporter {
 
               // add EN alternative labels
               if (values.length > 3 && !Strings.isNullOrEmpty(values[3])) {
+                Set<String> altLabels =
+                    Stream.of(values[3].split(listDelimiter))
+                        .map(String::trim)
+                        .collect(Collectors.toSet());
                 concept
                     .getAlternativeLabels()
                     .computeIfAbsent(LanguageRegion.ENGLISH, k -> new ArrayList<>())
-                    .add(values[3].trim());
+                    .addAll(altLabels);
               }
 
               // add ES labels
@@ -129,10 +135,15 @@ public class VocabularyImporter {
 
               // add ES alternative labels
               if (values.length > 5 && !Strings.isNullOrEmpty(values[5])) {
+                Set<String> altLabels =
+                    Stream.of(values[5].split(listDelimiter))
+                        .map(String::trim)
+                        .collect(Collectors.toSet());
+
                 concept
                     .getAlternativeLabels()
                     .computeIfAbsent(LanguageRegion.SPANISH, k -> new ArrayList<>())
-                    .add(values[5].trim());
+                    .addAll(altLabels);
               }
 
               // add EN definitions
@@ -140,26 +151,14 @@ public class VocabularyImporter {
                 concept.getDefinition().put(LanguageRegion.ENGLISH, values[6].trim());
               }
 
-              if (!conceptExists) {
-                // create concept
-                try {
-                  Concept created = conceptClient.create(createdVocab.getName(), concept);
-                  conceptsMap.put(created.getName(), created);
-                  log.info("Created concept {} with key {}", created.getName(), created.getKey());
-                } catch (Exception ex) {
-                  errors.add(Error.of("Error creating concept " + concept.getName(), ex));
-                  log.error("Cannot create concept {}", concept.getName(), ex);
-                }
-              } else {
-                // update concept
-                try {
-                  Concept updated =
-                      conceptClient.update(createdVocab.getName(), concept.getName(), concept);
-                  log.info("Updated concept {} with key {}", updated.getName(), updated.getKey());
-                } catch (Exception ex) {
-                  errors.add(Error.of("Error updating concept " + concept.getName(), ex));
-                  log.error("Cannot update concept {}", concept.getName(), ex);
-                }
+              // create concept
+              try {
+                Concept created = conceptClient.create(createdVocab.getName(), concept);
+                conceptsMap.put(created.getName(), created);
+                log.info("Created concept {} with key {}", created.getName(), created.getKey());
+              } catch (Exception ex) {
+                errors.add(Error.of("Error creating concept " + concept.getName(), ex));
+                log.error("Cannot create concept {}", concept.getName(), ex);
               }
             });
 

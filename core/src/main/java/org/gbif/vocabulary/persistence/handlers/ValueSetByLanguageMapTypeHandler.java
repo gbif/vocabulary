@@ -15,6 +15,8 @@
  */
 package org.gbif.vocabulary.persistence.handlers;
 
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+
 import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -24,8 +26,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

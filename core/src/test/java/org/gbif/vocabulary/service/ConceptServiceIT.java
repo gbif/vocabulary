@@ -15,21 +15,20 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +45,8 @@ import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import javax.sql.DataSource;
 
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertDeprecated;
@@ -148,7 +149,7 @@ public class ConceptServiceIT {
   public void createSimilarConceptTest() {
     Concept concept = createBasicConcept(vocabularyKeys[0]);
     concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "sim1"));
-    concept.setHiddenLabels(Collections.singletonList("simm1"));
+    concept.setHiddenLabels(Collections.singleton("simm1"));
     conceptService.create(concept);
 
     Concept similar = createBasicConcept(vocabularyKeys[0]);
@@ -170,7 +171,7 @@ public class ConceptServiceIT {
     assertDoesNotThrow(() -> conceptService.create(similar3));
 
     Concept similar4 = createBasicConcept(vocabularyKeys[0]);
-    similar4.getAlternativeLabels().put(LanguageRegion.SPANISH, Collections.singletonList("simm2"));
+    similar4.getAlternativeLabels().put(LanguageRegion.SPANISH, Collections.singleton("simm2"));
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar4));
   }
 
@@ -182,7 +183,7 @@ public class ConceptServiceIT {
 
     // update concept
     concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "label"));
-    concept.setHiddenLabels(Arrays.asList("labl", "lbel"));
+    concept.setHiddenLabels(new HashSet<>(Arrays.asList("labl", "lbel")));
 
     Concept parent = createBasicConcept(vocabularyKeys[0]);
     long parentKey = conceptService.create(parent);
@@ -202,8 +203,8 @@ public class ConceptServiceIT {
     concept1.setName("simConcept");
     concept1
         .getAlternativeLabels()
-        .put(LanguageRegion.ENGLISH, Collections.singletonList("simupdated"));
-    concept1.setHiddenLabels(Collections.singletonList("hidden1"));
+        .put(LanguageRegion.ENGLISH, Collections.singleton("simupdated"));
+    concept1.setHiddenLabels(Collections.singleton("hidden1"));
     conceptService.create(concept1);
 
     Concept concept2 = createBasicConcept(vocabularyKeys[0]);
@@ -220,21 +221,21 @@ public class ConceptServiceIT {
 
     Concept updatedConcept3 = conceptService.get(key2);
     updatedConcept3.setAlternativeLabels(
-        Collections.singletonMap(LanguageRegion.SPANISH, Collections.singletonList("simupdated")));
+        Collections.singletonMap(LanguageRegion.SPANISH, Collections.singleton("simupdated")));
     assertDoesNotThrow(() -> conceptService.update(updatedConcept3));
 
     Concept updatedConcept4 = conceptService.get(key2);
-    updatedConcept4.setHiddenLabels(Collections.singletonList("simupdated"));
+    updatedConcept4.setHiddenLabels(Collections.singleton("simupdated"));
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept4));
 
     Concept updatedConcept5 = conceptService.get(key2);
-    updatedConcept5.setHiddenLabels(Collections.singletonList("hidden1"));
+    updatedConcept5.setHiddenLabels(Collections.singleton("hidden1"));
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept5));
 
     Concept updatedConcept6 = conceptService.get(key2);
     updatedConcept6
         .getAlternativeLabels()
-        .put(LanguageRegion.ENGLISH, Collections.singletonList("hidden1"));
+        .put(LanguageRegion.ENGLISH, Collections.singleton("hidden1"));
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept6));
   }
 

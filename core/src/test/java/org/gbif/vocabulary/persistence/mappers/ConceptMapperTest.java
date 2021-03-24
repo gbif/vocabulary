@@ -15,6 +15,15 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.enums.LanguageRegion;
@@ -22,14 +31,6 @@ import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -105,13 +106,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept1.setName("concept1");
     concept1.setAlternativeLabels(
         Collections.singletonMap(
-            LanguageRegion.ENGLISH, Collections.singletonList("alternative example")));
+            LanguageRegion.ENGLISH, Collections.singleton("alternative example")));
     conceptMapper.create(concept1);
 
     Concept concept2 = createNewEntity();
     concept2.setName("concept2");
     concept2.setParentKey(concept1.getKey());
-    concept2.setHiddenLabels(Collections.singletonList("misspelt example"));
+    concept2.setHiddenLabels(Collections.singleton("misspelt example"));
     conceptMapper.create(concept2);
 
     Concept concept3 = createNewEntity();
@@ -186,7 +187,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void findSimilaritiesTest() {
     Concept concept1 = createNewEntity();
     concept1.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.SPANISH, "primero ")));
-    concept1.setHiddenLabels(Arrays.asList("primeiro", "otro primeiro"));
+    concept1.setHiddenLabels(new HashSet<>(Arrays.asList("primeiro", "otro primeiro")));
     conceptMapper.create(concept1);
 
     // check hidden labels
@@ -262,7 +263,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept1.setName("my-concept");
     concept1.setLabel(
         new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "normalization")));
-    concept1.setHiddenLabels(Arrays.asList("norm", "another norm"));
+    concept1.setHiddenLabels(new HashSet<>(Arrays.asList("norm", "another norm")));
     conceptMapper.create(concept1);
 
     // check Spanish labels
@@ -306,14 +307,14 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept1.setName("c1");
     concept1.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "l1")));
     concept1.setAlternativeLabels(
-        Collections.singletonMap(LanguageRegion.SPANISH, Collections.singletonList("l uno")));
-    concept1.setHiddenLabels(Arrays.asList("ll1", "l1l"));
+        Collections.singletonMap(LanguageRegion.SPANISH, Collections.singleton("l uno")));
+    concept1.setHiddenLabels(new HashSet<>(Arrays.asList("ll1", "l1l")));
     conceptMapper.create(concept1);
 
     Concept concept2 = createNewEntity();
     concept2.setName("c2");
     concept2.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "l2")));
-    concept2.setHiddenLabels(Arrays.asList("ll2", "l2l"));
+    concept2.setHiddenLabels(new HashSet<>(Arrays.asList("ll2", "l2l")));
     conceptMapper.create(concept2);
 
     // check Spanish labels
@@ -511,7 +512,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     entity.setVocabularyKey(vocabularyKeys[0]);
     entity.setName(UUID.randomUUID().toString());
     entity.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Label")));
-    entity.setHiddenLabels(Arrays.asList("lab,l", "lbel"));
+    entity.setHiddenLabels(new HashSet<>(Arrays.asList("lab,l", "lbel")));
     entity.setDefinition(
         new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Definition")));
     entity.setExternalDefinitions(

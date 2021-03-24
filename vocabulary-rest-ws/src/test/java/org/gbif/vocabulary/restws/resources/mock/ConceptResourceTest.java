@@ -15,6 +15,12 @@
  */
 package org.gbif.vocabulary.restws.resources.mock;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.DeprecateAction;
@@ -27,11 +33,6 @@ import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.restws.resources.ConceptResource;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -253,7 +254,8 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
     concept.setName(UUID.randomUUID().toString());
     concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
     concept.setAlternativeLabels(
-        Collections.singletonMap(LanguageRegion.ENGLISH, Arrays.asList("Label2", "Label3")));
+        Collections.singletonMap(
+            LanguageRegion.ENGLISH, new HashSet<>(Arrays.asList("Label2", "Label3"))));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

@@ -44,7 +44,8 @@ public class SpringConfig {
   @Bean
   ConfigurationCustomizer mybatisConfigCustomizer() {
     return configuration -> {
-      // importing type handlers from common-mybatis project
+      // importing type handlers from common-mybatis project. Not needed for the type handlers
+      // define in this project since their path is specified in the core.properties file
       configuration.getTypeHandlerRegistry().register(UriArrayTypeHandler.class);
       configuration
           .getTypeAliasRegistry()

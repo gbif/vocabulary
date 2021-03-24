@@ -21,9 +21,11 @@ import org.gbif.vocabulary.model.utils.LenientEquals;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -49,10 +51,10 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   private Long parentKey;
 
   /** Indicates alternative labels commonly associated to the concept. */
-  private Map<LanguageRegion, List<String>> alternativeLabels = new EnumMap<>(LanguageRegion.class);
+  private Map<LanguageRegion, Set<String>> alternativeLabels = new EnumMap<>(LanguageRegion.class);
 
   /** Indicates hidden labels commonly associated to the concept. */
-  private List<String> hiddenLabels = new ArrayList<>();
+  private Set<String> hiddenLabels = new HashSet<>();
 
   /** External URIs for concepts considered equivalent. */
   private List<URI> sameAsUris = new ArrayList<>();

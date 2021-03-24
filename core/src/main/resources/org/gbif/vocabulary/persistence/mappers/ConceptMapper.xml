@@ -5,8 +5,8 @@
   <resultMap id="CONCEPT_MAP" type="Concept" autoMapping="true">
     <id property="key" column="key"/>
     <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
-    <result property="alternativeLabels" column="alternative_labels" typeHandler="ValueListByLanguageMapTypeHandler"/>
-    <result property="hiddenLabels" column="hidden_labels" typeHandler="StringArrayTypeHandler"/>
+    <result property="alternativeLabels" column="alternative_labels" typeHandler="ValueSetByLanguageMapTypeHandler"/>
+    <result property="hiddenLabels" column="hidden_labels" typeHandler="StringSetTypeHandler"/>
     <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
     <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
     <result property="sameAsUris" column="same_as_uris" typeHandler="UriArrayTypeHandler"/>
@@ -29,8 +29,8 @@
     #{parentKey,jdbcType=BIGINT},
     #{name,jdbcType=VARCHAR},
     #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
-    #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::jsonb,
-    #{hiddenLabels,jdbcType=OTHER,typeHandler=StringArrayTypeHandler},
+    #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueSetByLanguageMapTypeHandler}::jsonb,
+    #{hiddenLabels,jdbcType=OTHER,typeHandler=StringSetTypeHandler},
     #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
@@ -47,8 +47,8 @@
     replaced_by_key = #{replacedByKey,jdbcType=BIGINT},
     name = #{name,jdbcType=VARCHAR},
     label = #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
-    alternative_labels = #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueListByLanguageMapTypeHandler}::jsonb,
-    hidden_labels = #{hiddenLabels,jdbcType=OTHER,typeHandler=StringArrayTypeHandler},
+    alternative_labels = #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueSetByLanguageMapTypeHandler}::jsonb,
+    hidden_labels = #{hiddenLabels,jdbcType=OTHER,typeHandler=StringSetTypeHandler},
     definition = #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     external_definition_urls = #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     same_as_uris = #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},

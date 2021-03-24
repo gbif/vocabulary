@@ -15,8 +15,6 @@
  */
 package org.gbif.vocabulary.persistence.handlers;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
@@ -25,6 +23,9 @@ import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -39,51 +40,51 @@ import com.google.common.base.Strings;
  * MyBatis {@link org.apache.ibatis.type.TypeHandler} for a {@link Map} keyed on {@link
  * LanguageRegion} and stores a {@link List} of strings.
  */
-public class ValueListByLanguageMapTypeHandler
-    extends BaseTypeHandler<Map<LanguageRegion, List<String>>> {
+public class ValueSetByLanguageMapTypeHandler
+    extends BaseTypeHandler<Map<LanguageRegion, Set<String>>> {
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final ObjectReader OBJECT_READER =
-      OBJECT_MAPPER.readerFor(new TypeReference<Map<LanguageRegion, List<String>>>() {});
+      OBJECT_MAPPER.readerFor(new TypeReference<Map<LanguageRegion, Set<String>>>() {});
 
   @Override
   public void setNonNullParameter(
       PreparedStatement preparedStatement,
       int i,
-      Map<LanguageRegion, List<String>> languageStringListMap,
+      Map<LanguageRegion, Set<String>> languageStringSetMap,
       JdbcType jdbcType)
       throws SQLException {
-    preparedStatement.setString(i, toString(languageStringListMap));
+    preparedStatement.setString(i, toString(languageStringSetMap));
   }
 
   @Override
-  public Map<LanguageRegion, List<String>> getNullableResult(ResultSet resultSet, String columnName)
+  public Map<LanguageRegion, Set<String>> getNullableResult(ResultSet resultSet, String columnName)
       throws SQLException {
     return fromString(resultSet.getString(columnName));
   }
 
   @Override
-  public Map<LanguageRegion, List<String>> getNullableResult(ResultSet resultSet, int columnIndex)
+  public Map<LanguageRegion, Set<String>> getNullableResult(ResultSet resultSet, int columnIndex)
       throws SQLException {
     return fromString(resultSet.getString(columnIndex));
   }
 
   @Override
-  public Map<LanguageRegion, List<String>> getNullableResult(
+  public Map<LanguageRegion, Set<String>> getNullableResult(
       CallableStatement callableStatement, int columnIndex) throws SQLException {
     return fromString(callableStatement.getString(columnIndex));
   }
 
-  private String toString(Map<LanguageRegion, List<String>> languageStringListMap) {
+  private String toString(Map<LanguageRegion, Set<String>> languageStringSetMap) {
     try {
-      return OBJECT_MAPPER.writeValueAsString(languageStringListMap);
+      return OBJECT_MAPPER.writeValueAsString(languageStringSetMap);
     } catch (JsonProcessingException e) {
       throw new IllegalStateException(
-          "Couldn't convert LanguageRegion map to JSON: " + languageStringListMap, e);
+          "Couldn't convert LanguageRegion map to JSON: " + languageStringSetMap, e);
     }
   }
 
-  private Map<LanguageRegion, List<String>> fromString(String json) {
+  private Map<LanguageRegion, Set<String>> fromString(String json) {
     if (Strings.isNullOrEmpty(json)) {
       return new EnumMap<>(LanguageRegion.class);
     }

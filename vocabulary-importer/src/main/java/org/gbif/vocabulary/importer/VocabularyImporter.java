@@ -15,26 +15,26 @@
  */
 package org.gbif.vocabulary.importer;
 
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.base.Strings;
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
+import com.google.common.base.Strings;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -125,7 +125,7 @@ public class VocabularyImporter {
                         .collect(Collectors.toSet());
                 concept
                     .getAlternativeLabels()
-                    .computeIfAbsent(LanguageRegion.ENGLISH, k -> new ArrayList<>())
+                    .computeIfAbsent(LanguageRegion.ENGLISH, k -> new HashSet<>())
                     .addAll(altLabels);
               }
 
@@ -143,7 +143,7 @@ public class VocabularyImporter {
 
                 concept
                     .getAlternativeLabels()
-                    .computeIfAbsent(LanguageRegion.SPANISH, k -> new ArrayList<>())
+                    .computeIfAbsent(LanguageRegion.SPANISH, k -> new HashSet<>())
                     .addAll(altLabels);
               }
 

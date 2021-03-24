@@ -15,12 +15,12 @@
  */
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
 import org.junit.jupiter.api.Test;
 
@@ -39,8 +39,8 @@ public class ConceptTest {
     c1.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "label"));
     c1.setParentKey(2L);
     c1.setReplacedByKey(1L);
-    c1.setAlternativeLabels(Collections.singletonMap(LanguageRegion.ENGLISH, Arrays.asList("alt")));
-    c1.setHiddenLabels(Collections.singletonList("misspelt"));
+    c1.setAlternativeLabels(Collections.singletonMap(LanguageRegion.ENGLISH, Collections.singleton("alt")));
+    c1.setHiddenLabels(Collections.singleton("misspelt"));
     c1.setDefinition(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
     c1.setSameAsUris(Collections.singletonList(URI.create("http://test.com")));
     c1.setEditorialNotes(Arrays.asList("n1", "n2"));

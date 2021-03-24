@@ -295,7 +295,7 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
     }
   }
 
-  private void addLabelsToCache(List<String> values, Concept concept, LanguageRegion language) {
+  private void addLabelsToCache(Set<String> values, Concept concept, LanguageRegion language) {
     values.forEach(v -> addLabelToCache(v, concept, language));
   }
 

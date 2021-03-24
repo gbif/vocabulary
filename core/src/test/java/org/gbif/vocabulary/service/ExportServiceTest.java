@@ -15,21 +15,22 @@
  */
 package org.gbif.vocabulary.service;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,16 +88,14 @@ public class ExportServiceTest extends MockServiceBaseTest {
     c1.setLabel(labels);
 
     // alternative labels
-    Map<LanguageRegion, List<String>> alternativeLabels = new HashMap<>();
-    alternativeLabels.put(LanguageRegion.ENGLISH, Arrays.asList("label2", "label3", "label4"));
-    alternativeLabels.put(LanguageRegion.SPANISH, Arrays.asList("label5", "label6"));
+    Map<LanguageRegion, Set<String>> alternativeLabels = new HashMap<>();
+    alternativeLabels.put(
+        LanguageRegion.ENGLISH, new HashSet<>(Arrays.asList("label2", "label3", "label4")));
+    alternativeLabels.put(LanguageRegion.SPANISH, new HashSet<>(Arrays.asList("label5", "label6")));
     c1.setAlternativeLabels(alternativeLabels);
 
-    // misapplied labels
-    Map<LanguageRegion, List<String>> misappliedLabels = new HashMap<>();
-    misappliedLabels.put(LanguageRegion.ENGLISH, Arrays.asList());
-    misappliedLabels.put(LanguageRegion.SPANISH, Arrays.asList());
-    c1.setHiddenLabels(Arrays.asList("labl2", "labl3", "labl4", "labl5", "labl6"));
+    // hidden labels
+    c1.setHiddenLabels(new HashSet<>(Arrays.asList("labl2", "labl3", "labl4", "labl5", "labl6")));
 
     Concept c2 = new Concept();
     c2.setName("c2");

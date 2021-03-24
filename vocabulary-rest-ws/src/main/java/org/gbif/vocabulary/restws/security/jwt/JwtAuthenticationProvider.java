@@ -52,11 +52,10 @@ public class JwtAuthenticationProvider extends AbstractAuthenticationProvider {
   @Override
   public Authentication createAuthentication(
       Authentication authentication, ResponseEntity<String> response) throws IOException {
-    JsonNode jsonNode = OBJECT_READER.readTree(response.getBody());
-    String username = jsonNode.get("userName").asText();
+    JsonNode responseJsonNode = OBJECT_READER.readTree(response.getBody());
     String newToken = response.getHeaders().getFirst("token");
 
-    return new JwtAuthentication(username, newToken, extractRoles(jsonNode));
+    return new JwtAuthentication(extractUsername(responseJsonNode), newToken, extractRoles(responseJsonNode));
   }
 
   @Override

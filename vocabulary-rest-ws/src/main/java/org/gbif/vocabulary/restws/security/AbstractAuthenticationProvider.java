@@ -15,12 +15,12 @@
  */
 package org.gbif.vocabulary.restws.security;
 
-import org.gbif.api.vocabulary.UserRole;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.gbif.api.vocabulary.UserRole;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -82,5 +82,9 @@ public abstract class AbstractAuthenticationProvider implements AuthenticationPr
         .forEach(r -> roles.add(new SimpleGrantedAuthority(UserRole.valueOf(r.asText()).name())));
 
     return roles;
+  }
+
+  protected String extractUsername(JsonNode root) {
+    return root.get("userName").asText();
   }
 }

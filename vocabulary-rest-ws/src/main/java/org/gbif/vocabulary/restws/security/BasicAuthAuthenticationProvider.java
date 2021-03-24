@@ -25,6 +25,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * {@link org.springframework.security.authentication.AuthenticationProvider} for request with basic
  * auth.
@@ -47,10 +49,12 @@ public class BasicAuthAuthenticationProvider extends AbstractAuthenticationProvi
   @Override
   public Authentication createAuthentication(
       Authentication authentication, ResponseEntity<String> response) throws IOException {
+    JsonNode responseJsonNode = OBJECT_READER.readTree(response.getBody());
+
     return new UsernamePasswordAuthenticationToken(
-        authentication.getName(),
+        extractUsername(responseJsonNode),
         authentication.getCredentials(),
-        extractRoles(OBJECT_READER.readTree(response.getBody())));
+        extractRoles(responseJsonNode));
   }
 
   @Override

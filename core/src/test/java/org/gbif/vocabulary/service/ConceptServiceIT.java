@@ -15,6 +15,13 @@
  */
 package org.gbif.vocabulary.service;
 
+import org.gbif.vocabulary.PostgresDBExtension;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -23,12 +30,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import org.gbif.vocabulary.PostgresDBExtension;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,8 +47,6 @@ import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.sql.DataSource;
 
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertDeprecated;

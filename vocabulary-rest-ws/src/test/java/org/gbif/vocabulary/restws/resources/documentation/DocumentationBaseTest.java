@@ -15,6 +15,11 @@
  */
 package org.gbif.vocabulary.restws.resources.documentation;
 
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,10 +28,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.search.KeyNameResult;
+import javax.servlet.Filter;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,15 +59,13 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import capital.scalable.restdocs.AutoDocumentation;
-import capital.scalable.restdocs.jackson.JacksonResultHandlers;
-import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import javax.servlet.Filter;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+
+import capital.scalable.restdocs.AutoDocumentation;
+import capital.scalable.restdocs.jackson.JacksonResultHandlers;
+import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -157,7 +159,8 @@ abstract class DocumentationBaseTest {
     concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
     concept.setAlternativeLabels(
         Collections.singletonMap(
-            LanguageRegion.ENGLISH, new HashSet<>(Arrays.asList("Alt label", "Another alt label"))));
+            LanguageRegion.ENGLISH,
+            new HashSet<>(Arrays.asList("Alt label", "Another alt label"))));
     concept.setHiddenLabels(Collections.singleton("Labl"));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 

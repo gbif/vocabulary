@@ -15,6 +15,12 @@
  */
 package org.gbif.vocabulary.importer;
 
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
+
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,13 +34,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import com.google.common.base.Strings;
+
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

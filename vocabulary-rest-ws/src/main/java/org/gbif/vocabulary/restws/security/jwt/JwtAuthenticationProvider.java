@@ -55,7 +55,8 @@ public class JwtAuthenticationProvider extends AbstractAuthenticationProvider {
     JsonNode responseJsonNode = OBJECT_READER.readTree(response.getBody());
     String newToken = response.getHeaders().getFirst("token");
 
-    return new JwtAuthentication(extractUsername(responseJsonNode), newToken, extractRoles(responseJsonNode));
+    return new JwtAuthentication(
+        extractUsername(responseJsonNode), newToken, extractRoles(responseJsonNode));
   }
 
   @Override

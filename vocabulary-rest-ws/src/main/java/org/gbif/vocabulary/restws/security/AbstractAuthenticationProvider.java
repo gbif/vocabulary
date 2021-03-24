@@ -15,12 +15,12 @@
  */
 package org.gbif.vocabulary.restws.security;
 
+import org.gbif.api.vocabulary.UserRole;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.gbif.api.vocabulary.UserRole;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

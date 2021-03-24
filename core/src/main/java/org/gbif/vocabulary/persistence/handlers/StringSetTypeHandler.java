@@ -24,20 +24,20 @@ public class StringSetTypeHandler extends BaseTypeHandler<Set<String>> {
 
   @Override
   public Set<String> getNullableResult(ResultSet rs, String columnName) throws SQLException {
-    return toList(rs.getArray(columnName));
+    return toSet(rs.getArray(columnName));
   }
 
   @Override
   public Set<String> getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
-    return toList(rs.getArray(columnIndex));
+    return toSet(rs.getArray(columnIndex));
   }
 
   @Override
   public Set<String> getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
-    return toList(cs.getArray(columnIndex));
+    return toSet(cs.getArray(columnIndex));
   }
 
-  private Set<String> toList(Array pgArray) throws SQLException {
+  private Set<String> toSet(Array pgArray) throws SQLException {
     if (pgArray == null) return new HashSet<>();
 
     String[] strings = (String[]) pgArray.getArray();

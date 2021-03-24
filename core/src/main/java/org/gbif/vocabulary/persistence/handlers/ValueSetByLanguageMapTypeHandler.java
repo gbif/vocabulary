@@ -21,7 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,7 +37,7 @@ import com.google.common.base.Strings;
 
 /**
  * MyBatis {@link org.apache.ibatis.type.TypeHandler} for a {@link Map} keyed on {@link
- * LanguageRegion} and stores a {@link List} of strings.
+ * LanguageRegion} and stores a {@link Set} of strings.
  */
 public class ValueSetByLanguageMapTypeHandler
     extends BaseTypeHandler<Map<LanguageRegion, Set<String>>> {

@@ -15,13 +15,8 @@
  */
 package org.gbif.vocabulary.importer;
 
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.io.BufferedWriter;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,8 +29,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.base.Strings;
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.enums.LanguageRegion;
 
+import com.google.common.base.Strings;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -151,6 +151,36 @@ public class VocabularyImporter {
               // add EN definitions
               if (values.length > 6 && !Strings.isNullOrEmpty(values[6])) {
                 concept.getDefinition().put(LanguageRegion.ENGLISH, values[6].trim());
+              }
+
+              // add sameAs URIs
+              if (values.length > 7 && !Strings.isNullOrEmpty(values[7])) {
+                Set<URI> sameAsUris = new HashSet<>();
+                String[] urisValues = values[7].split(listDelimiter);
+                for (String uri : urisValues) {
+                  try {
+                    sameAsUris.add(URI.create(uri.trim()));
+                  } catch (Exception ex) {
+                    errors.add(Error.of("Incorrect URI " + uri, ex));
+                    log.error("Incorrect URI {}", uri, ex);
+                  }
+                }
+                concept.getSameAsUris().addAll(sameAsUris);
+              }
+
+              // add external definitions
+              if (values.length > 8 && !Strings.isNullOrEmpty(values[8])) {
+                Set<URI> externalDefinitions = new HashSet<>();
+                String[] externalDefsValues = values[8].split(listDelimiter);
+                for (String definition : externalDefsValues) {
+                  try {
+                    externalDefinitions.add(URI.create(definition.trim()));
+                  } catch (Exception ex) {
+                    errors.add(Error.of("Incorrect external definition " + definition, ex));
+                    log.error("Incorrect external definition {}", definition, ex);
+                  }
+                }
+                concept.getExternalDefinitions().addAll(externalDefinitions);
               }
 
               // create concept

@@ -14,19 +14,19 @@ It contains the concepts of the vocabulary with its labels and alternative label
 The columns of this file are (note that it uses a semicolon as separator):
 
 ```
-Concept;Parent;Label_en;AlternativeLabels_en;Label_es;AlternativeLabels_es;Definition_en
+Concept;Parent;Label_en;AlternativeLabels_en;Label_es;AlternativeLabels_es;Definition_en;sameAsUris;externalDefinitions
 ```
 
 For example, for `LifeStage` we could have a concepts file like this:
 
 ```
-Concept;Parent;Label_en;AlternativeLabels_en;Label_es;AlternativeLabels_es;Definition_en
-Egg;;Egg;;Huevo;;The egg is the organic vessel containing the zygote in which an embryo develops until it can survive on its own, at which point the animal hatches
-Chick;;Chick;;Polluelo;;A chick is a bird that has not yet reached adulthood
+Concept;Parent;Label_en;AlternativeLabels_en;Label_es;AlternativeLabels_es;Definition_en;sameAsUris;externalDefinitions
+Egg;;Egg;;Huevo;;The egg is the organic vessel containing the zygote in which an embryo develops until it can survive on its own, at which point the animal hatches;;
+Chick;;Chick;;Polluelo;;A chick is a bird that has not yet reached adulthood;;
 ```
 
-If we want to have more than 1 alternative label per concept we should use a delimiter to separate them. A pipe("|") should be used
-as default but another one can be used if it conflicts in some vocabularies (see below how to specify a custom delimiter in the tool).
+For columns that accept a list of values, such as alternative labels, sameAs uris and external definitions, we should use a delimiter to separate them. 
+A pipe("|") should be used as default but another one can be used if it conflicts in some vocabularies (see below how to specify a custom delimiter in the tool).
 
 * **Hidden labels**
 

@@ -238,6 +238,8 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
   static class ContextInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+    @Override
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of(
               "spring.datasource.url=" + database.getPostgresContainer().getJdbcUrl(),

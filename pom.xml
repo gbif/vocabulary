@@ -63,9 +63,11 @@
   </distributionManagement>
 
   <properties>
-    <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+    <spring-boot.version>2.4.4</spring-boot.version>
     <spring-cloud-openfeign.version>2.2.6.RELEASE</spring-cloud-openfeign.version>
     <main.basedir>${project.basedir}</main.basedir>
+
+    <errorprone.excludedpaths>|.*/src/main/java/org/gbif/vocabulary/api/(DeprecateVocabularyAction|DeprecateConceptAction).java|.*/src/main/java/org/gbif/vocabulary/model/(Vocabulary|Concept|AbstractVocabularyEntity).java</errorprone.excludedpaths>
 
     <!-- gbif -->
     <gbif-api.version>0.142</gbif-api.version>
@@ -406,7 +408,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>${maven-surefire-plugin.version}</version>
           <configuration combine.self="override">
             <argLine>${surefireArgLine}</argLine>
             <runOrder>random</runOrder>
@@ -420,7 +421,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>${maven-jar-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.asciidoctor</groupId>
@@ -434,10 +434,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration combine.self="override">
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

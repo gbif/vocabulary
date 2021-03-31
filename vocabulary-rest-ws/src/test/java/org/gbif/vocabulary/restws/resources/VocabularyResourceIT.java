@@ -131,6 +131,8 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
 
   static class ContexInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+    @Override
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of(
               "spring.datasource.url=" + database.getPostgresContainer().getJdbcUrl(),

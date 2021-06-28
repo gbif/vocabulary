@@ -35,47 +35,46 @@
   <repositories>
     <repository>
       <id>gbif-all</id>
-      <url>http://repository.gbif.org/content/groups/gbif</url>
+      <url>https://repository.gbif.org/content/groups/gbif</url>
     </repository>
     <repository>
       <id>gbif-thirdparty</id>
-      <url>http://repository.gbif.org/content/repositories/thirdparty</url>
+      <url>https://repository.gbif.org/content/repositories/thirdparty</url>
     </repository>
     <repository>
       <id>gbif-mirror</id>
-      <url>http://repository.gbif.org/content/groups/public/</url>
+      <url>https://repository.gbif.org/content/groups/public/</url>
     </repository>
     <repository>
       <id>cloudera-release</id>
-      <url>http://repository.cloudera.com/artifactory/cloudera-repos/</url>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
     </repository>
   </repositories>
 
   <distributionManagement>
     <repository>
       <id>gbif-release</id>
-      <url>http://repository.gbif.org/content/repositories/releases</url>
+      <url>https://repository.gbif.org/content/repositories/releases</url>
     </repository>
     <snapshotRepository>
       <id>gbif-deploy</id>
-      <url>http://repository.gbif.org/content/repositories/snapshots</url>
+      <url>https://repository.gbif.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
 
   <properties>
-    <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
+    <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
     <spring-cloud-openfeign.version>2.2.6.RELEASE</spring-cloud-openfeign.version>
     <main.basedir>${project.basedir}</main.basedir>
 
     <!-- gbif -->
-    <gbif-api.version>0.142</gbif-api.version>
-    <gbif.common-mybatis.version>0.29</gbif.common-mybatis.version>
-    <postal-service.version>0.46</postal-service.version>
-    <gbif-cli.version>0.14</gbif-cli.version>
-    <gbif-common-ws.version>1.12</gbif-common-ws.version>
+    <gbif-api.version>0.154</gbif-api.version>
+    <gbif.common-mybatis.version>1.1</gbif.common-mybatis.version>
+    <postal-service.version>1.1</postal-service.version>
+    <gbif-cli.version>1.1</gbif-cli.version>
+    <gbif-common-ws.version>1.15</gbif-common-ws.version>
 
     <!-- DB -->
-    <postgresql-embedded.version>2.10</postgresql-embedded.version>
     <postgresql-testcontainers.version>1.15.0-rc2</postgresql-testcontainers.version>
     <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
 

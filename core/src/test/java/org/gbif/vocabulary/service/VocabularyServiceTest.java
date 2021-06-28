@@ -20,12 +20,12 @@ import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
-import javax.validation.ConstraintViolationException;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
+import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,8 +34,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocabulary> {
 
   @Autowired private VocabularyService vocabularyService;
-  @MockBean private VocabularyMapper vocabularyMapper;
-  @MockBean private ConceptMapper conceptMapper;
+
+  @MockBean(name = "vocabularyMapper")
+  private VocabularyMapper vocabularyMapper;
+
+  @MockBean(name = "conceptMapper")
+  private ConceptMapper conceptMapper;
 
   @Test
   public void createTest() {

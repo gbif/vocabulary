@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.gbif</groupId>
     <artifactId>motherpom</artifactId>
-    <version>49</version>
+    <version>54</version>
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
@@ -58,7 +58,7 @@
     </repository>
     <snapshotRepository>
       <id>gbif-deploy</id>
-      <url>http://repository.gbif.org/content/repositories/snapshots</url>
+      <url>https://repository.gbif.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
 

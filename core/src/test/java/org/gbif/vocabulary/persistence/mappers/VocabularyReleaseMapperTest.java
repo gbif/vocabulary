@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@ContextConfiguration(initializers = {VocabularyReleaseMapperTest.ContexInitializer.class})
+@ContextConfiguration(initializers = {VocabularyReleaseMapperTest.ContextInitializer.class})
 public class VocabularyReleaseMapperTest {
 
   @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
@@ -142,7 +142,7 @@ public class VocabularyReleaseMapperTest {
    *
    * <p>NOTE: this initializer cannot be in the base class because it gets executed only once.
    */
-  static class ContexInitializer
+  static class ContextInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of(

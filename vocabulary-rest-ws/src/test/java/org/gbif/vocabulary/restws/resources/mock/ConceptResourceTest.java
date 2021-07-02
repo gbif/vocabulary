@@ -15,24 +15,25 @@
  */
 package org.gbif.vocabulary.restws.resources.mock;
 
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.DeprecateAction;
-import org.gbif.vocabulary.api.DeprecateConceptAction;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.restws.resources.ConceptResource;
-import org.gbif.vocabulary.service.ConceptService;
-import org.gbif.vocabulary.service.VocabularyService;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.DeprecateAction;
+import org.gbif.vocabulary.api.DeprecateConceptAction;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.restws.resources.ConceptResource;
+import org.gbif.vocabulary.service.ConceptService;
+import org.gbif.vocabulary.service.VocabularyService;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -129,7 +130,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         .andExpect(jsonPath("parents", hasItem(parentName)));
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void createConceptTest() throws Exception {
     mockVocabulary();
@@ -151,7 +152,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         .andExpect(jsonPath("name", equalTo(created.getName())));
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void updateConceptTest() throws Exception {
     mockVocabulary();
@@ -170,7 +171,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         .andExpect(jsonPath("name", equalTo(concept.getName())));
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void updateConceptWithWrongVocabulary() throws Exception {
     mockVocabulary();
@@ -185,7 +186,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         .andExpect(status().isUnprocessableEntity());
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void updateConceptWithWrongConceptName() throws Exception {
     mockVocabulary();
@@ -205,7 +206,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
     suggestTest(suggestions);
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void deprecateConceptTest() throws Exception {
     Concept concept = createEntity();
@@ -222,7 +223,7 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         .andExpect(status().isNoContent());
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void restoreDeprecatedConceptTest() throws Exception {
     Concept concept = createEntity();

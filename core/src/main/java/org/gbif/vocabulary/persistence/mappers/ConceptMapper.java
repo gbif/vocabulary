@@ -15,19 +15,20 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import javax.annotation.Nullable;
 
 /** Mapper for {@link Concept}. */
 @Mapper
@@ -95,4 +96,10 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * @return list of {@link ChildrenResult}
    */
   List<ChildrenResult> countChildren(@Param("parentConcepts") List<Long> parentConcepts);
+
+  void addTag(@Param("conceptKey") long conceptKey, @Param("tagKey") int tagKey);
+
+  void removeTag(@Param("conceptKey") long conceptKey, @Param("tagKey") int tagKey);
+
+  List<Tag> listTags(@Param("key") long conceptKey);
 }

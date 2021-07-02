@@ -16,9 +16,10 @@
 package org.gbif.vocabulary.restws.resources.mock;
 
 import org.gbif.vocabulary.api.DeprecateAction;
+import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.util.Arrays;
@@ -72,7 +73,7 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     mockMvc.perform(get(getBasePath() + "/foo")).andExpect(status().isNotFound());
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void createNullEntityTest() throws Exception {
     mockMvc
@@ -80,28 +81,7 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
         .andExpect(status().isBadRequest());
   }
 
-  @Test
-  public void unauthorizedCreateTest() throws Exception {
-    mockMvc
-        .perform(
-            post(getBasePath())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(createEntity())))
-        .andExpect(status().isUnauthorized());
-  }
-
-  @WithMockUser
-  @Test
-  public void forbiddenCreateTest() throws Exception {
-    mockMvc
-        .perform(
-            post(getBasePath())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(createEntity())))
-        .andExpect(status().isForbidden());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void updateNullEntityTest() throws Exception {
     mockMvc
@@ -110,43 +90,11 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
   }
 
   @Test
-  public void unauthorizedUpdateTest() throws Exception {
-    mockMvc
-        .perform(
-            put(getBasePath() + "/fake")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(createEntity())))
-        .andExpect(status().isUnauthorized());
-  }
-
-  @WithMockUser()
-  @Test
-  public void forbiddenUpdateTest() throws Exception {
-    mockMvc
-        .perform(
-            put(getBasePath() + "/fake")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(createEntity())))
-        .andExpect(status().isForbidden());
-  }
-
-  @Test
   public void suggestWithoutQueryTest() throws Exception {
     mockMvc.perform(get(getBasePath() + "/suggest")).andExpect(status().isBadRequest()).andReturn();
   }
 
-  @Test
-  public void deprecateUnauthorizedTest() throws Exception {
-    mockMvc.perform(put(getBasePath() + "/fake/deprecate")).andExpect(status().isUnauthorized());
-  }
-
-  @WithMockUser(authorities = {"USER"})
-  @Test
-  public void deprecateForbiddenTest() throws Exception {
-    mockMvc.perform(put(getBasePath() + "/fake/deprecate")).andExpect(status().isForbidden());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void deprecateEntityNotFoundTest() throws Exception {
     // mock not set, so the service returns null
@@ -158,18 +106,7 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
         .andExpect(status().isUnprocessableEntity());
   }
 
-  @Test
-  public void restoreDeprecatedUnauthorizedTest() throws Exception {
-    mockMvc.perform(delete(getBasePath() + "/name/deprecate")).andExpect(status().isUnauthorized());
-  }
-
-  @WithMockUser(authorities = {"USER"})
-  @Test
-  public void restoreDeprecatedForbiddenTest() throws Exception {
-    mockMvc.perform(delete(getBasePath() + "/name/deprecate")).andExpect(status().isForbidden());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void restoreDeprecatedEntityNotFoundNameTest() throws Exception {
     // mock not set, so the service returns null

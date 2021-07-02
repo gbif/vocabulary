@@ -16,10 +16,11 @@
 package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.TagClient;
 import org.gbif.vocabulary.client.VocabularyClient;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.utils.LenientEquals;
 import org.gbif.vocabulary.restws.LoginServerExtension;
@@ -85,6 +86,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
 
   protected final VocabularyClient vocabularyClient;
   protected final ConceptClient conceptClient;
+  protected final TagClient tagClient;
 
   static final Function<TestCredentials, String> BASIC_AUTH_HEADER =
       testCredentials ->
@@ -115,6 +117,12 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
             .withCredentials(ADMIN.getUsername(), ADMIN.getPassword())
             .withObjectMapper(OBJECT_MAPPER)
             .build(ConceptClient.class);
+    tagClient =
+        clientBuilder
+            .withUrl("http://localhost:" + localServerPort)
+            .withCredentials(ADMIN.getUsername(), ADMIN.getPassword())
+            .withObjectMapper(OBJECT_MAPPER)
+            .build(TagClient.class);
   }
 
   @BeforeEach

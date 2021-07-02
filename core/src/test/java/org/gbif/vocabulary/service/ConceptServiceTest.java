@@ -16,15 +16,18 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
-import javax.validation.ConstraintViolationException;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithMockUser;
+
+import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,6 +43,7 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
 
   @Autowired private ConceptService conceptService;
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void invalidConceptTest() {
     Concept concept = new Concept();
@@ -55,6 +59,33 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
     concept.setVocabularyKey(TEST_KEY);
     mockCreateEntity(concept);
     assertDoesNotThrow(() -> conceptService.create(concept));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedDeprecateTest() {
+    assertThrows(AccessDeniedException.class, () -> conceptService.deprecate(0, "test", 0L, false));
+    assertThrows(
+        AccessDeniedException.class,
+        () -> conceptService.deprecateWithoutReplacement(0, "test", false));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedRestoreDeprecateTest() {
+    assertThrows(AccessDeniedException.class, () -> conceptService.restoreDeprecated(0, false));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedAddTagTest() {
+    assertThrows(AccessDeniedException.class, () -> conceptService.addTag(0, 1));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedRemoveTagTest() {
+    assertThrows(AccessDeniedException.class, () -> conceptService.removeTag(0, 1));
   }
 
   @Override

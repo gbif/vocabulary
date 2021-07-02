@@ -15,21 +15,6 @@
  */
 package org.gbif.vocabulary.service.impl;
 
-import org.gbif.api.model.common.paging.Pageable;
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.search.ChildrenResult;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.utils.PostPersist;
-import org.gbif.vocabulary.model.utils.PrePersist;
-import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
-import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-import org.gbif.vocabulary.service.ConceptService;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,27 +27,46 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.search.ChildrenResult;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.utils.PostPersist;
+import org.gbif.vocabulary.model.utils.PrePersist;
+import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
+import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
+import org.gbif.vocabulary.service.ConceptService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import com.google.common.base.Preconditions;
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
-
-import com.google.common.base.Preconditions;
-
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
+
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.HIDDEN_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /** Default implementation for {@link ConceptService}. */
 @Service
@@ -88,6 +92,7 @@ public class DefaultConceptService implements ConceptService {
     return conceptMapper.getByNameAndVocabulary(name, vocabularyName);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
@@ -115,6 +120,7 @@ public class DefaultConceptService implements ConceptService {
     return concept.getKey();
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Validated({PostPersist.class, Default.class})
   @Transactional
   @Override
@@ -177,6 +183,7 @@ public class DefaultConceptService implements ConceptService {
     return conceptMapper.suggest(query, vocabularyKey);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Transactional
   @Override
   public void deprecate(
@@ -210,6 +217,7 @@ public class DefaultConceptService implements ConceptService {
     conceptMapper.deprecate(key, deprecatedBy, replacementKey);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Transactional
   @Override
   public void deprecateWithoutReplacement(
@@ -228,6 +236,7 @@ public class DefaultConceptService implements ConceptService {
     conceptMapper.deprecate(key, deprecatedBy, null);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Transactional
   @Override
   public void restoreDeprecated(long key, boolean restoreDeprecatedChildren) {
@@ -261,6 +270,23 @@ public class DefaultConceptService implements ConceptService {
     Preconditions.checkArgument(
         conceptParents != null && !conceptParents.isEmpty(), "concept parents are required");
     return conceptMapper.countChildren(conceptParents);
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Override
+  public void addTag(long conceptKey, int tagKey) {
+    conceptMapper.addTag(conceptKey, tagKey);
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Override
+  public void removeTag(long conceptKey, int tagKey) {
+    conceptMapper.removeTag(conceptKey, tagKey);
+  }
+
+  @Override
+  public List<Tag> listTags(long conceptKey) {
+    return conceptMapper.listTags(conceptKey);
   }
 
   /** Returns the keys of all the children of the given concept. */

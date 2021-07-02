@@ -16,6 +16,7 @@
 package org.gbif.vocabulary.model.search;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -35,6 +36,7 @@ public class ConceptSearchParams implements Serializable {
   private final Long key;
   private final Boolean hasParent;
   private final Boolean hasReplacement;
+  private final List<String> tags;
 
   public static ConceptSearchParams empty() {
     return builder().build();

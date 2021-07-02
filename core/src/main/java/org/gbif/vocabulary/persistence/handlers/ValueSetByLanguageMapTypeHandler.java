@@ -15,7 +15,7 @@
  */
 package org.gbif.vocabulary.persistence.handlers;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.LanguageRegion;
 
 import java.io.IOException;
 import java.sql.CallableStatement;

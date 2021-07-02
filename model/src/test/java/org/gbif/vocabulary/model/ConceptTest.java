@@ -15,8 +15,6 @@
  */
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Arrays;

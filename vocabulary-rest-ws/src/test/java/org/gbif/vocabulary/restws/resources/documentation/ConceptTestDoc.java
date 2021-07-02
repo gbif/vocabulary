@@ -15,17 +15,20 @@
  */
 package org.gbif.vocabulary.restws.resources.documentation;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.service.ConceptService;
+import org.gbif.vocabulary.service.TagService;
 import org.gbif.vocabulary.service.VocabularyService;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
@@ -45,6 +48,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -62,6 +66,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
 
   @MockBean private ConceptService conceptService;
   @MockBean private VocabularyService vocabularyService;
+  @MockBean private TagService tagService;
 
   @Test
   public void listConceptsTest() throws Exception {
@@ -180,6 +185,65 @@ public class ConceptTestDoc extends DocumentationBaseTest {
         .perform(
             delete(getBasePath() + "/" + concept.getName() + "/deprecate")
                 .with(authorizationDocumentation()))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  public void listTagsTest() throws Exception {
+    Concept concept = createConcept("concept1");
+    concept.setKey(TEST_KEY);
+    List<Tag> tags = ImmutableList.of(createTag("tag1"), createTag("tag2"));
+
+    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+    when(conceptService.listTags(anyLong())).thenReturn(tags);
+
+    MvcResult mvcResult =
+        mockMvc
+            .perform(get(getBasePath() + "/" + concept.getName() + "/tags"))
+            .andExpect(status().isOk())
+            .andReturn();
+#
+    JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
+    List<Tag> resultList = OBJECT_MAPPER.convertValue(rootNode, new TypeReference<List<Tag>>() {});
+
+    assertEquals(tags.size(), resultList.size());
+  }
+
+  @Test
+  public void addTag() throws Exception {
+    setSecurityContext();
+    Concept concept = createConcept("concept1");
+    concept.setKey(TEST_KEY);
+    Tag tag = createTag("tag1");
+    tag.setKey(TEST_KEY.intValue());
+
+    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+    when(tagService.getByName(anyString())).thenReturn(tag);
+    doNothing().when(conceptService).addTag(anyLong(), anyInt());
+
+    mockMvc
+        .perform(
+            put(getBasePath() + "/" + concept.getName() + "/tags")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(new AddTagAction(tag.getName()))))
+        .andExpect(status().isNoContent())
+        .andDo(documentRequestFields(AddTagAction.class));
+  }
+
+  @Test
+  public void removeTag() throws Exception {
+    setSecurityContext();
+    Concept concept = createConcept("concept1");
+    concept.setKey(TEST_KEY);
+    Tag tag = createTag("tag1");
+    tag.setKey(TEST_KEY.intValue());
+
+    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+    when(tagService.getByName(anyString())).thenReturn(tag);
+    doNothing().when(conceptService).removeTag(anyLong(), anyInt());
+
+    mockMvc
+        .perform(delete(getBasePath() + "/" + concept.getName() + "/tags/" + tag.getName()))
         .andExpect(status().isNoContent());
   }
 

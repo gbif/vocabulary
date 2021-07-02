@@ -15,8 +15,8 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.enums.LanguageRegion.LanguageRegionAllFieldsSerializer;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.LanguageRegion.LanguageRegionAllFieldsSerializer;
 import org.gbif.vocabulary.restws.utils.Constants;
 
 import org.springframework.http.MediaType;

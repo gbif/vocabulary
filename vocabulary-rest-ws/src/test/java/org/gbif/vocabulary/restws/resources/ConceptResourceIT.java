@@ -15,17 +15,20 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.ConceptListParams;
-import org.gbif.vocabulary.api.ConceptView;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
+
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.AddTagAction;
+import org.gbif.vocabulary.api.ConceptListParams;
+import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.Vocabulary;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -207,6 +210,40 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     expected.setChildren(Collections.singletonList(created2.getName()));
     conceptView = conceptClient.get(defaultVocabularyName, created1.getName(), false, true);
     assertEquals(expected, conceptView);
+  }
+
+  @Test
+  public void tagsTest() {
+    Tag tag = new Tag();
+    tag.setName("myTag");
+    tagClient.create(tag);
+
+    Concept c1 = createEntity();
+    Concept created1 = conceptClient.create(defaultVocabularyName, c1);
+
+    conceptClient.addTag(
+        defaultVocabularyName, created1.getName(), new AddTagAction(tag.getName()));
+
+    List<Tag> tags = conceptClient.listTags(defaultVocabularyName, created1.getName());
+    assertEquals(1, tags.size());
+
+    PagingResponse<ConceptView> concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName,
+            ConceptListParams.builder().tags(Collections.singletonList(tag.getName())).build());
+    assertEquals(1, concepts.getResults().size());
+    assertEquals(created1.getKey(), concepts.getResults().get(0).getConcept().getKey());
+
+    conceptClient.removeTag(defaultVocabularyName, created1.getName(), tag.getName());
+
+    tags = conceptClient.listTags(defaultVocabularyName, created1.getName());
+    assertEquals(0, tags.size());
+
+    concepts =
+        conceptClient.listConcepts(
+            defaultVocabularyName,
+            ConceptListParams.builder().tags(Collections.singletonList(tag.getName())).build());
+    assertEquals(0, concepts.getResults().size());
   }
 
   @Override

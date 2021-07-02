@@ -39,9 +39,7 @@
     definition = #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     external_definition_urls = #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     editorial_notes = #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
-    created_by = #{createdBy,jdbcType=VARCHAR},
     modified_by = #{modifiedBy,jdbcType=VARCHAR},
-    created = now(),
     modified = now(),
     deleted = null <!-- if we're updating it can't be deleted -->
   </sql>

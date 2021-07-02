@@ -1,0 +1,28 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+  <changeSet id="5" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+       CREATE TABLE tag(
+         key serial NOT NULL PRIMARY KEY,
+         name text NOT NULL UNIQUE CHECK (assert_min_length(name, 1)),
+         description text CHECK (assert_min_length(name, 1)),
+         color varchar(7) NOT NULL,
+         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+         modified_by varchar NOT NULL CHECK (assert_min_length(modified_by, 1)),
+         created timestamp with time zone NOT NULL DEFAULT now(),
+         modified timestamp with time zone NOT NULL DEFAULT now()
+       );
+
+       CREATE TABLE concept_tag(
+        concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
+        tag_key int NOT NULL REFERENCES tag(key) ON DELETE CASCADE,
+        PRIMARY KEY (concept_key, tag_key)
+       );
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>

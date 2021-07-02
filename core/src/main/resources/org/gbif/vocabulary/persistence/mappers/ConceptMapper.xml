@@ -11,6 +11,7 @@
     <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
     <result property="sameAsUris" column="same_as_uris" typeHandler="UriArrayTypeHandler"/>
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
+    <collection property="tags" column="key" select="listTags"/>
   </resultMap>
 
   <sql id="CONCEPT_READ_FIELDS">
@@ -53,9 +54,7 @@
     external_definition_urls = #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     same_as_uris = #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     editorial_notes = #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
-    created_by = #{createdBy,jdbcType=VARCHAR},
     modified_by = #{modifiedBy,jdbcType=VARCHAR},
-    created = now(),
     modified = now(),
     deleted = null <!-- if we're updating it can't be deleted -->
   </sql>
@@ -144,7 +143,7 @@
   </update>
 
   <select id="list" resultType="Concept" resultMap="CONCEPT_MAP">
-    SELECT
+    SELECT DISTINCT ON (<if test="params.query != null">ts_rank_cd(c.fulltext_search, query),</if> c.created, c.key)
     <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
     <if test="params.query != null">
@@ -180,7 +179,13 @@
       AND c.replaced_by_key IS <if test="params.hasReplacement">NOT</if> NULL
     </if>
     <if test="params.parent != null">
-      And parent.name = #{params.parent}
+      AND parent.name = #{params.parent}
+    </if>
+    <if test="params.tags != null">
+      AND
+      <foreach item="item" collection="params.tags" open="(" separator=" AND " close=")">
+        EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE t.name = #{item,jdbcType=VARCHAR})
+      </foreach>
     </if>
     ORDER BY <if test="params.query != null">ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
     <if test="page != null">
@@ -189,7 +194,7 @@
   </select>
 
   <select id="count" resultType="Long">
-    SELECT COUNT(*)
+    SELECT COUNT(DISTINCT c.key)
     FROM concept c
     <if test="params.query != null">
       JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
@@ -224,6 +229,12 @@
     </if>
     <if test="params.parent != null">
       And parent.name = #{params.parent}
+    </if>
+    <if test="params.tags != null">
+      AND
+      <foreach item="item" collection="params.tags" open="(" separator=" AND " close=")">
+        EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE t.name = #{item,jdbcType=VARCHAR})
+      </foreach>
     </if>
   </select>
 
@@ -315,5 +326,27 @@
       #{key}
     </foreach>
   </select>
+
+  <!-- TAGS -->
+  <select id="listTags" resultMap="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_MAP">
+    SELECT <include refid="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_READ_FIELDS" />
+    FROM tag t
+    INNER JOIN concept_tag ct ON ct.tag_key = t.key
+    WHERE ct.concept_key = #{key,jdbcType=BIGINT}
+  </select>
+
+  <insert id="addTag">
+    INSERT INTO concept_tag(concept_key, tag_key)
+    VALUES(
+      #{conceptKey,jdbcType=BIGINT},
+      #{tagKey,jdbcType=INTEGER}
+    )
+  </insert>
+
+  <delete id="removeTag">
+    DELETE FROM concept_tag
+    WHERE concept_key = #{conceptKey,jdbcType=BIGINT}
+      AND tag_key = #{tagKey,jdbcType=INTEGER}
+  </delete>
 
 </mapper>

@@ -17,6 +17,7 @@ package org.gbif.vocabulary.api;
 
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.util.List;
@@ -39,4 +40,10 @@ public interface ConceptApi {
 
   void restoreDeprecated(
       String vocabularyName, String conceptName, boolean restoreDeprecatedChildren);
+
+  void addTag(String vocabularyName, String conceptName, AddTagAction addTagAction);
+
+  void removeTag(String vocabularyName, String conceptName, String tagName);
+
+  List<Tag> listTags(String vocabularyName, String conceptName);
 }

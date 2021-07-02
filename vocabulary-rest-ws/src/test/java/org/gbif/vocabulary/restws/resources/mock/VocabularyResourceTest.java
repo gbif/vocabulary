@@ -20,6 +20,7 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.DeprecateAction;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
+import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -102,7 +103,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void createVocabularyTest() throws Exception {
     Vocabulary vocabularyToCreate = createEntity();
@@ -123,7 +124,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         .andExpect(jsonPath("name", equalTo(created.getName())));
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void updateTest() throws Exception {
     Vocabulary vocabulary = createEntity();
@@ -142,7 +143,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         .andExpect(jsonPath("name", equalTo(vocabulary.getName())));
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void updateWrongNameTest() throws Exception {
     // mock not set, so the service returns null
@@ -161,7 +162,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
     suggestTest(suggestions);
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void deprecateTest() throws Exception {
     Vocabulary vocabulary = createEntity();
@@ -177,7 +178,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         .andExpect(status().isNoContent());
   }
 
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void restoreDeprecatedTest() throws Exception {
     Vocabulary vocabulary = createEntity();
@@ -190,32 +191,7 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         .andExpect(status().isNoContent());
   }
 
-  @Test
-  public void releaseVocabularyUnauthorizedTest() throws Exception {
-    mockMvc
-        .perform(
-            post(getBasePath() + "/foo/" + VOCABULARY_RELEASES_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    OBJECT_MAPPER.writeValueAsString(
-                        new VocabularyReleaseParams("1.0", "comment"))))
-        .andExpect(status().isUnauthorized());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_EDITOR"})
-  @Test
-  public void releaseVocabularyForbiddenForEditorsTest() throws Exception {
-    mockMvc
-        .perform(
-            post(getBasePath() + "/foo/" + VOCABULARY_RELEASES_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    OBJECT_MAPPER.writeValueAsString(
-                        new VocabularyReleaseParams("1.0", "comment"))))
-        .andExpect(status().isForbidden());
-  }
-
-  @WithMockUser(authorities = {"VOCABULARY_ADMIN"})
+  @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void releaseVocabularyVersionTest() throws Exception {
     Vocabulary vocabulary = createEntity();

@@ -15,7 +15,6 @@
  */
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
 import org.gbif.vocabulary.model.utils.PostPersist;
 import org.gbif.vocabulary.model.utils.PrePersist;
 

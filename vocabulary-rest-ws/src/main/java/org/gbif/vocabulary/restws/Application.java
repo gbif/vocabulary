@@ -15,7 +15,12 @@
  */
 package org.gbif.vocabulary.restws;
 
-import org.gbif.api.vocabulary.UserRole;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.gbif.common.messaging.ConnectionParameters;
 import org.gbif.common.messaging.DefaultMessagePublisher;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -25,11 +30,7 @@ import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.restws.config.MessagingConfig;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
+import org.gbif.ws.server.provider.PageableHandlerMethodArgumentResolver;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -41,7 +42,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -55,9 +55,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
-import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 @Import(SpringConfig.class)
@@ -66,6 +65,15 @@ public class Application {
 
   public static void main(String[] args) {
     SpringApplication.run(Application.class, args);
+  }
+
+  @Configuration
+  public class WebMvcConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+      argumentResolvers.add(new PageableHandlerMethodArgumentResolver());
+    }
   }
 
   @Bean
@@ -140,10 +148,6 @@ public class Application {
   @Order(20)
   static class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private static final String VOCABULARY_RELEASES_PATTERN =
-        "/" + VOCABULARIES_PATH + "/*/" + VOCABULARY_RELEASES_PATH + "/**";
-    private static final String VOCABULARIES_PATTERN = "/" + VOCABULARIES_PATH + "/**";
-
     @Autowired private AuthenticationProvider basicAuthAuthenticationProvider;
 
     @Autowired private AuthenticationProvider jwtAuthenticationProvider;
@@ -151,14 +155,6 @@ public class Application {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
       http.authorizeRequests()
-          .antMatchers(HttpMethod.POST, VOCABULARY_RELEASES_PATTERN)
-          .hasAuthority(UserRole.VOCABULARY_ADMIN.name())
-          .antMatchers(HttpMethod.POST, VOCABULARIES_PATTERN)
-          .hasAnyAuthority(UserRole.VOCABULARY_ADMIN.name(), UserRole.VOCABULARY_EDITOR.name())
-          .antMatchers(HttpMethod.PUT, VOCABULARIES_PATTERN)
-          .hasAnyAuthority(UserRole.VOCABULARY_ADMIN.name(), UserRole.VOCABULARY_EDITOR.name())
-          .antMatchers(HttpMethod.DELETE, VOCABULARIES_PATTERN)
-          .hasAnyAuthority(UserRole.VOCABULARY_ADMIN.name(), UserRole.VOCABULARY_EDITOR.name())
           .anyRequest()
           .permitAll()
           .and()

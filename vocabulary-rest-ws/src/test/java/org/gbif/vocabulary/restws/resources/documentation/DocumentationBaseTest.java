@@ -16,8 +16,9 @@
 package org.gbif.vocabulary.restws.resources.documentation;
 
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import java.lang.reflect.Field;
@@ -228,6 +229,14 @@ abstract class DocumentationBaseTest {
               return fd;
             })
         .collect(Collectors.toList());
+  }
+
+  protected Tag createTag(String name) {
+    Tag tag = new Tag();
+    tag.setName(name);
+    tag.setDescription("Tag for testing");
+    tag.setColor("#000000");
+    return tag;
   }
 
   abstract String getBasePath();

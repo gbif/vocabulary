@@ -15,15 +15,17 @@
  */
 package org.gbif.vocabulary.client;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptApi;
 import org.gbif.vocabulary.api.ConceptListParams;
 import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.util.List;
 
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
@@ -89,4 +91,24 @@ public interface ConceptClient extends ConceptApi {
       @PathVariable("name") String conceptName,
       @RequestParam(value = "restoreDeprecatedChildren", required = false)
           boolean restoreDeprecatedChildren);
+
+  @Override
+  @GetMapping(value = "{name}/tags", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<Tag> listTags(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName);
+
+  @Override
+  @PutMapping(value = "{name}/tags", consumes = MediaType.APPLICATION_JSON_VALUE)
+  void addTag(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody AddTagAction addTagAction);
+
+  @Override
+  @DeleteMapping("{name}/tags/{tagName}")
+  void removeTag(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("tagName") String tagName);
 }

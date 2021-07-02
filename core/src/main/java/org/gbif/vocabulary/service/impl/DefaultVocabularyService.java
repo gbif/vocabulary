@@ -19,6 +19,7 @@ import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -46,6 +47,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -82,6 +84,7 @@ public class DefaultVocabularyService implements VocabularyService {
     return vocabularyMapper.getByName(name);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
@@ -96,6 +99,7 @@ public class DefaultVocabularyService implements VocabularyService {
     return vocabulary.getKey();
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Validated({PostPersist.class, Default.class})
   @Transactional
   @Override
@@ -142,6 +146,7 @@ public class DefaultVocabularyService implements VocabularyService {
     return vocabularyMapper.suggest(query);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Override
   public void deprecate(
       long key,
@@ -162,12 +167,14 @@ public class DefaultVocabularyService implements VocabularyService {
     vocabularyMapper.deprecate(key, deprecatedBy, replacementKey);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Override
   public void deprecateWithoutReplacement(
       long key, @NotBlank String deprecatedBy, boolean deprecateConcepts) {
     deprecate(key, deprecatedBy, null, deprecateConcepts);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Override
   public void restoreDeprecated(long key, boolean restoreDeprecatedConcepts) {
     vocabularyMapper.restoreDeprecated(key);

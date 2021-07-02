@@ -15,9 +15,6 @@
  */
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.utils.LenientEquals;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -27,8 +24,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
+import org.gbif.vocabulary.model.utils.LenientEquals;
 
+import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -59,6 +57,9 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   /** External URIs for concepts considered equivalent. */
   private List<URI> sameAsUris = new ArrayList<>();
 
+  /** Concept tags. */
+  private List<Tag> tags = new ArrayList<>();
+
   @Override
   public boolean lenientEquals(Concept other) {
     if (this == other) return true;
@@ -77,6 +78,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
         && Objects.equals(replacedByKey, other.replacedByKey)
         && Objects.equals(deprecated, other.deprecated)
         && Objects.equals(deprecatedBy, other.deprecatedBy)
-        && Objects.equals(deleted, other.deleted);
+        && Objects.equals(deleted, other.deleted)
+        && Objects.equals(tags, other.tags);
   }
 }

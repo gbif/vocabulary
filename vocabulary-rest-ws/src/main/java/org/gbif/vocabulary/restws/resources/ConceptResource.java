@@ -15,20 +15,6 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.ConceptApi;
-import org.gbif.vocabulary.api.ConceptListParams;
-import org.gbif.vocabulary.api.ConceptView;
-import org.gbif.vocabulary.api.DeprecateConceptAction;
-import org.gbif.vocabulary.model.AbstractVocabularyEntity;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.ChildrenResult;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.service.ConceptService;
-import org.gbif.vocabulary.service.VocabularyService;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +23,25 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.AddTagAction;
+import org.gbif.vocabulary.api.ConceptApi;
+import org.gbif.vocabulary.api.ConceptListParams;
+import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.api.DeprecateConceptAction;
+import org.gbif.vocabulary.model.AbstractVocabularyEntity;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.ChildrenResult;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.service.ConceptService;
+import org.gbif.vocabulary.service.TagService;
+import org.gbif.vocabulary.service.VocabularyService;
+
+import org.assertj.core.util.Strings;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,20 +52,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 @RestController
-@RequestMapping(VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH)
+@RequestMapping(
+    value = VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH,
+    produces = MediaType.APPLICATION_JSON_VALUE)
 public class ConceptResource implements ConceptApi {
 
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
+  private final TagService tagService;
 
-  ConceptResource(ConceptService conceptService, VocabularyService vocabularyService) {
+  ConceptResource(
+      ConceptService conceptService, VocabularyService vocabularyService, TagService tagService) {
     this.conceptService = conceptService;
     this.vocabularyService = vocabularyService;
+    this.tagService = tagService;
   }
 
   @Override
@@ -84,6 +95,7 @@ public class ConceptResource implements ConceptApi {
                 .key(params.getKey())
                 .hasParent(params.getHasParent())
                 .hasReplacement(params.getHasReplacement())
+                .tags(params.getTags())
                 .build(),
             params.getPage());
 
@@ -251,5 +263,48 @@ public class ConceptResource implements ConceptApi {
         "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
 
     conceptService.restoreDeprecated(concept.getKey(), restoreDeprecatedChildren);
+  }
+
+  @Override
+  @GetMapping("{name}/tags")
+  public List<Tag> listTags(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName) {
+    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+    checkArgument(
+        concept != null,
+        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
+    return conceptService.listTags(concept.getKey());
+  }
+
+  @Override
+  @PutMapping("{name}/tags")
+  public void addTag(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody AddTagAction addTagAction) {
+    checkArgument(!Strings.isNullOrEmpty(addTagAction.getTagName()), "Tag name is required");
+    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+    checkArgument(
+        concept != null,
+        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
+    Tag tag = tagService.getByName(addTagAction.getTagName());
+    checkArgument(tag != null, "Tag not found for name " + addTagAction.getTagName());
+    conceptService.addTag(concept.getKey(), tag.getKey());
+  }
+
+  @Override
+  @DeleteMapping("{name}/tags/{tagName}")
+  public void removeTag(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("tagName") String tagName) {
+    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+    checkArgument(
+        concept != null,
+        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
+    Tag tag = tagService.getByName(tagName);
+    checkArgument(tag != null, "Tag not found for name " + tagName);
+    conceptService.removeTag(concept.getKey(), tag.getKey());
   }
 }

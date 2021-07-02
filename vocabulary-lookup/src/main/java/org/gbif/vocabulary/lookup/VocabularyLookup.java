@@ -16,7 +16,7 @@
 package org.gbif.vocabulary.lookup;
 
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
 

@@ -17,7 +17,7 @@ package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.VocabularyEntity;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.utils.LenientEquals;
 
 import org.junit.jupiter.api.Test;

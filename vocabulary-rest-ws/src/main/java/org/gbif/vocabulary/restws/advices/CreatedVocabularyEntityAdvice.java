@@ -15,10 +15,8 @@
  */
 package org.gbif.vocabulary.restws.advices;
 
+import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.VocabularyEntity;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
@@ -34,6 +32,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @ControllerAdvice
 @Slf4j
-public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<VocabularyEntity> {
+public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Object> {
 
   @Override
   public boolean supports(
@@ -50,8 +50,10 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Vocabul
     try {
       return returnType.hasMethodAnnotation(PostMapping.class)
           && !ResponseEntity.class.isAssignableFrom(returnType.getParameterType())
-          && VocabularyEntity.class.isAssignableFrom(
-              Class.forName(returnType.getGenericParameterType().getTypeName()));
+          && (VocabularyEntity.class.isAssignableFrom(
+                  Class.forName(returnType.getGenericParameterType().getTypeName()))
+              || Tag.class.isAssignableFrom(
+                  Class.forName(returnType.getGenericParameterType().getTypeName())));
     } catch (ClassNotFoundException e) {
       log.debug("Unexpected parameter type", e);
       return false;
@@ -59,8 +61,8 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Vocabul
   }
 
   @Override
-  public VocabularyEntity beforeBodyWrite(
-      VocabularyEntity body,
+  public Object beforeBodyWrite(
+      Object body,
       @NotNull MethodParameter returnType,
       @NotNull MediaType selectedContentType,
       @NotNull Class<? extends HttpMessageConverter<?>> selectedConverterType,
@@ -72,9 +74,17 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Vocabul
     if (HttpStatus.OK.value() == httpServletResponse.getStatus()) {
       HttpServletRequest httpServletRequest =
           ((ServletServerHttpRequest) request).getServletRequest();
-      httpServletResponse.addHeader(
-          "Location", httpServletRequest.getRequestURL() + "/" + body.getName());
       httpServletResponse.setStatus(HttpStatus.CREATED.value());
+
+      String entityName = null;
+      if (body instanceof VocabularyEntity) {
+        entityName = ((VocabularyEntity) body).getName();
+      } else if (body instanceof Tag) {
+        entityName = ((Tag) body).getName();
+      }
+
+      httpServletResponse.addHeader(
+          "Location", httpServletRequest.getRequestURL() + "/" + entityName);
     }
 
     return body;

@@ -15,15 +15,18 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.time.LocalDateTime;
+
+import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 
-import java.time.LocalDateTime;
-
-import javax.validation.ConstraintViolationException;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithMockUser;
+
+import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,11 +43,13 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
 
   static final long TEST_KEY = 1;
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void createNullEntityTest() {
     assertThrows(ConstraintViolationException.class, () -> getService().create(null));
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void createEntityWithInvalidNameTest() {
     T entity = createNewEntity("na me");
@@ -54,6 +59,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
     assertThrows(IllegalArgumentException.class, () -> getService().create(entity));
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void createEntityWithKeyTest() {
     T entity = createNewEntity("name");
@@ -70,6 +76,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
     assertEquals("name", entity.getName());
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void updateNullEntityTest() {
     assertThrows(ConstraintViolationException.class, () -> getService().update(null));
@@ -78,6 +85,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
         ConstraintViolationException.class, () -> getService().update(createNewEntity("name")));
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void updateWithDifferentNameTest() {
     T entityDB = createNewEntity("e1");
@@ -94,6 +102,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
     assertThrows(IllegalArgumentException.class, () -> getService().update(newEntity));
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void updateDeletedEntityTest() {
     T deletedEntity = createNewEntity("e1");
@@ -109,6 +118,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
     assertThrows(IllegalArgumentException.class, () -> getService().update(newEntity));
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void deletingWhenUpdatingTest() {
     T entityDB = createNewEntity("e1");
@@ -123,6 +133,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
     assertThrows(IllegalArgumentException.class, () -> getService().update(updatedEntity));
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void deprecatingWhenUpdatingTest() {
     T entityDB = createNewEntity("e1");
@@ -137,6 +148,7 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
     assertThrows(IllegalArgumentException.class, () -> getService().update(updatedEntity));
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void restoringDeprecatedWhenUpdatingTest() {
     T entityDB = createNewEntity("e1");
@@ -151,6 +163,18 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
     when(getMapper().get(TEST_KEY)).thenReturn(entityDB);
 
     assertThrows(IllegalArgumentException.class, () -> getService().update(updatedEntity));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedCreateTest() {
+    assertThrows(AccessDeniedException.class, () -> getService().create(createNewEntity("unauth")));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedUpdateTest() {
+    assertThrows(AccessDeniedException.class, () -> getService().update(createNewEntity("unauth")));
   }
 
   abstract T createNewEntity(String name);

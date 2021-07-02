@@ -68,7 +68,7 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PAT
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @Slf4j
 @RestController
-@RequestMapping(VOCABULARIES_PATH)
+@RequestMapping(value = VOCABULARIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 public class VocabularyResource implements VocabularyApi {
 
   private final VocabularyService vocabularyService;

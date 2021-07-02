@@ -15,13 +15,6 @@
  */
 package org.gbif.vocabulary.service;
 
-import org.gbif.vocabulary.PostgresDBExtension;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -30,7 +23,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.sql.DataSource;
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.PostgresDBExtension;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,9 +46,12 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import javax.sql.DataSource;
 
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertDeprecated;
@@ -62,6 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Integration tests for the {@link ConceptService}. */
+@WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {ConceptServiceIT.ContexInitializer.class})
@@ -76,13 +82,16 @@ public class ConceptServiceIT {
 
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
+  private final TagService tagService;
 
   private static final long[] vocabularyKeys = new long[2];
 
   @Autowired
-  ConceptServiceIT(ConceptService conceptService, VocabularyService vocabularyService) {
+  ConceptServiceIT(
+      ConceptService conceptService, VocabularyService vocabularyService, TagService tagService) {
     this.conceptService = conceptService;
     this.vocabularyService = vocabularyService;
+    this.tagService = tagService;
   }
 
   /**
@@ -494,6 +503,73 @@ public class ConceptServiceIT {
     assertEquals(2, parents.size());
     assertTrue(parents.contains(concept1.getName()));
     assertTrue(parents.contains(concept2.getName()));
+  }
+
+  @Test
+  public void tagsTest() {
+    Concept concept1 = createBasicConcept(vocabularyKeys[0]);
+    conceptService.create(concept1);
+
+    Tag tag = new Tag();
+    tag.setName("Tag");
+    tag.setCreatedBy("Test");
+    tag.setModifiedBy("Test");
+    tagService.create(tag);
+
+    Tag tag2 = new Tag();
+    tag2.setName("Tag2");
+    tag2.setCreatedBy("Test");
+    tag2.setModifiedBy("Test");
+    tagService.create(tag2);
+
+    conceptService.addTag(concept1.getKey(), tag.getKey());
+    conceptService.addTag(concept1.getKey(), tag2.getKey());
+    PagingResponse<Concept> concepts =
+        conceptService.list(
+            ConceptSearchParams.builder().tags(Collections.singletonList(tag.getName())).build(),
+            new PagingRequest(0, 5));
+    assertEquals(1, concepts.getResults().size());
+    concepts =
+        conceptService.list(
+            ConceptSearchParams.builder().tags(Collections.singletonList(tag2.getName())).build(),
+            new PagingRequest(0, 5));
+    assertEquals(1, concepts.getResults().size());
+    concepts =
+        conceptService.list(
+            ConceptSearchParams.builder()
+                .tags(Arrays.asList(tag.getName(), tag2.getName()))
+                .build(),
+            new PagingRequest(0, 5));
+    assertEquals(1, concepts.getResults().size());
+
+    conceptService.removeTag(concept1.getKey(), tag2.getKey());
+    concepts =
+        conceptService.list(
+            ConceptSearchParams.builder().tags(Collections.singletonList(tag.getName())).build(),
+            new PagingRequest(0, 5));
+    assertEquals(1, concepts.getResults().size());
+    concepts =
+        conceptService.list(
+            ConceptSearchParams.builder().tags(Collections.singletonList(tag2.getName())).build(),
+            new PagingRequest(0, 5));
+    assertEquals(0, concepts.getResults().size());
+    concepts =
+        conceptService.list(
+            ConceptSearchParams.builder()
+                .tags(Arrays.asList(tag.getName(), tag2.getName()))
+                .build(),
+            new PagingRequest(0, 5));
+    assertEquals(1, concepts.getResults().size());
+
+    tagService.delete(tag.getKey());
+    tagService.delete(tag2.getKey());
+    concepts =
+        conceptService.list(
+            ConceptSearchParams.builder()
+                .tags(Arrays.asList(tag.getName(), tag2.getName()))
+                .build(),
+            new PagingRequest(0, 5));
+    assertEquals(0, concepts.getResults().size());
   }
 
   static class ContexInitializer

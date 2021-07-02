@@ -15,7 +15,7 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.LanguageRegion;
 
 import java.util.Arrays;
 import java.util.Optional;

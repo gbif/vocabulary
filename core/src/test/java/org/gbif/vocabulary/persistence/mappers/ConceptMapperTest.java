@@ -15,14 +15,6 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.search.ChildrenResult;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +23,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.ChildrenResult;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <p>It uses a embedded PostgreSQL provided by {@link PostgreSQLContainer} which is started before
  * the tests run and it's reused by all the tests.
  */
-@ContextConfiguration(initializers = {ConceptMapperTest.ContexInitializer.class})
+@ContextConfiguration(initializers = {ConceptMapperTest.ContextInitializer.class})
 public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
   private static final String DEFAULT_VOCABULARY = "default";
@@ -69,11 +70,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   private static long[] vocabularyKeys = new long[2];
 
   private final ConceptMapper conceptMapper;
+  private final TagMapper tagMapper;
 
   @Autowired
-  ConceptMapperTest(ConceptMapper conceptMapper) {
+  ConceptMapperTest(ConceptMapper conceptMapper, TagMapper tagMapper) {
     super(conceptMapper);
     this.conceptMapper = conceptMapper;
+    this.tagMapper = tagMapper;
   }
 
   /**
@@ -495,6 +498,73 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertTrue(counts.contains(new ChildrenResult(concept3.getKey(), concept4.getName())));
   }
 
+  @Test
+  public void tagsTest() {
+    Concept concept1 = createNewEntity();
+    conceptMapper.create(concept1);
+
+    Concept concept2 = createNewEntity();
+    conceptMapper.create(concept2);
+
+    Tag tag = new Tag();
+    tag.setName("tag");
+    tag.setColor("#FFFFFF");
+    tag.setCreatedBy("test");
+    tag.setModifiedBy("test");
+    tagMapper.create(tag);
+
+    Tag tag2 = new Tag();
+    tag2.setName("tag2");
+    tag2.setColor("#FFFFFF");
+    tag2.setCreatedBy("test");
+    tag2.setModifiedBy("test");
+    tagMapper.create(tag2);
+
+    conceptMapper.addTag(concept1.getKey(), tag.getKey());
+    conceptMapper.addTag(concept1.getKey(), tag2.getKey());
+    conceptMapper.addTag(concept2.getKey(), tag.getKey());
+
+    Concept conceptWithTags = conceptMapper.get(concept1.getKey());
+    assertEquals(2, conceptWithTags.getTags().size());
+
+    List<Concept> concepts =
+        conceptMapper.list(
+            ConceptSearchParams.builder().tags(Collections.singletonList(tag.getName())).build(),
+            DEFAULT_PAGE);
+    assertEquals(2, concepts.size());
+
+    concepts =
+        conceptMapper.list(
+            ConceptSearchParams.builder().tags(Collections.singletonList(tag2.getName())).build(),
+            DEFAULT_PAGE);
+    assertEquals(1, concepts.size());
+
+    concepts =
+        conceptMapper.list(
+            ConceptSearchParams.builder()
+                .tags(Arrays.asList(tag.getName(), tag2.getName()))
+                .build(),
+            DEFAULT_PAGE);
+    assertEquals(1, concepts.size());
+
+    conceptMapper.removeTag(concept1.getKey(), tag2.getKey());
+    concepts =
+        conceptMapper.list(
+            ConceptSearchParams.builder()
+                .tags(Arrays.asList(tag.getName(), tag2.getName()))
+                .build(),
+            DEFAULT_PAGE);
+    assertEquals(0, concepts.size());
+
+    conceptMapper.addTag(concept1.getKey(), tag2.getKey());
+    tagMapper.delete(tag2.getKey());
+    concepts =
+        conceptMapper.list(
+            ConceptSearchParams.builder().tags(Collections.singletonList(tag2.getName())).build(),
+            DEFAULT_PAGE);
+    assertEquals(0, concepts.size());
+  }
+
   private void assertList(ConceptSearchParams searchParams, int expectedResult) {
     assertEquals(expectedResult, conceptMapper.list(searchParams, DEFAULT_PAGE).size());
     assertEquals(expectedResult, conceptMapper.count(searchParams));
@@ -530,7 +600,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
    * <p>NOTE: this initializer cannot be in the base class because it gets executed only once when
    * we run several tests at the same time and provokes errors.
    */
-  static class ContexInitializer
+  static class ContextInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of(

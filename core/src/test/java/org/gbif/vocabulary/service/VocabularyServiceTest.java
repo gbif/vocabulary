@@ -15,19 +15,22 @@
  */
 package org.gbif.vocabulary.service;
 
+import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
-import javax.validation.ConstraintViolationException;
-
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithMockUser;
+
+import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Tests the {@link VocabularyService}. */
@@ -41,6 +44,7 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
   @MockBean(name = "conceptMapper")
   private ConceptMapper conceptMapper;
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void createTest() {
     Vocabulary vocabulary = createNewEntity("name");
@@ -50,9 +54,10 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
 
     getService().create(vocabulary);
 
-    Assertions.assertEquals(TEST_KEY, vocabulary.getKey().intValue());
+    assertEquals(TEST_KEY, vocabulary.getKey().intValue());
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void invalidVocabularyTest() {
     Vocabulary vocabulary = new Vocabulary();
@@ -73,6 +78,22 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
     vocabulary.setCreatedBy("test");
     vocabulary.setModifiedBy("test");
     return vocabulary;
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedDeprecateTest() {
+    assertThrows(
+        AccessDeniedException.class, () -> vocabularyService.deprecate(0, "test", 0L, false));
+    assertThrows(
+        AccessDeniedException.class,
+        () -> vocabularyService.deprecateWithoutReplacement(0, "test", false));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedRestoreDeprecateTest() {
+    assertThrows(AccessDeniedException.class, () -> vocabularyService.restoreDeprecated(0, false));
   }
 
   @Override

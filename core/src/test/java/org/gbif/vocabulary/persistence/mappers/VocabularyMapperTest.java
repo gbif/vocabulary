@@ -16,7 +16,7 @@
 package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * <p>It uses a embedded PostgreSQL provided by {@link PostgreSQLContainer} which is started before
  * the tests run and it's reused by all the tests.
  */
-@ContextConfiguration(initializers = {VocabularyMapperTest.ContexInitializer.class})
+@ContextConfiguration(initializers = {VocabularyMapperTest.ContextInitializer.class})
 public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
   private final VocabularyMapper vocabularyMapper;
@@ -273,7 +273,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
    * <p>NOTE: this initializer cannot be in the base class because it gets executed only once and
    * provokes errors.
    */
-  static class ContexInitializer
+  static class ContextInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of(

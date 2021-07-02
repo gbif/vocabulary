@@ -15,14 +15,15 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
@@ -107,4 +108,28 @@ public interface ConceptService extends BaseService<Concept> {
    * @return list of {@link ChildrenResult}
    */
   List<ChildrenResult> countChildren(List<Long> conceptParents);
+
+  /**
+   * Adds a {@link org.gbif.vocabulary.model.Tag} to the specified concept.
+   *
+   * @param conceptKey key of the concept where the tag will be added to
+   * @param tagKey key of the tag to add
+   */
+  void addTag(long conceptKey, int tagKey);
+
+  /**
+   * Removes a {@link org.gbif.vocabulary.model.Tag} from the specified concept.
+   *
+   * @param conceptKey key of the concept where the tag will be removed from
+   * @param tagKey key of the tag to remove
+   */
+  void removeTag(long conceptKey, int tagKey);
+
+  /**
+   * Lists all the tags of the concept.
+   *
+   * @param conceptKey key of the concept whose tags we're retrieving.
+   * @return list of {@link Tag}
+   */
+  List<Tag> listTags(long conceptKey);
 }

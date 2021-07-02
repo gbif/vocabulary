@@ -15,13 +15,6 @@
  */
 package org.gbif.vocabulary.service;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.enums.LanguageRegion;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -32,15 +25,26 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
@@ -110,5 +114,17 @@ public class ExportServiceTest extends MockServiceBaseTest {
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);
     when(conceptService.list(any(), any()))
         .thenReturn(new PagingResponse<>(0, 100, 3L, Arrays.asList(c1, c2, c3)));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedReleaseTest() {
+    assertThrows(AccessDeniedException.class, () -> exportService.releaseVocabulary(null));
+  }
+
+  @WithMockUser(authorities = UserRoles.VOCABULARY_EDITOR)
+  @Test
+  public void forbiddenReleaseTest() {
+    assertThrows(AccessDeniedException.class, () -> exportService.releaseVocabulary(null));
   }
 }

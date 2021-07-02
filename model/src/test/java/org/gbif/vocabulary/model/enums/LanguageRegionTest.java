@@ -19,6 +19,8 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.gbif.vocabulary.model.LanguageRegion;
+
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JavaType;

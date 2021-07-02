@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.gbif.vocabulary.persistence.mappers.TagMapper">
+
+  <resultMap id="TAG_MAP" type="org.gbif.vocabulary.model.Tag" autoMapping="true">
+    <id property="key" column="key"/>
+  </resultMap>
+
+  <sql id="TAG_READ_FIELDS">
+    t.key, t.name, t.description, t.color, t.created_by, t.modified_by, t.created, t.modified
+  </sql>
+
+  <sql id="TAG_INSERT_FIELDS">
+    name, description, color, created_by, modified_by, created, modified
+  </sql>
+
+  <sql id="TAG_INSERT_PARAMS">
+    #{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{color,jdbcType=VARCHAR}, #{createdBy,jdbcType=VARCHAR},
+    #{modifiedBy,jdbcType=VARCHAR}, now(), <!-- created -->now() <!-- modified -->
+  </sql>
+
+  <sql id="TAG_UPDATE_PARAMS">
+    name = #{name,jdbcType=VARCHAR}, description = #{description,jdbcType=VARCHAR}, color = #{color,jdbcType=VARCHAR},
+    modified_by = #{modifiedBy,jdbcType=VARCHAR}, modified = now()
+  </sql>
+
+  <!-- QUERIES FROM HERE -->
+
+  <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
+    INSERT INTO tag(<include refid="TAG_INSERT_FIELDS"/>) VALUES(<include refid="TAG_INSERT_PARAMS"/>)
+  </insert>
+
+  <select id="get" resultMap="TAG_MAP">
+    SELECT
+    <include refid="TAG_READ_FIELDS"/>
+    FROM tag t WHERE t.key = #{key,jdbcType=INTEGER}
+  </select>
+
+  <select id="getByName" resultMap="TAG_MAP">
+    SELECT
+    <include refid="TAG_READ_FIELDS"/>
+    FROM tag t WHERE t.name = #{name,jdbcType=VARCHAR}
+  </select>
+
+  <select id="list" resultMap="TAG_MAP">
+    SELECT
+    <include refid="TAG_READ_FIELDS"/>
+    FROM tag t ORDER BY t.name
+    <if test="page != null">
+      LIMIT #{page.limit} OFFSET #{page.offset}
+    </if>
+  </select>
+
+  <select id="count" resultType="Long">
+    SELECT COUNT(*) FROM tag t
+  </select>
+
+  <update id="update">
+    UPDATE tag SET
+    <include refid="TAG_UPDATE_PARAMS"/>
+    WHERE key = #{key,jdbcType=INTEGER}
+  </update>
+
+  <delete id="delete">
+    DELETE FROM tag WHERE key = #{key,jdbcType=INTEGER}
+  </delete>
+
+</mapper>

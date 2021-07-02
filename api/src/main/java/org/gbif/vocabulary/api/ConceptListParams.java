@@ -20,6 +20,7 @@ import org.gbif.api.model.common.paging.PageableBase;
 import org.gbif.api.model.common.paging.PagingRequest;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,6 +47,7 @@ public class ConceptListParams extends PageableBase implements Serializable {
   boolean includeChildrenCount;
   boolean includeChildren;
   boolean includeParents;
+  List<String> tags;
 
   public Pageable getPage() {
     return new PagingRequest(this.getOffset(), this.getLimit());

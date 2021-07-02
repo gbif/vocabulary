@@ -559,7 +559,7 @@ public class ConceptServiceIT {
                 .tags(Arrays.asList(tag.getName(), tag2.getName()))
                 .build(),
             new PagingRequest(0, 5));
-    assertEquals(1, concepts.getResults().size());
+    assertEquals(0, concepts.getResults().size());
 
     tagService.delete(tag.getKey());
     tagService.delete(tag2.getKey());

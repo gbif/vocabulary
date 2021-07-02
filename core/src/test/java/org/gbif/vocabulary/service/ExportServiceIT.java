@@ -15,18 +15,19 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.vocabulary.PostgresDBExtension;
+import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 import org.gbif.vocabulary.service.export.ReleasePersister;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -139,6 +141,7 @@ public class ExportServiceIT {
     assertEquals(vr3.getKey(), releases.get(0).getKey());
   }
 
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void releaseVocabularyTest() throws IOException {
     // create vocabulary

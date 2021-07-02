@@ -202,7 +202,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
             .perform(get(getBasePath() + "/" + concept.getName() + "/tags"))
             .andExpect(status().isOk())
             .andReturn();
-#
+
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
     List<Tag> resultList = OBJECT_MAPPER.convertValue(rootNode, new TypeReference<List<Tag>>() {});
 

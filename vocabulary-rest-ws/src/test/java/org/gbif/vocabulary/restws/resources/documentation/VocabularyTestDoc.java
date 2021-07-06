@@ -92,13 +92,15 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
 
     MvcResult mvcResult =
         mockMvc
-            .perform(get(getBasePath()).param("q", "test")
-                .param("name", "vocab1")
-                .param("namespace", "ns")
-                .param("deprecated", "true")
-                .param("key", "1")
-                .param("offset", "0")
-                .param("limit", "20"))
+            .perform(
+                get(getBasePath())
+                    .param("q", "test")
+                    .param("name", "vocab1")
+                    .param("namespace", "ns")
+                    .param("deprecated", "true")
+                    .param("key", "1")
+                    .param("offset", "0")
+                    .param("limit", "20"))
             .andExpect(status().isOk())
             .andDo(
                 document(
@@ -114,8 +116,12 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                                 "Boolean to search for deprecated or non-deprecated vocabularies")
                             .optional(),
                         parameterWithName("key").description("Vocabulary key").optional(),
-                        parameterWithName("offset").description("Page offset. By default 0").optional(),
-                        parameterWithName("limit").description("Page limit. By default 20").optional())))
+                        parameterWithName("offset")
+                            .description("Page offset. By default 0")
+                            .optional(),
+                        parameterWithName("limit")
+                            .description("Page limit. By default 20")
+                            .optional())))
             .andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());

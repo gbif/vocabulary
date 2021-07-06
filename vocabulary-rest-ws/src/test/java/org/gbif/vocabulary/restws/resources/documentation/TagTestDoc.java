@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -66,7 +69,20 @@ public class TagTestDoc extends DocumentationBaseTest {
         .thenReturn(new PagingResponse<>(new PagingRequest(), (long) tags.size(), tags));
 
     MvcResult mvcResult =
-        mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
+        mockMvc
+            .perform(get(getBasePath()).param("offset", "0").param("limit", "20"))
+            .andExpect(status().isOk())
+            .andDo(
+                document(
+                    "{class-name}/{method-name}",
+                    requestParameters(
+                        parameterWithName("offset")
+                            .description("Page offset. By default 0")
+                            .optional(),
+                        parameterWithName("limit")
+                            .description("Page limit. By default 20")
+                            .optional())))
+            .andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
     List<Tag> resultList =

@@ -20,6 +20,7 @@ import java.util.List;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
+import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Tag;
@@ -53,6 +54,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -80,11 +84,72 @@ public class ConceptTestDoc extends DocumentationBaseTest {
         .thenReturn(new PagingResponse<>(new PagingRequest(), (long) concepts.size(), concepts));
 
     MvcResult mvcResult =
-        mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
+        mockMvc
+            .perform(
+                get(getBasePath())
+                    .param("q", "test")
+                    .param("parentKey", "2")
+                    .param("parent", "concept2")
+                    .param("replacedByKey", "2")
+                    .param("name", "concept1")
+                    .param("deprecated", "false")
+                    .param("key", "1")
+                    .param("hasParent", "true")
+                    .param("hasReplacement", "false")
+                    .param("includeChildrenCount", "true")
+                    .param("includeChildren", "true")
+                    .param("includeParents", "true")
+                    .param("tags", "tag1,tag2")
+                    .param("offset", "0")
+                    .param("limit", "20"))
+            .andExpect(status().isOk())
+            .andDo(
+                document(
+                    "{class-name}/{method-name}",
+                    requestParameters(
+                        parameterWithName("q").description("Search query").optional(),
+                        parameterWithName("parentKey").description("Parent key").optional(),
+                        parameterWithName("parent").description("Parent name").optional(),
+                        parameterWithName("replacedByKey")
+                            .description("Replacement key")
+                            .optional(),
+                        parameterWithName("name").description("Vocabulary name").optional(),
+                        parameterWithName("deprecated")
+                            .description(
+                                "Boolean to search for deprecated or non-deprecated vocabularies")
+                            .optional(),
+                        parameterWithName("key").description("Vocabulary key").optional(),
+                        parameterWithName("hasParent")
+                            .description("Boolean to search for concepts with parent")
+                            .optional(),
+                        parameterWithName("hasReplacement")
+                            .description("Boolean to search for concepts with replacement")
+                            .optional(),
+                        parameterWithName("includeChildrenCount")
+                            .description("Boolean to include the children count in the response")
+                            .optional(),
+                        parameterWithName("includeChildren")
+                            .description("Boolean to include the children names in the response")
+                            .optional(),
+                        parameterWithName("includeParents")
+                            .description("Boolean to include the parents names in the response")
+                            .optional(),
+                        parameterWithName("tags")
+                            .description(
+                                "Concept tags. For multiple values you can separate them by commas or send this parameter multiple times")
+                            .optional(),
+                        parameterWithName("offset")
+                            .description("Page offset. By default 0")
+                            .optional(),
+                        parameterWithName("limit")
+                            .description("Page limit. By default 20")
+                            .optional())))
+            .andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
-    List<Concept> resultList =
-        OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<Concept>>() {});
+    List<ConceptView> resultList =
+        OBJECT_MAPPER.convertValue(
+            rootNode.get("results"), new TypeReference<List<ConceptView>>() {});
 
     assertEquals(concepts.size(), resultList.size());
   }
@@ -210,7 +275,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
   }
 
   @Test
-  public void addTag() throws Exception {
+  public void addTagTest() throws Exception {
     setSecurityContext();
     Concept concept = createConcept("concept1");
     concept.setKey(TEST_KEY);
@@ -231,7 +296,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
   }
 
   @Test
-  public void removeTag() throws Exception {
+  public void removeTagTest() throws Exception {
     setSecurityContext();
     Concept concept = createConcept("concept1");
     concept.setKey(TEST_KEY);

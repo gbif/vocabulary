@@ -15,15 +15,20 @@
  */
 package org.gbif.vocabulary.restws.resources.documentation;
 
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
-import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.export.ExportMetadata;
 import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -32,11 +37,6 @@ import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.nio.file.Files;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -62,6 +62,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -88,7 +91,32 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
             new PagingResponse<>(new PagingRequest(), (long) vocabularies.size(), vocabularies));
 
     MvcResult mvcResult =
-        mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
+        mockMvc
+            .perform(get(getBasePath()).param("q", "test")
+                .param("name", "vocab1")
+                .param("namespace", "ns")
+                .param("deprecated", "true")
+                .param("key", "1")
+                .param("offset", "0")
+                .param("limit", "20"))
+            .andExpect(status().isOk())
+            .andDo(
+                document(
+                    "{class-name}/{method-name}",
+                    requestParameters(
+                        parameterWithName("q").description("Search query").optional(),
+                        parameterWithName("name").description("Vocabulary name").optional(),
+                        parameterWithName("namespace")
+                            .description("Vocabulary namespace")
+                            .optional(),
+                        parameterWithName("deprecated")
+                            .description(
+                                "Boolean to search for deprecated or non-deprecated vocabularies")
+                            .optional(),
+                        parameterWithName("key").description("Vocabulary key").optional(),
+                        parameterWithName("offset").description("Page offset. By default 0").optional(),
+                        parameterWithName("limit").description("Page limit. By default 20").optional())))
+            .andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
     List<Vocabulary> resultList =

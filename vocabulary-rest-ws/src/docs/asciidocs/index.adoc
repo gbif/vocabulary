@@ -33,7 +33,6 @@ These are the possible types of client errors:
 
 * 400 Bad Request: returned when the JSON is invalid or the request is not well-formed
 * 422 Unprocessable Entity: returned when the request is syntactically correct but the fields are invalid (required fields not set, duplicated keys, inconsistent keys, etc.)
-* 403 Forbidden: returned when the request is trying to perfom an unsupported operation
 
 == Vocabulary
 

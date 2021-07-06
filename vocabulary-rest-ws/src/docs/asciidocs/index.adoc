@@ -19,7 +19,7 @@ $ curl --user user:password {{host}}
 
 === JWT
 
-JWT tokens are issued by the endpoint http://api.gbif-dev.org/v1/user/login.
+JWT tokens are issued by the endpoint http://api.gbif.org/v1/user/login.
 This call should be done using basic auth.
 
 [source,bash]
@@ -29,7 +29,7 @@ $ curl -X POST {{host}} -H 'Bearer: f5036eda-0da6-4099-9131-863a511e1cd1'
 
 == Client Errors
 
-There are basically 2 possible types of client errors:
+These are the possible types of client errors:
 
 * 400 Bad Request: returned when the JSON is invalid or the request is not well-formed
 * 422 Unprocessable Entity: returned when the request is syntactically correct but the fields are invalid (required fields not set, duplicated keys, inconsistent keys, etc.)

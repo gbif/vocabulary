@@ -40,7 +40,8 @@ public class CliApp {
   public static void main(String[] args) {
     // parse args
     CliApp.CliArgs cliArgs = new CliApp.CliArgs();
-    JCommander.newBuilder().addObject(cliArgs).build().parse(args);
+    JCommander jCommander = new JCommander(cliArgs);
+    jCommander.parse(args);
 
     ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 

@@ -105,7 +105,7 @@ java -jar vocabulary-importer/target/vocabulary-importer-0.37-SNAPSHOT.jar \
 --vocabularyDefinitionEN "A vocabulary to capture the broad stages that an organism passes through during its life cycle. This vocabulary was assembled based on the observed terms commonly used by the open data community, including those from citizen scientists." \
 --conceptsPath "/mydir/my_concepts.csv" \
 --hiddenLabelsPath "/mydir/my_hidden_labels.csv" \
---csvDelimiter ; \
+--csvDelimiter ";" \
 --apiUrl https://api.gbif-dev.org/v1/ \
 --apiUser myusername \
 --apiPassword 

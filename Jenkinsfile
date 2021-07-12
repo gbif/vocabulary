@@ -2,7 +2,7 @@ pipeline {
   agent any
   tools {
     maven 'Maven3.2'
-    jdk 'JDK8'
+    jdk 'OpenJDK8'
   }
   options {
     buildDiscarder(logRotator(numToKeepStr: '10'))

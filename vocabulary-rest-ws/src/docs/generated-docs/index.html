@@ -457,7 +457,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#resources-vocabulary-test-doc-release-vocabulary-version-test">Release Vocabulary Version</a></li>
 <li><a href="#resources-vocabulary-test-doc-list-vocabulary-releases-test">List Releases</a></li>
 <li><a href="#resources-vocabulary-test-doc-get-vocabulary-release-test">Get Release</a></li>
-<li><a href="#resources-vocabulary-test-doc-get-release-export-test">Get Release Export</a></li>
+<li><a href="#resources-vocabulary-test-doc-get-release-export-test">Get Release Export Response</a></li>
 </ul>
 </li>
 <li><a href="#_concept">Concept</a>
@@ -1452,7 +1452,7 @@ Content-Length: 74
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Disposition: attachment; filename=export3660581943466525372.json
+Content-Disposition: attachment; filename=export8722856475797619415.json
 Accept-Ranges: bytes
 Content-Type: application/octet-stream</code></pre>
 </div>
@@ -1681,7 +1681,7 @@ Content-Length: 83
 </div>
 </div>
 <div class="sect2">
-<h3 id="resources-vocabulary-test-doc-get-release-export-test">Get Release Export</h3>
+<h3 id="resources-vocabulary-test-doc-get-release-export-test">Get Release Export Response</h3>
 <div class="paragraph">
 <p><code>GET /vocabularies/{name}/releases/{version}/export</code></p>
 </div>
@@ -1737,12 +1737,29 @@ Content-Length: 83
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Disposition: inline
+Accept-Ranges: bytes
 Content-Type: application/json
-Content-Length: 378
+Content-Length: 1372
 
 {
   "metadata" : {
-    "createdDate" : "2021-07-14T08:50:53.408",
+    "createdDate" : {
+      "dayOfYear" : 195,
+      "dayOfWeek" : "WEDNESDAY",
+      "year" : 2021,
+      "month" : "JULY",
+      "nano" : 276000000,
+      "monthValue" : 7,
+      "dayOfMonth" : 14,
+      "hour" : 13,
+      "minute" : 27,
+      "second" : 17,
+      "chronology" : {
+        "calendarType" : "iso8601",
+        "id" : "ISO"
+      }
+    },
     "version" : "1.0.0"
   },
   "vocabulary" : {
@@ -1751,7 +1768,17 @@ Content-Length: 378
     "label" : {
       "en" : "Label"
     },
+    "definition" : { },
+    "externalDefinitions" : [ ],
     "editorialNotes" : [ "note1", "note2" ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : null,
+    "createdBy" : null,
+    "modified" : null,
+    "modifiedBy" : null,
+    "deleted" : null,
     "namespace" : "ns"
   },
   "concepts" : [ {
@@ -1759,7 +1786,24 @@ Content-Length: 378
     "name" : "Concept",
     "label" : {
       "en" : "concept"
-    }
+    },
+    "definition" : { },
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "replacedByKey" : null,
+    "deprecated" : null,
+    "deprecatedBy" : null,
+    "created" : null,
+    "createdBy" : null,
+    "modified" : null,
+    "modifiedBy" : null,
+    "deleted" : null,
+    "vocabularyKey" : null,
+    "parentKey" : null,
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ ],
+    "sameAsUris" : [ ],
+    "tags" : [ ]
   } ]
 }</code></pre>
 </div>
@@ -3607,7 +3651,7 @@ Content-Length: 73
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-07-14 08:45:33 UTC
+Last updated 2021-07-14 12:52:34 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">

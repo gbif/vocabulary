@@ -15,6 +15,12 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -26,21 +32,12 @@ import org.gbif.vocabulary.api.VocabularyReleaseParams;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.export.ExportParams;
-import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -59,11 +56,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @Slf4j
@@ -243,9 +243,8 @@ public class VocabularyResource implements VocabularyApi {
   }
 
   @Override
-  @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}/export")
-  public VocabularyExport getReleaseExport(
-      @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
+  @SneakyThrows
+  public byte[] getReleaseExport(String vocabularyName, String version) {
     PagingRequest page = new PagingRequest(0, 1);
     PagingResponse<VocabularyRelease> releases =
         exportService.listReleases(vocabularyName, version, page);
@@ -253,9 +252,18 @@ public class VocabularyResource implements VocabularyApi {
         releases.getResults().isEmpty() ? null : releases.getResults().get(0);
 
     if (release == null) {
-      return null;
+      return new byte[0];
     }
 
-    return VocabularyDownloader.downloadVocabularyExport(release.getExportUrl());
+    Path exportPath = VocabularyDownloader.downloadVocabularyExport(release.getExportUrl());
+    return Files.readAllBytes(exportPath);
+  }
+
+  @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}/export")
+  @SneakyThrows
+  public ResponseEntity<Resource> getReleaseExportResponse(
+      @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
+    ByteArrayResource resource = new ByteArrayResource(getReleaseExport(vocabularyName, version));
+    return ResponseEntity.ok().header("Content-Disposition", "inline").body(resource);
   }
 }

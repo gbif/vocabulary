@@ -15,15 +15,14 @@
  */
 package org.gbif.vocabulary.api;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
-import org.gbif.vocabulary.model.export.VocabularyExport;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.io.IOException;
-import java.util.List;
 
 public interface VocabularyApi {
 
@@ -51,5 +50,5 @@ public interface VocabularyApi {
 
   VocabularyRelease getRelease(String vocabularyName, String version);
 
-  VocabularyExport getReleaseExport(String vocabularyName, String version);
+  byte[] getReleaseExport(String vocabularyName, String version);
 }

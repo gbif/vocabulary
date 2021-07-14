@@ -15,9 +15,6 @@
  */
 package org.gbif.vocabulary.tools;
 
-import org.gbif.vocabulary.model.VocabularyRelease;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,9 +28,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.gbif.vocabulary.model.VocabularyRelease;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -137,7 +135,7 @@ public class VocabularyDownloader {
     }
   }
 
-  public static VocabularyExport downloadVocabularyExport(String exportUrl) {
+  public static Path downloadVocabularyExport(String exportUrl) {
     Path vocabularyJsonFile = downloadVocabularyFile(exportUrl);
 
     if (vocabularyJsonFile == null || vocabularyJsonFile.toFile().length() == 0) {
@@ -145,11 +143,7 @@ public class VocabularyDownloader {
       throw new IllegalArgumentException("Empty vocabulary");
     }
 
-    try {
-      return OBJECT_MAPPER.readValue(vocabularyJsonFile.toFile(), VocabularyExport.class);
-    } catch (IOException e) {
-      throw new IllegalStateException("Couldn't read the vocabulary in " + exportUrl, e);
-    }
+    return vocabularyJsonFile;
   }
 
   public static Path downloadVocabularyFile(String url) {

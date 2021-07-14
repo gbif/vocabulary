@@ -115,6 +115,6 @@ public interface VocabularyClient extends VocabularyApi {
   @GetMapping(
       value = "{name}/releases/{version}/export",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  VocabularyExport getReleaseExport(
+  byte[] getReleaseExport(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version);
 }

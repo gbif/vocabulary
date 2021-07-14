@@ -16,6 +16,7 @@
 package org.gbif.vocabulary.restws.resources.documentation;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -350,9 +351,12 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
       concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "concept"));
       export.setConcepts(Collections.singletonList(concept));
 
+      Path exportPath = Files.createTempFile("export", "json");
+      Files.write(exportPath, OBJECT_MAPPER.writeValueAsBytes(export));
+
       vocabDownloader
           .when(() -> VocabularyDownloader.downloadVocabularyExport(vr1.getExportUrl()))
-          .thenReturn(export);
+          .thenReturn(exportPath);
 
       mockMvc
           .perform(

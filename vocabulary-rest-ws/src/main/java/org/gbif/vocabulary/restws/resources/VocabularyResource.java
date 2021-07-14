@@ -261,7 +261,7 @@ public class VocabularyResource implements VocabularyApi {
 
   @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}/export")
   @SneakyThrows
-  public ResponseEntity<Resource> getReleaseExportResponse(
+  public ResponseEntity<Resource> getReleasedExport(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
     ByteArrayResource resource = new ByteArrayResource(getReleaseExport(vocabularyName, version));
     return ResponseEntity.ok().header("Content-Disposition", "inline").body(resource);

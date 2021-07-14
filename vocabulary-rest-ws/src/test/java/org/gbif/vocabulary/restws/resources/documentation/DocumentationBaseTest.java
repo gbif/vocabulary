@@ -15,12 +15,6 @@
  */
 package org.gbif.vocabulary.restws.resources.documentation;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Tag;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.servlet.Filter;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,13 +56,18 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-
 import capital.scalable.restdocs.AutoDocumentation;
 import capital.scalable.restdocs.jackson.JacksonResultHandlers;
 import capital.scalable.restdocs.response.ResponseModifyingPreprocessors;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.ImmutableList;
+import javax.servlet.Filter;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -85,7 +86,11 @@ abstract class DocumentationBaseTest {
   static final Long TEST_KEY = 1L;
   static final String TEST_VOCABULARY_NAME = "vocab1";
   static final Long TEST_VOCABULARY_KEY = 1L;
-  static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  static final ObjectMapper OBJECT_MAPPER =
+      new ObjectMapper()
+          .registerModule(new JavaTimeModule())
+          .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+          .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
   @Autowired private Filter springSecurityFilterChain;
   @Autowired private WebApplicationContext context;

@@ -2,7 +2,6 @@ package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.TagApi;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.service.TagService;
 
@@ -22,7 +21,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
 @RequestMapping(value = TAGS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-public class TagResource implements TagApi {
+public class TagResource {
 
   private final TagService tagService;
 
@@ -30,26 +29,22 @@ public class TagResource implements TagApi {
     this.tagService = tagService;
   }
 
-  @Override
   @GetMapping
   public PagingResponse<Tag> listTags(Pageable page) {
     return tagService.list(page);
   }
 
-  @Override
   @GetMapping("{name}")
   public Tag getTag(@PathVariable("name") String tagName) {
     return tagService.getByName(tagName);
   }
 
-  @Override
   @PostMapping
   public Tag create(@RequestBody Tag tag) {
     int key = tagService.create(tag);
     return tagService.get(key);
   }
 
-  @Override
   @PutMapping("{name}")
   public Tag update(@PathVariable("name") String tagName, @RequestBody Tag tag) {
     Tag oldTag = tagService.getByName(tagName);
@@ -61,7 +56,6 @@ public class TagResource implements TagApi {
     return tagService.get(tag.getKey());
   }
 
-  @Override
   @DeleteMapping("{name}")
   public void delete(@PathVariable("name") String tagName) {
     Tag tag = tagService.getByName(tagName);

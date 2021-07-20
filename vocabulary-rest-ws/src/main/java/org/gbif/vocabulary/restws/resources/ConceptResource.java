@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
-import org.gbif.vocabulary.api.ConceptApi;
 import org.gbif.vocabulary.api.ConceptListParams;
 import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
@@ -61,7 +60,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 @RequestMapping(
     value = VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH,
     produces = MediaType.APPLICATION_JSON_VALUE)
-public class ConceptResource implements ConceptApi {
+public class ConceptResource {
 
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
@@ -74,7 +73,6 @@ public class ConceptResource implements ConceptApi {
     this.tagService = tagService;
   }
 
-  @Override
   @GetMapping()
   public PagingResponse<ConceptView> listConcepts(
       @PathVariable("vocabularyName") String vocabularyName, ConceptListParams params) {
@@ -160,7 +158,6 @@ public class ConceptResource implements ConceptApi {
         viewStream.collect(Collectors.toList()));
   }
 
-  @Override
   @GetMapping("{name}")
   public ConceptView get(
       @PathVariable("vocabularyName") String vocabularyName,
@@ -191,7 +188,6 @@ public class ConceptResource implements ConceptApi {
     return conceptView;
   }
 
-  @Override
   @PostMapping
   public Concept create(
       @PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
@@ -203,7 +199,6 @@ public class ConceptResource implements ConceptApi {
     return conceptService.get(key);
   }
 
-  @Override
   @PutMapping("{name}")
   public Concept update(
       @PathVariable("vocabularyName") String vocabularyName,
@@ -222,7 +217,6 @@ public class ConceptResource implements ConceptApi {
     return conceptService.get(concept.getKey());
   }
 
-  @Override
   @GetMapping("suggest")
   public List<KeyNameResult> suggest(
       @PathVariable("vocabularyName") String vocabularyName, @RequestParam("q") String query) {
@@ -232,7 +226,6 @@ public class ConceptResource implements ConceptApi {
     return conceptService.suggest(query, vocabulary.getKey());
   }
 
-  @Override
   @PutMapping("{name}/deprecate")
   public void deprecate(
       @PathVariable("vocabularyName") String vocabularyName,
@@ -250,7 +243,6 @@ public class ConceptResource implements ConceptApi {
         deprecateConceptAction.isDeprecateChildren());
   }
 
-  @Override
   @DeleteMapping("{name}/deprecate")
   public void restoreDeprecated(
       @PathVariable("vocabularyName") String vocabularyName,
@@ -265,7 +257,6 @@ public class ConceptResource implements ConceptApi {
     conceptService.restoreDeprecated(concept.getKey(), restoreDeprecatedChildren);
   }
 
-  @Override
   @GetMapping("{name}/tags")
   public List<Tag> listTags(
       @PathVariable("vocabularyName") String vocabularyName,
@@ -277,7 +268,6 @@ public class ConceptResource implements ConceptApi {
     return conceptService.listTags(concept.getKey());
   }
 
-  @Override
   @PutMapping("{name}/tags")
   public void addTag(
       @PathVariable("vocabularyName") String vocabularyName,
@@ -293,7 +283,6 @@ public class ConceptResource implements ConceptApi {
     conceptService.addTag(concept.getKey(), tag.getKey());
   }
 
-  @Override
   @DeleteMapping("{name}/tags/{tagName}")
   public void removeTag(
       @PathVariable("vocabularyName") String vocabularyName,

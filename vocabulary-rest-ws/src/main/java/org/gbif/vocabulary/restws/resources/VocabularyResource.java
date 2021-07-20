@@ -26,7 +26,6 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.common.messaging.api.MessagePublisher;
 import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
-import org.gbif.vocabulary.api.VocabularyApi;
 import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -69,7 +68,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Slf4j
 @RestController
 @RequestMapping(value = VOCABULARIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-public class VocabularyResource implements VocabularyApi {
+public class VocabularyResource {
 
   private final VocabularyService vocabularyService;
   private final ExportService exportService;
@@ -87,7 +86,6 @@ public class VocabularyResource implements VocabularyApi {
     this.messagePublisher = messagePublisher;
   }
 
-  @Override
   @GetMapping
   public PagingResponse<Vocabulary> listVocabularies(VocabularyListParams params) {
     return vocabularyService.list(
@@ -101,20 +99,17 @@ public class VocabularyResource implements VocabularyApi {
         params.getPage());
   }
 
-  @Override
   @GetMapping("{name}")
   public Vocabulary get(@PathVariable("name") String vocabularyName) {
     return vocabularyService.getByName(vocabularyName);
   }
 
-  @Override
   @PostMapping
   public Vocabulary create(@RequestBody Vocabulary vocabulary) {
     long key = vocabularyService.create(vocabulary);
     return vocabularyService.get(key);
   }
 
-  @Override
   @PutMapping("{name}")
   public Vocabulary update(
       @PathVariable("name") String vocabularyName, @RequestBody Vocabulary vocabulary) {
@@ -125,13 +120,11 @@ public class VocabularyResource implements VocabularyApi {
     return vocabularyService.get(vocabulary.getKey());
   }
 
-  @Override
   @GetMapping("suggest")
   public List<KeyNameResult> suggest(@RequestParam("q") String query) {
     return vocabularyService.suggest(query);
   }
 
-  @Override
   @PutMapping("{name}/deprecate")
   public void deprecate(
       @PathVariable("name") String vocabularyName,
@@ -146,7 +139,6 @@ public class VocabularyResource implements VocabularyApi {
         deprecateVocabularyAction.isDeprecateConcepts());
   }
 
-  @Override
   @DeleteMapping("{name}/deprecate")
   public void restoreDeprecated(
       @PathVariable("name") String vocabularyName,
@@ -156,12 +148,6 @@ public class VocabularyResource implements VocabularyApi {
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
 
     vocabularyService.restoreDeprecated(vocabulary.getKey(), restoreDeprecatedConcepts);
-  }
-
-  @Override
-  public byte[] exportVocabulary(String vocabularyName) throws IOException {
-    Path exportPath = exportService.exportVocabulary(vocabularyName);
-    return Files.readAllBytes(exportPath);
   }
 
   @GetMapping(value = "{name}/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
@@ -176,7 +162,6 @@ public class VocabularyResource implements VocabularyApi {
         .body(resource);
   }
 
-  @Override
   public VocabularyRelease releaseVocabularyVersion(
       String vocabularyName, VocabularyReleaseParams params) throws IOException {
 
@@ -223,7 +208,6 @@ public class VocabularyResource implements VocabularyApi {
         .body(release);
   }
 
-  @Override
   @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH)
   public PagingResponse<VocabularyRelease> listReleases(
       @PathVariable("name") String vocabularyName,
@@ -232,7 +216,6 @@ public class VocabularyResource implements VocabularyApi {
     return exportService.listReleases(vocabularyName, version, page);
   }
 
-  @Override
   @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}")
   public VocabularyRelease getRelease(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
@@ -242,7 +225,6 @@ public class VocabularyResource implements VocabularyApi {
     return releases.getResults().isEmpty() ? null : releases.getResults().get(0);
   }
 
-  @Override
   @SneakyThrows
   public byte[] getReleaseExport(String vocabularyName, String version) {
     PagingRequest page = new PagingRequest(0, 1);

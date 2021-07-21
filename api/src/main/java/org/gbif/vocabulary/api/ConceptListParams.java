@@ -15,25 +15,24 @@
  */
 package org.gbif.vocabulary.api;
 
-import org.gbif.api.model.common.paging.Pageable;
-import org.gbif.api.model.common.paging.PageableBase;
-import org.gbif.api.model.common.paging.PagingRequest;
-
 import java.io.Serializable;
 import java.util.List;
 
+import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingRequest;
+
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ConceptListParams extends PageableBase implements Serializable {
+public class ConceptListParams extends ListParamsBase implements Serializable {
 
   private String q;
   private Long parentKey;

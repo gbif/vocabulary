@@ -15,21 +15,20 @@
  */
 package org.gbif.vocabulary.importer;
 
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.ws.client.ClientBuilder;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.ws.client.ClientBuilder;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Strings;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -82,14 +81,25 @@ public class CliApp {
     }
 
     log.info("Calling the importer");
-    vocabularyImporter.importVocabulary(
-        cliArgs.getCsvDelimiter(),
-        cliArgs.getListDelimiter(),
-        cliArgs.getVocabularyName(),
-        cliArgs.getVocabularyLabelEN(),
-        cliArgs.getVocabularyDefinitionEN(),
-        conceptsPath,
-        hiddenLabelsPath);
+    if (cliArgs.isReimport()) {
+      vocabularyImporter.reimportVocabulary(
+          cliArgs.getCsvDelimiter(),
+          cliArgs.getListDelimiter(),
+          cliArgs.getVocabularyName(),
+          cliArgs.getVocabularyLabelEN(),
+          cliArgs.getVocabularyDefinitionEN(),
+          conceptsPath,
+          hiddenLabelsPath);
+    } else {
+      vocabularyImporter.importVocabulary(
+          cliArgs.getCsvDelimiter(),
+          cliArgs.getListDelimiter(),
+          cliArgs.getVocabularyName(),
+          cliArgs.getVocabularyLabelEN(),
+          cliArgs.getVocabularyDefinitionEN(),
+          conceptsPath,
+          hiddenLabelsPath);
+    }
     log.info("Import done");
   }
 
@@ -141,5 +151,8 @@ public class CliApp {
         names = {"--hiddenLabelsPath", "-hp"},
         required = true)
     private String hiddenLabelsPath;
+
+    @Parameter(names = {"--reimport", "-re"})
+    private boolean reimport;
   }
 }

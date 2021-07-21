@@ -95,6 +95,10 @@ This tool can be run via command line by sending these params:
     
     Password of the user. It has to be blank in the command and it will be prompted on the console
 
+* *--reimport, -re*
+    
+    If set it does a reimport by updating the exisiting vocabulary and concepts
+
 
 For example:
 
@@ -107,6 +111,7 @@ java -jar vocabulary-importer/target/vocabulary-importer-0.37-SNAPSHOT.jar \
 --hiddenLabelsPath "/mydir/my_hidden_labels.csv" \
 --csvDelimiter ";" \
 --apiUrl https://api.gbif-dev.org/v1/ \
+--reimport \
 --apiUser myusername \
 --apiPassword 
 ```

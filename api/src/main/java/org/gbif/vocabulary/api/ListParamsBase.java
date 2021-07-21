@@ -11,10 +11,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class ListParamsBase implements Pageable {
 
-  @Builder.Default
-  protected long offset = 0L;
-  @Builder.Default
-  protected int limit = 20;
+  @Builder.Default protected long offset = 0L;
+  @Builder.Default protected int limit = 20;
 
   protected ListParamsBase() {
     this.offset = 0L;

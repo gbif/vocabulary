@@ -5,12 +5,16 @@ import java.util.StringJoiner;
 
 import org.gbif.api.model.common.paging.Pageable;
 
+import lombok.Builder;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 public class ListParamsBase implements Pageable {
-  protected long offset;
-  protected int limit;
+
+  @Builder.Default
+  protected long offset = 0L;
+  @Builder.Default
+  protected int limit = 20;
 
   protected ListParamsBase() {
     this.offset = 0L;

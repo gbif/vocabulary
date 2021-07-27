@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @MybatisTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+//@SpringBootTest
 @ActiveProfiles("test")
 abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
 

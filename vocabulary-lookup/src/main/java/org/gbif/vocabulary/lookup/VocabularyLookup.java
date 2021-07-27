@@ -110,24 +110,20 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
         Cache2kBuilder.of(String.class, Concept.class)
             .eternal(true)
             .entryCapacity(Long.MAX_VALUE)
-            .suppressExceptions(false)
             .build();
     labelsCache =
         new Cache2kBuilder<String, LabelMatch>() {}.eternal(true)
             .entryCapacity(Long.MAX_VALUE)
-            .suppressExceptions(false)
             .build();
     hiddenLabelsCache =
         Cache2kBuilder.of(String.class, Concept.class)
             .eternal(true)
             .entryCapacity(Long.MAX_VALUE)
-            .suppressExceptions(false)
             .build();
     conceptsByKeyCache =
         Cache2kBuilder.of(Long.class, Concept.class)
             .eternal(true)
             .entryCapacity(Long.MAX_VALUE)
-            .suppressExceptions(false)
             .build();
 
     importVocabulary(in);
@@ -308,11 +304,11 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
 
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(value));
 
-    boolean added =
+    Boolean added =
         labelsCache.invoke(
             normalizedValue,
             e -> {
-              LabelMatch match = e.getOldValue();
+              LabelMatch match = e.getValue();
               if (match == null) {
                 match = new LabelMatch();
               }
@@ -325,7 +321,7 @@ public class VocabularyLookup implements AutoCloseable, Serializable {
                   .add(concept);
             });
 
-    if (!added) {
+    if (Boolean.FALSE.equals(added)) {
       LOG.warn("Concept {} not added for value {}", concept, normalizedValue);
     }
   }

@@ -48,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @MybatisTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = {VocabularyReleaseMapperTest.ContextInitializer.class})
 public class VocabularyReleaseMapperTest {

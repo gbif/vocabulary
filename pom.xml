@@ -63,7 +63,7 @@
   </distributionManagement>
 
   <properties>
-    <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
+    <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
     <spring-cloud-openfeign.version>2.2.6.RELEASE</spring-cloud-openfeign.version>
     <main.basedir>${project.basedir}</main.basedir>
 
@@ -75,14 +75,15 @@
     <gbif-common-ws.version>1.15</gbif-common-ws.version>
 
     <!-- DB -->
-    <postgresql-testcontainers.version>1.15.0-rc2</postgresql-testcontainers.version>
-    <mybatis.spring.boot.starter>2.0.0</mybatis.spring.boot.starter>
+    <postgresql-testcontainers.version>1.16.0</postgresql-testcontainers.version>
+    <mybatis.spring.boot.starter>2.1.0</mybatis.spring.boot.starter>
+    <postgresql.version>42.2.23</postgresql.version>
 
     <!-- utils -->
     <javax-validation.version>2.0.1.Final</javax-validation.version>
-    <okhttp-version>4.2.2</okhttp-version>
-    <cache2k-version>1.2.4.Final</cache2k-version>
-    <lombok.version>1.18.12</lombok.version>
+    <okhttp.version>4.9.1</okhttp.version>
+    <cache2k.version>2.0.0.Final</cache2k.version>
+    <lombok.version>1.18.20</lombok.version>
     <metainf-services.version>1.8</metainf-services.version>
     <jcommander.version>1.60</jcommander.version>
     <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
@@ -92,7 +93,7 @@
     <guava.version>18.0</guava.version>
 
     <!-- ZK -->
-    <spring-cloud-zookeeper.version>2.2.4.RELEASE</spring-cloud-zookeeper.version>
+    <spring-cloud-zookeeper.version>2.2.5.RELEASE</spring-cloud-zookeeper.version>
     <zookeeper.version>3.4.14</zookeeper.version>
 
     <!-- Hadoop -->
@@ -212,6 +213,12 @@
         <artifactId>mybatis-spring-boot-starter</artifactId>
         <version>${mybatis.spring.boot.starter}</version>
       </dependency>
+      <!-- DB -->
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgresql.version}</version>
+      </dependency>
 
       <!-- utils -->
       <dependency>
@@ -233,17 +240,17 @@
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp</artifactId>
-        <version>${okhttp-version}</version>
+        <version>${okhttp.version}</version>
       </dependency>
       <dependency>
         <groupId>org.cache2k</groupId>
         <artifactId>cache2k-api</artifactId>
-        <version>${cache2k-version}</version>
+        <version>${cache2k.version}</version>
       </dependency>
       <dependency>
         <groupId>org.cache2k</groupId>
         <artifactId>cache2k-core</artifactId>
-        <version>${cache2k-version}</version>
+        <version>${cache2k.version}</version>
       </dependency>
       <dependency>
         <groupId>org.kohsuke.metainf-services</groupId>

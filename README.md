@@ -25,3 +25,5 @@ mvn clean compile
 - [Model](model/README.md): contains all the model classes
 - [Rest-WS](vocabulary-rest-ws/README.md): a REST ws that exposes the public API
 - [Vocabulary-lookup](vocabulary-lookup/README.md): utility library to do lookups in a vocabulary
+- [Vocabulary-cli](vocabulary-cli/README.md): CLI applications
+- [Vocabulary-importer](vocabulary-importer/README.md): tool to import vocabularies

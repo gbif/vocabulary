@@ -1,6 +1,4 @@
 /*
- * Copyright 2020 Global Biodiversity Information Facility (GBIF)
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +13,6 @@
  */
 package org.gbif.vocabulary.restws;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.gbif.common.messaging.ConnectionParameters;
 import org.gbif.common.messaging.DefaultMessagePublisher;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -31,6 +23,12 @@ import org.gbif.vocabulary.restws.config.MessagingConfig;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
 import org.gbif.ws.server.provider.PageableHandlerMethodArgumentResolver;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

@@ -1,6 +1,4 @@
 /*
- * Copyright 2020 Global Biodiversity Information Facility (GBIF)
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +13,8 @@
  */
 package org.gbif.vocabulary.model;
 
+import org.gbif.vocabulary.model.utils.LenientEquals;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -24,9 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.gbif.vocabulary.model.utils.LenientEquals;
-
 import javax.validation.constraints.NotNull;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

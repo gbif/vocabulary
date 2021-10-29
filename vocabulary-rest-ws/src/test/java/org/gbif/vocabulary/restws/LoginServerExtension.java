@@ -44,47 +44,47 @@ public class LoginServerExtension implements BeforeAllCallback, AfterAllCallback
   @Override
   public void beforeAll(ExtensionContext context) throws Exception {
     wireMockServer.stubFor(
-        post("/user/login")
+        post("/user/auth/basic")
             .withBasicAuth(USER.getUsername(), USER.getPassword())
             .willReturn(
                 aResponse().withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(USER)))));
     wireMockServer.stubFor(
-        post("/user/login")
+        post("/user/auth/basic")
             .withBasicAuth(ADMIN.getUsername(), ADMIN.getPassword())
             .willReturn(
                 aResponse().withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(ADMIN)))));
     wireMockServer.stubFor(
-        post("/user/login")
+        post("/user/auth/basic")
             .withBasicAuth(EDITOR.getUsername(), EDITOR.getPassword())
             .willReturn(
                 aResponse().withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(EDITOR)))));
     wireMockServer.stubFor(
-        post("/user/login")
+        post("/user/auth/basic")
             .withBasicAuth(INVALID_USER.getUsername(), INVALID_USER.getPassword())
             .willReturn(aResponse().withStatus(HttpStatus.UNAUTHORIZED.value())));
     wireMockServer.stubFor(
-        post("/user/login")
+        post("/user/auth/jwt")
             .withHeader("Authorization", equalTo("Bearer " + JWT_USER.getToken()))
             .willReturn(
                 aResponse()
                     .withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(JWT_USER)))
                     .withHeader("token", UUID.randomUUID().toString())));
     wireMockServer.stubFor(
-        post("/user/login")
+        post("/user/auth/jwt")
             .withHeader("Authorization", equalTo("Bearer " + JWT_ADMIN.getToken()))
             .willReturn(
                 aResponse()
                     .withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(JWT_ADMIN)))
                     .withHeader("token", UUID.randomUUID().toString())));
     wireMockServer.stubFor(
-        post("/user/login")
+        post("/user/auth/jwt")
             .withHeader("Authorization", equalTo("Bearer " + JWT_EDITOR.getToken()))
             .willReturn(
                 aResponse()
                     .withBody(OBJECT_MAPPER.writeValueAsString(new LoginResponse(JWT_EDITOR)))
                     .withHeader("token", UUID.randomUUID().toString())));
     wireMockServer.stubFor(
-        post("/user/login")
+        post("/user/auth/jwt")
             .withHeader("Authorization", equalTo("Bearer " + INVALID_JWT_USER.getToken()))
             .willReturn(aResponse().withStatus(HttpStatus.UNAUTHORIZED.value())));
 

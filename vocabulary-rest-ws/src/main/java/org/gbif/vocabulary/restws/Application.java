@@ -17,8 +17,6 @@ package org.gbif.vocabulary.restws;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.gbif.common.messaging.ConnectionParameters;
@@ -29,7 +27,11 @@ import org.gbif.vocabulary.restws.config.ConfigPropertiesValidator;
 import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.restws.config.MessagingConfig;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
-import org.gbif.vocabulary.restws.security.jwt.JwtRequestFilter;
+import org.gbif.ws.remoteauth.RemoteAuthClient;
+import org.gbif.ws.remoteauth.RemoteAuthWebSecurityConfigurer;
+import org.gbif.ws.remoteauth.RestTemplateRemoteAuthClient;
+import org.gbif.ws.server.filter.HttpServletRequestWrapperFilter;
+import org.gbif.ws.server.filter.RequestHeaderParamUpdateFilter;
 import org.gbif.ws.server.provider.PageableHandlerMethodArgumentResolver;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,29 +40,34 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-@Import(SpringConfig.class)
-@EnableConfigurationProperties({ExportConfig.class, MessagingConfig.class})
+@Import({
+  SpringConfig.class,
+  HttpServletRequestWrapperFilter.class,
+  RequestHeaderParamUpdateFilter.class
+})
+@ComponentScan(
+    basePackages = {"org.gbif.vocabulary.restws", "org.gbif.ws.remoteauth"},
+    excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE)})
+@EnableConfigurationProperties({ExportConfig.class, MessagingConfig.class, SecurityConfig.class})
 public class Application {
 
   public static void main(String[] args) {
@@ -77,16 +84,22 @@ public class Application {
   }
 
   @Bean
-  public RestTemplate restTemplate(RestTemplateBuilder builder) {
+  public RestTemplate restTemplate(RestTemplateBuilder builder, SecurityConfig securityConfig) {
     return builder
         .setConnectTimeout(Duration.ofSeconds(30))
         .setReadTimeout(Duration.ofSeconds(60))
+        .rootUri(securityConfig.getLoginApiBasePath())
         .additionalInterceptors(
             (request, body, execution) -> {
               request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
               return execution.execute(request, body);
             })
         .build();
+  }
+
+  @Bean
+  public RemoteAuthClient remoteAuthClient(RestTemplate restTemplate) {
+    return new RestTemplateRemoteAuthClient(restTemplate);
   }
 
   @Bean
@@ -146,53 +159,11 @@ public class Application {
 
   @Configuration
   @Order(20)
-  static class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+  public class SpringSecurityConfig extends RemoteAuthWebSecurityConfigurer {
 
-    @Autowired private AuthenticationProvider basicAuthAuthenticationProvider;
-
-    @Autowired private AuthenticationProvider jwtAuthenticationProvider;
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      http.authorizeRequests()
-          .anyRequest()
-          .permitAll()
-          .and()
-          .httpBasic()
-          .and()
-          .csrf()
-          .disable()
-          .cors()
-          .and()
-          .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-          .and()
-          .addFilterBefore(
-              new JwtRequestFilter(authenticationManager()), BasicAuthenticationFilter.class);
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-      auth.authenticationProvider(basicAuthAuthenticationProvider);
-      auth.authenticationProvider(jwtAuthenticationProvider);
-    }
-
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-      // CorsFilter only applies this if the origin header is present in the request
-      CorsConfiguration configuration = new CorsConfiguration();
-      configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type"));
-      configuration.setAllowedOrigins(Collections.singletonList("*"));
-      configuration.setAllowedMethods(
-          Arrays.asList("HEAD", "GET", "POST", "DELETE", "PUT", "OPTIONS"));
-      configuration.setExposedHeaders(
-          Arrays.asList(
-              "Access-Control-Allow-Origin",
-              "Access-Control-Allow-Methods",
-              "Access-Control-Allow-Headers"));
-      UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-      source.registerCorsConfiguration("/**", configuration);
-      return source;
+    public SpringSecurityConfig(
+        ApplicationContext applicationContext, RemoteAuthClient remoteAuthClient) {
+      super(applicationContext, remoteAuthClient);
     }
   }
 }

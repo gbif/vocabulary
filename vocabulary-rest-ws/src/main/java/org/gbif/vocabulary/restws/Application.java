@@ -1,6 +1,4 @@
 /*
- * Copyright 2020 Global Biodiversity Information Facility (GBIF)
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +12,6 @@
  * limitations under the License.
  */
 package org.gbif.vocabulary.restws;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.List;
 
 import org.gbif.common.messaging.ConnectionParameters;
 import org.gbif.common.messaging.DefaultMessagePublisher;
@@ -33,6 +27,10 @@ import org.gbif.ws.remoteauth.RestTemplateRemoteAuthClient;
 import org.gbif.ws.server.filter.HttpServletRequestWrapperFilter;
 import org.gbif.ws.server.filter.RequestHeaderParamUpdateFilter;
 import org.gbif.ws.server.provider.PageableHandlerMethodArgumentResolver;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

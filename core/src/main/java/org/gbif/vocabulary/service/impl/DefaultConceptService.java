@@ -1,6 +1,4 @@
 /*
- * Copyright 2020 Global Biodiversity Information Facility (GBIF)
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,18 +12,6 @@
  * limitations under the License.
  */
 package org.gbif.vocabulary.service.impl;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
@@ -44,6 +30,24 @@ import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.ConceptService;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
@@ -51,22 +55,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Preconditions;
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
-
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.HIDDEN_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /** Default implementation for {@link ConceptService}. */
 @Service

@@ -1,6 +1,4 @@
 /*
- * Copyright 2020 Global Biodiversity Information Facility (GBIF)
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +16,9 @@ package org.gbif.vocabulary.restws.resources;
 import org.gbif.vocabulary.client.ConceptClient;
 import org.gbif.vocabulary.client.TagClient;
 import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyEntity;
-import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.utils.LenientEquals;
 import org.gbif.vocabulary.restws.LoginServerExtension;

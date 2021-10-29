@@ -1,6 +1,4 @@
 /*
- * Copyright 2020 Global Biodiversity Information Facility (GBIF)
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +13,6 @@
  */
 package org.gbif.vocabulary.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.UserRoles;
@@ -28,6 +22,10 @@ import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 import org.gbif.vocabulary.service.export.ReleasePersister;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,6 +1,4 @@
 /*
- * Copyright 2020 Global Biodiversity Information Facility (GBIF)
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +13,11 @@
  */
 package org.gbif.vocabulary.model.enums;
 
+import org.gbif.vocabulary.model.LanguageRegion;
+
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.gbif.vocabulary.model.LanguageRegion;
 
 import org.junit.jupiter.api.Test;
 

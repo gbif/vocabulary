@@ -13,9 +13,6 @@
  */
 package org.gbif.vocabulary.restws;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.gbif.common.messaging.ConnectionParameters;
 import org.gbif.common.messaging.DefaultMessagePublisher;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -30,6 +27,9 @@ import org.gbif.ws.remoteauth.RestTemplateRemoteAuthClient;
 import org.gbif.ws.server.filter.HttpServletRequestWrapperFilter;
 import org.gbif.ws.server.filter.RequestHeaderParamUpdateFilter;
 import org.gbif.ws.server.provider.PageableHandlerMethodArgumentResolver;
+
+import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

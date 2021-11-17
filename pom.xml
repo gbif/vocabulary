@@ -81,7 +81,7 @@
 
     <!-- utils -->
     <javax-validation.version>2.0.1.Final</javax-validation.version>
-    <okhttp.version>4.9.1</okhttp.version>
+    <okhttp.version>4.2.2</okhttp.version>
     <cache2k.version>2.0.0.Final</cache2k.version>
     <lombok.version>1.18.20</lombok.version>
     <metainf-services.version>1.8</metainf-services.version>

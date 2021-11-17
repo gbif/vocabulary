@@ -178,7 +178,7 @@ pipeline {
   post {
     failure {
       slackSend message: "Vocabulary build failed! - ${env.JOB_NAME} ${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)",
-              channel: "#vocabulary"
+              channel: "#jenkins"
     }
   }
 }

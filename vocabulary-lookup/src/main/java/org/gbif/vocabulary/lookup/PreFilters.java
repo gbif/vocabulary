@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-/** Predefined prefilters that can be reused in {@link VocabularyLookup}. */
+/** Predefined prefilters that can be reused in {@link InMemoryVocabularyLookup}. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PreFilters {
 

@@ -25,15 +25,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Tests the {@link VocabularyLookup}. */
+/** Tests the {@link InMemoryVocabularyLookup}. */
 public class VocabularyLookupTest {
 
   private static final String TEST_VOCAB_FILE = "test-vocab.json";
 
   @Test
   public void loadVocabularyFromInputStreamTest() {
-    VocabularyLookup lookup =
-        VocabularyLookup.newBuilder()
+    InMemoryVocabularyLookup lookup =
+        InMemoryVocabularyLookup.newBuilder()
             .from(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE))
             .build();
@@ -42,8 +42,8 @@ public class VocabularyLookupTest {
 
   @Test
   public void lookupTest() {
-    VocabularyLookup vocabulary =
-        VocabularyLookup.newBuilder()
+    InMemoryVocabularyLookup vocabulary =
+        InMemoryVocabularyLookup.newBuilder()
             .from(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE))
             .build();
@@ -78,8 +78,8 @@ public class VocabularyLookupTest {
 
   @Test
   public void lookupWithLanguageTest() {
-    VocabularyLookup vocabulary =
-        VocabularyLookup.newBuilder()
+    InMemoryVocabularyLookup vocabulary =
+        InMemoryVocabularyLookup.newBuilder()
             .from(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE))
             .build();
@@ -99,8 +99,8 @@ public class VocabularyLookupTest {
 
   @Test
   public void lookupWithPrefiltersTest() {
-    VocabularyLookup lookup =
-        VocabularyLookup.newBuilder()
+    InMemoryVocabularyLookup lookup =
+        InMemoryVocabularyLookup.newBuilder()
             .from(
                 Thread.currentThread()
                     .getContextClassLoader()
@@ -111,7 +111,7 @@ public class VocabularyLookupTest {
     assertEquals("Adult", lookup.lookup("1325 adult").get().getConcept().getName());
 
     lookup =
-        VocabularyLookup.newBuilder()
+        InMemoryVocabularyLookup.newBuilder()
             .from(
                 Thread.currentThread()
                     .getContextClassLoader()

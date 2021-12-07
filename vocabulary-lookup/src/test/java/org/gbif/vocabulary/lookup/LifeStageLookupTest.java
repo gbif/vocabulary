@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 public class LifeStageLookupTest {
 
   private static final String LIFE_STAGE_VOCAB_FILE = "LifeStage.json";
-  private static final VocabularyLookup LOOKUP =
-      VocabularyLookup.newBuilder()
+  private static final InMemoryVocabularyLookup LOOKUP =
+      InMemoryVocabularyLookup.newBuilder()
           .from(
               Thread.currentThread()
                   .getContextClassLoader()

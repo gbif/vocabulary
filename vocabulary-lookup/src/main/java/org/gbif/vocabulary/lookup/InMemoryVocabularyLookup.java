@@ -14,7 +14,6 @@
 package org.gbif.vocabulary.lookup;
 
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -48,8 +47,8 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonA
 /**
  * Class that allows to load a vocabulary export in memory to do fast lookups by concept labels.
  *
- * <p>Instances of this class have to be created by using a {@link VocabularyLookupBuilder}. There
- * are 2 ways to create these instances:
+ * <p>Instances of this class have to be created by using a {@link InMemoryVocabularyLookupBuilder}.
+ * There are 2 ways to create these instances:
  *
  * <ul>
  *   <li>Load the vocabulary from an {@link InputStream}:
@@ -85,7 +84,7 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonA
  * already handled by this class and will be normalized before performing a lookup.
  */
 @Slf4j
-public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable, Serializable {
+public class InMemoryVocabularyLookup implements VocabularyLookup {
 
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper()

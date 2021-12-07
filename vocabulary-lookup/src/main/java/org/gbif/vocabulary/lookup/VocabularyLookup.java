@@ -13,12 +13,13 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.LanguageRegion;
-
+import java.io.Serializable;
 import java.util.Optional;
 
+import org.gbif.vocabulary.model.LanguageRegion;
+
 /** Service to look up concepts within a vocabulary. */
-public interface VocabularyLookup {
+public interface VocabularyLookup extends AutoCloseable, Serializable {
 
   /**
    * Looks up for a value in the vocabulary.
@@ -39,4 +40,12 @@ public interface VocabularyLookup {
    * @return the {@link LookupConcept} found. Empty {@link Optional} if there was no match.
    */
   Optional<LookupConcept> lookup(String value, LanguageRegion contextLang);
+
+  /**
+   * See {@link AutoCloseable#close()}.
+   *
+   * <p>It just removes the exception from the signature.
+   */
+  @Override
+  void close();
 }

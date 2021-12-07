@@ -13,10 +13,10 @@
  */
 package org.gbif.vocabulary.lookup;
 
+import org.gbif.vocabulary.model.LanguageRegion;
+
 import java.io.Serializable;
 import java.util.Optional;
-
-import org.gbif.vocabulary.model.LanguageRegion;
 
 /** Service to look up concepts within a vocabulary. */
 public interface VocabularyLookup extends AutoCloseable, Serializable {

@@ -13,11 +13,6 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.tools.VocabularyDownloader;
-
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,15 +27,17 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
+
 import org.cache2k.Cache;
 import org.cache2k.Cache2kBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,7 +64,7 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonA
  *
  * Optionally, a pre-filter can be added. The pre-filter will be applied to the value received
  * before performing the lookup. There are some predefined pre-filters in {@link PreFilters} that
- * can be reused. They should be set in the {@link VocabularyLookupBuilder} when creating the
+ * can be reused. They should be set in the {@link InMemoryVocabularyLookup} when creating the
  * instance and they will be applied to all the lookups:
  *
  * <pre>
@@ -90,7 +87,6 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonA
 @Slf4j
 public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable, Serializable {
 
-  private static final Logger LOG = LoggerFactory.getLogger(InMemoryVocabularyLookup.class);
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper()
           .registerModule(new JavaTimeModule())
@@ -174,7 +170,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable
       // matching by name
       Concept nameMatch = namesCache.get(transformedValue);
       if (nameMatch != null) {
-        LOG.info("value {} matched with concept {} by name", value, nameMatch.getName());
+        log.info("value {} matched with concept {} by name", value, nameMatch.getName());
         return Optional.of(toLookupConcept(nameMatch));
       }
 
@@ -183,7 +179,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable
       if (labelMatch != null) {
         if (labelMatch.allMatches.size() == 1) {
           Concept conceptMatched = labelMatch.allMatches.iterator().next();
-          LOG.info("value {} matched with concept {} by label", value, conceptMatched.getName());
+          log.info("value {} matched with concept {} by label", value, conceptMatched.getName());
           return Optional.of(toLookupConcept(conceptMatched));
         }
 
@@ -191,7 +187,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable
         // or English as fallback
         Optional<Concept> langMatch = matchByLanguage(labelMatch, contextLang, value);
         if (langMatch.isPresent()) {
-          LOG.info(
+          log.info(
               "value {} matched with concept {} by language {}",
               value,
               langMatch.get().getName(),
@@ -199,7 +195,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable
           return Optional.of(toLookupConcept(langMatch.get()));
         }
 
-        LOG.warn(
+        log.warn(
             "Couldn't resolve match between all the several candidates found for {}: {}",
             value,
             labelMatch.allMatches);
@@ -208,12 +204,12 @@ public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable
       // if no match we try with the hidden labels
       Concept hiddenMatch = hiddenLabelsCache.get(transformedValue);
       if (hiddenMatch != null) {
-        LOG.info("value {} matched with concept {} by hidden label", value, hiddenMatch);
+        log.info("value {} matched with concept {} by hidden label", value, hiddenMatch);
         return Optional.of(toLookupConcept(hiddenMatch));
       }
     }
 
-    LOG.info("Couldn't find any match for {}", value);
+    log.info("Couldn't find any match for {}", value);
     return Optional.empty();
   }
 
@@ -235,7 +231,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable
 
     if (langMatches.size() == 1) {
       Concept conceptMatched = langMatches.iterator().next();
-      LOG.info(
+      log.info(
           "Value {} matched with concept {} by using language {}", value, conceptMatched, lang);
       return Optional.of(conceptMatched);
     }
@@ -323,7 +319,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable
             });
 
     if (Boolean.FALSE.equals(added)) {
-      LOG.warn("Concept {} not added for value {}", concept, normalizedValue);
+      log.warn("Concept {} not added for value {}", concept, normalizedValue);
     }
   }
 
@@ -369,8 +365,8 @@ public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable
     Map<LanguageRegion, Set<Concept>> matchesByLanguage = new EnumMap<>(LanguageRegion.class);
   }
 
-  public static VocabularyLookupBuilder newBuilder() {
-    return new VocabularyLookupBuilder();
+  public static InMemoryVocabularyLookupBuilder newBuilder() {
+    return new InMemoryVocabularyLookupBuilder();
   }
 
   /**
@@ -378,24 +374,24 @@ public class InMemoryVocabularyLookup implements VocabularyLookup, AutoCloseable
    *
    * <p>It is required to call one of the 2 available from methods.
    */
-  public static class VocabularyLookupBuilder {
+  public static class InMemoryVocabularyLookupBuilder {
     private InputStream inputStream;
     private String apiUrl;
     private String vocabularyName;
     private Function<String, String> prefilter;
 
-    public VocabularyLookupBuilder from(InputStream inputStream) {
+    public InMemoryVocabularyLookupBuilder from(InputStream inputStream) {
       this.inputStream = inputStream;
       return this;
     }
 
-    public VocabularyLookupBuilder from(String apiUrl, String vocabularyName) {
+    public InMemoryVocabularyLookupBuilder from(String apiUrl, String vocabularyName) {
       this.apiUrl = apiUrl;
       this.vocabularyName = vocabularyName;
       return this;
     }
 
-    public VocabularyLookupBuilder withPrefilter(Function<String, String> prefilter) {
+    public InMemoryVocabularyLookupBuilder withPrefilter(Function<String, String> prefilter) {
       this.prefilter = prefilter;
       return this;
     }

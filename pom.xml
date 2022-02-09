@@ -97,7 +97,7 @@
     <zookeeper.version>3.4.14</zookeeper.version>
 
     <!-- Hadoop -->
-    <hadoop.version>2.6.0-cdh5.16.2</hadoop.version>
+    <hadoop.version>2.10.1</hadoop.version>
     <hadoop-core.version>2.6.0-mr1-cdh5.16.2</hadoop-core.version>
 
     <!-- logging -->

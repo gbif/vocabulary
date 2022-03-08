@@ -51,7 +51,7 @@ public class VocabularyReleaseMapperTest {
 
   @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
 
-  private static final String DEFAULT_VOCABULARY = "default";
+  private static final String DEFAULT_VOCABULARY = "Default";
 
   private final VocabularyReleaseMapper vocabularyReleaseMapper;
 

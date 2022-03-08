@@ -13,6 +13,7 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import org.gbif.vocabulary.TestUtils;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -63,17 +64,17 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   @Test
   public void listVocabulariesTest() {
     Vocabulary vocabulary1 = createNewEntity();
-    vocabulary1.setName("vocab1");
+    vocabulary1.setName("Vocab1");
     vocabulary1.setNamespace("namespace1");
     vocabularyMapper.create(vocabulary1);
 
     Vocabulary vocabulary2 = createNewEntity();
-    vocabulary2.setName("vocab2");
+    vocabulary2.setName("Vocab2");
     vocabulary2.setNamespace("namespace2");
     vocabularyMapper.create(vocabulary2);
 
     Vocabulary vocabularyGbif = createNewEntity();
-    vocabularyGbif.setName("vocab gbif");
+    vocabularyGbif.setName("VocabGbif");
     vocabularyGbif.setNamespace("namespace gbif");
     vocabularyMapper.create(vocabularyGbif);
 
@@ -84,26 +85,26 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertList(VocabularySearchParams.builder().query("voc").build(), 3);
     assertList(VocabularySearchParams.builder().query("ocab").build(), 0);
     assertList(VocabularySearchParams.builder().query("namesp gb").build(), 1);
-    assertList(VocabularySearchParams.builder().name("vocab1").build(), 1);
-    assertList(VocabularySearchParams.builder().name("vocab").build(), 0);
+    assertList(VocabularySearchParams.builder().name("Vocab1").build(), 1);
+    assertList(VocabularySearchParams.builder().name("Vocab").build(), 0);
     assertList(VocabularySearchParams.builder().namespace("namespace gbif").build(), 1);
     assertList(VocabularySearchParams.builder().namespace("namespace").build(), 0);
-    assertList(VocabularySearchParams.builder().name("vocab2").namespace("namespace2").build(), 1);
+    assertList(VocabularySearchParams.builder().name("Vocab2").namespace("namespace2").build(), 1);
     assertList(
         VocabularySearchParams.builder()
             .query("voc")
-            .name("vocab1")
+            .name("Vocab1")
             .namespace("namespace1")
             .build(),
         1);
     assertList(
         VocabularySearchParams.builder()
             .query("oca")
-            .name("vocab2")
+            .name("Vocab2")
             .namespace("namespace2")
             .build(),
         0);
-    assertList(VocabularySearchParams.builder().query("v gbif").name("vocab gbif").build(), 1);
+    assertList(VocabularySearchParams.builder().query("v gbif").name("VocabGbif").build(), 1);
   }
 
   @Test
@@ -130,18 +131,18 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   public void suggestTest() {
     // create entities for the test
     Vocabulary v1 = createNewEntity();
-    v1.setName("suggest111");
+    v1.setName("Suggest111");
     vocabularyMapper.create(v1);
     assertNotNull(v1.getKey());
 
     Vocabulary v2 = createNewEntity();
-    v2.setName("suggest222");
+    v2.setName("Suggest222");
     vocabularyMapper.create(v2);
     assertNotNull(v2.getKey());
 
     // check result values
     List<KeyNameResult> result = vocabularyMapper.suggest("suggest1");
-    assertEquals("suggest111", result.get(0).getName());
+    assertEquals("Suggest111", result.get(0).getName());
     assertEquals(v1.getKey().intValue(), result.get(0).getKey());
 
     // assert expected number of results
@@ -184,7 +185,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
     // create another vocabulary
     Vocabulary vocabulary2 = createNewEntity();
-    vocabulary2.setName("another-vocab");
+    vocabulary2.setName("AnotherVocab");
     vocabulary2.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "another label "));
     vocabularyMapper.create(vocabulary2);
 
@@ -252,7 +253,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   @Override
   Vocabulary createNewEntity() {
     Vocabulary entity = new Vocabulary();
-    entity.setName(UUID.randomUUID().toString());
+    entity.setName(TestUtils.getRandomName());
     entity.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Label")));
     entity.setDefinition(
         new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Definition")));

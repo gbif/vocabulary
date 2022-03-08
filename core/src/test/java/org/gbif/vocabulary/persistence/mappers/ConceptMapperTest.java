@@ -13,6 +13,7 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import org.gbif.vocabulary.TestUtils;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
@@ -63,7 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ContextConfiguration(initializers = {ConceptMapperTest.ContextInitializer.class})
 public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
-  private static final String DEFAULT_VOCABULARY = "default";
+  private static final String DEFAULT_VOCABULARY = "Default";
 
   private static long[] vocabularyKeys = new long[2];
 
@@ -94,7 +95,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     vocabularyKeys[0] = vocabulary.getKey();
 
     Vocabulary vocabulary2 = new Vocabulary();
-    vocabulary2.setName("default2");
+    vocabulary2.setName("Default2");
     vocabulary2.setCreatedBy("test");
     vocabulary2.setModifiedBy("test");
     vocabularyMapper.create(vocabulary2);
@@ -104,20 +105,20 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @Test
   public void listConceptsTest() {
     Concept concept1 = createNewEntity();
-    concept1.setName("concept1");
+    concept1.setName("Concept1");
     concept1.setAlternativeLabels(
         Collections.singletonMap(
             LanguageRegion.ENGLISH, Collections.singleton("alternative example")));
     conceptMapper.create(concept1);
 
     Concept concept2 = createNewEntity();
-    concept2.setName("concept2");
+    concept2.setName("Concept2");
     concept2.setParentKey(concept1.getKey());
     concept2.setHiddenLabels(Collections.singleton("misspelt example"));
     conceptMapper.create(concept2);
 
     Concept concept3 = createNewEntity();
-    concept3.setName("concept3");
+    concept3.setName("Concept3");
     concept3.setParentKey(concept1.getKey());
     concept3.setEditorialNotes(Collections.singletonList("editorial notes"));
     conceptMapper.create(concept3);
@@ -136,12 +137,12 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertList(ConceptSearchParams.builder().parent(concept1.getName()).build(), 2);
     assertList(ConceptSearchParams.builder().parentKey(concept2.getKey()).build(), 0);
     assertList(ConceptSearchParams.builder().parent(concept2.getName()).build(), 0);
-    assertList(ConceptSearchParams.builder().name("concept1").build(), 1);
-    assertList(ConceptSearchParams.builder().name("concepto").build(), 0);
+    assertList(ConceptSearchParams.builder().name("Concept1").build(), 1);
+    assertList(ConceptSearchParams.builder().name("Concepto").build(), 0);
     assertList(
         ConceptSearchParams.builder().query("exa").vocabularyKey(vocabularyKeys[0]).build(), 2);
     assertList(
-        ConceptSearchParams.builder().parentKey(concept1.getKey()).name("concept3").build(), 1);
+        ConceptSearchParams.builder().parentKey(concept1.getKey()).name("Concept3").build(), 1);
     assertList(ConceptSearchParams.builder().replacedByKey(concept2.getKey()).build(), 1);
     assertList(ConceptSearchParams.builder().hasParent(true).build(), 2);
     assertList(ConceptSearchParams.builder().hasReplacement(true).build(), 1);
@@ -151,18 +152,18 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void suggestTest() {
     // create entities for the test
     Concept c1 = createNewEntity();
-    c1.setName("suggest111");
+    c1.setName("Suggest111");
     conceptMapper.create(c1);
     assertNotNull(c1.getKey());
 
     Concept c2 = createNewEntity();
-    c2.setName("suggest222");
+    c2.setName("Suggest222");
     conceptMapper.create(c2);
     assertNotNull(c2.getKey());
 
     // check result values
     List<KeyNameResult> result = conceptMapper.suggest("suggest1", c1.getVocabularyKey());
-    assertEquals("suggest111", result.get(0).getName());
+    assertEquals("Suggest111", result.get(0).getName());
     assertEquals(c1.getKey().intValue(), result.get(0).getKey());
 
     // assert expected number of results
@@ -174,7 +175,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
     Concept c3 = createNewEntity();
     c3.setVocabularyKey(vocabularyKeys[1]);
-    c3.setName("suggest333");
+    c3.setName("Suggest333");
     conceptMapper.create(c3);
     assertNotNull(c3.getKey());
 
@@ -261,7 +262,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @Test
   public void findSimilaritiesNormalizationTest() {
     Concept concept1 = createNewEntity();
-    concept1.setName("my-concept");
+    concept1.setName("MyConcept");
     concept1.setLabel(
         new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "normalization")));
     concept1.setHiddenLabels(new HashSet<>(Arrays.asList("norm", "another norm")));
@@ -305,7 +306,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @Test
   public void findSimilaritiesMultipleParamsTest() {
     Concept concept1 = createNewEntity();
-    concept1.setName("c1");
+    concept1.setName("C1");
     concept1.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "l1")));
     concept1.setAlternativeLabels(
         Collections.singletonMap(LanguageRegion.SPANISH, Collections.singleton("l uno")));
@@ -313,7 +314,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     conceptMapper.create(concept1);
 
     Concept concept2 = createNewEntity();
-    concept2.setName("c2");
+    concept2.setName("C2");
     concept2.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "l2")));
     concept2.setHiddenLabels(new HashSet<>(Arrays.asList("ll2", "l2l")));
     conceptMapper.create(concept2);
@@ -578,7 +579,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   Concept createNewEntity() {
     Concept entity = new Concept();
     entity.setVocabularyKey(vocabularyKeys[0]);
-    entity.setName(UUID.randomUUID().toString());
+    entity.setName(TestUtils.getRandomName());
     entity.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Label")));
     entity.setHiddenLabels(new HashSet<>(Arrays.asList("lab,l", "lbel")));
     entity.setDefinition(

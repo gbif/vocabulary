@@ -13,14 +13,14 @@
  */
 package org.gbif.vocabulary;
 
-import java.util.Random;
-import java.util.UUID;
-import java.util.function.BiFunction;
-
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Deprecable;
 import org.gbif.vocabulary.model.Vocabulary;
+
+import java.util.Random;
+import java.util.UUID;
+import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

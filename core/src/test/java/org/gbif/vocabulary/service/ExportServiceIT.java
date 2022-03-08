@@ -26,7 +26,6 @@ import org.gbif.vocabulary.service.export.ReleasePersister;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

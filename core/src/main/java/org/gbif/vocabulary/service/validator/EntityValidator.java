@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 /** Contians validity checks for entities. */
 public final class EntityValidator {
 
-  private static final Pattern NAME_PATTERN = Pattern.compile("[a-zA-Z0-9-_]*");
+  private static final Pattern NAME_PATTERN = Pattern.compile("^[A-Z0-9][a-zA-Z0-9]*$");
 
   private EntityValidator() {}
 

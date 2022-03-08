@@ -279,7 +279,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
   public void suggestTest() {
     // create entity
     T entity1 = createEntity();
-    entity1.setName("suggest111");
+    entity1.setName("Suggest111");
     webClient
         .post()
         .uri(getBasePath())
@@ -292,7 +292,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
 
     // create entity
     T entity2 = createEntity();
-    entity2.setName("suggest222");
+    entity2.setName("Suggest222");
     webClient
         .post()
         .uri(getBasePath())

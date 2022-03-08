@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.math3.stat.inference.TestUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   @BeforeAll
   public static void populateData(@Autowired WebTestClient webClient) {
     Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName("v1");
+    vocabulary.setName("V1");
 
     Vocabulary created =
         webClient
@@ -83,7 +84,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     defaultVocabularyKey = created.getKey();
 
     Vocabulary other = new Vocabulary();
-    other.setName("v2");
+    other.setName("V2");
 
     Vocabulary otherCreated =
         webClient
@@ -106,13 +107,13 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   @Test
   void listTest() {
     Concept c1 = createEntity();
-    c1.setName("concept1");
+    c1.setName("Concept1");
     Concept created1 = conceptClient.create(defaultVocabularyName, c1);
 
     // create a concept in other vocab to see that the list concepts filters by vocab key
     Concept otherVocabConcept = createEntity();
     otherVocabConcept.setVocabularyKey(otherVocabularyKey);
-    otherVocabConcept.setName("otherVocabConcept");
+    otherVocabConcept.setName("OtherVocabConcept");
     conceptClient.create(otherVocabularyName, otherVocabConcept);
 
     // list entities
@@ -123,7 +124,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
     // Add another concept
     Concept c2 = createEntity();
-    c2.setName("concept2");
+    c2.setName("Concept2");
     c2.setParentKey(created1.getKey());
     c2 = conceptClient.create(defaultVocabularyName, c2);
 
@@ -247,7 +248,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   @Override
   Concept createEntity() {
     Concept concept = new Concept();
-    concept.setName(UUID.randomUUID().toString());
+    concept.setName("N" + UUID.randomUUID().toString().replace("-", ""));
     concept.setVocabularyKey(defaultVocabularyKey);
     concept.setLabel(
         Collections.singletonMap(LanguageRegion.ENGLISH, UUID.randomUUID().toString()));

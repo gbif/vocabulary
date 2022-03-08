@@ -85,7 +85,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     assertNotNull(v1.getKey());
 
     Concept c1 = new Concept();
-    c1.setName("c1");
+    c1.setName("C1");
     c1.setVocabularyKey(v1.getKey());
     c1 = conceptClient.create(v1.getName(), c1);
 
@@ -109,7 +109,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
   @Override
   Vocabulary createEntity() {
     Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName(UUID.randomUUID().toString());
+    vocabulary.setName("N" + UUID.randomUUID().toString().replace("-", ""));
     vocabulary.setNamespace(TEST_NAMESPACE);
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
     vocabulary.setLabel(

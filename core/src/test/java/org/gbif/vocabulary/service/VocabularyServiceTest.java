@@ -45,7 +45,7 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
   @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test
   public void createTest() {
-    Vocabulary vocabulary = createNewEntity("name");
+    Vocabulary vocabulary = createNewEntity("Name");
 
     // mock
     mockCreateEntity(vocabulary);
@@ -64,7 +64,7 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
     assertThrows(ConstraintViolationException.class, () -> vocabularyService.create(vocabulary));
 
     // set name
-    vocabulary.setName("name");
+    vocabulary.setName("Name");
     mockCreateEntity(vocabulary);
     assertDoesNotThrow(() -> vocabularyService.create(vocabulary));
   }

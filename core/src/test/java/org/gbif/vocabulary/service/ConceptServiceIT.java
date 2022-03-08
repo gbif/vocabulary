@@ -163,7 +163,7 @@ public class ConceptServiceIT {
     similar.setName(concept.getName());
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar));
 
-    similar.setName("sim1");
+    similar.setName("Sim1");
     assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar));
 
     similar.setVocabularyKey(vocabularyKeys[1]);
@@ -207,7 +207,7 @@ public class ConceptServiceIT {
   @Test
   public void updateSimilarConceptTest() {
     Concept concept1 = createBasicConcept(vocabularyKeys[0]);
-    concept1.setName("simConcept");
+    concept1.setName("SimConcept");
     concept1
         .getAlternativeLabels()
         .put(LanguageRegion.ENGLISH, Collections.singleton("simupdated"));

@@ -6,8 +6,8 @@
   <changeSet id="6" author="mlopez">
     <sql splitStatements="false" stripComments="false">
       <![CDATA[
-        ALTER TABLE vocabulary ADD CONSTRAINT vocabulary_name_check CHECK (name ~ '^[A-Z0-9][a-zA-Z0-9]*$');
-        ALTER TABLE concept ADD CONSTRAINT concept_name_check CHECK (name ~ '^[A-Z0-9][a-zA-Z0-9]*$');
+        ALTER TABLE vocabulary ADD CONSTRAINT vocabulary_name_format_check CHECK (name ~ '^[A-Z0-9][a-zA-Z0-9]*$');
+        ALTER TABLE concept ADD CONSTRAINT concept_name_format_check CHECK (name ~ '^[A-Z0-9][a-zA-Z0-9]*$');
       ]]>
     </sql>
   </changeSet>

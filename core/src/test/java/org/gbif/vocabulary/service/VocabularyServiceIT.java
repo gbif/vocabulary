@@ -97,7 +97,7 @@ public class VocabularyServiceIT {
     vocabularyService.create(vocabulary);
 
     Vocabulary similarName = createBasicVocabulary();
-    similarName.setName("sim");
+    similarName.setName("Sim");
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.create(similarName));
 
     Vocabulary similarLabel = createBasicVocabulary();
@@ -128,7 +128,7 @@ public class VocabularyServiceIT {
   @Test
   public void updateSimilarVocabularyTest() {
     Vocabulary vocabulary1 = createBasicVocabulary();
-    vocabulary1.setName("simVocab");
+    vocabulary1.setName("SimVocab");
     vocabulary1.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "simupdated"));
     vocabularyService.create(vocabulary1);
 

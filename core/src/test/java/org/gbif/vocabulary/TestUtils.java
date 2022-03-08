@@ -13,13 +13,14 @@
  */
 package org.gbif.vocabulary;
 
+import java.util.Random;
+import java.util.UUID;
+import java.util.function.BiFunction;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Deprecable;
 import org.gbif.vocabulary.model.Vocabulary;
-
-import java.util.UUID;
-import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,6 +31,7 @@ public final class TestUtils {
 
   public static final String DEPRECATED_BY = "deprecator";
   private static final String TEST_USER = "test";
+  private static final Random RANDOM = new Random();
 
   public static final BiFunction<Integer, Long, Pageable> PAGE_FN =
       (limit, offset) ->
@@ -70,7 +72,7 @@ public final class TestUtils {
 
   public static Concept createBasicConcept(long vocabularyKey) {
     Concept concept = new Concept();
-    concept.setName(UUID.randomUUID().toString());
+    concept.setName(getRandomName());
     concept.setVocabularyKey(vocabularyKey);
     concept.setCreatedBy(TEST_USER);
     concept.setModifiedBy(TEST_USER);
@@ -79,9 +81,13 @@ public final class TestUtils {
 
   public static Vocabulary createBasicVocabulary() {
     Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName(UUID.randomUUID().toString());
+    vocabulary.setName(getRandomName());
     vocabulary.setCreatedBy(TEST_USER);
     vocabulary.setModifiedBy(TEST_USER);
     return vocabulary;
+  }
+
+  public static String getRandomName() {
+    return "N" + UUID.randomUUID().toString().replace("-", "");
   }
 }

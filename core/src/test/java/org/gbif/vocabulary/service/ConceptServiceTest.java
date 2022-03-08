@@ -50,7 +50,7 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
     assertThrows(ConstraintViolationException.class, () -> conceptService.create(concept));
 
     // set name
-    concept.setName("name");
+    concept.setName("Name");
     assertThrows(ConstraintViolationException.class, () -> conceptService.create(concept));
 
     // set required auditable fields

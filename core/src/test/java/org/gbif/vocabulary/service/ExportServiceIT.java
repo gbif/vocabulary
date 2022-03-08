@@ -15,6 +15,7 @@ package org.gbif.vocabulary.service;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.vocabulary.PostgresDBExtension;
+import org.gbif.vocabulary.TestUtils;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
@@ -75,7 +76,7 @@ public class ExportServiceIT {
   public void listReleasesTest() {
     // create vocabulary
     Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName(UUID.randomUUID().toString());
+    vocabulary.setName(TestUtils.getRandomName());
     vocabulary.setCreatedBy("test");
     vocabulary.setModifiedBy("test");
     vocabularyMapper.create(vocabulary);
@@ -144,7 +145,7 @@ public class ExportServiceIT {
   public void releaseVocabularyTest() throws IOException {
     // create vocabulary
     Vocabulary vocabulary = new Vocabulary();
-    vocabulary.setName(UUID.randomUUID().toString());
+    vocabulary.setName(TestUtils.getRandomName());
     vocabulary.setCreatedBy("test");
     vocabulary.setModifiedBy("test");
     vocabularyMapper.create(vocabulary);

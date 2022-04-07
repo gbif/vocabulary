@@ -13,6 +13,15 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import org.gbif.vocabulary.TestUtils;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.LanguageRegion;
@@ -22,14 +31,6 @@ import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -152,6 +153,12 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     // create entities for the test
     Concept c1 = createNewEntity();
     c1.setName("Suggest111");
+
+    Map<LanguageRegion, String> labelsC1 = new HashMap<>();
+    labelsC1.put(LanguageRegion.SPANISH, "labelspanish");
+    labelsC1.put(LanguageRegion.ENGLISH, "labelenglish");
+
+    c1.setLabel(labelsC1);
     conceptMapper.create(c1);
     assertNotNull(c1.getKey());
 
@@ -161,16 +168,28 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertNotNull(c2.getKey());
 
     // check result values
-    List<KeyNameResult> result = conceptMapper.suggest("suggest1", c1.getVocabularyKey());
+    List<KeyNameResult> result = conceptMapper.suggest("suggest1", c1.getVocabularyKey(), null);
     assertEquals("Suggest111", result.get(0).getName());
     assertEquals(c1.getKey().intValue(), result.get(0).getKey());
 
     // assert expected number of results
-    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey()).size());
-    assertEquals(2, conceptMapper.suggest("gge", c1.getVocabularyKey()).size());
-    assertEquals(1, conceptMapper.suggest("22", c1.getVocabularyKey()).size());
-    assertEquals(0, conceptMapper.suggest("zz", c1.getVocabularyKey()).size());
-    assertEquals(0, conceptMapper.suggest(null, c1.getVocabularyKey()).size());
+    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey(), null).size());
+    assertEquals(2, conceptMapper.suggest("gge", c1.getVocabularyKey(), null).size());
+    assertEquals(1, conceptMapper.suggest("22", c1.getVocabularyKey(), null).size());
+    assertEquals(0, conceptMapper.suggest("zz", c1.getVocabularyKey(), null).size());
+    assertEquals(0, conceptMapper.suggest(null, c1.getVocabularyKey(), null).size());
+    assertEquals(2, conceptMapper.suggest("label", c1.getVocabularyKey(), null).size());
+    assertEquals(1, conceptMapper.suggest("labeleng", c1.getVocabularyKey(), null).size());
+    assertEquals(
+        0,
+        conceptMapper
+            .suggest("labeleng", c1.getVocabularyKey(), LanguageRegion.SPANISH.getLocale())
+            .size());
+    assertEquals(
+        1,
+        conceptMapper
+            .suggest("labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH.getLocale())
+            .size());
 
     Concept c3 = createNewEntity();
     c3.setVocabularyKey(vocabularyKeys[1]);
@@ -178,10 +197,10 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     conceptMapper.create(c3);
     assertNotNull(c3.getKey());
 
-    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey()).size());
-    assertEquals(1, conceptMapper.suggest("su", c3.getVocabularyKey()).size());
-    assertEquals(1, conceptMapper.suggest("33", c3.getVocabularyKey()).size());
-    assertEquals(0, conceptMapper.suggest("33", c1.getVocabularyKey()).size());
+    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey(), null).size());
+    assertEquals(1, conceptMapper.suggest("su", c3.getVocabularyKey(), null).size());
+    assertEquals(1, conceptMapper.suggest("33", c3.getVocabularyKey(), null).size());
+    assertEquals(0, conceptMapper.suggest("33", c1.getVocabularyKey(), null).size());
   }
 
   @Test

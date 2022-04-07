@@ -13,19 +13,20 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.vocabulary.TestUtils;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.gbif.vocabulary.TestUtils;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -131,6 +132,12 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     // create entities for the test
     Vocabulary v1 = createNewEntity();
     v1.setName("Suggest111");
+
+    Map<LanguageRegion, String> labelsV1 = new HashMap<>();
+    labelsV1.put(LanguageRegion.SPANISH, "labelspanish");
+    labelsV1.put(LanguageRegion.ENGLISH, "labelenglish");
+    v1.setLabel(labelsV1);
+
     vocabularyMapper.create(v1);
     assertNotNull(v1.getKey());
 
@@ -140,16 +147,22 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertNotNull(v2.getKey());
 
     // check result values
-    List<KeyNameResult> result = vocabularyMapper.suggest("suggest1");
+    List<KeyNameResult> result = vocabularyMapper.suggest("suggest1", null);
     assertEquals("Suggest111", result.get(0).getName());
     assertEquals(v1.getKey().intValue(), result.get(0).getKey());
 
     // assert expected number of results
-    assertEquals(2, vocabularyMapper.suggest("su").size());
-    assertEquals(2, vocabularyMapper.suggest("gge").size());
-    assertEquals(1, vocabularyMapper.suggest("22").size());
-    assertEquals(0, vocabularyMapper.suggest("zz").size());
-    assertEquals(0, vocabularyMapper.suggest(null).size());
+    assertEquals(2, vocabularyMapper.suggest("su", null).size());
+    assertEquals(2, vocabularyMapper.suggest("gge", null).size());
+    assertEquals(1, vocabularyMapper.suggest("22", null).size());
+    assertEquals(0, vocabularyMapper.suggest("zz", null).size());
+    assertEquals(0, vocabularyMapper.suggest(null, null).size());
+    assertEquals(2, vocabularyMapper.suggest("label", null).size());
+    assertEquals(1, vocabularyMapper.suggest("labeleng", null).size());
+    assertEquals(
+        0, vocabularyMapper.suggest("labeleng", LanguageRegion.SPANISH.getLocale()).size());
+    assertEquals(
+        1, vocabularyMapper.suggest("labeleng", LanguageRegion.ENGLISH.getLocale()).size());
   }
 
   @Test

@@ -212,7 +212,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
   public void suggestConceptTest() throws Exception {
     mockVocabulary();
     List<KeyNameResult> suggestions = createSuggestions();
-    when(conceptService.suggest(anyString(), anyLong())).thenReturn(suggestions);
+    when(conceptService.suggest(anyString(), anyLong(), any())).thenReturn(suggestions);
     suggestTest(suggestions);
   }
 

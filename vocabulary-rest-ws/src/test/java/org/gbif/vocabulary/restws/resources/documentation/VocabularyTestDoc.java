@@ -189,7 +189,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
   @Test
   public void suggestVocabularyTest() throws Exception {
     List<KeyNameResult> suggestions = createSuggestions();
-    when(vocabularyService.suggest(anyString())).thenReturn(suggestions);
+    when(vocabularyService.suggest(anyString(), any())).thenReturn(suggestions);
     suggestTest(suggestions);
   }
 

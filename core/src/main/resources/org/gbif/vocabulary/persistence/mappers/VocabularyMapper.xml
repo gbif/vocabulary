@@ -10,6 +10,11 @@
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
   </resultMap>
 
+  <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
+  </resultMap>
+
   <sql id="VOCABULARY_READ_FIELDS">
     v.key, v.namespace, v.name, v.label, v.definition, v.external_definition_urls, v.editorial_notes, v.replaced_by_key,
     v.deprecated_by, v.deprecated, v.created_by, v.modified_by, v.created, v.modified, v.deleted
@@ -119,19 +124,39 @@
     </if>
   </select>
 
-  <select id="suggest" resultType="KeyNameResult">
-    SELECT key, name
+  <select id="suggest" resultMap="KEY_NAME_RESULT_MAP">
+    SELECT key, name, label
     FROM (
-    (SELECT key, name
+    (SELECT key, name, label
     FROM vocabulary
     WHERE name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
     ORDER BY name LIMIT 20
     )
     UNION ALL
-    (SELECT key, name
+    (SELECT key, name, label
     FROM vocabulary
     WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
     ORDER BY name LIMIT 20
+    )
+    UNION ALL
+    (SELECT DISTINCT v.key, v.name, v.label
+    FROM vocabulary v
+    JOIN jsonb_each_text(v.label) l ON true
+    WHERE l.value ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
+    <if test="locale != null">
+      AND l.key = #{locale}
+    </if>
+    LIMIT 20
+    )
+    UNION ALL
+    (SELECT DISTINCT v.key, v.name, v.label
+    FROM vocabulary v
+    JOIN jsonb_each_text(v.label) l ON true
+    WHERE l.value ilike '%'||#{query}||'%' AND NOT l.value ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
+    <if test="locale != null">
+      AND l.key = #{locale}
+    </if>
+    LIMIT 20
     )
     ) t1 LIMIT 20
   </select>

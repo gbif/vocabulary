@@ -15,6 +15,7 @@ package org.gbif.vocabulary.service;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
@@ -51,9 +52,10 @@ public interface VocabularyService extends BaseService<Vocabulary> {
    * vocabulary.
    *
    * @param query suggestion
+   * @param languageRegion locale to filter by
    * @return a list of up to 20 suggested vocabularies
    */
-  List<KeyNameResult> suggest(@NotNull String query);
+  List<KeyNameResult> suggest(@NotNull String query, @Nullable LanguageRegion languageRegion);
 
   /**
    * Deprecates a vocabulary with a replacement.

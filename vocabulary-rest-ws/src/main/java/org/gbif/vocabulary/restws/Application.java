@@ -20,6 +20,7 @@ import org.gbif.vocabulary.SpringConfig;
 import org.gbif.vocabulary.restws.config.ConfigPropertiesValidator;
 import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.restws.config.MessagingConfig;
+import org.gbif.vocabulary.restws.resolvers.LanguageRegionHandlerMethodArgumentResolver;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.ws.remoteauth.RemoteAuthClient;
 import org.gbif.ws.remoteauth.RemoteAuthWebSecurityConfigurer;
@@ -75,6 +76,7 @@ public class Application {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
       argumentResolvers.add(new PageableHandlerMethodArgumentResolver());
+      argumentResolvers.add(new LanguageRegionHandlerMethodArgumentResolver());
     }
   }
 

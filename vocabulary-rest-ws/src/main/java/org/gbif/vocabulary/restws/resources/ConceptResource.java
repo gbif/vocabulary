@@ -13,6 +13,14 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptListParams;
@@ -20,6 +28,7 @@ import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.AbstractVocabularyEntity;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ChildrenResult;
@@ -28,14 +37,6 @@ import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.TagService;
 import org.gbif.vocabulary.service.VocabularyService;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.assertj.core.util.Strings;
 import org.springframework.http.MediaType;
@@ -49,9 +50,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
 @RequestMapping(
@@ -216,11 +218,13 @@ public class ConceptResource {
 
   @GetMapping("suggest")
   public List<KeyNameResult> suggest(
-      @PathVariable("vocabularyName") String vocabularyName, @RequestParam("q") String query) {
+      @PathVariable("vocabularyName") String vocabularyName,
+      @RequestParam("q") String query,
+      LanguageRegion locale) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
 
-    return conceptService.suggest(query, vocabulary.getKey());
+    return conceptService.suggest(query, vocabulary.getKey(), locale);
   }
 
   @PutMapping("{name}/deprecate")

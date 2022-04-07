@@ -13,6 +13,12 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -20,6 +26,7 @@ import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.export.ExportParams;
@@ -29,14 +36,6 @@ import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -55,12 +54,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @Slf4j
@@ -119,8 +120,10 @@ public class VocabularyResource {
   }
 
   @GetMapping("suggest")
-  public List<KeyNameResult> suggest(@RequestParam("q") String query) {
-    return vocabularyService.suggest(query);
+  public List<KeyNameResult> suggest(
+      @RequestParam("q") String query,
+      @RequestParam(value = "locale", required = false) LanguageRegion languageRegion) {
+    return vocabularyService.suggest(query, languageRegion);
   }
 
   @PutMapping("{name}/deprecate")

@@ -16,6 +16,7 @@ package org.gbif.vocabulary.service;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
@@ -54,9 +55,10 @@ public interface ConceptService extends BaseService<Concept> {
    *
    * @param query suggestion
    * @param vocabularyKey key of the vocabulary
+   * @param languageRegion locale to filter by
    * @return a list of up to 20 suggested concepts
    */
-  List<KeyNameResult> suggest(@NotNull String query, long vocabularyKey);
+  List<KeyNameResult> suggest(@NotNull String query, long vocabularyKey, @Nullable LanguageRegion languageRegion);
 
   /**
    * Deprecates a concept with a replacement.

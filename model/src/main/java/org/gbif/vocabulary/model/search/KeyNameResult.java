@@ -13,9 +13,9 @@
  */
 package org.gbif.vocabulary.model.search;
 
-import java.util.Map;
-
 import org.gbif.vocabulary.model.LanguageRegion;
+
+import java.util.Map;
 
 import lombok.Data;
 

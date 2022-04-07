@@ -51,7 +51,9 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   void updateParent(@Param("keys") List<Long> conceptKeys, @Param("parentKey") long parentKey);
 
   List<KeyNameResult> suggest(
-      @Param("query") String query, @Param("vocabularyKey") long vocabularyKey, @Nullable @Param("locale") String locale);
+      @Param("query") String query,
+      @Param("vocabularyKey") long vocabularyKey,
+      @Nullable @Param("locale") String locale);
 
   /**
    * Given a deprecated concept, it finds the current replacement, that's to say, the first

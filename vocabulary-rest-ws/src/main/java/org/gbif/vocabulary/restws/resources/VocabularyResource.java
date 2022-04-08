@@ -120,13 +120,11 @@ public class VocabularyResource {
   }
 
   @GetMapping("suggest")
-  public List<KeyNameResult> suggest(
-      @RequestParam("q") String query,
-      @RequestParam(value = "locale", required = false) LanguageRegion languageRegion) {
-    return vocabularyService.suggest(query, languageRegion);
+  public List<KeyNameResult> suggest(@RequestParam("q") String query, LanguageRegion locale) {
+    return vocabularyService.suggest(query, locale);
   }
 
-  @PutMapping("{name}/deprecate")
+  @PutMapping("{name}/deprecatesug")
   public void deprecate(
       @PathVariable("name") String vocabularyName,
       @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {

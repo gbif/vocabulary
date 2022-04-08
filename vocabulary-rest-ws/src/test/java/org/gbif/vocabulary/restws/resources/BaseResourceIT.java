@@ -13,12 +13,6 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map.Entry;
-import java.util.function.Function;
-
 import org.gbif.vocabulary.client.ConceptClient;
 import org.gbif.vocabulary.client.TagClient;
 import org.gbif.vocabulary.client.VocabularyClient;
@@ -31,6 +25,14 @@ import org.gbif.vocabulary.restws.LoginServerExtension;
 import org.gbif.vocabulary.restws.PostgresDBExtension;
 import org.gbif.vocabulary.restws.TestCredentials;
 import org.gbif.ws.client.ClientBuilder;
+
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map.Entry;
+import java.util.function.Function;
+
+import javax.sql.DataSource;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +52,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import javax.sql.DataSource;
 
 import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.restws.TestCredentials.EDITOR;

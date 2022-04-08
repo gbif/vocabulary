@@ -38,7 +38,8 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
 
   Vocabulary getByName(@Param("name") String name);
 
-  List<KeyNameResult> suggest(@Param("query") String query, @Nullable @Param("locale") String locale);
+  List<KeyNameResult> suggest(
+      @Param("query") String query, @Nullable @Param("locale") String locale);
 
   /**
    * Searchs for a similar vocabulary whose name or any of its labels are the same as the ones

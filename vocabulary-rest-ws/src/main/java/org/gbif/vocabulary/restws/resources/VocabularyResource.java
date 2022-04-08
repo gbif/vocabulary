@@ -124,7 +124,7 @@ public class VocabularyResource {
     return vocabularyService.suggest(query, locale);
   }
 
-  @PutMapping("{name}/deprecatesug")
+  @PutMapping("{name}/deprecate")
   public void deprecate(
       @PathVariable("name") String vocabularyName,
       @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {

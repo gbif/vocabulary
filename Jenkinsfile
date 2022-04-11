@@ -79,7 +79,7 @@ pipeline {
         allOf {
           not { expression { params.RELEASE } };
           not { expression { params.DOCUMENTATION } };
-          branch 'master';
+          branch '#104_stop_words';
         }
       }
       steps {
@@ -139,7 +139,7 @@ pipeline {
         allOf {
           not { expression { params.RELEASE } };
           not { expression { params.DOCUMENTATION } };
-          branch 'master';
+          branch '#104_stop_words';
         }
       }
       steps {

@@ -82,7 +82,7 @@
     <include refid="VOCABULARY_READ_FIELDS"/>
     FROM vocabulary v
     <if test="params.query != null">
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     WHERE v.deleted IS NULL
     <if test="params.deprecated != null">
@@ -107,7 +107,7 @@
     SELECT COUNT(*)
     FROM vocabulary v
     <if test="params.query != null">
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     WHERE v.deleted IS NULL
     <if test="params.deprecated != null">

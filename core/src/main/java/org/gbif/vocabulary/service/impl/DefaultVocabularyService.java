@@ -31,8 +31,6 @@ import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -53,9 +51,7 @@ import org.springframework.validation.annotation.Validated;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
-import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
 import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
 

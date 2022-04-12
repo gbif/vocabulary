@@ -213,22 +213,7 @@ public class DefaultVocabularyService implements VocabularyService {
       // add name
       valuesToCheck.add(
           NormalizedValuesParam.from(
-              ALL_NODE, Collections.singletonList(normalizeName(vocabulary.getName()))));
-
-      // add labels
-      valuesToCheck.addAll(
-          vocabulary.getLabel().entrySet().stream()
-              .map(
-                  e -> {
-                    List<String> normalizedLabels =
-                        Collections.singletonList(normalizeLabel(e.getValue()));
-
-                    return Arrays.asList(
-                        NormalizedValuesParam.from(e.getKey().getLocale(), normalizedLabels),
-                        NormalizedValuesParam.from(NAME_NODE, normalizedLabels));
-                  })
-              .flatMap(Collection::stream)
-              .collect(Collectors.toList()));
+              NAME_NODE, Collections.singletonList(normalizeName(vocabulary.getName()))));
 
       return vocabularyMapper.findSimilarities(valuesToCheck, update ? vocabulary.getKey() : null);
     };

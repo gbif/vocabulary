@@ -97,16 +97,8 @@ public class VocabularyServiceIT {
     vocabularyService.create(vocabulary);
 
     Vocabulary similarName = createBasicVocabulary();
-    similarName.setName("Sim");
+    similarName.setName(vocabulary.getName());
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.create(similarName));
-
-    Vocabulary similarLabel = createBasicVocabulary();
-    similarLabel.getLabel().put(LanguageRegion.ENGLISH, "sim");
-    assertThrows(IllegalArgumentException.class, () -> vocabularyService.create(similarLabel));
-
-    Vocabulary similarLabelDifferentLanguage = createBasicVocabulary();
-    similarLabelDifferentLanguage.getLabel().put(LanguageRegion.SPANISH, "sim");
-    assertDoesNotThrow(() -> vocabularyService.create(similarLabelDifferentLanguage));
   }
 
   @Test

@@ -199,6 +199,10 @@ public class VocabularyImporter {
       List<Error> errors,
       Map<String, Concept> conceptsMap)
       throws IOException {
+    if (hiddenLabelsPath == null) {
+      return;
+    }
+
     Files.lines(hiddenLabelsPath)
         .skip(1) // we skip the column names
         .filter(l -> !Strings.isNullOrEmpty(l))

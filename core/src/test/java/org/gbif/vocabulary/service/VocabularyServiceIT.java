@@ -129,20 +129,8 @@ public class VocabularyServiceIT {
 
     // update concept
     Vocabulary updated = vocabularyService.get(key2);
-    updated.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "simupdated"));
+    updated.setName(vocabulary1.getName());
     assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(updated));
-
-    Vocabulary updated2 = vocabularyService.get(key2);
-    updated2.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, vocabulary1.getName()));
-    assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(updated2));
-
-    Vocabulary updated3 = vocabularyService.get(key2);
-    updated3.setLabel(Collections.singletonMap(LanguageRegion.SPANISH, vocabulary1.getName()));
-    assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(updated2));
-
-    Vocabulary updated4 = vocabularyService.get(key2);
-    updated4.setLabel(Collections.singletonMap(LanguageRegion.SPANISH, "simupdated"));
-    assertDoesNotThrow(() -> vocabularyService.update(updated4));
   }
 
   @Test

@@ -13,6 +13,12 @@
  */
 package org.gbif.vocabulary.restws.resources.documentation;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
@@ -30,12 +36,6 @@ import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -369,6 +369,19 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                       + "/export"))
           .andExpect(status().isOk());
     }
+  }
+
+  @Test
+  public void deleteVocabularyTest() throws Exception {
+    Vocabulary vocabulary = createVocabulary("vocab1");
+    vocabulary.setKey(1L);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+    doNothing().when(vocabularyService).deleteVocabulary(1L);
+
+    mockMvc
+        .perform(
+            delete(getBasePath() + "/" + vocabulary.getName()).with(authorizationDocumentation()))
+        .andExpect(status().isNoContent());
   }
 
   @Override

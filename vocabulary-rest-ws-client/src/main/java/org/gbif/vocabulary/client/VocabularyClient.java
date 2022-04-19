@@ -13,6 +13,8 @@
  */
 package org.gbif.vocabulary.client;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
@@ -21,8 +23,6 @@ import org.gbif.vocabulary.api.VocabularyReleaseParams;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.util.List;
 
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
@@ -105,4 +105,7 @@ public interface VocabularyClient {
       produces = MediaType.APPLICATION_JSON_VALUE)
   byte[] getReleaseExport(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version);
+
+  @DeleteMapping(value = "{name}")
+  void deleteVocabulary(@PathVariable("name") String vocabularyName);
 }

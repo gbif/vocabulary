@@ -262,6 +262,19 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertEquals(vocabulary1.getKey(), vocabularyDB.getKey());
   }
 
+  @Test
+  public void deleteVocabularyTest() {
+    Vocabulary vocabulary1 = createNewEntity();
+    vocabularyMapper.create(vocabulary1);
+
+    List<Vocabulary> vocabs = vocabularyMapper.list(VocabularySearchParams.builder().build(), DEFAULT_PAGE);
+    assertEquals(1, vocabs.size());
+
+    vocabularyMapper.delete(vocabulary1.getKey());
+    vocabs = vocabularyMapper.list(VocabularySearchParams.builder().build(), DEFAULT_PAGE);
+    assertEquals(0, vocabs.size());
+  }
+
   @Override
   Vocabulary createNewEntity() {
     Vocabulary entity = new Vocabulary();

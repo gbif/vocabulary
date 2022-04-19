@@ -13,6 +13,12 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -31,14 +37,6 @@ import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -56,12 +54,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @Slf4j
@@ -246,5 +246,13 @@ public class VocabularyResource {
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
     ByteArrayResource resource = new ByteArrayResource(getReleaseExport(vocabularyName, version));
     return ResponseEntity.ok().header("Content-Disposition", "inline").body(resource);
+  }
+
+  @DeleteMapping("{name}")
+  public void deleteVocabulary(@PathVariable("name") String vocabularyName) {
+    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+
+    vocabularyService.deleteVocabulary(vocabulary.getKey());
   }
 }

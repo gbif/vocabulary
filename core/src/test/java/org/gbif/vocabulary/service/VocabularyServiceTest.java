@@ -19,13 +19,14 @@ import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
-import javax.validation.ConstraintViolationException;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.test.context.support.WithMockUser;
+
+import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -92,6 +93,25 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
   @Test
   public void unauthorizedRestoreDeprecateTest() {
     assertThrows(AccessDeniedException.class, () -> vocabularyService.restoreDeprecated(0, false));
+  }
+
+  @WithMockUser(authorities = UserRoles.VOCABULARY_EDITOR)
+  @Test
+  public void unauthorizedDeleteVocabularyTest() {
+    assertThrows(AccessDeniedException.class, () -> vocabularyService.deleteVocabulary(0));
+  }
+
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
+  @Test
+  public void adminDeleteVocabularyTest() {
+    assertDoesNotThrow(() -> vocabularyService.deleteVocabulary(0));
+  }
+
+  @Test
+  public void noUserDeleteVocabularyTest() {
+    assertThrows(
+        AuthenticationCredentialsNotFoundException.class,
+        () -> vocabularyService.deleteVocabulary(0));
   }
 
   @Override

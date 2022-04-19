@@ -13,17 +13,17 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
+
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.export.VocabularyExport;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -35,6 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /** IT for the {@link VocabularyResource}. */
 @ContextConfiguration(initializers = {VocabularyResourceIT.ContexInitializer.class})
@@ -104,6 +105,18 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
         .isOk()
         .expectHeader()
         .exists("Content-Disposition");
+  }
+
+  @Test
+  void deleteVocabularyTest() {
+    // create entity
+    Vocabulary v1 = createEntity();
+    vocabularyClient.create(v1);
+    assertNotNull(vocabularyClient.get(v1.getName()));
+
+    // delete
+    vocabularyClient.deleteVocabulary(v1.getName());
+    assertNull(vocabularyClient.get(v1.getName()));
   }
 
   @Override

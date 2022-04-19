@@ -374,4 +374,9 @@
       AND tag_key = #{tagKey,jdbcType=INTEGER}
   </delete>
 
+  <delete id="deleteAllConcepts">
+    DELETE FROM concept
+    WHERE vocabulary_key = #{vocabularyKey}
+  </delete>
+
 </mapper>

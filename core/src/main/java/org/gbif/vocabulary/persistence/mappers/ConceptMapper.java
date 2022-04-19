@@ -102,4 +102,6 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   void removeTag(@Param("conceptKey") long conceptKey, @Param("tagKey") int tagKey);
 
   List<Tag> listTags(@Param("key") long conceptKey);
+
+  void deleteAllConcepts(@Param("vocabularyKey") long vocabularyKey);
 }

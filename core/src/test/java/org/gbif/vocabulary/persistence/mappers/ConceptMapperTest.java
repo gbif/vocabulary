@@ -582,6 +582,26 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(0, concepts.size());
   }
 
+  @Test
+  public void deleteAllConceptsTest() {
+    Concept concept1 = createNewEntity();
+    conceptMapper.create(concept1);
+
+    Concept concept2 = createNewEntity();
+    conceptMapper.create(concept2);
+
+    List<Concept> conceptsFound =
+        conceptMapper.list(
+            ConceptSearchParams.builder().vocabularyKey(vocabularyKeys[0]).build(), DEFAULT_PAGE);
+    assertEquals(2, conceptsFound.size());
+
+    conceptMapper.deleteAllConcepts(vocabularyKeys[0]);
+    conceptsFound =
+        conceptMapper.list(
+            ConceptSearchParams.builder().vocabularyKey(vocabularyKeys[0]).build(), DEFAULT_PAGE);
+    assertEquals(0, conceptsFound.size());
+  }
+
   private void assertList(ConceptSearchParams searchParams, int expectedResult) {
     assertEquals(expectedResult, conceptMapper.list(searchParams, DEFAULT_PAGE).size());
     assertEquals(expectedResult, conceptMapper.count(searchParams));

@@ -203,4 +203,9 @@
     WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL
   </select>
 
+  <delete id="delete">
+    DELETE FROM vocabulary
+    WHERE key = #{key,jdbcType=BIGINT}
+  </delete>
+
 </mapper>

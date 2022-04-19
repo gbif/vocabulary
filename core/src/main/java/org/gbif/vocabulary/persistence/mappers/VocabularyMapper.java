@@ -52,4 +52,6 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
   List<KeyNameResult> findSimilarities(
       @Param("normalizedValues") List<NormalizedValuesParam> normalizedValues,
       @Nullable @Param("vocabularyKey") Long vocabularyKey);
+
+  void delete(@Param("key") long vocabularyKey);
 }

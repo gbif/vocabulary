@@ -13,19 +13,17 @@
  */
 package org.gbif.vocabulary.service;
 
-import org.gbif.vocabulary.PostgresDBExtension;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.UserRoles;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.VocabularySearchParams;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 
-import javax.sql.DataSource;
+import org.gbif.vocabulary.PostgresDBExtension;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +41,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.sql.DataSource;
+
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertDeprecated;
 import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
@@ -51,6 +51,8 @@ import static org.gbif.vocabulary.TestUtils.createBasicConcept;
 import static org.gbif.vocabulary.TestUtils.createBasicVocabulary;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -208,6 +210,19 @@ public class VocabularyServiceIT {
     assertNotDeprecated(vocabularyService.get(v1Key));
     assertNotDeprecated(conceptService.get(c1Key));
     assertNotDeprecated(conceptService.get(c2Key));
+  }
+
+  @Test
+  public void deleteVocabularyTest() {
+    long v1Key = vocabularyService.create(createBasicVocabulary());
+
+    // add concepts to the vocabulary
+    conceptService.create(createBasicConcept(v1Key));
+    conceptService.create(createBasicConcept(v1Key));
+
+    assertNotNull(vocabularyService.get(v1Key));
+    vocabularyService.deleteVocabulary(v1Key);
+    assertNull(vocabularyService.get(v1Key));
   }
 
   static class ContexInitializer

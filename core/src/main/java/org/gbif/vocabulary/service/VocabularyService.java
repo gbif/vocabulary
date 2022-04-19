@@ -88,4 +88,11 @@ public interface VocabularyService extends BaseService<Vocabulary> {
    * @param restoreDeprecatedConcepts if true it restores the deprecated concepts of the vocabulary
    */
   void restoreDeprecated(long key, boolean restoreDeprecatedConcepts);
+
+  /**
+   * Deletes a vocabulary and all its concepts.
+   *
+   * @param key vocabulary key
+   */
+  void deleteVocabulary(long key);
 }

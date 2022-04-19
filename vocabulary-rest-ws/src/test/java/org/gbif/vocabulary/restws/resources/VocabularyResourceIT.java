@@ -13,17 +13,17 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
-
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.export.VocabularyExport;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.util.TestPropertyValues;

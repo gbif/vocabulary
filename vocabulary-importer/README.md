@@ -69,11 +69,11 @@ This tool can be run via command line by sending these params:
 
     Path of the CSV that contains the concepts of the vocabulary
 
-* *--hiddenLabelsPath, -hp*
+* *--hiddenLabelsPath, -hp (Optional)*
 
     Path of the CSV that contains the hidden labels of the vocabulary
     
-* *--csvDelimiter, --d  (Optional)*  
+* *--csvDelimiter, -d  (Optional)*  
     
     Delimiter of the CSV files for concepts and hidden labels. If not specified it uses a comma (","). 
     Note that some delimiters may need to be escaped for Java, e.g.: \\\\|

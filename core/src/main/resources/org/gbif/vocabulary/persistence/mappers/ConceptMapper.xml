@@ -152,7 +152,7 @@
     <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
     <if test="params.query != null">
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     <if test="params.parent != null">
       INNER JOIN concept parent ON parent.key = c.parent_key
@@ -202,7 +202,7 @@
     SELECT COUNT(DISTINCT c.key)
     FROM concept c
     <if test="params.query != null">
-      JOIN to_tsquery('english',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     </if>
     <if test="params.parent != null">
       INNER JOIN concept parent ON parent.key = c.parent_key

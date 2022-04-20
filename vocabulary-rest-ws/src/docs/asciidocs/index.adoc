@@ -62,6 +62,8 @@ include::{snippets}/vocabulary-test-doc/get-vocabulary-release-test/auto-section
 
 include::{snippets}/vocabulary-test-doc/get-release-export-test/auto-section.adoc[]
 
+include::{snippets}/vocabulary-test-doc/delete-vocabulary-test/auto-section.adoc[]
+
 == Concept
 
 Methods to work with concepts

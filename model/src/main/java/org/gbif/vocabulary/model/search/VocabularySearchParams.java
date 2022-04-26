@@ -28,6 +28,7 @@ public class VocabularySearchParams implements Serializable {
   private final String namespace;
   private final Boolean deprecated;
   private final Long key;
+  private final Boolean hasUnreleasedChanges;
 
   public static VocabularySearchParams empty() {
     return builder().build();

@@ -78,11 +78,21 @@
   </select>
 
   <select id="list" resultType="Vocabulary" resultMap="VOCABULARY_MAP">
-    SELECT
+    SELECT DISTINCT ON (<if test="params.query != null">ts_rank_cd(v.fulltext_search, query),</if> v.created, v.key)
     <include refid="VOCABULARY_READ_FIELDS"/>
     FROM vocabulary v
     <if test="params.query != null">
       JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    </if>
+    <if test="params.hasUnreleasedChanges != null">
+      LEFT JOIN LATERAL (
+        SELECT vr.created
+        FROM vocabulary_release vr
+        WHERE vr.vocabulary_key = v.key
+        ORDER BY vr.created DESC
+        LIMIT 1
+      ) latestRelease ON true
+      LEFT JOIN concept c ON c.vocabulary_key = v.key
     </if>
     WHERE v.deleted IS NULL
     <if test="params.deprecated != null">
@@ -96,6 +106,16 @@
     </if>
     <if test="params.key != null">
       AND v.key = #{params.key}
+    </if>
+    <if test="params.hasUnreleasedChanges != null">
+      <choose>
+        <when test="params.hasUnreleasedChanges">
+          AND (latestRelease IS NULL OR v.modified > latestRelease.created OR c.modified > latestRelease.created)
+        </when>
+        <otherwise>
+          AND (latestRelease IS NOT NULL AND v.modified &lt;= latestRelease.created AND (c IS NULL OR c.modified &lt;= latestRelease.created))
+        </otherwise>
+      </choose>
     </if>
     ORDER BY <if test="params.query != null">ts_rank_cd(v.fulltext_search, query) DESC,</if> v.created DESC, v.key
     <if test="page != null">
@@ -104,10 +124,20 @@
   </select>
 
   <select id="count" resultType="Long">
-    SELECT COUNT(*)
+    SELECT COUNT(DISTINCT v.key)
     FROM vocabulary v
     <if test="params.query != null">
       JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    </if>
+    <if test="params.hasUnreleasedChanges != null">
+      LEFT JOIN LATERAL (
+        SELECT vr.created
+        FROM vocabulary_release vr
+        WHERE vr.vocabulary_key = v.key
+        ORDER BY vr.created desc
+        LIMIT 1
+      ) latestRelease ON true
+      LEFT JOIN concept c ON c.vocabulary_key = v.key
     </if>
     WHERE v.deleted IS NULL
     <if test="params.deprecated != null">
@@ -121,6 +151,16 @@
     </if>
     <if test="params.key != null">
       AND v.key = #{params.key}
+    </if>
+    <if test="params.hasUnreleasedChanges != null">
+      <choose>
+        <when test="params.hasUnreleasedChanges">
+          AND (latestRelease IS NULL OR v.modified > latestRelease.created OR c.modified > latestRelease.created)
+        </when>
+        <otherwise>
+          AND (latestRelease IS NOT NULL AND v.modified &lt;= latestRelease.created AND (c IS NULL OR c.modified &lt;= latestRelease.created))
+        </otherwise>
+      </choose>
     </if>
   </select>
 

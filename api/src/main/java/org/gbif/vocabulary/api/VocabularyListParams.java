@@ -36,6 +36,7 @@ public class VocabularyListParams extends ListParamsBase implements Serializable
   private String namespace;
   private Boolean deprecated;
   private Long key;
+  private Boolean hasUnreleasedChanges;
 
   public Pageable getPage() {
     return new PagingRequest(this.getOffset(), this.getLimit());

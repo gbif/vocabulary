@@ -98,6 +98,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                     .param("namespace", "ns")
                     .param("deprecated", "true")
                     .param("key", "1")
+                    .param("hasUnreleasedChanges", "true")
                     .param("offset", "0")
                     .param("limit", "20"))
             .andExpect(status().isOk())
@@ -115,6 +116,10 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                                 "Boolean to search for deprecated or non-deprecated vocabularies")
                             .optional(),
                         parameterWithName("key").description("Vocabulary key").optional(),
+                        parameterWithName("hasUnreleasedChanges")
+                            .description(
+                                "Boolean to search for vocabularies that have unreleased changes")
+                            .optional(),
                         parameterWithName("offset")
                             .description("Page offset. By default 0")
                             .optional(),

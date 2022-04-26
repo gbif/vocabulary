@@ -13,13 +13,6 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.vocabulary.TestUtils;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,12 +21,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.gbif.vocabulary.TestUtils;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
@@ -54,19 +57,33 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
   private final VocabularyMapper vocabularyMapper;
+  private final ConceptMapper conceptMapper;
+  private final VocabularyReleaseMapper vocabularyReleaseMapper;
 
   @Autowired
-  VocabularyMapperTest(VocabularyMapper vocabularyMapper) {
+  VocabularyMapperTest(
+      VocabularyMapper vocabularyMapper,
+      VocabularyReleaseMapper vocabularyReleaseMapper,
+      ConceptMapper conceptMapper) {
     super(vocabularyMapper);
     this.vocabularyMapper = vocabularyMapper;
+    this.vocabularyReleaseMapper = vocabularyReleaseMapper;
+    this.conceptMapper = conceptMapper;
   }
 
   @Test
-  public void listVocabulariesTest() {
+  public void listVocabulariesTest() throws InterruptedException {
     Vocabulary vocabulary1 = createNewEntity();
     vocabulary1.setName("Vocab1");
     vocabulary1.setNamespace("namespace1");
     vocabularyMapper.create(vocabulary1);
+
+    Concept c1 = new Concept();
+    c1.setName("C1");
+    c1.setVocabularyKey(vocabulary1.getKey());
+    c1.setCreatedBy("test");
+    c1.setModifiedBy("test");
+    conceptMapper.create(c1);
 
     Vocabulary vocabulary2 = createNewEntity();
     vocabulary2.setName("Vocab2");
@@ -105,6 +122,58 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
             .build(),
         0);
     assertList(VocabularySearchParams.builder().query("v gbif").name("VocabGbif").build(), 1);
+
+    TestTransaction.flagForCommit();
+    TestTransaction.end();
+    TestTransaction.start();
+
+    assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 0);
+    assertList(VocabularySearchParams.builder().hasUnreleasedChanges(true).build(), 3);
+
+    VocabularyRelease vr = new VocabularyRelease();
+    vr.setVocabularyKey(vocabulary1.getKey());
+    vr.setComment("test");
+    vr.setVersion("1.0");
+    vr.setExportUrl("http://test.com");
+    vr.setCreatedBy("test");
+    vocabularyReleaseMapper.create(vr);
+
+    TestTransaction.flagForCommit();
+    TestTransaction.end();
+    TestTransaction.start();
+
+    assertList(VocabularySearchParams.builder().hasUnreleasedChanges(true).build(), 2);
+    assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 1);
+
+    TestTransaction.flagForCommit();
+    TestTransaction.end();
+    TestTransaction.start();
+
+    vocabulary1.getEditorialNotes().add("test");
+    vocabularyMapper.update(vocabulary1);
+
+    vocabularyMapper.get(vocabulary1.getKey());
+
+    assertList(VocabularySearchParams.builder().hasUnreleasedChanges(true).build(), 3);
+
+    VocabularyRelease vr2 = new VocabularyRelease();
+    vr2.setVocabularyKey(vocabulary1.getKey());
+    vr2.setComment("test");
+    vr2.setVersion("2.0");
+    vr2.setExportUrl("http://test.com");
+    vr2.setCreatedBy("test");
+    vocabularyReleaseMapper.create(vr2);
+
+    TestTransaction.flagForCommit();
+    TestTransaction.end();
+    TestTransaction.start();
+
+    assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 1);
+
+    c1.getLabel().put(LanguageRegion.ACHOLI, "aa");
+    conceptMapper.update(c1);
+
+    assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 0);
   }
 
   @Test

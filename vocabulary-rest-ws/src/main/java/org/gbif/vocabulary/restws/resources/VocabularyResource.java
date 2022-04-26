@@ -94,6 +94,7 @@ public class VocabularyResource {
             .deprecated(params.getDeprecated())
             .key(params.getKey())
             .query(params.getQ())
+            .hasUnreleasedChanges(params.getHasUnreleasedChanges())
             .build(),
         params.getPage());
   }

@@ -24,7 +24,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /** Services for a {@link Vocabulary}. */
 public interface VocabularyService extends BaseService<Vocabulary> {

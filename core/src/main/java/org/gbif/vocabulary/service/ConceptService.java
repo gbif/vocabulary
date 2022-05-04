@@ -26,7 +26,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /** Services for a {@link Concept}. */
 public interface ConceptService extends BaseService<Concept> {

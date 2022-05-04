@@ -59,7 +59,7 @@ public interface ConceptService extends BaseService<Concept> {
    * @return a list of up to 20 suggested concepts
    */
   List<KeyNameResult> suggest(
-      @NotNull String query, long vocabularyKey, @Nullable LanguageRegion languageRegion);
+      String query, long vocabularyKey, @Nullable LanguageRegion languageRegion);
 
   /**
    * Deprecates a concept with a replacement.

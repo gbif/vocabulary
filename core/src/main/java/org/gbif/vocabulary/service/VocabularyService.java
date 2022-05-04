@@ -55,7 +55,7 @@ public interface VocabularyService extends BaseService<Vocabulary> {
    * @param languageRegion locale to filter by
    * @return a list of up to 20 suggested vocabularies
    */
-  List<KeyNameResult> suggest(@NotNull String query, @Nullable LanguageRegion languageRegion);
+  List<KeyNameResult> suggest(String query, @Nullable LanguageRegion languageRegion);
 
   /**
    * Deprecates a vocabulary with a replacement.

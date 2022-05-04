@@ -121,7 +121,8 @@ public class VocabularyResource {
   }
 
   @GetMapping("suggest")
-  public List<KeyNameResult> suggest(@RequestParam("q") String query, LanguageRegion locale) {
+  public List<KeyNameResult> suggest(
+      @RequestParam(value = "q", required = false) String query, LanguageRegion locale) {
     return vocabularyService.suggest(query, locale);
   }
 

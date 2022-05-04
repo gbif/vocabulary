@@ -177,7 +177,8 @@ public class DefaultConceptService implements ConceptService {
 
   @Override
   public List<KeyNameResult> suggest(
-      @NotNull String query, long vocabularyKey, @Nullable LanguageRegion languageRegion) {
+      String query, long vocabularyKey, @Nullable LanguageRegion languageRegion) {
+    query = query != null ? query : "";
     return conceptMapper.suggest(
         query, vocabularyKey, languageRegion != null ? languageRegion.getLocale() : null);
   }

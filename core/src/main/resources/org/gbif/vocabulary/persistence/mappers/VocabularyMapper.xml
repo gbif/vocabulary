@@ -165,7 +165,7 @@
   </select>
 
   <select id="suggest" resultMap="KEY_NAME_RESULT_MAP">
-    SELECT key, name, label
+    SELECT DISTINCT ON(key) key, name, label
     FROM (
     (SELECT key, name, label
     FROM vocabulary

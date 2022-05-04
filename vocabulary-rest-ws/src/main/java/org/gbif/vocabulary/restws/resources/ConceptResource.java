@@ -218,7 +218,7 @@ public class ConceptResource {
   @GetMapping("suggest")
   public List<KeyNameResult> suggest(
       @PathVariable("vocabularyName") String vocabularyName,
-      @RequestParam("q") String query,
+      @RequestParam(value = "q", required = false) String query,
       LanguageRegion locale) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);

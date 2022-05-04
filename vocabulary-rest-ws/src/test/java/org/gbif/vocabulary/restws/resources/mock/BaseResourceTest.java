@@ -87,11 +87,6 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
         .andExpect(status().isBadRequest());
   }
 
-  @Test
-  public void suggestWithoutQueryTest() throws Exception {
-    mockMvc.perform(get(getBasePath() + "/suggest")).andExpect(status().isBadRequest()).andReturn();
-  }
-
   @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void deprecateEntityNotFoundTest() throws Exception {

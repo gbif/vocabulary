@@ -97,8 +97,11 @@ This tool can be run via command line by sending these params:
 
 * *--reimport, -re*
     
-    If set it does a reimport by updating the exisiting vocabulary and concepts
+    If set it does a reimport by updating the existing vocabulary and concepts
 
+* *--encoding, -enc*
+
+    Encoding of the CSV files. If not specified it uses UTF-8
 
 For example:
 

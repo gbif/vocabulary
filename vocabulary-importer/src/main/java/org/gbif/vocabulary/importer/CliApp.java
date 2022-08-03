@@ -17,6 +17,9 @@ import org.gbif.vocabulary.client.ConceptClient;
 import org.gbif.vocabulary.client.VocabularyClient;
 import org.gbif.ws.client.ClientBuilder;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -91,7 +94,8 @@ public class CliApp {
           cliArgs.getVocabularyLabelEN(),
           cliArgs.getVocabularyDefinitionEN(),
           conceptsPath,
-          hiddenLabelsPath);
+          hiddenLabelsPath,
+          parseEncoding(cliArgs.encoding));
     } else {
       vocabularyImporter.importVocabulary(
           cliArgs.getCsvDelimiter(),
@@ -100,9 +104,19 @@ public class CliApp {
           cliArgs.getVocabularyLabelEN(),
           cliArgs.getVocabularyDefinitionEN(),
           conceptsPath,
-          hiddenLabelsPath);
+          hiddenLabelsPath,
+          parseEncoding(cliArgs.encoding));
     }
     log.info("Import done");
+  }
+
+  private static Charset parseEncoding(String encoding) {
+    try {
+    return Charset.forName(encoding);
+    } catch(UnsupportedCharsetException e) {
+      log.warn("Couldn't parse encoding. Using UTF-8.", e);
+      return StandardCharsets.UTF_8;
+    }
   }
 
   @Getter
@@ -154,5 +168,8 @@ public class CliApp {
 
     @Parameter(names = {"--reimport", "-re"})
     private boolean reimport;
+
+    @Parameter(names = {"--encoding", "-enc"})
+    private String encoding = "UTF-8";
   }
 }

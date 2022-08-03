@@ -285,8 +285,8 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
     if (existing != null) {
       log.warn(
           "Incorrect vocabulary: concept names have to be unique. The concept name {} has the same name as {}",
-          concept.toString(),
-          existing.toString());
+          concept,
+          existing);
     }
   }
 

@@ -57,7 +57,7 @@ This tool can be run via command line by sending these params:
     
     Name of the vocabulary to import. It's the unique identifier of the vocabulary that will be used in the URLs
 
-* *-vocabularyLabelEN, -vlen*
+* *--vocabularyLabelEN, -vlen*
 
     Label for the vocabulary in EN language
 

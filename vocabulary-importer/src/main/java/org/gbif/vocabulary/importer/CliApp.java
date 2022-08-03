@@ -112,8 +112,8 @@ public class CliApp {
 
   private static Charset parseEncoding(String encoding) {
     try {
-    return Charset.forName(encoding);
-    } catch(UnsupportedCharsetException e) {
+      return Charset.forName(encoding);
+    } catch (UnsupportedCharsetException e) {
       log.warn("Couldn't parse encoding. Using UTF-8.", e);
       return StandardCharsets.UTF_8;
     }

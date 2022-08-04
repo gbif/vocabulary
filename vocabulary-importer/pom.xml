@@ -3,12 +3,12 @@
   <parent>
     <groupId>org.gbif.vocabulary</groupId>
     <artifactId>vocabulary-parent</artifactId>
-    <version>0.52</version>
+    <version>0.53-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>vocabulary-importer</artifactId>
-  <version>0.52</version>
+  <version>0.53-SNAPSHOT</version>
 
   <properties>
     <main.basedir>${project.parent.basedir}</main.basedir>

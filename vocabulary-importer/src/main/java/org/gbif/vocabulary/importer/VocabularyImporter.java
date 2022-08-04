@@ -13,6 +13,15 @@
  */
 package org.gbif.vocabulary.importer;
 
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.ConceptListParams;
+import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Vocabulary;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URI;
@@ -29,16 +38,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.ConceptListParams;
-import org.gbif.vocabulary.api.ConceptView;
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Vocabulary;
-
 import com.google.common.base.Strings;
+
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

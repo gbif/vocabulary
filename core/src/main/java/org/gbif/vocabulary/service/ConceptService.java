@@ -16,6 +16,8 @@ package org.gbif.vocabulary.service;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.ChildrenResult;
@@ -132,4 +134,24 @@ public interface ConceptService extends BaseService<Concept> {
    * @return list of {@link Tag}
    */
   List<Tag> listTags(long conceptKey);
+
+  long addAlternativeLabel(Label label);
+
+  void updateAlternativeLabel(Label label);
+
+  void deleteAlternativeLabel(long key);
+
+  Label getAlternativeLabel(long key);
+
+  List<Label> listAlternativeLabels(long entityKey);
+
+  long addHiddenLabel(HiddenLabel label);
+
+  void updateHiddenLabel(HiddenLabel label);
+
+  void deleteHiddenLabel(long key);
+
+  HiddenLabel getHiddenLabel(long key);
+
+  List<HiddenLabel> listHiddenLabels(long entityKey);
 }

@@ -32,8 +32,10 @@ public class VocabularyTest {
     v1.setKey(1L);
     v1.setName("v1");
     v1.setNamespace("ns");
-    v1.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "label"));
-    v1.setDefinition(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
+    v1.setLabels(
+        Collections.singletonList(
+            Label.builder().language(LanguageRegion.ENGLISH).label("label").build()));
+    v1.setDefinitions(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
     v1.setEditorialNotes(Arrays.asList("n1", "n2"));
     v1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
     v1.setCreated(LocalDateTime.now());
@@ -44,8 +46,8 @@ public class VocabularyTest {
     v2.setKey(v1.getKey());
     v2.setName(v1.getName());
     v2.setNamespace(v1.getNamespace());
-    v2.setLabel(v1.getLabel());
-    v2.setDefinition(v1.getDefinition());
+    v2.setLabels(v1.getLabels());
+    v2.setDefinitions(v1.getDefinitions());
     v2.setEditorialNotes(v1.getEditorialNotes());
     v2.setExternalDefinitions(v1.getExternalDefinitions());
     v2.setCreated(v1.getCreated());

@@ -72,16 +72,15 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
 
     // update
     entitySaved.getEditorialNotes().add("Note test 2");
-    entitySaved.getLabel().put(LanguageRegion.SPANISH, "Etiqueta");
     baseMapper.update(entitySaved);
 
     T entityUpdated = baseMapper.get(entitySaved.getKey());
     assertTrue(entitySaved.lenientEquals(entityUpdated));
 
-    entityUpdated.setDefinition(null);
+    entityUpdated.setDefinitions(null);
     baseMapper.update(entityUpdated);
     entityUpdated = baseMapper.get(entitySaved.getKey());
-    assertTrue(entityUpdated.getDefinition().isEmpty());
+    assertTrue(entityUpdated.getDefinitions().isEmpty());
   }
 
   @Test

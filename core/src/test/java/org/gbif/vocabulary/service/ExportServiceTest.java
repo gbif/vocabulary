@@ -13,23 +13,21 @@
  */
 package org.gbif.vocabulary.service;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.UserRoles;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,30 +82,86 @@ public class ExportServiceTest extends MockServiceBaseTest {
     c1.setCreated(LocalDateTime.now());
 
     // labels
-    Map<LanguageRegion, String> labels = new HashMap<>();
-    labels.put(LanguageRegion.ENGLISH, "Label");
-    labels.put(LanguageRegion.SPANISH, "Etiqueta");
-    c1.setLabel(labels);
+    c1.getLabels()
+        .add(
+            Label.builder()
+                .entityKey(c1.getKey())
+                .language(LanguageRegion.ENGLISH)
+                .label("Label")
+                .build());
+    c1.getLabels()
+        .add(
+            Label.builder()
+                .entityKey(c1.getKey())
+                .language(LanguageRegion.SPANISH)
+                .label("Etiqueta")
+                .build());
 
     // alternative labels
-    Map<LanguageRegion, Set<String>> alternativeLabels = new HashMap<>();
-    alternativeLabels.put(
-        LanguageRegion.ENGLISH, new HashSet<>(Arrays.asList("label2", "label3", "label4")));
-    alternativeLabels.put(LanguageRegion.SPANISH, new HashSet<>(Arrays.asList("label5", "label6")));
-    c1.setAlternativeLabels(alternativeLabels);
+    c1.getAlternativeLabels()
+        .add(
+            Label.builder()
+                .entityKey(c1.getKey())
+                .language(LanguageRegion.ENGLISH)
+                .label("label2")
+                .build());
+    c1.getAlternativeLabels()
+        .add(
+            Label.builder()
+                .entityKey(c1.getKey())
+                .language(LanguageRegion.ENGLISH)
+                .label("label3")
+                .build());
+    c1.getAlternativeLabels()
+        .add(
+            Label.builder()
+                .entityKey(c1.getKey())
+                .language(LanguageRegion.ENGLISH)
+                .label("label4")
+                .build());
+    c1.getAlternativeLabels()
+        .add(
+            Label.builder()
+                .entityKey(c1.getKey())
+                .language(LanguageRegion.SPANISH)
+                .label("label5")
+                .build());
+    c1.getAlternativeLabels()
+        .add(
+            Label.builder()
+                .entityKey(c1.getKey())
+                .language(LanguageRegion.SPANISH)
+                .label("label6")
+                .build());
 
     // hidden labels
-    c1.setHiddenLabels(new HashSet<>(Arrays.asList("labl2", "labl3", "labl4", "labl5", "labl6")));
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl2").build());
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl3").build());
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl4").build());
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl5").build());
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl6").build());
 
     Concept c2 = new Concept();
     c2.setName("c2");
     c2.setVocabularyKey(vocabulary.getKey());
-    c2.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
+    c2.setLabels(
+        Collections.singletonList(
+            Label.builder()
+                .entityKey(c2.getKey())
+                .language(LanguageRegion.ENGLISH)
+                .label("Label")
+                .build()));
 
     Concept c3 = new Concept();
     c3.setName("c3");
     c3.setVocabularyKey(vocabulary.getKey());
-    c3.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
+    c3.setLabels(
+        Collections.singletonList(
+            Label.builder()
+                .entityKey(c3.getKey())
+                .language(LanguageRegion.ENGLISH)
+                .label("Label")
+                .build()));
 
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);
     when(conceptService.list(any(), any()))

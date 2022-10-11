@@ -32,13 +32,16 @@ public class ConceptTest {
     c1.setKey(1L);
     c1.setName("n1");
     c1.setVocabularyKey(1L);
-    c1.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "label"));
+    c1.setLabels(
+        Collections.singletonList(
+            Label.builder().language(LanguageRegion.ENGLISH).label("tes").build()));
     c1.setParentKey(2L);
     c1.setReplacedByKey(1L);
     c1.setAlternativeLabels(
-        Collections.singletonMap(LanguageRegion.ENGLISH, Collections.singleton("alt")));
-    c1.setHiddenLabels(Collections.singleton("misspelt"));
-    c1.setDefinition(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
+        Collections.singletonList(
+            Label.builder().language(LanguageRegion.ENGLISH).label("alt").build()));
+    c1.setHiddenLabels(Collections.singletonList(HiddenLabel.builder().label("misspelt").build()));
+    c1.setDefinitions(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
     c1.setSameAsUris(Collections.singletonList(URI.create("http://test.com")));
     c1.setEditorialNotes(Arrays.asList("n1", "n2"));
     c1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
@@ -50,12 +53,12 @@ public class ConceptTest {
     c2.setKey(c1.getKey());
     c2.setName(c1.getName());
     c2.setVocabularyKey(c1.getVocabularyKey());
-    c2.setLabel(c1.getLabel());
+    c2.setLabels(c1.getLabels());
     c2.setParentKey(c1.getParentKey());
     c2.setReplacedByKey(c1.getReplacedByKey());
     c2.setAlternativeLabels(c1.getAlternativeLabels());
     c2.setHiddenLabels(c1.getHiddenLabels());
-    c2.setDefinition(c1.getDefinition());
+    c2.setDefinitions(c1.getDefinitions());
     c2.setSameAsUris(c1.getSameAsUris());
     c2.setEditorialNotes(c1.getEditorialNotes());
     c2.setExternalDefinitions(c1.getExternalDefinitions());

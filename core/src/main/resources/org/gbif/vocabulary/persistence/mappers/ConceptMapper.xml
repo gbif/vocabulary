@@ -4,40 +4,47 @@
 
   <resultMap id="CONCEPT_MAP" type="Concept" autoMapping="true">
     <id property="key" column="key"/>
-    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
-    <result property="alternativeLabels" column="alternative_labels" typeHandler="ValueSetByLanguageMapTypeHandler"/>
-    <result property="hiddenLabels" column="hidden_labels" typeHandler="StringSetTypeHandler"/>
-    <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <result property="definitions" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
     <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
     <result property="sameAsUris" column="same_as_uris" typeHandler="UriArrayTypeHandler"/>
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
+    <collection property="labels" column="key" select="listLabels"/>
+    <collection property="alternativeLabels" column="key" select="listAlternativeLabels"/>
+    <collection property="hiddenLabels" column="key" select="listHiddenLabels"/>
     <collection property="tags" column="key" select="listTags"/>
   </resultMap>
 
   <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">
     <id property="key" column="key"/>
-    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <collection property="labels" column="key" select="listLabels"/>
+  </resultMap>
+
+  <resultMap id="LABEL_RESULT_MAP" type="Label" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="entityKey" column="concept_key"/>
+  </resultMap>
+
+  <resultMap id="HIDDEN_LABEL_RESULT_MAP" type="HiddenLabel" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="entityKey" column="concept_key"/>
   </resultMap>
 
   <sql id="CONCEPT_READ_FIELDS">
-    c.key, c.vocabulary_key, c.parent_key, c.replaced_by_key, c.name, c.label, c.alternative_labels, c.hidden_labels,
-    c.definition, c.external_definition_urls, c.same_as_uris, c.editorial_notes, c.deprecated_by, c.deprecated, c.created_by,
+    c.key, c.vocabulary_key, c.parent_key, c.replaced_by_key, c.name, c.definition, c.external_definition_urls,
+    c.same_as_uris, c.editorial_notes, c.deprecated_by, c.deprecated, c.created_by,
     c.modified_by, c.created, c.modified, c.deleted
   </sql>
 
   <sql id="CONCEPT_INSERT_FIELDS">
-    vocabulary_key, parent_key, name, label, alternative_labels, hidden_labels, definition,
-    external_definition_urls, same_as_uris, editorial_notes, created_by, modified_by, created, modified
+    vocabulary_key, parent_key, name, definition, external_definition_urls, same_as_uris, editorial_notes,
+    created_by, modified_by, created, modified
   </sql>
 
   <sql id="CONCEPT_INSERT_PARAMS">
     #{vocabularyKey,jdbcType=BIGINT},
     #{parentKey,jdbcType=BIGINT},
     #{name,jdbcType=VARCHAR},
-    #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
-    #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueSetByLanguageMapTypeHandler}::jsonb,
-    #{hiddenLabels,jdbcType=OTHER,typeHandler=StringSetTypeHandler},
-    #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
+    #{definitions,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
@@ -52,10 +59,7 @@
     parent_key = #{parentKey,jdbcType=BIGINT},
     replaced_by_key = #{replacedByKey,jdbcType=BIGINT},
     name = #{name,jdbcType=VARCHAR},
-    label = #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
-    alternative_labels = #{alternativeLabels,jdbcType=OTHER,typeHandler=ValueSetByLanguageMapTypeHandler}::jsonb,
-    hidden_labels = #{hiddenLabels,jdbcType=OTHER,typeHandler=StringSetTypeHandler},
-    definition = #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
+    definition = #{definitions,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     external_definition_urls = #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     same_as_uris = #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     editorial_notes = #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
@@ -244,24 +248,24 @@
   </select>
 
   <select id="suggest" resultMap="KEY_NAME_RESULT_MAP">
-    SELECT DISTINCT ON(key) key, name, label
+    SELECT DISTINCT ON(key) key, name
     FROM (
-    (SELECT key, name, label
+    (SELECT key, name
     FROM concept
     WHERE vocabulary_key = #{vocabularyKey} AND name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
     ORDER BY name LIMIT 20
     )
     UNION ALL
-    (SELECT key, name, label
+    (SELECT key, name
     FROM concept
     WHERE vocabulary_key = #{vocabularyKey} AND name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
     ORDER BY name LIMIT 20
     )
     UNION ALL
-    (SELECT DISTINCT c.key, c.name, c.label
+    (SELECT DISTINCT c.key, c.name
     FROM concept c
-    JOIN jsonb_each_text(c.label) l ON true
-    WHERE c.vocabulary_key = #{vocabularyKey} AND l.value ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
+    JOIN concept_label cl ON cl.concept_key = c.key
+    WHERE c.vocabulary_key = #{vocabularyKey} AND cl.label ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
     <if test="locale != null">
       AND l.key = #{locale}
     </if>
@@ -270,10 +274,10 @@
     UNION ALL
     (SELECT DISTINCT c.key, c.name, c.label
     FROM concept c
-    JOIN jsonb_each_text(c.label) l ON true
-    WHERE c.vocabulary_key = #{vocabularyKey} AND l.value ilike '%'||#{query}||'%' AND NOT l.value ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
+    JOIN concept_label cl ON cl.concept_key = c.key
+    WHERE c.vocabulary_key = #{vocabularyKey} AND cl.label ilike '%'||#{query}||'%' AND NOT cl.label ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
     <if test="locale != null">
-        AND l.key = #{locale}
+        AND cl.language = #{locale}
     </if>
     LIMIT 20
     )
@@ -290,17 +294,22 @@
   </update>
 
   <select id="findSimilarities" resultType="KeyNameResult">
-    SELECT key, name
-    FROM concept
+    SELECT c.key, c.name
+    FROM concept c
+    LEFT JOIN concept_label cl ON cl.concept_key = c.key <if test="lang != null">AND cl.language = #{lang}</if>
+    LEFT JOIN concept_alternative_label cal ON cal.concept_key = c.key <if test="lang != null">AND cl.language = #{lang}</if>
+    LEFT JOIN concept_hidden_label chl ON chl.concept_key = c.key
     <where>
-      vocabulary_key = #{vocabularyKey}
+      c.vocabulary_key = #{vocabularyKey}
       <if test="conceptKey != null">
-        AND key != #{conceptKey}
+        AND c.key != #{conceptKey}
       </if>
-      AND
-      <foreach collection="normalizedValues" item="v" separator=" OR " open="(" close=")">
-        normalized_values::jsonb->#{v.node} ??| #{v.values, typeHandler=StringArrayTypeHandler}
-      </foreach>
+      AND (
+        normalize_name(c.name) = #{normalizedValue,jdbcType=VARCHAR}
+        OR cl.normalized_value = #{normalizedValue,jdbcType=VARCHAR}
+        OR cal.normalized_value = #{normalizedValue,jdbcType=VARCHAR}
+        OR chl.normalized_value = #{normalizedValue,jdbcType=VARCHAR}
+      )
     </where>
     LIMIT 3
   </select>
@@ -378,5 +387,97 @@
     DELETE FROM concept
     WHERE vocabulary_key = #{vocabularyKey}
   </delete>
+
+  <!-- labels -->
+  <insert id="addLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
+    INSERT INTO concept_label(concept_key, language, label)
+    VALUES(#{entityKey,jdbcType=BIGINT},
+    #{language,jdbcType=VARCHAR},
+    #{label,jdbcType=VARCHAR})
+  </insert>
+
+  <update id="updateLabel">
+    UPDATE concept_label
+    SET label = #{label,jdbcType=VARCHAR}
+    WHERE key = #{key,jdbcType=BIGINT}
+  </update>
+
+  <delete id="deleteLabel">
+    DELETE FROM concept_label
+    WHERE key = #{key,jdbcType=BIGINT}
+  </delete>
+
+  <select id="listLabels" resultMap="LABEL_RESULT_MAP">
+    SELECT key, concept_key, language, label
+    FROM concept_label
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+  </select>
+
+  <select id="getLabel" resultMap="LABEL_RESULT_MAP">
+    SELECT key, concept_key, language, label
+    FROM concept_label
+    WHERE key = #{key,jdbcType=BIGINT}
+  </select>
+
+  <!-- alternative labels -->
+  <insert id="addAlternativeLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
+    INSERT INTO concept_alternative_label(concept_key, language, label)
+    VALUES(#{entityKey,jdbcType=BIGINT},
+    #{language,jdbcType=VARCHAR},
+    #{label,jdbcType=VARCHAR})
+  </insert>
+
+  <update id="updateAlternativeLabel">
+    UPDATE concept_alternative_label
+    SET label = #{label,jdbcType=VARCHAR}
+    WHERE key = #{key,jdbcType=BIGINT}
+  </update>
+
+  <delete id="deleteAlternativeLabel">
+    DELETE FROM concept_alternative_label
+    WHERE key = #{key,jdbcType=BIGINT}
+  </delete>
+
+  <select id="listAlternativeLabels" resultMap="LABEL_RESULT_MAP">
+    SELECT key, concept_key, language, label
+    FROM concept_alternative_label
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+  </select>
+
+  <select id="getAlternativeLabel" resultMap="LABEL_RESULT_MAP">
+    SELECT key, concept_key, language, label
+    FROM concept_alternative_label
+    WHERE key = #{key,jdbcType=BIGINT}
+  </select>
+
+  <!-- hidden labels -->
+  <insert id="addHiddenLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
+    INSERT INTO concept_hidden_label(concept_key, label)
+    VALUES(#{entityKey,jdbcType=BIGINT},
+    #{label,jdbcType=VARCHAR})
+  </insert>
+
+  <update id="updateHiddenLabel">
+    UPDATE concept_hidden_label
+    SET label = #{label,jdbcType=VARCHAR}
+    WHERE key = #{key,jdbcType=BIGINT}
+  </update>
+
+  <delete id="deleteHiddenLabel">
+    DELETE FROM concept_hidden_label
+    WHERE key = #{key,jdbcType=BIGINT}
+  </delete>
+
+  <select id="listHiddenLabels" resultMap="HIDDEN_LABEL_RESULT_MAP">
+    SELECT key, concept_key, label
+    FROM concept_hidden_label
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+  </select>
+
+  <select id="getHiddenLabel" resultMap="HIDDEN_LABEL_RESULT_MAP">
+    SELECT key, concept_key, label
+    FROM concept_hidden_label
+    WHERE key = #{key,jdbcType=BIGINT}
+  </select>
 
 </mapper>

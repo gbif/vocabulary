@@ -13,6 +13,9 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.util.List;
+
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
 import javax.annotation.Nullable;
@@ -40,4 +43,14 @@ public interface BaseMapper<T extends VocabularyEntity> {
   void restoreDeprecated(@Param("key") long key);
 
   boolean isDeprecated(@Param("key") long key);
+
+  void addLabel(Label label);
+
+  void updateLabel(Label label);
+
+  void deleteLabel(@Param("key") long key);
+
+  List<Label> listLabels(@Param("entityKey") long entityKey);
+
+  Label getLabel(@Param("key") long labelKey);
 }

@@ -1,0 +1,130 @@
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+  <changeSet id="8" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+        CREATE TABLE vocabulary_label(
+         key bigserial NOT NULL PRIMARY KEY,
+         vocabulary_key bigint NOT NULL REFERENCES vocabulary(key),
+         language varchar(8) NOT NULL,
+         label text NOT NULL,
+         UNIQUE(vocabulary_key, language)
+       );
+
+       CREATE TABLE concept_label(
+         key bigserial NOT NULL PRIMARY KEY,
+         concept_key bigint NOT NULL REFERENCES concept(key),
+         language varchar(8) NOT NULL,
+         label text NOT NULL,
+         normalized_value text,
+         UNIQUE(concept_key, language)
+       );
+
+       CREATE TABLE concept_alternative_label(
+         key bigserial NOT NULL PRIMARY KEY,
+         concept_key bigint NOT NULL REFERENCES concept(key),
+         language varchar(8) NOT NULL,
+         label text NOT NULL,
+         normalized_value text,
+         UNIQUE(concept_key, language, label)
+       );
+
+       CREATE TABLE concept_hidden_label(
+         key bigserial NOT NULL PRIMARY KEY,
+         concept_key bigint NOT NULL REFERENCES concept(key),
+         label text NOT NULL,
+         normalized_value text,
+         UNIQUE(concept_key, label)
+       );
+
+       CREATE OR REPLACE FUNCTION vocabulary_change_trigger()
+       RETURNS TRIGGER AS
+       $vocabchange$
+           DECLARE
+             definitions text[];
+           BEGIN
+             definitions := COALESCE(get_json_values(NEW.definition), array[]::text[]);
+
+             NEW.fulltext_search :=
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.namespace,''))) ||
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.name,''))) ||
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(definitions, ' '),''))) ||
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.external_definition_urls, ' '),''))) ||
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.editorial_notes, ' '),'')));
+
+             RETURN NEW;
+           END;
+       $vocabchange$
+       LANGUAGE plpgsql;
+
+       DROP TRIGGER vocabulary_fulltext_update ON vocabulary;
+       CREATE TRIGGER vocabulary_fulltext_update
+       BEFORE INSERT OR UPDATE OF namespace, name, definition, external_definition_urls, editorial_notes ON vocabulary
+       FOR EACH ROW EXECUTE PROCEDURE vocabulary_change_trigger();
+
+       CREATE OR REPLACE FUNCTION concept_change_trigger()
+       RETURNS TRIGGER AS
+       $conceptchange$
+           DECLARE
+             definitions text[];
+           BEGIN
+             definitions := COALESCE(get_json_values(NEW.definition), array[]::text[]);
+
+             NEW.fulltext_search :=
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.name,''))) ||
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(definitions, ' '),''))) ||
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.external_definition_urls, ' '),''))) ||
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.same_as_uris, ' '),''))) ||
+               TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.editorial_notes, ' '),'')));
+
+             RETURN NEW;
+           END;
+       $conceptchange$
+       LANGUAGE plpgsql;
+
+       DROP TRIGGER concept_fulltext_update ON concept;
+       CREATE TRIGGER concept_fulltext_update
+       BEFORE INSERT OR UPDATE OF name, definition, external_definition_urls, same_as_uris, editorial_notes ON concept
+       FOR EACH ROW EXECUTE PROCEDURE concept_change_trigger();
+
+       CREATE OR REPLACE FUNCTION concept_label_change_trigger()
+       RETURNS TRIGGER AS
+       $conceptlabelchange$
+           BEGIN
+             -- update full text search of the concept
+             UPDATE concept
+             SET fulltext_search = fulltext_search || TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.label,'')))
+             WHERE key = NEW.concept_key;
+
+             NEW.normalized_value := normalize_label(COALESCE(NEW.label,''));
+
+             RETURN NEW;
+           END;
+       $conceptlabelchange$
+       LANGUAGE plpgsql;
+
+       CREATE TRIGGER concept_label_update
+       BEFORE INSERT OR DELETE OR UPDATE OF label ON concept_label
+       FOR EACH ROW EXECUTE PROCEDURE concept_label_change_trigger();
+
+       CREATE TRIGGER concept_alternative_label_update
+       BEFORE INSERT OR DELETE OR UPDATE OF label ON concept_alternative_label
+       FOR EACH ROW EXECUTE PROCEDURE concept_label_change_trigger();
+
+       CREATE TRIGGER concept_hidden_label_update
+       BEFORE INSERT OR DELETE OR UPDATE OF label ON concept_hidden_label
+       FOR EACH ROW EXECUTE PROCEDURE concept_label_change_trigger();
+
+       ALTER TABLE vocabulary DROP COLUMN normalized_values;
+       ALTER TABLE vocabulary DROP COLUMN label;
+       ALTER TABLE concept DROP COLUMN normalized_values;
+       ALTER TABLE concept DROP COLUMN label;
+       ALTER TABLE concept DROP COLUMN alternative_labels;
+       ALTER TABLE concept DROP COLUMN hidden_labels;
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>

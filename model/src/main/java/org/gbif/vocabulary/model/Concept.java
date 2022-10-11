@@ -13,19 +13,14 @@
  */
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.utils.LenientEquals;
-
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+
+import org.gbif.vocabulary.model.utils.LenientEquals;
 
 import javax.validation.constraints.NotNull;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -48,10 +43,10 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   private Long parentKey;
 
   /** Indicates alternative labels commonly associated to the concept. */
-  private Map<LanguageRegion, Set<String>> alternativeLabels = new EnumMap<>(LanguageRegion.class);
+  private List<Label> alternativeLabels = new ArrayList<>();
 
   /** Indicates hidden labels commonly associated to the concept. */
-  private Set<String> hiddenLabels = new HashSet<>();
+  private List<HiddenLabel> hiddenLabels = new ArrayList<>();
 
   /** External URIs for concepts considered equivalent. */
   private List<URI> sameAsUris = new ArrayList<>();
@@ -67,10 +62,10 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
         && Objects.equals(vocabularyKey, other.vocabularyKey)
         && Objects.equals(parentKey, other.parentKey)
         && Objects.equals(name, other.name)
-        && Objects.equals(label, other.label)
+        && Objects.equals(labels, other.labels)
         && Objects.equals(alternativeLabels, other.alternativeLabels)
         && Objects.equals(hiddenLabels, other.hiddenLabels)
-        && Objects.equals(definition, other.definition)
+        && Objects.equals(definitions, other.definitions)
         && Objects.equals(externalDefinitions, other.externalDefinitions)
         && Objects.equals(sameAsUris, other.sameAsUris)
         && Objects.equals(editorialNotes, other.editorialNotes)

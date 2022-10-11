@@ -13,6 +13,9 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.util.List;
+
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
 import javax.validation.Valid;
@@ -47,4 +50,15 @@ public interface BaseService<T extends VocabularyEntity> {
    * @param entity to be updated.
    */
   void update(@NotNull @Valid T entity);
+
+  long addLabel(Label label);
+
+  void updateLabel(Label label);
+
+  void deleteLabel(long key);
+
+  Label getLabel(long key);
+
+  List<Label> listLabels(long entityKey);
+
 }

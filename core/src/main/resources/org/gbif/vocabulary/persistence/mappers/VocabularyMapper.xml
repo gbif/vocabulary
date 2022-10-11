@@ -4,31 +4,35 @@
 
   <resultMap id="VOCABULARY_MAP" type="Vocabulary" autoMapping="true">
     <id property="key" column="key"/>
-    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
-    <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <result property="definitions" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
     <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
+    <collection property="labels" column="key" select="listLabels"/>
   </resultMap>
 
   <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">
     <id property="key" column="key"/>
-    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <collection property="labels" column="key" select="listLabels"/>
+  </resultMap>
+
+  <resultMap id="LABEL_RESULT_MAP" type="Label" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="entityKey" column="vocabulary_key"/>
   </resultMap>
 
   <sql id="VOCABULARY_READ_FIELDS">
-    v.key, v.namespace, v.name, v.label, v.definition, v.external_definition_urls, v.editorial_notes, v.replaced_by_key,
+    v.key, v.namespace, v.name, v.definition, v.external_definition_urls, v.editorial_notes, v.replaced_by_key,
     v.deprecated_by, v.deprecated, v.created_by, v.modified_by, v.created, v.modified, v.deleted
   </sql>
 
   <sql id="VOCABULARY_INSERT_FIELDS">
-    namespace, name, label, definition, external_definition_urls, editorial_notes, created_by, modified_by, created, modified
+    namespace, name, definition, external_definition_urls, editorial_notes, created_by, modified_by, created, modified
   </sql>
 
   <sql id="VOCABULARY_INSERT_PARAMS">
     #{namespace,jdbcType=VARCHAR},
     #{name,jdbcType=VARCHAR},
-    #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
-    #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
+    #{definitions,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
     #{createdBy,jdbcType=VARCHAR},
@@ -40,8 +44,7 @@
   <sql id="VOCABULARY_PARAMS_UPDATE">
     namespace = #{namespace,jdbcType=VARCHAR},
     name = #{name,jdbcType=VARCHAR},
-    label = #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
-    definition = #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
+    definition = #{definitions,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     external_definition_urls = #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     editorial_notes = #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
     modified_by = #{modifiedBy,jdbcType=VARCHAR},
@@ -165,36 +168,36 @@
   </select>
 
   <select id="suggest" resultMap="KEY_NAME_RESULT_MAP">
-    SELECT DISTINCT ON(key) key, name, label
+    SELECT DISTINCT ON(key) key, name
     FROM (
-    (SELECT key, name, label
+    (SELECT key, name
     FROM vocabulary
     WHERE name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
     ORDER BY name LIMIT 20
     )
     UNION ALL
-    (SELECT key, name, label
+    (SELECT key, name
     FROM vocabulary
     WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
     ORDER BY name LIMIT 20
     )
     UNION ALL
-    (SELECT DISTINCT v.key, v.name, v.label
+    (SELECT DISTINCT v.key, v.name
     FROM vocabulary v
-    JOIN jsonb_each_text(v.label) l ON true
-    WHERE l.value ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
+    JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
+    WHERE vl.label ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
     <if test="locale != null">
-      AND l.key = #{locale}
+      AND vl.language = #{locale}
     </if>
     LIMIT 20
     )
     UNION ALL
-    (SELECT DISTINCT v.key, v.name, v.label
+    (SELECT DISTINCT v.key, v.name
     FROM vocabulary v
-    JOIN jsonb_each_text(v.label) l ON true
-    WHERE l.value ilike '%'||#{query}||'%' AND NOT l.value ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
+    JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
+    WHERE vl.label ilike '%'||#{query}||'%' AND NOT vl.label ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
     <if test="locale != null">
-      AND l.key = #{locale}
+      AND vl.language= #{locale}
     </if>
     LIMIT 20
     )
@@ -208,10 +211,7 @@
       <if test="vocabularyKey != null">
         key != #{vocabularyKey}
       </if>
-      AND
-      <foreach collection="normalizedValues" item="v" separator=" OR " open="(" close=")">
-        normalized_values::jsonb->#{v.node} ??| #{v.values, typeHandler=StringArrayTypeHandler}
-      </foreach>
+      AND normalize_name(name) = #{name,jdbcType=VARCHAR}
     </where>
     LIMIT 3
   </select>
@@ -247,5 +247,36 @@
     DELETE FROM vocabulary
     WHERE key = #{key,jdbcType=BIGINT}
   </delete>
+
+  <!-- labels -->
+  <insert id="addLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
+    INSERT INTO vocabulary_label(vocabulary_key, language, label)
+    VALUES(#{entityKey,jdbcType=BIGINT},
+           #{language,jdbcType=VARCHAR},
+           #{label,jdbcType=VARCHAR})
+  </insert>
+
+  <update id="updateLabel">
+    UPDATE vocabulary_label
+    SET label = #{label,jdbcType=VARCHAR}
+    WHERE key = #{key,jdbcType=BIGINT}
+  </update>
+
+  <delete id="deleteLabel">
+    DELETE FROM vocabulary_label
+    WHERE key = #{key,jdbcType=BIGINT}
+  </delete>
+
+  <select id="listLabels" resultMap="LABEL_RESULT_MAP">
+    SELECT key, vocabulary_key, language, label
+    FROM vocabulary_label
+    WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
+  </select>
+
+  <select id="getLabel" resultMap="LABEL_RESULT_MAP">
+    SELECT key, vocabulary_key, language, label
+    FROM vocabulary_label
+    WHERE key = #{key,jdbcType=BIGINT}
+  </select>
 
 </mapper>

@@ -13,20 +13,22 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import javax.annotation.Nullable;
 
 /** Mapper for {@link Concept}. */
 @Mapper
@@ -70,13 +72,19 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * Searchs for a similar concept whose name or any of its labels are the same as the ones received
    * as parameter.
    *
-   * @param normalizedValues values that we want to check that are unique in the vocabulary. <b>They
-   *     must be normalized</b>
+   * @param normalizedLabel value that we want to check that is unique in the vocabulary. <b>It must
+   *     be normalized</b>
    * @param vocabularyKey key of the vocabulary whose concepts we'll check
    * @param conceptKey if we are updating a concept we exclude it from the search
    */
+  List<KeyNameResult> findSimilarLabels(
+      @Param("normalizedLabel") String normalizedLabel,
+      @Param("vocabularyKey") long vocabularyKey,
+      @Nullable @Param("conceptKey") Long conceptKey);
+
   List<KeyNameResult> findSimilarities(
-      @Param("normalizedValues") List<NormalizedValuesParam> normalizedValues,
+      @Param("normalizedLabel") String normalizedValue,
+      @Nullable @Param("lang") LanguageRegion languageRegion,
       @Param("vocabularyKey") long vocabularyKey,
       @Nullable @Param("conceptKey") Long conceptKey);
 
@@ -104,4 +112,24 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   List<Tag> listTags(@Param("key") long conceptKey);
 
   void deleteAllConcepts(@Param("vocabularyKey") long vocabularyKey);
+
+  void addAlternativeLabel(Label label);
+
+  void updateAlternativeLabel(Label label);
+
+  void deleteAlternativeLabel(@Param("key") long key);
+
+  List<Label> listAlternativeLabels(@Param("entityKey") long entityKey);
+
+  Label getAlternativeLabel(@Param("key") long labelKey);
+
+  void addHiddenLabel(HiddenLabel label);
+
+  void updateHiddenLabel(HiddenLabel label);
+
+  void deleteHiddenLabel(@Param("key") long key);
+
+  List<HiddenLabel> listHiddenLabels(@Param("entityKey") long entityKey);
+
+  HiddenLabel getHiddenLabel(@Param("key") long labelKey);
 }

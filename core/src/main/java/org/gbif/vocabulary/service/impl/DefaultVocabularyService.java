@@ -13,10 +13,15 @@
  */
 package org.gbif.vocabulary.service.impl;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -27,21 +32,7 @@ import org.gbif.vocabulary.model.utils.PostPersist;
 import org.gbif.vocabulary.model.utils.PrePersist;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.VocabularyService;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -49,11 +40,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
+
 import static java.util.Objects.requireNonNull;
+
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.NAME_FORMAT_PATTERN;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.isValidName;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
-import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
-import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /** Default implementation for {@link VocabularyService}. */
 @Service
@@ -86,8 +85,18 @@ public class DefaultVocabularyService implements VocabularyService {
   public long create(@NotNull @Valid Vocabulary vocabulary) {
     checkArgument(vocabulary.getKey() == null, "Can't create a vocabulary which already has a key");
 
-    // checking the validity of the concept.
-    validateEntity(vocabulary, createSimilaritiesExtractor(vocabulary, false));
+    // checking the format of the name
+    checkArgument(
+        isValidName(vocabulary.getName()),
+        "Entity name has to match the regex " + NAME_FORMAT_PATTERN.pattern());
+
+    // checking if there are other vocabs with the same name
+    List<KeyNameResult> similarities =
+        vocabularyMapper.findSimilarities(normalizeName(vocabulary.getName()), null);
+    if (!similarities.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);
+    }
 
     vocabularyMapper.create(vocabulary);
 
@@ -120,11 +129,38 @@ public class DefaultVocabularyService implements VocabularyService {
         Objects.equals(oldVocabulary.getDeleted(), vocabulary.getDeleted()),
         "Cannot delete or restore an vocabulary while updating");
 
-    // validity check
-    validateEntity(vocabulary, createSimilaritiesExtractor(vocabulary, true));
-
     // update the vocabulary
     vocabularyMapper.update(vocabulary);
+  }
+
+  @Override
+  public long addLabel(Label label) {
+    checkArgument(label.getKey() == null, "Can't add a label that has a key");
+    checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
+
+    vocabularyMapper.addLabel(label);
+    return label.getKey();
+  }
+
+  @Override
+  public void updateLabel(Label label) {
+    requireNonNull(label.getKey());
+    vocabularyMapper.updateLabel(label);
+  }
+
+  @Override
+  public void deleteLabel(long key) {
+    vocabularyMapper.deleteLabel(key);
+  }
+
+  @Override
+  public Label getLabel(long key) {
+    return vocabularyMapper.getLabel(key);
+  }
+
+  @Override
+  public List<Label> listLabels(long entityKey) {
+    return vocabularyMapper.listLabels(entityKey);
   }
 
   @Override
@@ -199,26 +235,5 @@ public class DefaultVocabularyService implements VocabularyService {
         .stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
-  }
-
-  /**
-   * Supplies the required method to the DB that checks if the name or labels of the vocabulary
-   * received are already present in any other vocabulary.
-   *
-   * <p><b>NOTICE that the normalization of the name and labels has to be the same as the one the DB
-   * does.</b>
-   */
-  private Supplier<List<KeyNameResult>> createSimilaritiesExtractor(
-      Vocabulary vocabulary, boolean update) {
-    return () -> {
-      List<NormalizedValuesParam> valuesToCheck = new ArrayList<>();
-
-      // add name
-      valuesToCheck.add(
-          NormalizedValuesParam.from(
-              NAME_NODE, Collections.singletonList(normalizeName(vocabulary.getName()))));
-
-      return vocabularyMapper.findSimilarities(valuesToCheck, update ? vocabulary.getKey() : null);
-    };
   }
 }

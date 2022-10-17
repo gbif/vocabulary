@@ -10,5 +10,5 @@ public class Label {
   private Long key;
   private Long entityKey;
   private LanguageRegion language;
-  private String label;
+  private String value;
 }

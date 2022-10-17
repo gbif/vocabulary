@@ -164,10 +164,10 @@ public class ConceptServiceIT {
         Label.builder()
             .entityKey(concept.getKey())
             .language(LanguageRegion.ENGLISH)
-            .label("sim1")
+            .value("sim1")
             .build());
     conceptService.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept.getKey()).label("simm1").build());
+        HiddenLabel.builder().entityKey(concept.getKey()).value("simm1").build());
 
     Concept similar = createBasicConcept(vocabularyKeys[0]);
     similar.setName(concept.getName());
@@ -185,7 +185,7 @@ public class ConceptServiceIT {
         IllegalArgumentException.class,
         () ->
             conceptService.addHiddenLabel(
-                HiddenLabel.builder().entityKey(similar2.getKey()).label("simm1").build()));
+                HiddenLabel.builder().entityKey(similar2.getKey()).value("simm1").build()));
 
     Concept similar3 = createBasicConcept(vocabularyKeys[0]);
     conceptService.create(similar3);
@@ -193,7 +193,7 @@ public class ConceptServiceIT {
         IllegalArgumentException.class,
         () ->
             conceptService.addHiddenLabel(
-                HiddenLabel.builder().entityKey(similar3.getKey()).label("simm2").build()));
+                HiddenLabel.builder().entityKey(similar3.getKey()).value("simm2").build()));
 
     Concept similar4 = createBasicConcept(vocabularyKeys[0]);
     conceptService.create(similar4);
@@ -204,7 +204,7 @@ public class ConceptServiceIT {
                 Label.builder()
                     .entityKey(similar4.getKey())
                     .language(LanguageRegion.SPANISH)
-                    .label("simm2")
+                    .value("simm2")
                     .build()));
   }
 
@@ -236,10 +236,10 @@ public class ConceptServiceIT {
         Label.builder()
             .entityKey(concept1.getKey())
             .language(LanguageRegion.ENGLISH)
-            .label("simupdated")
+            .value("simupdated")
             .build());
     conceptService.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept1.getKey()).label("hidden1").build());
+        HiddenLabel.builder().entityKey(concept1.getKey()).value("hidden1").build());
 
     Concept concept2 = createBasicConcept(vocabularyKeys[0]);
     long key2 = conceptService.create(concept2);
@@ -252,7 +252,7 @@ public class ConceptServiceIT {
                 Label.builder()
                     .entityKey(concept2.getKey())
                     .language(LanguageRegion.ENGLISH)
-                    .label("simupdated")
+                    .value("simupdated")
                     .build()));
 
     assertThrows(
@@ -262,7 +262,7 @@ public class ConceptServiceIT {
                 Label.builder()
                     .entityKey(concept2.getKey())
                     .language(LanguageRegion.ENGLISH)
-                    .label(concept1.getName())
+                    .value(concept1.getName())
                     .build()));
 
     assertThrows(
@@ -272,20 +272,20 @@ public class ConceptServiceIT {
                 Label.builder()
                     .entityKey(concept2.getKey())
                     .language(LanguageRegion.SPANISH)
-                    .label("simupdated")
+                    .value("simupdated")
                     .build()));
 
     assertThrows(
         IllegalArgumentException.class,
         () ->
             conceptService.addHiddenLabel(
-                HiddenLabel.builder().entityKey(concept2.getKey()).label("simupdated").build()));
+                HiddenLabel.builder().entityKey(concept2.getKey()).value("simupdated").build()));
 
     assertThrows(
         IllegalArgumentException.class,
         () ->
             conceptService.addHiddenLabel(
-                HiddenLabel.builder().entityKey(concept2.getKey()).label("hidden1").build()));
+                HiddenLabel.builder().entityKey(concept2.getKey()).value("hidden1").build()));
 
     assertThrows(
         IllegalArgumentException.class,
@@ -294,7 +294,7 @@ public class ConceptServiceIT {
                 Label.builder()
                     .entityKey(concept2.getKey())
                     .language(LanguageRegion.ENGLISH)
-                    .label("hidden1")
+                    .value("hidden1")
                     .build()));
   }
 

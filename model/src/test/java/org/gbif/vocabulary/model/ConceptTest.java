@@ -34,13 +34,13 @@ public class ConceptTest {
     c1.setVocabularyKey(1L);
     c1.setLabels(
         Collections.singletonList(
-            Label.builder().language(LanguageRegion.ENGLISH).label("tes").build()));
+            Label.builder().language(LanguageRegion.ENGLISH).value("tes").build()));
     c1.setParentKey(2L);
     c1.setReplacedByKey(1L);
     c1.setAlternativeLabels(
         Collections.singletonList(
-            Label.builder().language(LanguageRegion.ENGLISH).label("alt").build()));
-    c1.setHiddenLabels(Collections.singletonList(HiddenLabel.builder().label("misspelt").build()));
+            Label.builder().language(LanguageRegion.ENGLISH).value("alt").build()));
+    c1.setHiddenLabels(Collections.singletonList(HiddenLabel.builder().value("misspelt").build()));
     c1.setDefinitions(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
     c1.setSameAsUris(Collections.singletonList(URI.create("http://test.com")));
     c1.setEditorialNotes(Arrays.asList("n1", "n2"));

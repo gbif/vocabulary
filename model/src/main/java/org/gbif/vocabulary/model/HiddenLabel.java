@@ -9,6 +9,6 @@ public class HiddenLabel {
 
   private Long key;
   private Long entityKey;
-  private String label;
+  private String value;
 
 }

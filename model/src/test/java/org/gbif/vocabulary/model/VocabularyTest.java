@@ -34,7 +34,7 @@ public class VocabularyTest {
     v1.setNamespace("ns");
     v1.setLabels(
         Collections.singletonList(
-            Label.builder().language(LanguageRegion.ENGLISH).label("label").build()));
+            Label.builder().language(LanguageRegion.ENGLISH).value("label").build()));
     v1.setDefinitions(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
     v1.setEditorialNotes(Arrays.asList("n1", "n2"));
     v1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));

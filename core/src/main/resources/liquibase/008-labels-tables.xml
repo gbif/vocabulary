@@ -10,7 +10,7 @@
          key bigserial NOT NULL PRIMARY KEY,
          vocabulary_key bigint NOT NULL REFERENCES vocabulary(key),
          language varchar(8) NOT NULL,
-         label text NOT NULL,
+         value text NOT NULL,
          UNIQUE(vocabulary_key, language)
        );
 
@@ -18,7 +18,7 @@
          key bigserial NOT NULL PRIMARY KEY,
          concept_key bigint NOT NULL REFERENCES concept(key),
          language varchar(8) NOT NULL,
-         label text NOT NULL,
+         value text NOT NULL,
          normalized_value text,
          UNIQUE(concept_key, language)
        );
@@ -27,17 +27,17 @@
          key bigserial NOT NULL PRIMARY KEY,
          concept_key bigint NOT NULL REFERENCES concept(key),
          language varchar(8) NOT NULL,
-         label text NOT NULL,
+         value text NOT NULL,
          normalized_value text,
-         UNIQUE(concept_key, language, label)
+         UNIQUE(concept_key, language, value)
        );
 
        CREATE TABLE concept_hidden_label(
          key bigserial NOT NULL PRIMARY KEY,
          concept_key bigint NOT NULL REFERENCES concept(key),
-         label text NOT NULL,
+         value text NOT NULL,
          normalized_value text,
-         UNIQUE(concept_key, label)
+         UNIQUE(concept_key, value)
        );
 
        CREATE OR REPLACE FUNCTION vocabulary_change_trigger()
@@ -64,6 +64,29 @@
        CREATE TRIGGER vocabulary_fulltext_update
        BEFORE INSERT OR UPDATE OF namespace, name, definition, external_definition_urls, editorial_notes ON vocabulary
        FOR EACH ROW EXECUTE PROCEDURE vocabulary_change_trigger();
+
+      CREATE OR REPLACE FUNCTION vocabulary_label_change_trigger()
+       RETURNS TRIGGER AS
+       $vocablabelchange$
+           BEGIN
+             -- update full text search of the vocabulary
+             UPDATE vocabulary
+             SET fulltext_search = fulltext_search || TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.value,''))),
+                 modified = now()
+             WHERE key = NEW.vocabulary_key;
+
+             IF (TG_OP = 'DELETE') THEN
+              RETURN OLD;
+             ELSE
+              RETURN NEW;
+             END IF;
+           END;
+       $vocablabelchange$
+       LANGUAGE plpgsql;
+
+       CREATE TRIGGER vocabulary_label_update
+       BEFORE INSERT OR DELETE OR UPDATE OF value ON vocabulary_label
+       FOR EACH ROW EXECUTE PROCEDURE vocabulary_label_change_trigger();
 
        CREATE OR REPLACE FUNCTION concept_change_trigger()
        RETURNS TRIGGER AS
@@ -96,26 +119,31 @@
            BEGIN
              -- update full text search of the concept
              UPDATE concept
-             SET fulltext_search = fulltext_search || TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.label,'')))
+             SET fulltext_search = fulltext_search || TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.value,''))),
+                 modified = now()
              WHERE key = NEW.concept_key;
 
-             NEW.normalized_value := normalize_label(COALESCE(NEW.label,''));
+             NEW.normalized_value := normalize_label(COALESCE(NEW.value,''));
 
-             RETURN NEW;
+             IF (TG_OP = 'DELETE') THEN
+              RETURN OLD;
+             ELSE
+              RETURN NEW;
+             END IF;
            END;
        $conceptlabelchange$
        LANGUAGE plpgsql;
 
        CREATE TRIGGER concept_label_update
-       BEFORE INSERT OR DELETE OR UPDATE OF label ON concept_label
+       BEFORE INSERT OR DELETE OR UPDATE OF value ON concept_label
        FOR EACH ROW EXECUTE PROCEDURE concept_label_change_trigger();
 
        CREATE TRIGGER concept_alternative_label_update
-       BEFORE INSERT OR DELETE OR UPDATE OF label ON concept_alternative_label
+       BEFORE INSERT OR DELETE OR UPDATE OF value ON concept_alternative_label
        FOR EACH ROW EXECUTE PROCEDURE concept_label_change_trigger();
 
        CREATE TRIGGER concept_hidden_label_update
-       BEFORE INSERT OR DELETE OR UPDATE OF label ON concept_hidden_label
+       BEFORE INSERT OR DELETE OR UPDATE OF value ON concept_hidden_label
        FOR EACH ROW EXECUTE PROCEDURE concept_label_change_trigger();
 
        ALTER TABLE vocabulary DROP COLUMN normalized_values;

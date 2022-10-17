@@ -55,7 +55,7 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   List<KeyNameResult> suggest(
       @Param("query") String query,
       @Param("vocabularyKey") long vocabularyKey,
-      @Nullable @Param("locale") String locale);
+      @Nullable @Param("lang") LanguageRegion language);
 
   /**
    * Given a deprecated concept, it finds the current replacement, that's to say, the first
@@ -72,18 +72,14 @@ public interface ConceptMapper extends BaseMapper<Concept> {
    * Searchs for a similar concept whose name or any of its labels are the same as the ones received
    * as parameter.
    *
-   * @param normalizedLabel value that we want to check that is unique in the vocabulary. <b>It must
+   * @param normalizedValue value that we want to check that is unique in the vocabulary. <b>It must
    *     be normalized</b>
+   * @param languageRegion language to filter by
    * @param vocabularyKey key of the vocabulary whose concepts we'll check
    * @param conceptKey if we are updating a concept we exclude it from the search
    */
-  List<KeyNameResult> findSimilarLabels(
-      @Param("normalizedLabel") String normalizedLabel,
-      @Param("vocabularyKey") long vocabularyKey,
-      @Nullable @Param("conceptKey") Long conceptKey);
-
   List<KeyNameResult> findSimilarities(
-      @Param("normalizedLabel") String normalizedValue,
+      @Param("normalizedValue") String normalizedValue,
       @Nullable @Param("lang") LanguageRegion languageRegion,
       @Param("vocabularyKey") long vocabularyKey,
       @Nullable @Param("conceptKey") Long conceptKey);

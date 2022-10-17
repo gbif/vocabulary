@@ -185,9 +185,9 @@
     (SELECT DISTINCT v.key, v.name
     FROM vocabulary v
     JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
-    WHERE vl.label ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
-    <if test="locale != null">
-      AND vl.language = #{locale}
+    WHERE vl.value ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
+    <if test="lang != null">
+      AND vl.language = #{lang}
     </if>
     LIMIT 20
     )
@@ -195,9 +195,9 @@
     (SELECT DISTINCT v.key, v.name
     FROM vocabulary v
     JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
-    WHERE vl.label ilike '%'||#{query}||'%' AND NOT vl.label ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
-    <if test="locale != null">
-      AND vl.language= #{locale}
+    WHERE vl.value ilike '%'||#{query}||'%' AND NOT vl.value ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
+    <if test="lang != null">
+      AND vl.language= #{lang}
     </if>
     LIMIT 20
     )
@@ -205,7 +205,7 @@
   </select>
 
   <select id="findSimilarities" resultType="KeyNameResult">
-    SELECT key, name
+    SELECT DISTINCT ON(key) key, name
     FROM vocabulary
     <where>
       <if test="vocabularyKey != null">
@@ -250,15 +250,15 @@
 
   <!-- labels -->
   <insert id="addLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO vocabulary_label(vocabulary_key, language, label)
+    INSERT INTO vocabulary_label(vocabulary_key, language, value)
     VALUES(#{entityKey,jdbcType=BIGINT},
            #{language,jdbcType=VARCHAR},
-           #{label,jdbcType=VARCHAR})
+           #{value,jdbcType=VARCHAR})
   </insert>
 
   <update id="updateLabel">
     UPDATE vocabulary_label
-    SET label = #{label,jdbcType=VARCHAR}
+    SET value = #{value,jdbcType=VARCHAR}
     WHERE key = #{key,jdbcType=BIGINT}
   </update>
 
@@ -268,13 +268,13 @@
   </delete>
 
   <select id="listLabels" resultMap="LABEL_RESULT_MAP">
-    SELECT key, vocabulary_key, language, label
+    SELECT key, vocabulary_key, language, value
     FROM vocabulary_label
     WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
   </select>
 
   <select id="getLabel" resultMap="LABEL_RESULT_MAP">
-    SELECT key, vocabulary_key, language, label
+    SELECT key, vocabulary_key, language, value
     FROM vocabulary_label
     WHERE key = #{key,jdbcType=BIGINT}
   </select>

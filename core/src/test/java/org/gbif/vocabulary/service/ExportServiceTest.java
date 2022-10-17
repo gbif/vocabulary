@@ -87,14 +87,14 @@ public class ExportServiceTest extends MockServiceBaseTest {
             Label.builder()
                 .entityKey(c1.getKey())
                 .language(LanguageRegion.ENGLISH)
-                .label("Label")
+                .value("Label")
                 .build());
     c1.getLabels()
         .add(
             Label.builder()
                 .entityKey(c1.getKey())
                 .language(LanguageRegion.SPANISH)
-                .label("Etiqueta")
+                .value("Etiqueta")
                 .build());
 
     // alternative labels
@@ -103,43 +103,43 @@ public class ExportServiceTest extends MockServiceBaseTest {
             Label.builder()
                 .entityKey(c1.getKey())
                 .language(LanguageRegion.ENGLISH)
-                .label("label2")
+                .value("label2")
                 .build());
     c1.getAlternativeLabels()
         .add(
             Label.builder()
                 .entityKey(c1.getKey())
                 .language(LanguageRegion.ENGLISH)
-                .label("label3")
+                .value("label3")
                 .build());
     c1.getAlternativeLabels()
         .add(
             Label.builder()
                 .entityKey(c1.getKey())
                 .language(LanguageRegion.ENGLISH)
-                .label("label4")
+                .value("label4")
                 .build());
     c1.getAlternativeLabels()
         .add(
             Label.builder()
                 .entityKey(c1.getKey())
                 .language(LanguageRegion.SPANISH)
-                .label("label5")
+                .value("label5")
                 .build());
     c1.getAlternativeLabels()
         .add(
             Label.builder()
                 .entityKey(c1.getKey())
                 .language(LanguageRegion.SPANISH)
-                .label("label6")
+                .value("label6")
                 .build());
 
     // hidden labels
-    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl2").build());
-    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl3").build());
-    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl4").build());
-    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl5").build());
-    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).label("labl6").build());
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl2").build());
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl3").build());
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl4").build());
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl5").build());
+    c1.getHiddenLabels().add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl6").build());
 
     Concept c2 = new Concept();
     c2.setName("c2");
@@ -149,7 +149,7 @@ public class ExportServiceTest extends MockServiceBaseTest {
             Label.builder()
                 .entityKey(c2.getKey())
                 .language(LanguageRegion.ENGLISH)
-                .label("Label")
+                .value("Label")
                 .build()));
 
     Concept c3 = new Concept();
@@ -160,7 +160,7 @@ public class ExportServiceTest extends MockServiceBaseTest {
             Label.builder()
                 .entityKey(c3.getKey())
                 .language(LanguageRegion.ENGLISH)
-                .label("Label")
+                .value("Label")
                 .build()));
 
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);

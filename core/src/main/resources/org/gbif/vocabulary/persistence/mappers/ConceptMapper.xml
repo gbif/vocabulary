@@ -265,19 +265,19 @@
     (SELECT DISTINCT c.key, c.name
     FROM concept c
     JOIN concept_label cl ON cl.concept_key = c.key
-    WHERE c.vocabulary_key = #{vocabularyKey} AND cl.label ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
-    <if test="locale != null">
-      AND l.key = #{locale}
+    WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
+    <if test="lang != null">
+      AND cl.language = #{lang}
     </if>
     LIMIT 20
     )
     UNION ALL
-    (SELECT DISTINCT c.key, c.name, c.label
+    (SELECT DISTINCT c.key, c.name
     FROM concept c
     JOIN concept_label cl ON cl.concept_key = c.key
-    WHERE c.vocabulary_key = #{vocabularyKey} AND cl.label ilike '%'||#{query}||'%' AND NOT cl.label ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
-    <if test="locale != null">
-        AND cl.language = #{locale}
+    WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike '%'||#{query}||'%' AND NOT cl.value ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
+    <if test="lang != null">
+        AND cl.language = #{lang}
     </if>
     LIMIT 20
     )
@@ -294,10 +294,10 @@
   </update>
 
   <select id="findSimilarities" resultType="KeyNameResult">
-    SELECT c.key, c.name
+    SELECT DISTINCT ON (c.key) c.key, c.name
     FROM concept c
     LEFT JOIN concept_label cl ON cl.concept_key = c.key <if test="lang != null">AND cl.language = #{lang}</if>
-    LEFT JOIN concept_alternative_label cal ON cal.concept_key = c.key <if test="lang != null">AND cl.language = #{lang}</if>
+    LEFT JOIN concept_alternative_label cal ON cal.concept_key = c.key <if test="lang != null">AND cal.language = #{lang}</if>
     LEFT JOIN concept_hidden_label chl ON chl.concept_key = c.key
     <where>
       c.vocabulary_key = #{vocabularyKey}
@@ -390,15 +390,15 @@
 
   <!-- labels -->
   <insert id="addLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO concept_label(concept_key, language, label)
+    INSERT INTO concept_label(concept_key, language, value)
     VALUES(#{entityKey,jdbcType=BIGINT},
     #{language,jdbcType=VARCHAR},
-    #{label,jdbcType=VARCHAR})
+    #{value,jdbcType=VARCHAR})
   </insert>
 
   <update id="updateLabel">
     UPDATE concept_label
-    SET label = #{label,jdbcType=VARCHAR}
+    SET value = #{value,jdbcType=VARCHAR}
     WHERE key = #{key,jdbcType=BIGINT}
   </update>
 
@@ -408,28 +408,28 @@
   </delete>
 
   <select id="listLabels" resultMap="LABEL_RESULT_MAP">
-    SELECT key, concept_key, language, label
+    SELECT key, concept_key, language, value
     FROM concept_label
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
   </select>
 
   <select id="getLabel" resultMap="LABEL_RESULT_MAP">
-    SELECT key, concept_key, language, label
+    SELECT key, concept_key, language, value
     FROM concept_label
     WHERE key = #{key,jdbcType=BIGINT}
   </select>
 
   <!-- alternative labels -->
   <insert id="addAlternativeLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO concept_alternative_label(concept_key, language, label)
+    INSERT INTO concept_alternative_label(concept_key, language, value)
     VALUES(#{entityKey,jdbcType=BIGINT},
     #{language,jdbcType=VARCHAR},
-    #{label,jdbcType=VARCHAR})
+    #{value,jdbcType=VARCHAR})
   </insert>
 
   <update id="updateAlternativeLabel">
     UPDATE concept_alternative_label
-    SET label = #{label,jdbcType=VARCHAR}
+    SET value = #{value,jdbcType=VARCHAR}
     WHERE key = #{key,jdbcType=BIGINT}
   </update>
 
@@ -439,27 +439,27 @@
   </delete>
 
   <select id="listAlternativeLabels" resultMap="LABEL_RESULT_MAP">
-    SELECT key, concept_key, language, label
+    SELECT key, concept_key, language, value
     FROM concept_alternative_label
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
   </select>
 
   <select id="getAlternativeLabel" resultMap="LABEL_RESULT_MAP">
-    SELECT key, concept_key, language, label
+    SELECT key, concept_key, language, value
     FROM concept_alternative_label
     WHERE key = #{key,jdbcType=BIGINT}
   </select>
 
   <!-- hidden labels -->
   <insert id="addHiddenLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO concept_hidden_label(concept_key, label)
+    INSERT INTO concept_hidden_label(concept_key, value)
     VALUES(#{entityKey,jdbcType=BIGINT},
-    #{label,jdbcType=VARCHAR})
+    #{value,jdbcType=VARCHAR})
   </insert>
 
   <update id="updateHiddenLabel">
     UPDATE concept_hidden_label
-    SET label = #{label,jdbcType=VARCHAR}
+    SET value = #{value,jdbcType=VARCHAR}
     WHERE key = #{key,jdbcType=BIGINT}
   </update>
 
@@ -469,13 +469,13 @@
   </delete>
 
   <select id="listHiddenLabels" resultMap="HIDDEN_LABEL_RESULT_MAP">
-    SELECT key, concept_key, label
+    SELECT key, concept_key, value
     FROM concept_hidden_label
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
   </select>
 
   <select id="getHiddenLabel" resultMap="HIDDEN_LABEL_RESULT_MAP">
-    SELECT key, concept_key, label
+    SELECT key, concept_key, value
     FROM concept_hidden_label
     WHERE key = #{key,jdbcType=BIGINT}
   </select>

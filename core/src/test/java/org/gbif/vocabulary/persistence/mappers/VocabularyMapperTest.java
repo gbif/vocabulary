@@ -166,9 +166,8 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
     assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 1);
 
-    // TODO: check this, not gonna work
     conceptMapper.addLabel(
-        Label.builder().entityKey(c1.getKey()).language(LanguageRegion.ACHOLI).label("aa").build());
+        Label.builder().entityKey(c1.getKey()).language(LanguageRegion.ACHOLI).value("aa").build());
     assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 0);
   }
 
@@ -205,14 +204,14 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
         Label.builder()
             .entityKey(v1.getKey())
             .language(LanguageRegion.SPANISH)
-            .label("labelspanish")
+            .value("labelspanish")
             .build());
 
     vocabularyMapper.addLabel(
         Label.builder()
             .entityKey(v1.getKey())
             .language(LanguageRegion.ENGLISH)
-            .label("labelenglish")
+            .value("labelenglish")
             .build());
 
     Vocabulary v2 = createNewEntity();
@@ -224,7 +223,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
         Label.builder()
             .entityKey(v2.getKey())
             .language(LanguageRegion.ENGLISH)
-            .label("Label")
+            .value("Label")
             .build());
 
     // check result values
@@ -240,10 +239,8 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertEquals(0, vocabularyMapper.suggest(null, null).size());
     assertEquals(2, vocabularyMapper.suggest("label", null).size());
     assertEquals(1, vocabularyMapper.suggest("labeleng", null).size());
-    assertEquals(
-        0, vocabularyMapper.suggest("labeleng", LanguageRegion.SPANISH.getLocale()).size());
-    assertEquals(
-        1, vocabularyMapper.suggest("labeleng", LanguageRegion.ENGLISH.getLocale()).size());
+    assertEquals(0, vocabularyMapper.suggest("labeleng", LanguageRegion.SPANISH).size());
+    assertEquals(1, vocabularyMapper.suggest("labeleng", LanguageRegion.ENGLISH).size());
   }
 
   @Test
@@ -265,15 +262,10 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     // check with multiple labels
     similarities = vocabularyMapper.findSimilarities(normalizeName("Another Vocab"), null);
     assertEquals(1, similarities.size());
-    assertSimilarity(similarities, vocabulary1);
+    assertSimilarity(similarities, vocabulary2);
 
     similarities = vocabularyMapper.findSimilarities(normalizeName("new Vocab"), null);
     assertEquals(0, similarities.size());
-
-    similarities =
-        vocabularyMapper.findSimilarities(normalizeName("new Vocab"), vocabulary1.getKey());
-    assertEquals(1, similarities.size());
-    assertSimilarity(similarities, vocabulary1);
   }
 
   private void assertSimilarity(List<KeyNameResult> similarities, Vocabulary vocabulary) {
@@ -319,7 +311,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
         Label.builder()
             .entityKey(vocabulary.getKey())
             .language(LanguageRegion.ENGLISH)
-            .label("test")
+            .value("test")
             .build();
     vocabularyMapper.addLabel(label);
 
@@ -327,15 +319,16 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertEquals(1, labels.size());
 
     label = vocabularyMapper.getLabel(label.getKey());
-    assertEquals("test", label.getLabel());
+    assertEquals("test", label.getValue());
     assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
 
-    label.setLabel("test2");
+    label.setValue("test2");
     vocabularyMapper.updateLabel(label);
     label = vocabularyMapper.getLabel(label.getKey());
-    assertEquals("test2", label.getLabel());
+    assertEquals("test2", label.getValue());
 
     vocabularyMapper.deleteLabel(label.getKey());
+
     labels = vocabularyMapper.listLabels(vocabulary.getKey());
     assertEquals(0, labels.size());
   }

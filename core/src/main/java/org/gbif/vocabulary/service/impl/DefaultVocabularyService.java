@@ -175,8 +175,7 @@ public class DefaultVocabularyService implements VocabularyService {
   @Override
   public List<KeyNameResult> suggest(String query, @Nullable LanguageRegion languageRegion) {
     query = query != null ? query : "";
-    return vocabularyMapper.suggest(
-        query, languageRegion != null ? languageRegion.getLocale() : null);
+    return vocabularyMapper.suggest(query, languageRegion);
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})

@@ -180,8 +180,7 @@ public class DefaultConceptService implements ConceptService {
   public List<KeyNameResult> suggest(
       String query, long vocabularyKey, @Nullable LanguageRegion languageRegion) {
     query = query != null ? query : "";
-    return conceptMapper.suggest(
-        query, vocabularyKey, languageRegion != null ? languageRegion.getLocale() : null);
+    return conceptMapper.suggest(query, vocabularyKey, languageRegion);
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
@@ -294,7 +293,7 @@ public class DefaultConceptService implements ConceptService {
   public long addLabel(Label label) {
     checkArgument(label.getKey() == null, "Can't add a label that has a key");
     checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
-    checkArgument(!Strings.isNullOrEmpty(label.getLabel()), "Label is required");
+    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
     // checking if there are other vocabs with the same label
     checkSimilarLabels(label);
@@ -306,7 +305,7 @@ public class DefaultConceptService implements ConceptService {
   @Override
   public void updateLabel(Label label) {
     requireNonNull(label.getKey());
-    checkArgument(!Strings.isNullOrEmpty(label.getLabel()), "Label is required");
+    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
     // checking if there are other vocabs with the same label
     checkSimilarLabels(label);
@@ -333,7 +332,7 @@ public class DefaultConceptService implements ConceptService {
   public long addAlternativeLabel(Label label) {
     checkArgument(label.getKey() == null, "Can't add a label that has a key");
     checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
-    checkArgument(!Strings.isNullOrEmpty(label.getLabel()), "Label is required");
+    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
     // checking if there are other vocabs with the same label
     checkSimilarLabels(label);
@@ -345,7 +344,7 @@ public class DefaultConceptService implements ConceptService {
   @Override
   public void updateAlternativeLabel(Label label) {
     requireNonNull(label.getKey());
-    checkArgument(!Strings.isNullOrEmpty(label.getLabel()), "Label is required");
+    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
     // checking if there are other vocabs with the same label
     checkSimilarLabels(label);
@@ -357,7 +356,7 @@ public class DefaultConceptService implements ConceptService {
     long vocabularyKey = conceptMapper.getVocabularyKey(label.getEntityKey());
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            normalizeLabel(label.getLabel()),
+            normalizeLabel(label.getValue()),
             label.getLanguage(),
             vocabularyKey,
             label.getEntityKey());
@@ -386,7 +385,7 @@ public class DefaultConceptService implements ConceptService {
   public long addHiddenLabel(HiddenLabel label) {
     checkArgument(label.getKey() == null, "Can't add a label that has a key");
     checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
-    checkArgument(!Strings.isNullOrEmpty(label.getLabel()), "Label is required");
+    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
     // checking if there are other vocabs with the same label
     checkSimilarHiddenLabels(label);
@@ -398,7 +397,7 @@ public class DefaultConceptService implements ConceptService {
   @Override
   public void updateHiddenLabel(HiddenLabel label) {
     requireNonNull(label.getKey());
-    checkArgument(!Strings.isNullOrEmpty(label.getLabel()), "Label is required");
+    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
     // checking if there are other vocabs with the same label
     checkSimilarHiddenLabels(label);
@@ -410,7 +409,7 @@ public class DefaultConceptService implements ConceptService {
     long vocabularyKey = conceptMapper.getVocabularyKey(label.getEntityKey());
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            normalizeName(label.getLabel()), null, vocabularyKey, label.getEntityKey());
+            normalizeName(label.getValue()), null, vocabularyKey, label.getEntityKey());
     if (!similarities.isEmpty()) {
       throw new IllegalArgumentException(
           "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);

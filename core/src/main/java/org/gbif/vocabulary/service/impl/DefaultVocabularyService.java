@@ -133,8 +133,11 @@ public class DefaultVocabularyService implements VocabularyService {
     vocabularyMapper.update(vocabulary);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
   @Override
-  public long addLabel(Label label) {
+  public long addLabel(@NotNull @Valid Label label) {
     checkArgument(label.getKey() == null, "Can't add a label that has a key");
     checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
 
@@ -142,12 +145,17 @@ public class DefaultVocabularyService implements VocabularyService {
     return label.getKey();
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PostPersist.class, Default.class})
+  @Transactional
   @Override
-  public void updateLabel(Label label) {
+  public void updateLabel(@NotNull @Valid Label label) {
     requireNonNull(label.getKey());
     vocabularyMapper.updateLabel(label);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Transactional
   @Override
   public void deleteLabel(long key) {
     vocabularyMapper.deleteLabel(key);

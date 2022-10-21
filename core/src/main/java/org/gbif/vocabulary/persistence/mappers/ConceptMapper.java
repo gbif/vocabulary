@@ -115,7 +115,10 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   void deleteAlternativeLabel(@Param("key") long key);
 
-  List<Label> listAlternativeLabels(@Param("entityKey") long entityKey);
+  List<Label> listAlternativeLabels(
+      @Param("entityKey") long entityKey, @Nullable @Param("page") Pageable page);
+
+  long countAlternativeLabels(@Param("entityKey") long entityKey);
 
   Label getAlternativeLabel(@Param("key") long labelKey);
 
@@ -125,7 +128,10 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   void deleteHiddenLabel(@Param("key") long key);
 
-  List<HiddenLabel> listHiddenLabels(@Param("entityKey") long entityKey);
+  List<HiddenLabel> listHiddenLabels(
+      @Param("entityKey") long entityKey, @Nullable @Param("page") Pageable page);
+
+  long countHiddenLabels(@Param("entityKey") long entityKey);
 
   HiddenLabel getHiddenLabel(@Param("key") long labelKey);
 }

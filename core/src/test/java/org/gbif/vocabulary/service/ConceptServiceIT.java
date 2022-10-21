@@ -52,6 +52,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.sql.DataSource;
 
+import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertDeprecated;
 import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
@@ -72,8 +73,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ContextConfiguration(initializers = {ConceptServiceIT.ContexInitializer.class})
 @ActiveProfiles("test")
 public class ConceptServiceIT {
-
-  // TODO: labels tests
 
   private static final String CLEAN_DB_SCRIPT = "/clean-concepts.sql";
 
@@ -189,8 +188,7 @@ public class ConceptServiceIT {
 
     Concept similar3 = createBasicConcept(vocabularyKeys[0]);
     conceptService.create(similar3);
-    assertThrows(
-        IllegalArgumentException.class,
+    assertDoesNotThrow(
         () ->
             conceptService.addHiddenLabel(
                 HiddenLabel.builder().entityKey(similar3.getKey()).value("simm2").build()));
@@ -265,8 +263,7 @@ public class ConceptServiceIT {
                     .value(concept1.getName())
                     .build()));
 
-    assertThrows(
-        IllegalArgumentException.class,
+    assertDoesNotThrow(
         () ->
             conceptService.addAlternativeLabel(
                 Label.builder()
@@ -620,6 +617,106 @@ public class ConceptServiceIT {
                 .build(),
             new PagingRequest(0, 5));
     assertEquals(0, concepts.getResults().size());
+  }
+
+  @Test
+  public void labelsTest() {
+    Concept concept1 = createBasicConcept(vocabularyKeys[0]);
+    long c1Key = conceptService.create(concept1);
+
+    // add label
+    Label label =
+        Label.builder().entityKey(c1Key).language(LanguageRegion.ENGLISH).value("label").build();
+    long labelKey = conceptService.addLabel(label);
+    assertTrue(labelKey > 0);
+
+    // get label
+    Label createdLabel = conceptService.getLabel(labelKey);
+    assertEquals(label, createdLabel);
+
+    // list labels
+    List<Label> labelList = conceptService.listLabels(c1Key);
+    assertEquals(1, labelList.size());
+    assertEquals(labelKey, labelList.get(0).getKey());
+
+    // add another label
+    Label label2 =
+        Label.builder().entityKey(c1Key).language(LanguageRegion.SPANISH).value("label2").build();
+    long labelKey2 = conceptService.addLabel(label2);
+    assertTrue(labelKey2 > 0);
+    assertEquals(2, conceptService.listLabels(c1Key).size());
+
+    // delete label
+    conceptService.deleteLabel(labelKey);
+    labelList = conceptService.listLabels(c1Key);
+    assertEquals(1, labelList.size());
+    assertEquals(labelKey2, labelList.get(0).getKey());
+  }
+
+  @Test
+  public void alternativeLabelsTest() {
+    Concept concept1 = createBasicConcept(vocabularyKeys[0]);
+    long c1Key = conceptService.create(concept1);
+
+    // add label
+    Label label =
+        Label.builder().entityKey(c1Key).language(LanguageRegion.ENGLISH).value("label").build();
+    long labelKey = conceptService.addAlternativeLabel(label);
+    assertTrue(labelKey > 0);
+
+    // get label
+    Label createdLabel = conceptService.getAlternativeLabel(labelKey);
+    assertEquals(label, createdLabel);
+
+    // list labels
+    PagingResponse<Label> labelList = conceptService.listAlternativeLabels(c1Key, DEFAULT_PAGE);
+    assertEquals(1, labelList.getResults().size());
+    assertEquals(labelKey, labelList.getResults().get(0).getKey());
+
+    // add another label
+    Label label2 =
+        Label.builder().entityKey(c1Key).language(LanguageRegion.SPANISH).value("label2").build();
+    long labelKey2 = conceptService.addAlternativeLabel(label2);
+    assertTrue(labelKey2 > 0);
+    assertEquals(2, conceptService.listAlternativeLabels(c1Key, DEFAULT_PAGE).getResults().size());
+
+    // delete label
+    conceptService.deleteAlternativeLabel(labelKey);
+    labelList = conceptService.listAlternativeLabels(c1Key, DEFAULT_PAGE);
+    assertEquals(1, labelList.getResults().size());
+    assertEquals(labelKey2, labelList.getResults().get(0).getKey());
+  }
+
+  @Test
+  public void hiddenLabelsTest() {
+    Concept concept1 = createBasicConcept(vocabularyKeys[0]);
+    long c1Key = conceptService.create(concept1);
+
+    // add label
+    HiddenLabel label = HiddenLabel.builder().entityKey(c1Key).value("label").build();
+    long labelKey = conceptService.addHiddenLabel(label);
+    assertTrue(labelKey > 0);
+
+    // get label
+    HiddenLabel createdLabel = conceptService.getHiddenLabel(labelKey);
+    assertEquals(label, createdLabel);
+
+    // list labels
+    PagingResponse<HiddenLabel> labelList = conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE);
+    assertEquals(1, labelList.getResults().size());
+    assertEquals(labelKey, labelList.getResults().get(0).getKey());
+
+    // add another label
+    HiddenLabel label2 = HiddenLabel.builder().entityKey(c1Key).value("label2").build();
+    long labelKey2 = conceptService.addHiddenLabel(label2);
+    assertTrue(labelKey2 > 0);
+    assertEquals(2, conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE).getResults().size());
+
+    // delete label
+    conceptService.deleteHiddenLabel(labelKey);
+    labelList = conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE);
+    assertEquals(1, labelList.getResults().size());
+    assertEquals(labelKey2, labelList.getResults().get(0).getKey());
   }
 
   static class ContexInitializer

@@ -151,7 +151,7 @@ abstract class DocumentationBaseTest {
   Vocabulary createVocabulary(String name) {
     Vocabulary vocabulary = new Vocabulary();
     vocabulary.setName(name);
-    vocabulary.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
+//    vocabulary.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
     vocabulary.setNamespace("ns");
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
 
@@ -162,12 +162,6 @@ abstract class DocumentationBaseTest {
     Concept concept = new Concept();
     concept.setVocabularyKey(TEST_VOCABULARY_KEY);
     concept.setName(name);
-    concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
-    concept.setAlternativeLabels(
-        Collections.singletonMap(
-            LanguageRegion.ENGLISH,
-            new HashSet<>(Arrays.asList("Alt label", "Another alt label"))));
-    concept.setHiddenLabels(Collections.singleton("Labl"));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

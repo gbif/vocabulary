@@ -2,10 +2,12 @@ package org.gbif.vocabulary.model;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
 @Data
 @Builder
-public class Label {
+@Jacksonized
+public class Label implements LabelEntity {
 
   private Long key;
   private Long entityKey;

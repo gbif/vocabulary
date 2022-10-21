@@ -13,13 +13,13 @@
  */
 package org.gbif.vocabulary.service;
 
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-
-import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.test.context.support.WithMockUser;
+
+import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -112,6 +114,60 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
     assertThrows(
         AuthenticationCredentialsNotFoundException.class,
         () -> vocabularyService.deleteVocabulary(0));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedAddLabelTest() {
+    assertThrows(
+        AccessDeniedException.class,
+        () ->
+            vocabularyService.addLabel(
+                Label.builder()
+                    .entityKey(1L)
+                    .language(LanguageRegion.ENGLISH)
+                    .value("label")
+                    .build()));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedUpdateLabelTest() {
+    assertThrows(
+        AccessDeniedException.class,
+        () ->
+            vocabularyService.updateLabel(
+                Label.builder()
+                    .entityKey(1L)
+                    .language(LanguageRegion.ENGLISH)
+                    .value("label")
+                    .build()));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedDeleteLabelTest() {
+    assertThrows(AccessDeniedException.class, () -> vocabularyService.deleteLabel(1L));
+  }
+
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
+  @Test
+  public void invalidLabelTest() {
+    // required fields are null
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> vocabularyService.addLabel(Label.builder().build()));
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> vocabularyService.updateLabel(Label.builder().build()));
+
+    // set value
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> vocabularyService.addLabel(Label.builder().value("v").build()));
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> vocabularyService.updateLabel(Label.builder().value("v").build()));
   }
 
   @Override

@@ -13,16 +13,19 @@
  */
 package org.gbif.vocabulary.client;
 
+import java.util.List;
+
+import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptListParams;
 import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.util.List;
 
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
@@ -53,19 +56,19 @@ public interface ConceptClient {
   @PostMapping(
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  Concept create(
+  ConceptView create(
       @PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept);
 
   @PutMapping(
       value = "{name}",
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  Concept update(
+  ConceptView update(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody Concept concept);
 
-  default Concept update(String vocabularyName, Concept concept) {
+  default ConceptView update(String vocabularyName, Concept concept) {
     return update(vocabularyName, concept.getName(), concept);
   }
 
@@ -102,4 +105,127 @@ public interface ConceptClient {
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @PathVariable("tagName") String tagName);
+
+  @GetMapping(value = "{name}/labels", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<Label> listLabels(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName);
+
+  @GetMapping(value = "{name}/alternativeLabels", produces = MediaType.APPLICATION_JSON_VALUE)
+  PagingResponse<Label> listAlternativeLabels(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @SpringQueryMap Pageable page);
+
+  @GetMapping(value = "{name}/hiddenLabels", produces = MediaType.APPLICATION_JSON_VALUE)
+  PagingResponse<HiddenLabel> listHiddenLabels(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @SpringQueryMap Pageable page);
+
+  @GetMapping(value = "{name}/labels/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
+  Label getLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long labelKey);
+
+  @GetMapping(value = "{name}/alternativeLabels/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
+  Label getAlternativeLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long labelKey);
+
+  @GetMapping(value = "{name}/hiddenLabels/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
+  HiddenLabel getHiddenLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long labelKey);
+
+  @PostMapping(
+      value = "{name}/labels",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  Label addLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody Label label);
+
+  @PostMapping(
+      value = "{name}/alternativeLabels",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  Label addAlternativeLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody Label label);
+
+  @PostMapping(
+      value = "{name}/hiddenLabels",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  HiddenLabel addHiddenLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody HiddenLabel label);
+
+  @PutMapping(
+      value = "{name}/labels/{key}",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  Label updateLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long labelKey,
+      @RequestBody Label label);
+
+  default Label updateLabel(String vocabularyName, String conceptName, Label label) {
+    return updateLabel(vocabularyName, conceptName, label.getKey(), label);
+  }
+
+  @PutMapping(
+      value = "{name}/alternativeLabels/{key}",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  Label updateAlternativeLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long labelKey,
+      @RequestBody Label label);
+
+  default Label updateAlternativeLabel(String vocabularyName, String conceptName, Label label) {
+    return updateAlternativeLabel(vocabularyName, conceptName, label.getKey(), label);
+  }
+
+  @PutMapping(
+      value = "{name}/hiddenLabels/{key}",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  HiddenLabel updateHiddenLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long labelKey,
+      @RequestBody HiddenLabel label);
+
+  default HiddenLabel updateHiddenLabel(
+      String vocabularyName, String conceptName, HiddenLabel label) {
+    return updateHiddenLabel(vocabularyName, conceptName, label.getKey(), label);
+  }
+
+  @DeleteMapping("{name}/labels/{key}")
+  void deleteLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long key);
+
+  @DeleteMapping("{name}/alternativeLabels/{key}")
+  void deleteAlternativeLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long key);
+
+  @DeleteMapping("{name}/hiddenLabels/{key}")
+  void deleteHiddenLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long key);
 }

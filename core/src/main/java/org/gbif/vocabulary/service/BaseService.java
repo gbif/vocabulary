@@ -51,14 +51,13 @@ public interface BaseService<T extends VocabularyEntity> {
    */
   void update(@NotNull @Valid T entity);
 
-  long addLabel(Label label);
+  long addLabel(@NotNull @Valid Label label);
 
-  void updateLabel(Label label);
+  void updateLabel(@NotNull @Valid Label label);
 
   void deleteLabel(long key);
 
   Label getLabel(long key);
 
   List<Label> listLabels(long entityKey);
-
 }

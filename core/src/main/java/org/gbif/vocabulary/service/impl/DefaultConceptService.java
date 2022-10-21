@@ -97,7 +97,8 @@ public class DefaultConceptService implements ConceptService {
 
     // checking if there are other vocabs with the same name
     List<KeyNameResult> similarities =
-        vocabularyMapper.findSimilarities(normalizeName(concept.getName()), null);
+        conceptMapper.findSimilarities(
+            normalizeName(concept.getName()), null, concept.getVocabularyKey(), null);
     if (!similarities.isEmpty()) {
       throw new IllegalArgumentException(
           "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);
@@ -289,8 +290,11 @@ public class DefaultConceptService implements ConceptService {
     return conceptMapper.listTags(conceptKey);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
   @Override
-  public long addLabel(Label label) {
+  public long addLabel(@NotNull @Valid Label label) {
     checkArgument(label.getKey() == null, "Can't add a label that has a key");
     checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
     checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
@@ -302,8 +306,11 @@ public class DefaultConceptService implements ConceptService {
     return label.getKey();
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PostPersist.class, Default.class})
+  @Transactional
   @Override
-  public void updateLabel(Label label) {
+  public void updateLabel(@NotNull @Valid Label label) {
     requireNonNull(label.getKey());
     checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
@@ -313,6 +320,8 @@ public class DefaultConceptService implements ConceptService {
     conceptMapper.updateLabel(label);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Transactional
   @Override
   public void deleteLabel(long key) {
     conceptMapper.deleteLabel(key);
@@ -328,8 +337,11 @@ public class DefaultConceptService implements ConceptService {
     return conceptMapper.listLabels(entityKey);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
   @Override
-  public long addAlternativeLabel(Label label) {
+  public long addAlternativeLabel(@NotNull @Valid Label label) {
     checkArgument(label.getKey() == null, "Can't add a label that has a key");
     checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
     checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
@@ -341,8 +353,11 @@ public class DefaultConceptService implements ConceptService {
     return label.getKey();
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PostPersist.class, Default.class})
+  @Transactional
   @Override
-  public void updateAlternativeLabel(Label label) {
+  public void updateAlternativeLabel(@NotNull @Valid Label label) {
     requireNonNull(label.getKey());
     checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
@@ -366,6 +381,8 @@ public class DefaultConceptService implements ConceptService {
     }
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Transactional
   @Override
   public void deleteAlternativeLabel(long key) {
     conceptMapper.deleteAlternativeLabel(key);
@@ -377,12 +394,19 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public List<Label> listAlternativeLabels(long entityKey) {
-    return conceptMapper.listAlternativeLabels(entityKey);
+  public PagingResponse<Label> listAlternativeLabels(long entityKey, @Nullable Pageable page) {
+    page = page != null ? page : new PagingRequest();
+    return new PagingResponse<>(
+        page,
+        conceptMapper.countAlternativeLabels(entityKey),
+        conceptMapper.listAlternativeLabels(entityKey, page));
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
   @Override
-  public long addHiddenLabel(HiddenLabel label) {
+  public long addHiddenLabel(@NotNull @Valid HiddenLabel label) {
     checkArgument(label.getKey() == null, "Can't add a label that has a key");
     checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
     checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
@@ -394,8 +418,11 @@ public class DefaultConceptService implements ConceptService {
     return label.getKey();
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PostPersist.class, Default.class})
+  @Transactional
   @Override
-  public void updateHiddenLabel(HiddenLabel label) {
+  public void updateHiddenLabel(@NotNull @Valid HiddenLabel label) {
     requireNonNull(label.getKey());
     checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
@@ -416,6 +443,8 @@ public class DefaultConceptService implements ConceptService {
     }
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Transactional
   @Override
   public void deleteHiddenLabel(long key) {
     conceptMapper.deleteHiddenLabel(key);
@@ -427,8 +456,12 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public List<HiddenLabel> listHiddenLabels(long entityKey) {
-    return conceptMapper.listHiddenLabels(entityKey);
+  public PagingResponse<HiddenLabel> listHiddenLabels(long entityKey, @Nullable Pageable page) {
+    page = page != null ? page : new PagingRequest();
+    return new PagingResponse<>(
+        page,
+        conceptMapper.countHiddenLabels(entityKey),
+        conceptMapper.listHiddenLabels(entityKey, page));
   }
 
   /** Returns the keys of all the children of the given concept. */

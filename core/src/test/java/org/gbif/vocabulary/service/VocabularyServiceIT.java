@@ -17,9 +17,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import org.gbif.vocabulary.PostgresDBExtension;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -219,6 +220,39 @@ public class VocabularyServiceIT {
     assertNotNull(vocabularyService.get(v1Key));
     vocabularyService.deleteVocabulary(v1Key);
     assertNull(vocabularyService.get(v1Key));
+  }
+
+  @Test
+  public void labelsTest() {
+    long v1Key = vocabularyService.create(createBasicVocabulary());
+
+    // add label
+    Label label =
+        Label.builder().entityKey(v1Key).language(LanguageRegion.ENGLISH).value("label").build();
+    long labelKey = vocabularyService.addLabel(label);
+    assertTrue(labelKey > 0);
+
+    // get label
+    Label createdLabel = vocabularyService.getLabel(labelKey);
+    assertEquals(label, createdLabel);
+
+    // list labels
+    List<Label> labelList = vocabularyService.listLabels(v1Key);
+    assertEquals(1, labelList.size());
+    assertEquals(labelKey, labelList.get(0).getKey());
+
+    // add another label
+    Label label2 =
+        Label.builder().entityKey(v1Key).language(LanguageRegion.SPANISH).value("label2").build();
+    long labelKey2 = vocabularyService.addLabel(label2);
+    assertTrue(labelKey2 > 0);
+    assertEquals(2, vocabularyService.listLabels(v1Key).size());
+
+    // delete label
+    vocabularyService.deleteLabel(labelKey);
+    labelList = vocabularyService.listLabels(v1Key);
+    assertEquals(1, labelList.size());
+    assertEquals(labelKey2, labelList.get(0).getKey());
   }
 
   static class ContexInitializer

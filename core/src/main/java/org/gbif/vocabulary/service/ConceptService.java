@@ -27,7 +27,9 @@ import org.gbif.vocabulary.model.search.KeyNameResult;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /** Services for a {@link Concept}. */
 public interface ConceptService extends BaseService<Concept> {
@@ -135,23 +137,23 @@ public interface ConceptService extends BaseService<Concept> {
    */
   List<Tag> listTags(long conceptKey);
 
-  long addAlternativeLabel(Label label);
+  long addAlternativeLabel(@NotNull @Valid Label label);
 
-  void updateAlternativeLabel(Label label);
+  void updateAlternativeLabel(@NotNull @Valid Label label);
 
   void deleteAlternativeLabel(long key);
 
   Label getAlternativeLabel(long key);
 
-  List<Label> listAlternativeLabels(long entityKey);
+  PagingResponse<Label> listAlternativeLabels(long entityKey, @Nullable Pageable page);
 
-  long addHiddenLabel(HiddenLabel label);
+  long addHiddenLabel(@NotNull @Valid HiddenLabel label);
 
-  void updateHiddenLabel(HiddenLabel label);
+  void updateHiddenLabel(@NotNull @Valid HiddenLabel label);
 
   void deleteHiddenLabel(long key);
 
   HiddenLabel getHiddenLabel(long key);
 
-  List<HiddenLabel> listHiddenLabels(long entityKey);
+  PagingResponse<HiddenLabel> listHiddenLabels(long entityKey, @Nullable Pageable page);
 }

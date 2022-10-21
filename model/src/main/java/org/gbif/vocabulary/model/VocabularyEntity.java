@@ -41,11 +41,6 @@ public interface VocabularyEntity extends Auditable, Deprecable, Serializable {
 
   void setName(String name);
 
-  /** Representative label per language. */
-  List<Label> getLabels();
-
-  void setLabels(List<Label> labels);
-
   /** Definition of the entity by language. */
   Map<LanguageRegion, String> getDefinitions();
 

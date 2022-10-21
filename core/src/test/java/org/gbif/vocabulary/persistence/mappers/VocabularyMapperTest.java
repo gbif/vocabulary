@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.gbif.vocabulary.TestUtils;
+import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;

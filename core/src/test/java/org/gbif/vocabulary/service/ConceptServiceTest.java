@@ -14,18 +14,21 @@
 package org.gbif.vocabulary.service;
 
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-
-import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
+
+import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -84,6 +87,159 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
   @Test
   public void unauthorizedRemoveTagTest() {
     assertThrows(AccessDeniedException.class, () -> conceptService.removeTag(0, 1));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedAddLabelTest() {
+    assertThrows(
+        AccessDeniedException.class,
+        () ->
+            conceptService.addLabel(
+                Label.builder()
+                    .entityKey(1L)
+                    .language(LanguageRegion.ENGLISH)
+                    .value("label")
+                    .build()));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedUpdateLabelTest() {
+    assertThrows(
+        AccessDeniedException.class,
+        () ->
+            conceptService.updateLabel(
+                Label.builder()
+                    .entityKey(1L)
+                    .language(LanguageRegion.ENGLISH)
+                    .value("label")
+                    .build()));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedDeleteLabelTest() {
+    assertThrows(AccessDeniedException.class, () -> conceptService.deleteLabel(1L));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedAddAlternativeLabelTest() {
+    assertThrows(
+        AccessDeniedException.class,
+        () ->
+            conceptService.addAlternativeLabel(
+                Label.builder()
+                    .entityKey(1L)
+                    .language(LanguageRegion.ENGLISH)
+                    .value("label")
+                    .build()));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedUpdateAlternativeLabelTest() {
+    assertThrows(
+        AccessDeniedException.class,
+        () ->
+            conceptService.updateAlternativeLabel(
+                Label.builder()
+                    .entityKey(1L)
+                    .language(LanguageRegion.ENGLISH)
+                    .value("label")
+                    .build()));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedDeleteAlternativeLabelTest() {
+    assertThrows(AccessDeniedException.class, () -> conceptService.deleteAlternativeLabel(1L));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedAddHiddenLabelTest() {
+    assertThrows(
+        AccessDeniedException.class,
+        () ->
+            conceptService.addHiddenLabel(
+                HiddenLabel.builder().entityKey(1L).value("label").build()));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedUpdateHiddenLabelTest() {
+    assertThrows(
+        AccessDeniedException.class,
+        () ->
+            conceptService.updateHiddenLabel(
+                HiddenLabel.builder().entityKey(1L).value("label").build()));
+  }
+
+  @WithMockUser
+  @Test
+  public void unauthorizedDeleteHiddenLabelTest() {
+    assertThrows(AccessDeniedException.class, () -> conceptService.deleteHiddenLabel(1L));
+  }
+
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
+  @Test
+  public void invalidLabelTest() {
+    // required fields are null
+    assertThrows(
+        ConstraintViolationException.class, () -> conceptService.addLabel(Label.builder().build()));
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.updateLabel(Label.builder().build()));
+
+    // set value
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.addLabel(Label.builder().value("v").build()));
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.updateLabel(Label.builder().value("v").build()));
+  }
+
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
+  @Test
+  public void invalidAlternativeLabelTest() {
+    // required fields are null
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.addAlternativeLabel(Label.builder().build()));
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.updateAlternativeLabel(Label.builder().build()));
+
+    // set value
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.addAlternativeLabel(Label.builder().value("v").build()));
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.updateAlternativeLabel(Label.builder().value("v").build()));
+  }
+
+  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
+  @Test
+  public void invalidHiddenLabelTest() {
+    // required fields are null
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.addHiddenLabel(HiddenLabel.builder().build()));
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.updateHiddenLabel(HiddenLabel.builder().build()));
+
+    // set value
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.addHiddenLabel(HiddenLabel.builder().value("v").build()));
+    assertThrows(
+        ConstraintViolationException.class,
+        () -> conceptService.updateHiddenLabel(HiddenLabel.builder().value("v").build()));
   }
 
   @Override

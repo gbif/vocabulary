@@ -13,11 +13,10 @@
  */
 package org.gbif.vocabulary.restws.advices;
 
+import org.gbif.vocabulary.api.EntityView;
+import org.gbif.vocabulary.model.LabelEntity;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.VocabularyEntity;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
@@ -33,6 +32,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -51,7 +52,11 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Object>
           && !ResponseEntity.class.isAssignableFrom(returnType.getParameterType())
           && (VocabularyEntity.class.isAssignableFrom(
                   Class.forName(returnType.getGenericParameterType().getTypeName()))
+              || EntityView.class.isAssignableFrom(
+                  Class.forName(returnType.getGenericParameterType().getTypeName()))
               || Tag.class.isAssignableFrom(
+                  Class.forName(returnType.getGenericParameterType().getTypeName()))
+              || LabelEntity.class.isAssignableFrom(
                   Class.forName(returnType.getGenericParameterType().getTypeName())));
     } catch (ClassNotFoundException e) {
       log.debug("Unexpected parameter type", e);
@@ -78,8 +83,12 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Object>
       String entityName = null;
       if (body instanceof VocabularyEntity) {
         entityName = ((VocabularyEntity) body).getName();
+      } else if (body instanceof EntityView) {
+        entityName = ((EntityView) body).getEntity().getName();
       } else if (body instanceof Tag) {
         entityName = ((Tag) body).getName();
+      } else if (body instanceof LabelEntity) {
+        entityName = ((LabelEntity) body).getKey().toString();
       }
 
       httpServletResponse.addHeader(

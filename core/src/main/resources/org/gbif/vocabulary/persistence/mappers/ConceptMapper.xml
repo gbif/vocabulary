@@ -8,9 +8,6 @@
     <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
     <result property="sameAsUris" column="same_as_uris" typeHandler="UriArrayTypeHandler"/>
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
-    <collection property="labels" column="key" select="listLabels"/>
-    <collection property="alternativeLabels" column="key" select="listAlternativeLabels"/>
-    <collection property="hiddenLabels" column="key" select="listHiddenLabels"/>
     <collection property="tags" column="key" select="listTags"/>
   </resultMap>
 
@@ -31,82 +28,65 @@
 
   <sql id="CONCEPT_READ_FIELDS">
     c.key, c.vocabulary_key, c.parent_key, c.replaced_by_key, c.name, c.definition, c.external_definition_urls,
-    c.same_as_uris, c.editorial_notes, c.deprecated_by, c.deprecated, c.created_by,
-    c.modified_by, c.created, c.modified, c.deleted
+    c.same_as_uris, c.editorial_notes, c.deprecated_by, c.deprecated, c.created_by, c.modified_by, c.created,
+    c.modified, c.deleted
   </sql>
 
   <sql id="CONCEPT_INSERT_FIELDS">
-    vocabulary_key, parent_key, name, definition, external_definition_urls, same_as_uris, editorial_notes,
-    created_by, modified_by, created, modified
+    vocabulary_key, parent_key, name, definition, external_definition_urls, same_as_uris, editorial_notes, created_by,
+    modified_by, created, modified
   </sql>
 
   <sql id="CONCEPT_INSERT_PARAMS">
-    #{vocabularyKey,jdbcType=BIGINT},
-    #{parentKey,jdbcType=BIGINT},
-    #{name,jdbcType=VARCHAR},
+    #{vocabularyKey,jdbcType=BIGINT}, #{parentKey,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR},
     #{definitions,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
-    #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
-    #{createdBy,jdbcType=VARCHAR},
-    #{modifiedBy,jdbcType=VARCHAR},
-    now(), <!-- created -->
-    now() <!-- modified -->
+    #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler}, #{createdBy,jdbcType=VARCHAR},
+    #{modifiedBy,jdbcType=VARCHAR}, now(), <!-- created -->now() <!-- modified -->
   </sql>
 
   <sql id="CONCEPT_UPDATE_PARAMS">
-    vocabulary_key = #{vocabularyKey,jdbcType=BIGINT},
-    parent_key = #{parentKey,jdbcType=BIGINT},
-    replaced_by_key = #{replacedByKey,jdbcType=BIGINT},
-    name = #{name,jdbcType=VARCHAR},
-    definition = #{definitions,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
-    external_definition_urls = #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
-    same_as_uris = #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
-    editorial_notes = #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
-    modified_by = #{modifiedBy,jdbcType=VARCHAR},
-    modified = now(),
-    deleted = null <!-- if we're updating it can't be deleted -->
+    vocabulary_key = #{vocabularyKey,jdbcType=BIGINT}, parent_key = #{parentKey,jdbcType=BIGINT}, replaced_by_key =
+    #{replacedByKey,jdbcType=BIGINT}, name = #{name,jdbcType=VARCHAR}, definition =
+    #{definitions,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb, external_definition_urls =
+    #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler}, same_as_uris =
+    #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler}, editorial_notes =
+    #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler}, modified_by = #{modifiedBy,jdbcType=VARCHAR},
+    modified = now(), deleted = null <!-- if we're updating it can't be deleted -->
   </sql>
 
   <!-- QUERIES FROM HERE -->
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO concept(<include refid="CONCEPT_INSERT_FIELDS"/>)
-    VALUES(<include refid="CONCEPT_INSERT_PARAMS"/>)
+    INSERT INTO concept(<include refid="CONCEPT_INSERT_FIELDS"/>) VALUES(<include refid="CONCEPT_INSERT_PARAMS"/>)
   </insert>
 
   <update id="update">
-    UPDATE concept
-    SET
+    UPDATE concept SET
     <include refid="CONCEPT_UPDATE_PARAMS"/>
     WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
   </update>
 
   <update id="delete">
-    UPDATE concept
-    SET deleted = now()
-    WHERE key = #{key,jdbcType=OTHER}
+    UPDATE concept SET deleted = now() WHERE key = #{key,jdbcType=OTHER}
   </update>
 
   <select id="get" resultMap="CONCEPT_MAP">
     SELECT
     <include refid="CONCEPT_READ_FIELDS"/>
-    FROM concept c
-    WHERE c.key = #{key,jdbcType=BIGINT}
+    FROM concept c WHERE c.key = #{key,jdbcType=BIGINT}
   </select>
 
   <select id="getByNameAndVocabulary" resultMap="CONCEPT_MAP">
     SELECT
     <include refid="CONCEPT_READ_FIELDS"/>
-    FROM concept c
-    INNER JOIN vocabulary v on v.key = c.vocabulary_key
-    WHERE c.name = #{name,jdbcType=VARCHAR} and v.name = #{vocabularyName,jdbcType=VARCHAR}
+    FROM concept c INNER JOIN vocabulary v on v.key = c.vocabulary_key WHERE c.name = #{name,jdbcType=VARCHAR} and
+    v.name = #{vocabularyName,jdbcType=VARCHAR}
   </select>
 
   <update id="deprecate">
-    UPDATE concept
-    SET deprecated = now(),
-    deprecated_by = #{deprecatedBy,jdbcType=VARCHAR}
+    UPDATE concept SET deprecated = now(), deprecated_by = #{deprecatedBy,jdbcType=VARCHAR}
     <choose>
       <when test="replacementKey != null">
         ,replaced_by_key=#{replacementKey,jdbcType=BIGINT}
@@ -119,9 +99,7 @@
   </update>
 
   <update id="deprecateInBulk">
-    UPDATE concept
-    SET deprecated = now(),
-    deprecated_by = #{deprecatedBy,jdbcType=VARCHAR}
+    UPDATE concept SET deprecated = now(), deprecated_by = #{deprecatedBy,jdbcType=VARCHAR}
     <choose>
       <when test="replacementKey != null">
         ,replaced_by_key=#{replacementKey,jdbcType=BIGINT}
@@ -137,15 +115,12 @@
   </update>
 
   <update id="restoreDeprecated">
-    UPDATE concept
-    SET deprecated = null, deprecated_by = null, replaced_by_key = null
-    WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
+    UPDATE concept SET deprecated = null, deprecated_by = null, replaced_by_key = null WHERE key =
+    #{key,jdbcType=BIGINT} AND deleted IS NULL
   </update>
 
   <update id="restoreDeprecatedInBulk">
-    UPDATE concept
-    SET deprecated = null, deprecated_by = null, replaced_by_key = null
-    WHERE deleted IS NULL AND key IN
+    UPDATE concept SET deprecated = null, deprecated_by = null, replaced_by_key = null WHERE deleted IS NULL AND key IN
     <foreach collection="keys" item="key" separator="," open="(" close=")">
       #{key}
     </foreach>
@@ -156,13 +131,13 @@
     <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
     <if test="params.query != null">
-      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query
+      ON query @@ fulltext_search
     </if>
     <if test="params.parent != null">
       INNER JOIN concept parent ON parent.key = c.parent_key
     </if>
-    WHERE
-    c.deleted IS NULL
+    WHERE c.deleted IS NULL
     <if test="params.vocabularyKey != null">
       AND c.vocabulary_key = #{params.vocabularyKey}
     </if>
@@ -193,7 +168,8 @@
     <if test="params.tags != null">
       AND
       <foreach item="item" collection="params.tags" open="(" separator=" AND " close=")">
-        EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE t.name = #{item,jdbcType=VARCHAR})
+        EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE
+        t.name = #{item,jdbcType=VARCHAR})
       </foreach>
     </if>
     ORDER BY <if test="params.query != null">ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
@@ -203,10 +179,10 @@
   </select>
 
   <select id="count" resultType="Long">
-    SELECT COUNT(DISTINCT c.key)
-    FROM concept c
+    SELECT COUNT(DISTINCT c.key) FROM concept c
     <if test="params.query != null">
-      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query
+      ON query @@ fulltext_search
     </if>
     <if test="params.parent != null">
       INNER JOIN concept parent ON parent.key = c.parent_key
@@ -242,120 +218,81 @@
     <if test="params.tags != null">
       AND
       <foreach item="item" collection="params.tags" open="(" separator=" AND " close=")">
-        EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE t.name = #{item,jdbcType=VARCHAR})
+        EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE
+        t.name = #{item,jdbcType=VARCHAR})
       </foreach>
     </if>
   </select>
 
   <select id="suggest" resultMap="KEY_NAME_RESULT_MAP">
-    SELECT DISTINCT ON(key) key, name
-    FROM (
-    (SELECT key, name
-    FROM concept
-    WHERE vocabulary_key = #{vocabularyKey} AND name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
-    ORDER BY name LIMIT 20
-    )
-    UNION ALL
-    (SELECT key, name
-    FROM concept
-    WHERE vocabulary_key = #{vocabularyKey} AND name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
-    ORDER BY name LIMIT 20
-    )
-    UNION ALL
-    (SELECT DISTINCT c.key, c.name
-    FROM concept c
-    JOIN concept_label cl ON cl.concept_key = c.key
-    WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
+    SELECT DISTINCT ON(key) key, name FROM ( (SELECT key, name FROM concept WHERE vocabulary_key = #{vocabularyKey} AND
+    name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL ORDER BY name LIMIT 20 ) UNION ALL (SELECT key,
+    name FROM concept WHERE vocabulary_key = #{vocabularyKey} AND name ilike '%'||#{query}||'%' AND NOT name ilike
+    #{query}||'%' AND deleted IS NULL AND deprecated IS NULL ORDER BY name LIMIT 20 ) UNION ALL (SELECT DISTINCT c.key,
+    c.name FROM concept c JOIN concept_label cl ON cl.concept_key = c.key WHERE c.vocabulary_key = #{vocabularyKey} AND
+    cl.value ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
     <if test="lang != null">
       AND cl.language = #{lang}
     </if>
-    LIMIT 20
-    )
-    UNION ALL
-    (SELECT DISTINCT c.key, c.name
-    FROM concept c
-    JOIN concept_label cl ON cl.concept_key = c.key
-    WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike '%'||#{query}||'%' AND NOT cl.value ilike #{query}||'%' AND c.deleted IS NULL AND c.deprecated IS NULL
+    LIMIT 20 ) UNION ALL (SELECT DISTINCT c.key, c.name FROM concept c JOIN concept_label cl ON cl.concept_key = c.key
+    WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike '%'||#{query}||'%' AND NOT cl.value ilike #{query}||'%'
+    AND c.deleted IS NULL AND c.deprecated IS NULL
     <if test="lang != null">
-        AND cl.language = #{lang}
+      AND cl.language = #{lang}
     </if>
-    LIMIT 20
-    )
-    ) t1 LIMIT 20
+    LIMIT 20 ) ) t1 LIMIT 20
   </select>
 
   <update id="updateParent">
-    UPDATE concept
-    SET parent_key = #{parentKey}
-    WHERE key IN
+    UPDATE concept SET parent_key = #{parentKey} WHERE key IN
     <foreach collection="keys" item="key" separator="," open="(" close=")">
       #{key}
     </foreach>
   </update>
 
   <select id="findSimilarities" resultType="KeyNameResult">
-    SELECT DISTINCT ON (c.key) c.key, c.name
-    FROM concept c
-    LEFT JOIN concept_label cl ON cl.concept_key = c.key <if test="lang != null">AND cl.language = #{lang}</if>
-    LEFT JOIN concept_alternative_label cal ON cal.concept_key = c.key <if test="lang != null">AND cal.language = #{lang}</if>
+    SELECT DISTINCT ON (c.key) c.key, c.name FROM concept c LEFT JOIN concept_label cl ON cl.concept_key = c.key
+    <if test="lang != null">AND cl.language = #{lang}</if>
+    LEFT JOIN concept_alternative_label cal ON cal.concept_key = c.key
+    <if test="lang != null">AND cal.language = #{lang}</if>
     LEFT JOIN concept_hidden_label chl ON chl.concept_key = c.key
     <where>
       c.vocabulary_key = #{vocabularyKey}
       <if test="conceptKey != null">
         AND c.key != #{conceptKey}
       </if>
-      AND (
-        normalize_name(c.name) = #{normalizedValue,jdbcType=VARCHAR}
-        OR cl.normalized_value = #{normalizedValue,jdbcType=VARCHAR}
-        OR cal.normalized_value = #{normalizedValue,jdbcType=VARCHAR}
-        OR chl.normalized_value = #{normalizedValue,jdbcType=VARCHAR}
-      )
+      AND ( normalize_name(c.name) = #{normalizedValue,jdbcType=VARCHAR} OR cl.normalized_value =
+      #{normalizedValue,jdbcType=VARCHAR} OR cal.normalized_value = #{normalizedValue,jdbcType=VARCHAR} OR
+      chl.normalized_value = #{normalizedValue,jdbcType=VARCHAR} )
     </where>
     LIMIT 3
   </select>
 
   <select id="findReplacement" resultType="Long">
-    WITH RECURSIVE replacements(key, replaced_by, deprecated) AS (
-    SELECT root.key, root.replaced_by_key, root.deprecated
-    FROM concept root
-    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL AND replaced_by_key IS NOT NULL AND deleted IS NULL
-    UNION
-    SELECT c.key, c.replaced_by_key, c.deprecated
-    FROM replacements r, concept c
-    WHERE r.replaced_by = c.key
-    )
-    SELECT key FROM replacements WHERE deprecated IS NULL;
+    WITH RECURSIVE replacements(key, replaced_by, deprecated) AS ( SELECT root.key, root.replaced_by_key,
+    root.deprecated FROM concept root WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL AND replaced_by_key
+    IS NOT NULL AND deleted IS NULL UNION SELECT c.key, c.replaced_by_key, c.deprecated FROM replacements r, concept c
+    WHERE r.replaced_by = c.key ) SELECT key FROM replacements WHERE deprecated IS NULL;
   </select>
 
   <select id="findParents" resultType="String">
-    WITH RECURSIVE parents(key, name, parent_key, deprecated) AS (
-    SELECT root.key, root.name, root.parent_key, root.deprecated
-    FROM concept root
-    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NULL AND parent_key IS NOT NULL AND deleted IS NULL
-    UNION
-    SELECT c.key, c.name, c.parent_key, c.deprecated
-    FROM parents p, concept c
-    WHERE p.parent_key = c.key
-    )
-    SELECT name FROM parents WHERE key != #{key,jdbcType=BIGINT};
+    WITH RECURSIVE parents(key, name, parent_key, deprecated) AS ( SELECT root.key, root.name, root.parent_key,
+    root.deprecated FROM concept root WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NULL AND parent_key IS NOT
+    NULL AND deleted IS NULL UNION SELECT c.key, c.name, c.parent_key, c.deprecated FROM parents p, concept c WHERE
+    p.parent_key = c.key ) SELECT name FROM parents WHERE key != #{key,jdbcType=BIGINT};
   </select>
 
   <select id="getVocabularyKey" resultType="Long">
-    SELECT vocabulary_key
-    FROM concept
-    WHERE key = #{key,jdbcType=BIGINT}
+    SELECT vocabulary_key FROM concept WHERE key = #{key,jdbcType=BIGINT}
   </select>
 
   <select id="isDeprecated" resultType="Boolean">
-    SELECT case when count(*) > 0 then 1 else 0 end
-    FROM concept
-    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL
+    SELECT case when count(*) > 0 then 1 else 0 end FROM concept WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS
+    NOT NULL
   </select>
 
   <select id="countChildren" resultType="ChildrenResult">
-    SELECT c.parent_key as parentKey, c.name as childName
-    FROM concept c
-    WHERE c.parent_key IN
+    SELECT c.parent_key as parentKey, c.name as childName FROM concept c WHERE c.parent_key IN
     <foreach collection="parentConcepts" item="key" separator="," open="(" close=")">
       #{key}
     </foreach>
@@ -363,121 +300,103 @@
 
   <!-- TAGS -->
   <select id="listTags" resultMap="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_MAP">
-    SELECT <include refid="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_READ_FIELDS" />
-    FROM tag t
-    INNER JOIN concept_tag ct ON ct.tag_key = t.key
-    WHERE ct.concept_key = #{key,jdbcType=BIGINT}
+    SELECT
+    <include refid="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_READ_FIELDS"/>
+    FROM tag t INNER JOIN concept_tag ct ON ct.tag_key = t.key WHERE ct.concept_key = #{key,jdbcType=BIGINT}
   </select>
 
   <insert id="addTag">
-    INSERT INTO concept_tag(concept_key, tag_key)
-    VALUES(
-      #{conceptKey,jdbcType=BIGINT},
-      #{tagKey,jdbcType=INTEGER}
-    )
+    INSERT INTO concept_tag(concept_key, tag_key) VALUES( #{conceptKey,jdbcType=BIGINT}, #{tagKey,jdbcType=INTEGER} )
   </insert>
 
   <delete id="removeTag">
-    DELETE FROM concept_tag
-    WHERE concept_key = #{conceptKey,jdbcType=BIGINT}
-      AND tag_key = #{tagKey,jdbcType=INTEGER}
+    DELETE FROM concept_tag WHERE concept_key = #{conceptKey,jdbcType=BIGINT} AND tag_key = #{tagKey,jdbcType=INTEGER}
   </delete>
 
   <delete id="deleteAllConcepts">
-    DELETE FROM concept
-    WHERE vocabulary_key = #{vocabularyKey}
+    DELETE FROM concept WHERE vocabulary_key = #{vocabularyKey}
   </delete>
 
   <!-- labels -->
   <insert id="addLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO concept_label(concept_key, language, value)
-    VALUES(#{entityKey,jdbcType=BIGINT},
-    #{language,jdbcType=VARCHAR},
-    #{value,jdbcType=VARCHAR})
+    INSERT INTO concept_label(concept_key, language, value) VALUES(#{entityKey,jdbcType=BIGINT},
+    #{language,jdbcType=VARCHAR}, #{value,jdbcType=VARCHAR})
   </insert>
 
   <update id="updateLabel">
-    UPDATE concept_label
-    SET value = #{value,jdbcType=VARCHAR}
-    WHERE key = #{key,jdbcType=BIGINT}
+    UPDATE concept_label SET value = #{value,jdbcType=VARCHAR} WHERE key = #{key,jdbcType=BIGINT}
   </update>
 
   <delete id="deleteLabel">
-    DELETE FROM concept_label
-    WHERE key = #{key,jdbcType=BIGINT}
+    DELETE FROM concept_label WHERE key = #{key,jdbcType=BIGINT}
   </delete>
 
   <select id="listLabels" resultMap="LABEL_RESULT_MAP">
-    SELECT key, concept_key, language, value
-    FROM concept_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    SELECT key, concept_key, language, value FROM concept_label WHERE concept_key = #{entityKey,jdbcType=BIGINT} ORDER
+    BY key DESC
   </select>
 
   <select id="getLabel" resultMap="LABEL_RESULT_MAP">
-    SELECT key, concept_key, language, value
-    FROM concept_label
-    WHERE key = #{key,jdbcType=BIGINT}
+    SELECT key, concept_key, language, value FROM concept_label WHERE key = #{key,jdbcType=BIGINT}
   </select>
 
   <!-- alternative labels -->
   <insert id="addAlternativeLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO concept_alternative_label(concept_key, language, value)
-    VALUES(#{entityKey,jdbcType=BIGINT},
-    #{language,jdbcType=VARCHAR},
-    #{value,jdbcType=VARCHAR})
+    INSERT INTO concept_alternative_label(concept_key, language, value) VALUES(#{entityKey,jdbcType=BIGINT},
+    #{language,jdbcType=VARCHAR}, #{value,jdbcType=VARCHAR})
   </insert>
 
   <update id="updateAlternativeLabel">
-    UPDATE concept_alternative_label
-    SET value = #{value,jdbcType=VARCHAR}
-    WHERE key = #{key,jdbcType=BIGINT}
+    UPDATE concept_alternative_label SET value = #{value,jdbcType=VARCHAR} WHERE key = #{key,jdbcType=BIGINT}
   </update>
 
   <delete id="deleteAlternativeLabel">
-    DELETE FROM concept_alternative_label
-    WHERE key = #{key,jdbcType=BIGINT}
+    DELETE FROM concept_alternative_label WHERE key = #{key,jdbcType=BIGINT}
   </delete>
 
   <select id="listAlternativeLabels" resultMap="LABEL_RESULT_MAP">
-    SELECT key, concept_key, language, value
-    FROM concept_alternative_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    SELECT key, concept_key, language, value FROM concept_alternative_label WHERE concept_key =
+    #{entityKey,jdbcType=BIGINT} ORDER BY key DESC
+    <if test="page != null">
+      LIMIT #{page.limit} OFFSET #{page.offset}
+    </if>
+  </select>
+
+  <select id="countAlternativeLabels" resultType="Long">
+    SELECT COUNT(DISTINCT key) FROM concept_alternative_label WHERE concept_key = #{entityKey,jdbcType=BIGINT}
   </select>
 
   <select id="getAlternativeLabel" resultMap="LABEL_RESULT_MAP">
-    SELECT key, concept_key, language, value
-    FROM concept_alternative_label
-    WHERE key = #{key,jdbcType=BIGINT}
+    SELECT key, concept_key, language, value FROM concept_alternative_label WHERE key = #{key,jdbcType=BIGINT}
   </select>
 
   <!-- hidden labels -->
   <insert id="addHiddenLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO concept_hidden_label(concept_key, value)
-    VALUES(#{entityKey,jdbcType=BIGINT},
-    #{value,jdbcType=VARCHAR})
+    INSERT INTO concept_hidden_label(concept_key, value) VALUES(#{entityKey,jdbcType=BIGINT}, #{value,jdbcType=VARCHAR})
   </insert>
 
   <update id="updateHiddenLabel">
-    UPDATE concept_hidden_label
-    SET value = #{value,jdbcType=VARCHAR}
-    WHERE key = #{key,jdbcType=BIGINT}
+    UPDATE concept_hidden_label SET value = #{value,jdbcType=VARCHAR} WHERE key = #{key,jdbcType=BIGINT}
   </update>
 
   <delete id="deleteHiddenLabel">
-    DELETE FROM concept_hidden_label
-    WHERE key = #{key,jdbcType=BIGINT}
+    DELETE FROM concept_hidden_label WHERE key = #{key,jdbcType=BIGINT}
   </delete>
 
   <select id="listHiddenLabels" resultMap="HIDDEN_LABEL_RESULT_MAP">
-    SELECT key, concept_key, value
-    FROM concept_hidden_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    SELECT key, concept_key, value FROM concept_hidden_label WHERE concept_key = #{entityKey,jdbcType=BIGINT} ORDER BY
+    key DESC
+    <if test="page != null">
+      LIMIT #{page.limit} OFFSET #{page.offset}
+    </if>
+  </select>
+
+  <select id="countHiddenLabels" resultType="Long">
+    SELECT COUNT(DISTINCT key) FROM concept_hidden_label WHERE concept_key = #{entityKey,jdbcType=BIGINT}
   </select>
 
   <select id="getHiddenLabel" resultMap="HIDDEN_LABEL_RESULT_MAP">
-    SELECT key, concept_key, value
-    FROM concept_hidden_label
-    WHERE key = #{key,jdbcType=BIGINT}
+    SELECT key, concept_key, value FROM concept_hidden_label WHERE key = #{key,jdbcType=BIGINT}
   </select>
 
 </mapper>

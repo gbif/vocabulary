@@ -13,16 +13,18 @@
  */
 package org.gbif.vocabulary.client;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
+import org.gbif.vocabulary.api.VocabularyView;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.util.List;
 
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
@@ -39,24 +41,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface VocabularyClient {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  PagingResponse<Vocabulary> listVocabularies(@SpringQueryMap VocabularyListParams params);
+  PagingResponse<VocabularyView> listVocabularies(@SpringQueryMap VocabularyListParams params);
 
   @GetMapping(value = "{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-  Vocabulary get(@PathVariable("name") String name);
+  VocabularyView get(@PathVariable("name") String name);
 
   @PostMapping(
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  Vocabulary create(@RequestBody Vocabulary vocabulary);
+  VocabularyView create(@RequestBody Vocabulary vocabulary);
 
   @PutMapping(
       value = "{name}",
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  Vocabulary update(
+  VocabularyView update(
       @PathVariable("name") String vocabularyName, @RequestBody Vocabulary vocabulary);
 
-  default Vocabulary update(Vocabulary vocabulary) {
+  default VocabularyView update(Vocabulary vocabulary) {
     return update(vocabulary.getName(), vocabulary);
   }
 
@@ -108,4 +110,32 @@ public interface VocabularyClient {
 
   @DeleteMapping(value = "{name}")
   void deleteVocabulary(@PathVariable("name") String vocabularyName);
+
+  @GetMapping(value = "{name}/labels", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<Label> listLabels(@PathVariable("name") String vocabularyName);
+
+  @GetMapping(value = "{name}/labels/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
+  Label getLabel(@PathVariable("name") String vocabularyName, @PathVariable("key") long labelKey);
+
+  @PostMapping(
+      value = "{name}/labels",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  Label addLabel(@PathVariable("name") String vocabularyName, @RequestBody Label label);
+
+  @PutMapping(
+      value = "{name}/labels/{key}",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  Label updateLabel(
+      @PathVariable("name") String vocabularyName,
+      @PathVariable("key") long labelKey,
+      @RequestBody Label label);
+
+  default Label updateLabel(String vocabularyName, Label label) {
+    return updateLabel(vocabularyName, label.getKey(), label);
+  }
+
+  @DeleteMapping("{name}/labels/{key}")
+  void deleteLabel(@PathVariable("name") String vocabularyName, @PathVariable("key") long key);
 }

@@ -7,7 +7,6 @@
     <result property="definitions" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
     <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
-    <collection property="labels" column="key" select="listLabels"/>
   </resultMap>
 
   <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">
@@ -271,6 +270,7 @@
     SELECT key, vocabulary_key, language, value
     FROM vocabulary_label
     WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
+    ORDER BY key DESC
   </select>
 
   <select id="getLabel" resultMap="LABEL_RESULT_MAP">

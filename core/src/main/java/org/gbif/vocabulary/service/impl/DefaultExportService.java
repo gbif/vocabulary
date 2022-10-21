@@ -13,35 +13,37 @@
  */
 package org.gbif.vocabulary.service.impl;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.export.ConceptExportView;
+import org.gbif.vocabulary.model.export.Export;
 import org.gbif.vocabulary.model.export.ExportMetadata;
 import org.gbif.vocabulary.model.export.ExportParams;
-import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.model.export.VocabularyExportView;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.service.export.ReleasePersister;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotBlank;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -56,7 +58,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotBlank;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -98,14 +101,9 @@ public class DefaultExportService implements ExportService {
 
   @Override
   public Path exportVocabulary(@NotBlank String vocabularyName, String version) {
-    Vocabulary vocabulary =
-        Optional.ofNullable(vocabularyService.getByName(vocabularyName))
-            .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        "Couldn't find vocabulary with name " + vocabularyName));
+    VocabularyExportView vocabularyExportView = getVocabularyExportView(vocabularyName);
 
-    Path exportPath = createExportFile(vocabulary.getName());
+    Path exportPath = createExportFile(vocabularyExportView.getVocabulary().getName());
 
     // write json to the file
     JsonFactory jsonFactory = OBJECT_MAPPER.getFactory();
@@ -124,14 +122,14 @@ public class DefaultExportService implements ExportService {
       if (!Strings.isNullOrEmpty(version)) {
         metadata.setVersion(version);
       }
-      jsonGen.writeObjectField(VocabularyExport.METADATA_PROP, metadata);
+      jsonGen.writeObjectField(Export.METADATA_PROP, metadata);
 
       // write vocabulary
-      jsonGen.writeObjectField(VocabularyExport.VOCABULARY_PROP, vocabulary);
+      jsonGen.writeObjectField(Export.VOCABULARY_PROP, vocabularyExportView);
 
       // write concepts
-      jsonGen.writeArrayFieldStart(VocabularyExport.CONCEPTS_PROP);
-      writeConcepts(vocabulary, jsonGen);
+      jsonGen.writeArrayFieldStart(Export.CONCEPTS_PROP);
+      writeConcepts(vocabularyExportView, jsonGen);
       jsonGen.writeEndArray();
 
       // end of json
@@ -207,18 +205,21 @@ public class DefaultExportService implements ExportService {
     }
   }
 
-  private void writeConcepts(Vocabulary vocabulary, JsonGenerator jsonGen) throws IOException {
+  private void writeConcepts(VocabularyExportView vocabularyExportView, JsonGenerator jsonGen)
+      throws IOException {
     final int limit = 1000;
     int offset = 0;
     ConceptSearchParams conceptSearchParams =
-        ConceptSearchParams.builder().vocabularyKey(vocabulary.getKey()).build();
+        ConceptSearchParams.builder()
+            .vocabularyKey(vocabularyExportView.getVocabulary().getKey())
+            .build();
     PagingResponse<Concept> concepts;
     jsonGen.flush();
     do {
       concepts = conceptService.list(conceptSearchParams, new PagingRequest(offset, limit));
 
       for (Concept c : concepts.getResults()) {
-        jsonGen.writeObject(c);
+        jsonGen.writeObject(getConceptExportView(c));
       }
 
       jsonGen.flush();
@@ -257,5 +258,67 @@ public class DefaultExportService implements ExportService {
       return Long.parseLong(matcher.group(0).replace(".", ""));
     }
     return 0;
+  }
+
+  private VocabularyExportView getVocabularyExportView(String vocabularyName) {
+    Vocabulary vocabulary =
+        Optional.ofNullable(vocabularyService.getByName(vocabularyName))
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "Couldn't find vocabulary with name " + vocabularyName));
+
+    VocabularyExportView vocabularyExportView = new VocabularyExportView();
+    vocabularyExportView.setVocabulary(vocabulary);
+
+    List<Label> labels = vocabularyService.listLabels(vocabulary.getKey());
+    labels.forEach(l -> vocabularyExportView.getLabels().put(l.getLanguage(), l.getValue()));
+
+    return vocabularyExportView;
+  }
+
+  private ConceptExportView getConceptExportView(Concept concept) {
+    ConceptExportView conceptExportView = new ConceptExportView();
+    conceptExportView.setConcept(concept);
+
+    // labels
+    List<Label> labels = conceptService.listLabels(concept.getKey());
+    labels.forEach(l -> conceptExportView.getLabel().put(l.getLanguage(), l.getValue()));
+
+    // alternative labels
+    int offset = 0;
+    int limit = 1000;
+    PagingResponse<Label> responseAltLabels = null;
+    do {
+      responseAltLabels =
+          conceptService.listAlternativeLabels(concept.getKey(), new PagingRequest(offset, limit));
+
+      responseAltLabels
+          .getResults()
+          .forEach(
+              r ->
+                  conceptExportView
+                      .getAlternativeLabels()
+                      .computeIfAbsent(r.getLanguage(), k -> new HashSet<>())
+                      .add(r.getValue()));
+
+      offset += limit;
+    } while (!responseAltLabels.isEndOfRecords());
+
+    // hidden labels
+    offset = 0;
+    PagingResponse<HiddenLabel> responseHidden = null;
+    do {
+      responseHidden =
+          conceptService.listHiddenLabels(concept.getKey(), new PagingRequest(offset, limit));
+
+      responseHidden
+          .getResults()
+          .forEach(r -> conceptExportView.getHiddenLabels().add(r.getValue()));
+
+      offset += limit;
+    } while (!responseHidden.isEndOfRecords());
+
+    return conceptExportView;
   }
 }

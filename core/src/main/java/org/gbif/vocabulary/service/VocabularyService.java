@@ -15,8 +15,8 @@ package org.gbif.vocabulary.service;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 

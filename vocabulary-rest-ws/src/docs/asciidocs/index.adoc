@@ -64,6 +64,16 @@ include::{snippets}/vocabulary-test-doc/get-release-export-test/auto-section.ado
 
 include::{snippets}/vocabulary-test-doc/delete-vocabulary-test/auto-section.adoc[]
 
+include::{snippets}/vocabulary-test-doc/add-label-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/update-label-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/get-label-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/list-labels-test/auto-section.adoc[]
+
+include::{snippets}/vocabulary-test-doc/delete-label-test/auto-section.adoc[]
+
 == Concept
 
 Methods to work with concepts
@@ -87,6 +97,36 @@ include::{snippets}/concept-test-doc/list-tags-test/auto-section.adoc[]
 include::{snippets}/concept-test-doc/add-tag-test/auto-section.adoc[]
 
 include::{snippets}/concept-test-doc/remove-tag-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/add-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/update-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/get-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/list-labels-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/delete-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/add-alternative-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/update-alternative-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/get-alternative-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/list-alternative-labels-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/delete-alternative-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/add-hidden-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/update-hidden-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/get-hidden-label-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/list-hidden-labels-test/auto-section.adoc[]
+
+include::{snippets}/concept-test-doc/delete-hidden-label-test/auto-section.adoc[]
 
 == Tag
 

@@ -42,6 +42,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+import static org.gbif.vocabulary.TestUtils.PAGE_FN;
 import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
@@ -688,8 +689,9 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .build();
     conceptMapper.addAlternativeLabel(label);
 
-    List<Label> labels = conceptMapper.listAlternativeLabels(concept.getKey());
+    List<Label> labels = conceptMapper.listAlternativeLabels(concept.getKey(), DEFAULT_PAGE);
     assertEquals(1, labels.size());
+    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey()));
 
     label = conceptMapper.getAlternativeLabel(label.getKey());
     assertEquals("test", label.getValue());
@@ -700,9 +702,14 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     label = conceptMapper.getAlternativeLabel(label.getKey());
     assertEquals("test2", label.getValue());
 
-    conceptMapper.deleteAlternativeLabel(label.getKey());
-    labels = conceptMapper.listAlternativeLabels(concept.getKey());
+    labels = conceptMapper.listAlternativeLabels(concept.getKey(), PAGE_FN.apply(0, 0L));
     assertEquals(0, labels.size());
+    assertEquals(1, conceptMapper.countAlternativeLabels(concept.getKey()));
+
+    conceptMapper.deleteAlternativeLabel(label.getKey());
+    labels = conceptMapper.listAlternativeLabels(concept.getKey(), DEFAULT_PAGE);
+    assertEquals(0, labels.size());
+    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey()));
   }
 
   @Test
@@ -713,8 +720,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     HiddenLabel label = HiddenLabel.builder().entityKey(concept.getKey()).value("test").build();
     conceptMapper.addHiddenLabel(label);
 
-    List<HiddenLabel> labels = conceptMapper.listHiddenLabels(concept.getKey());
+    List<HiddenLabel> labels = conceptMapper.listHiddenLabels(concept.getKey(), DEFAULT_PAGE);
     assertEquals(1, labels.size());
+    assertEquals(labels.size(), conceptMapper.countHiddenLabels(concept.getKey()));
+
+    labels = conceptMapper.listHiddenLabels(concept.getKey(), PAGE_FN.apply(0, 0L));
+    assertEquals(0, labels.size());
+    assertEquals(1, conceptMapper.countHiddenLabels(concept.getKey()));
 
     label = conceptMapper.getHiddenLabel(label.getKey());
     assertEquals("test", label.getValue());
@@ -725,8 +737,9 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals("test2", label.getValue());
 
     conceptMapper.deleteHiddenLabel(label.getKey());
-    labels = conceptMapper.listHiddenLabels(concept.getKey());
+    labels = conceptMapper.listHiddenLabels(concept.getKey(), DEFAULT_PAGE);
     assertEquals(0, labels.size());
+    assertEquals(labels.size(), conceptMapper.countHiddenLabels(concept.getKey()));
   }
 
   private void assertList(ConceptSearchParams searchParams, int expectedResult) {

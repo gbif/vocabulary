@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.DeprecateAction;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.Concept;
@@ -86,8 +87,8 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
-    List<Concept> resultList =
-        OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<Concept>>() {});
+    List<ConceptView> resultList =
+        OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<ConceptView>>() {});
 
     assertEquals(concepts.size(), resultList.size());
   }

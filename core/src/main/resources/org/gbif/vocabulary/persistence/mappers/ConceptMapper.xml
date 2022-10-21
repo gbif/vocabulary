@@ -4,7 +4,7 @@
 
   <resultMap id="CONCEPT_MAP" type="Concept" autoMapping="true">
     <id property="key" column="key"/>
-    <result property="definitions" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
     <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
     <result property="sameAsUris" column="same_as_uris" typeHandler="UriArrayTypeHandler"/>
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
@@ -39,7 +39,7 @@
 
   <sql id="CONCEPT_INSERT_PARAMS">
     #{vocabularyKey,jdbcType=BIGINT}, #{parentKey,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR},
-    #{definitions,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
+    #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler}, #{createdBy,jdbcType=VARCHAR},
@@ -49,7 +49,7 @@
   <sql id="CONCEPT_UPDATE_PARAMS">
     vocabulary_key = #{vocabularyKey,jdbcType=BIGINT}, parent_key = #{parentKey,jdbcType=BIGINT}, replaced_by_key =
     #{replacedByKey,jdbcType=BIGINT}, name = #{name,jdbcType=VARCHAR}, definition =
-    #{definitions,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb, external_definition_urls =
+    #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb, external_definition_urls =
     #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler}, same_as_uris =
     #{sameAsUris,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler}, editorial_notes =
     #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler}, modified_by = #{modifiedBy,jdbcType=VARCHAR},

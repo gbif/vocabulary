@@ -42,9 +42,9 @@ public interface VocabularyEntity extends Auditable, Deprecable, Serializable {
   void setName(String name);
 
   /** Definition of the entity by language. */
-  Map<LanguageRegion, String> getDefinitions();
+  Map<LanguageRegion, String> getDefinition();
 
-  void setDefinitions(Map<LanguageRegion, String> definition);
+  void setDefinition(Map<LanguageRegion, String> definition);
 
   /** Additional external definitions. */
   List<URI> getExternalDefinitions();

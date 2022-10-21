@@ -13,15 +13,6 @@
  */
 package org.gbif.vocabulary.importer;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.ConceptListParams;
-import org.gbif.vocabulary.api.ConceptView;
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Vocabulary;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URI;
@@ -38,8 +29,20 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.base.Strings;
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.ConceptListParams;
+import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.api.VocabularyView;
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Vocabulary;
 
+import com.google.common.base.Strings;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -72,12 +75,17 @@ public class VocabularyImporter {
     // create vocabulary
     Vocabulary vocab = new Vocabulary();
     vocab.setName(vocabName);
-    vocab.getLabel().put(LanguageRegion.ENGLISH, vocabLabelEN);
     if (!Strings.isNullOrEmpty(vocabDefinitionEN)) {
       vocab.getDefinition().put(LanguageRegion.ENGLISH, vocabDefinitionEN);
     }
-    Vocabulary createdVocab = vocabularyClient.create(vocab);
-    log.info("Created vocabulary {} with key {}", vocabName, createdVocab.getKey());
+    VocabularyView createdVocab = vocabularyClient.create(vocab);
+    log.info("Created vocabulary {} with key {}", vocabName, createdVocab.getVocabulary().getKey());
+
+    Label vocabLabel =
+        vocabularyClient.addLabel(
+            vocabName,
+            Label.builder().language(LanguageRegion.ENGLISH).value(vocabLabelEN).build());
+    log.info("Added vocabulary label with key {}", vocabLabel.getKey());
 
     // create the concepts
     Map<String, Concept> conceptsMap = new HashMap<>();
@@ -106,13 +114,17 @@ public class VocabularyImporter {
                 conceptsMap.put(conceptName, concept);
 
                 // read fields
-                parseConceptFields(listDelimiter, errors, conceptsMap, values, concept);
+                parseConceptFields(listDelimiter, errors, conceptsMap, values, concept, vocabName);
 
                 // create concept
                 try {
-                  Concept created = conceptClient.create(createdVocab.getName(), concept);
-                  conceptsMap.put(created.getName(), created);
-                  log.info("Created concept {} with key {}", created.getName(), created.getKey());
+                  ConceptView created =
+                      conceptClient.create(createdVocab.getVocabulary().getName(), concept);
+                  conceptsMap.put(created.getConcept().getName(), created.getConcept());
+                  log.info(
+                      "Created concept {} with key {}",
+                      created.getConcept().getName(),
+                      created.getConcept().getKey());
                 } catch (Exception ex) {
                   errors.add(Error.of("Error creating concept " + concept.getName(), ex));
                   log.error("Cannot create concept {}", concept.getName(), ex);
@@ -141,14 +153,23 @@ public class VocabularyImporter {
     List<Error> errors = new ArrayList<>();
 
     // update vocabulary
-    Vocabulary vocab = vocabularyClient.get(vocabName);
-    vocab.setName(vocabName);
-    vocab.getLabel().put(LanguageRegion.ENGLISH, vocabLabelEN);
+    VocabularyView vocab = vocabularyClient.get(vocabName);
+    vocab.getVocabulary().setName(vocabName);
     if (!Strings.isNullOrEmpty(vocabDefinitionEN)) {
-      vocab.getDefinition().put(LanguageRegion.ENGLISH, vocabDefinitionEN);
+      vocab.getVocabulary().getDefinition().put(LanguageRegion.ENGLISH, vocabDefinitionEN);
     }
-    Vocabulary updatedVocab = vocabularyClient.update(vocab);
-    log.info("Updated vocabulary {} with key {}", vocabName, updatedVocab.getKey());
+    VocabularyView updatedVocab = vocabularyClient.update(vocab.getVocabulary());
+    log.info("Updated vocabulary {} with key {}", vocabName, updatedVocab.getVocabulary().getKey());
+
+    List<Label> labels = vocabularyClient.listLabels(vocab.getVocabulary().getName());
+    labels.stream()
+        .filter(l -> l.getLanguage() == LanguageRegion.ENGLISH)
+        .findFirst()
+        .ifPresent(
+            l -> {
+              l.setValue(vocabLabelEN);
+              vocabularyClient.updateLabel(vocabName, l);
+            });
 
     // retrieve all the existing concepts
     Map<String, Concept> existingConcepts = getVocabularyConcepts(vocabName);
@@ -178,14 +199,32 @@ public class VocabularyImporter {
                 Concept concept = existingConcepts.get(conceptName);
                 conceptsMap.put(conceptName, concept);
                 // reset the hidden labels as they will be set later
-                concept.setHiddenLabels(new HashSet<>());
-                parseConceptFields(listDelimiter, errors, conceptsMap, values, concept);
+                int offset = 0;
+                int limit = 1000;
+                PagingResponse<HiddenLabel> responseHiddenLabels;
+                do {
+                  responseHiddenLabels =
+                      conceptClient.listHiddenLabels(
+                          vocabName, conceptName, new PagingRequest(offset, limit));
+                  offset += limit;
+
+                  responseHiddenLabels
+                      .getResults()
+                      .forEach(
+                          hl ->
+                              conceptClient.deleteHiddenLabel(vocabName, conceptName, hl.getKey()));
+                } while (!responseHiddenLabels.isEndOfRecords());
+
+                parseConceptFields(listDelimiter, errors, conceptsMap, values, concept, vocabName);
 
                 // update concept
                 try {
-                  Concept updated = conceptClient.update(vocabName, concept);
-                  conceptsMap.put(updated.getName(), updated);
-                  log.info("Updated concept {} with key {}", updated.getName(), updated.getKey());
+                  ConceptView updated = conceptClient.update(vocabName, concept);
+                  conceptsMap.put(updated.getConcept().getName(), updated.getConcept());
+                  log.info(
+                      "Updated concept {} with key {}",
+                      updated.getConcept().getName(),
+                      updated.getConcept().getKey());
                 } catch (Exception ex) {
                   errors.add(Error.of("Error updating concept " + concept.getName(), ex));
                   log.error("Cannot update concept {}", concept.getName(), ex);
@@ -241,26 +280,22 @@ public class VocabularyImporter {
                   return;
                 }
 
-                if (!concept.getHiddenLabels().contains(hiddenLabel)) {
-                  concept.getHiddenLabels().add(hiddenLabel);
-                  try {
-                    Concept updated = conceptClient.update(vocabName, concept.getName(), concept);
-                    conceptsMap.put(concept.getName(), updated);
-                  } catch (Exception ex) {
-                    concept.getHiddenLabels().remove(hiddenLabel);
-                    errors.add(
-                        Error.of(
-                            "Error adding hidden label "
-                                + hiddenLabel
-                                + " in concept "
-                                + concept.getName(),
-                            ex));
-                    log.error(
-                        "Couldn't add hidden label {} in concept {}",
-                        hiddenLabel,
-                        concept.getName(),
-                        ex);
-                  }
+                try {
+                  conceptClient.addHiddenLabel(
+                      vocabName, conceptName, HiddenLabel.builder().value(hiddenLabel).build());
+                } catch (Exception ex) {
+                  errors.add(
+                      Error.of(
+                          "Error adding hidden label "
+                              + hiddenLabel
+                              + " in concept "
+                              + concept.getName(),
+                          ex));
+                  log.error(
+                      "Couldn't add hidden label {} in concept {}",
+                      hiddenLabel,
+                      concept.getName(),
+                      ex);
                 }
               });
     }
@@ -271,7 +306,8 @@ public class VocabularyImporter {
       List<Error> errors,
       Map<String, Concept> conceptsMap,
       String[] values,
-      Concept concept) {
+      Concept concept,
+      String vocabName) {
     // parent
     if (values.length > 1 && !Strings.isNullOrEmpty(values[1])) {
       String parentName = values[1].trim();
@@ -287,27 +323,46 @@ public class VocabularyImporter {
 
     // add EN labels
     if (values.length > 2 && !Strings.isNullOrEmpty(values[2])) {
-      concept.getLabel().put(LanguageRegion.ENGLISH, values[2].trim());
+      addLabel(
+          vocabName,
+          concept,
+          Label.builder().language(LanguageRegion.ENGLISH).value(values[2].trim()).build(),
+          errors);
     }
 
     // add EN alternative labels
     if (values.length > 3 && !Strings.isNullOrEmpty(values[3])) {
-      Set<String> altLabels =
-          Stream.of(values[3].split(listDelimiter)).map(String::trim).collect(Collectors.toSet());
-      concept.getAlternativeLabels().put(LanguageRegion.ENGLISH, altLabels);
+      Stream.of(values[3].split(listDelimiter))
+          .map(String::trim)
+          .forEach(
+              l ->
+                  addAlternativeLabel(
+                      vocabName,
+                      concept,
+                      Label.builder().language(LanguageRegion.ENGLISH).value(l).build(),
+                      errors));
     }
 
     // add ES labels
     if (values.length > 4 && !Strings.isNullOrEmpty(values[4])) {
-      concept.getLabel().put(LanguageRegion.SPANISH, values[4].trim());
+      addLabel(
+          vocabName,
+          concept,
+          Label.builder().language(LanguageRegion.SPANISH).value(values[4].trim()).build(),
+          errors);
     }
 
     // add ES alternative labels
     if (values.length > 5 && !Strings.isNullOrEmpty(values[5])) {
-      Set<String> altLabels =
-          Stream.of(values[5].split(listDelimiter)).map(String::trim).collect(Collectors.toSet());
-
-      concept.getAlternativeLabels().put(LanguageRegion.SPANISH, altLabels);
+      Stream.of(values[5].split(listDelimiter))
+          .map(String::trim)
+          .forEach(
+              l ->
+                  addAlternativeLabel(
+                      vocabName,
+                      concept,
+                      Label.builder().language(LanguageRegion.SPANISH).value(l).build(),
+                      errors));
     }
 
     // add EN definitions
@@ -343,6 +398,41 @@ public class VocabularyImporter {
         }
       }
       concept.setExternalDefinitions(new ArrayList<>(externalDefinitions));
+    }
+  }
+
+  private void addLabel(String vocabName, Concept concept, Label label, List<Error> errors) {
+    try {
+      conceptClient.addLabel(vocabName, concept.getName(), label);
+    } catch (Exception ex) {
+      errors.add(
+          Error.of(
+              "Error adding label "
+                  + label.getLanguage()
+                  + "->"
+                  + label.getValue()
+                  + " in concept "
+                  + concept.getName(),
+              ex));
+      log.error("Couldn't add label {} in concept {}", label, concept.getName(), ex);
+    }
+  }
+
+  private void addAlternativeLabel(
+      String vocabName, Concept concept, Label label, List<Error> errors) {
+    try {
+      conceptClient.addAlternativeLabel(vocabName, concept.getName(), label);
+    } catch (Exception ex) {
+      errors.add(
+          Error.of(
+              "Error adding alternative label "
+                  + label.getLanguage()
+                  + "->"
+                  + label.getValue()
+                  + " in concept "
+                  + concept.getName(),
+              ex));
+      log.error("Couldn't add alternative label {} in concept {}", label, concept.getName(), ex);
     }
   }
 

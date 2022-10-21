@@ -32,7 +32,7 @@ public abstract class AbstractVocabularyEntity implements VocabularyEntity {
 
   Long key;
   @NotBlank String name;
-  Map<LanguageRegion, String> definitions = new EnumMap<>(LanguageRegion.class);
+  Map<LanguageRegion, String> definition = new EnumMap<>(LanguageRegion.class);
   List<URI> externalDefinitions = new ArrayList<>();
   List<String> editorialNotes = new ArrayList<>();
 

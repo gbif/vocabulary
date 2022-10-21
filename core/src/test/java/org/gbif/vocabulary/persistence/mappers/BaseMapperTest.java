@@ -14,7 +14,6 @@
 package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.vocabulary.PostgresDBExtension;
-import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.model.utils.LenientEquals;
 
@@ -77,10 +76,10 @@ abstract class BaseMapperTest<T extends VocabularyEntity & LenientEquals<T>> {
     T entityUpdated = baseMapper.get(entitySaved.getKey());
     assertTrue(entitySaved.lenientEquals(entityUpdated));
 
-    entityUpdated.setDefinitions(null);
+    entityUpdated.setDefinition(null);
     baseMapper.update(entityUpdated);
     entityUpdated = baseMapper.get(entitySaved.getKey());
-    assertTrue(entityUpdated.getDefinitions().isEmpty());
+    assertTrue(entityUpdated.getDefinition().isEmpty());
   }
 
   @Test

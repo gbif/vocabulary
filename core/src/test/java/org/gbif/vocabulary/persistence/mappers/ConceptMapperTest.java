@@ -758,7 +758,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept entity = new Concept();
     entity.setVocabularyKey(vocabularyKeys[0]);
     entity.setName(TestUtils.getRandomName());
-    entity.setDefinitions(
+    entity.setDefinition(
         new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));

@@ -24,7 +24,7 @@ public class Vocabulary extends AbstractVocabularyEntity
     return Objects.equals(key, other.key)
         && Objects.equals(namespace, other.namespace)
         && Objects.equals(name, other.name)
-        && Objects.equals(definitions, other.definitions)
+        && Objects.equals(definition, other.definition)
         && Objects.equals(externalDefinitions, other.externalDefinitions)
         && Objects.equals(editorialNotes, other.editorialNotes)
         && Objects.equals(replacedByKey, other.replacedByKey)

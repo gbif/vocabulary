@@ -37,7 +37,7 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
         && Objects.equals(vocabularyKey, other.vocabularyKey)
         && Objects.equals(parentKey, other.parentKey)
         && Objects.equals(name, other.name)
-        && Objects.equals(definitions, other.definitions)
+        && Objects.equals(definition, other.definition)
         && Objects.equals(externalDefinitions, other.externalDefinitions)
         && Objects.equals(sameAsUris, other.sameAsUris)
         && Objects.equals(editorialNotes, other.editorialNotes)

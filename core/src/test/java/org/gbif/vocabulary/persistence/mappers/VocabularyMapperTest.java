@@ -337,7 +337,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   Vocabulary createNewEntity() {
     Vocabulary entity = new Vocabulary();
     entity.setName(TestUtils.getRandomName());
-    entity.setDefinitions(
+    entity.setDefinition(
         new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));

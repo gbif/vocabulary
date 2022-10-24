@@ -140,17 +140,17 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
 
     Label createdLabel = vocabularyClient.addLabel(v1.getName(), label);
     label.setKey(createdLabel.getKey());
-    assertEquals(label, createdLabel);
+    assertTrue(label.lenientEquals(createdLabel));
 
     assertEquals(createdLabel, vocabularyClient.getLabel(v1.getName(), createdLabel.getKey()));
 
     List<Label> labelList = vocabularyClient.listLabels(v1.getName());
     assertEquals(1, labelList.size());
-    assertEquals(createdLabel, labelList.get(0));
+    assertTrue(createdLabel.lenientEquals(labelList.get(0)));
 
     label.setValue("Label2");
     Label updatedLabel = vocabularyClient.updateLabel(v1.getName(), label);
-    assertEquals(label, updatedLabel);
+    assertTrue(label.lenientEquals(updatedLabel));
 
     vocabularyClient.deleteLabel(v1.getName(), updatedLabel.getKey());
     assertEquals(0, vocabularyClient.listLabels(v1.getName()).size());

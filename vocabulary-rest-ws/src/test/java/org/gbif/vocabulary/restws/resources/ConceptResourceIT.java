@@ -46,6 +46,7 @@ import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** IT for the {@link ConceptResource}. */
 @ContextConfiguration(initializers = {ConceptResourceIT.ContextInitializer.class})
@@ -266,7 +267,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
     Label createdLabel = conceptClient.addLabel(defaultVocabularyName, c1.getName(), label);
     label.setKey(createdLabel.getKey());
-    assertEquals(label, createdLabel);
+    assertTrue(label.lenientEquals(createdLabel));
 
     assertEquals(
         createdLabel,
@@ -274,11 +275,11 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
     List<Label> labelList = conceptClient.listLabels(defaultVocabularyName, c1.getName());
     assertEquals(1, labelList.size());
-    assertEquals(createdLabel, labelList.get(0));
+    assertTrue(createdLabel.lenientEquals(labelList.get(0)));
 
     label.setValue("Label2");
     Label updatedLabel = conceptClient.updateLabel(defaultVocabularyName, c1.getName(), label);
-    assertEquals(label, updatedLabel);
+    assertTrue(label.lenientEquals(updatedLabel));
 
     conceptClient.deleteLabel(defaultVocabularyName, c1.getName(), updatedLabel.getKey());
     assertEquals(0, conceptClient.listLabels(defaultVocabularyName, c1.getName()).size());
@@ -299,7 +300,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     Label createdLabel =
         conceptClient.addAlternativeLabel(defaultVocabularyName, c1.getName(), label);
     label.setKey(createdLabel.getKey());
-    assertEquals(label, createdLabel);
+    assertTrue(label.lenientEquals(createdLabel));
 
     assertEquals(
         createdLabel,
@@ -310,12 +311,12 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         conceptClient.listAlternativeLabels(
             defaultVocabularyName, c1.getName(), new PagingRequest());
     assertEquals(1, labelList.getResults().size());
-    assertEquals(createdLabel, labelList.getResults().get(0));
+    assertTrue(createdLabel.lenientEquals(labelList.getResults().get(0)));
 
     label.setValue("Label2");
     Label updatedLabel =
         conceptClient.updateAlternativeLabel(defaultVocabularyName, c1.getName(), label);
-    assertEquals(label, updatedLabel);
+    assertTrue(label.lenientEquals(updatedLabel));
 
     conceptClient.deleteAlternativeLabel(
         defaultVocabularyName, c1.getName(), updatedLabel.getKey());
@@ -338,7 +339,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     HiddenLabel createdLabel =
         conceptClient.addHiddenLabel(defaultVocabularyName, c1.getName(), label);
     label.setKey(createdLabel.getKey());
-    assertEquals(label, createdLabel);
+    assertTrue(label.lenientEquals(createdLabel));
 
     assertEquals(
         createdLabel,
@@ -347,12 +348,12 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     PagingResponse<HiddenLabel> labelList =
         conceptClient.listHiddenLabels(defaultVocabularyName, c1.getName(), new PagingRequest());
     assertEquals(1, labelList.getResults().size());
-    assertEquals(createdLabel, labelList.getResults().get(0));
+    assertTrue(createdLabel.lenientEquals(labelList.getResults().get(0)));
 
     label.setValue("Label2");
     HiddenLabel updatedLabel =
         conceptClient.updateHiddenLabel(defaultVocabularyName, c1.getName(), label);
-    assertEquals(label, updatedLabel);
+    assertTrue(label.lenientEquals(updatedLabel));
 
     conceptClient.deleteHiddenLabel(defaultVocabularyName, c1.getName(), updatedLabel.getKey());
     assertEquals(

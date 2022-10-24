@@ -164,9 +164,16 @@ public class ConceptServiceIT {
             .entityKey(concept.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("sim1")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
     conceptService.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept.getKey()).value("simm1").build());
+        HiddenLabel.builder()
+            .entityKey(concept.getKey())
+            .value("simm1")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
 
     Concept similar = createBasicConcept(vocabularyKeys[0]);
     similar.setName(concept.getName());
@@ -184,14 +191,24 @@ public class ConceptServiceIT {
         IllegalArgumentException.class,
         () ->
             conceptService.addHiddenLabel(
-                HiddenLabel.builder().entityKey(similar2.getKey()).value("simm1").build()));
+                HiddenLabel.builder()
+                    .entityKey(similar2.getKey())
+                    .value("simm1")
+                    .createdBy("test")
+                    .modifiedBy("test")
+                    .build()));
 
     Concept similar3 = createBasicConcept(vocabularyKeys[0]);
     conceptService.create(similar3);
     assertDoesNotThrow(
         () ->
             conceptService.addHiddenLabel(
-                HiddenLabel.builder().entityKey(similar3.getKey()).value("simm2").build()));
+                HiddenLabel.builder()
+                    .entityKey(similar3.getKey())
+                    .value("simm2")
+                    .createdBy("test")
+                    .modifiedBy("test")
+                    .build()));
 
     Concept similar4 = createBasicConcept(vocabularyKeys[0]);
     conceptService.create(similar4);
@@ -202,6 +219,8 @@ public class ConceptServiceIT {
                 Label.builder()
                     .entityKey(similar4.getKey())
                     .language(LanguageRegion.SPANISH)
+                    .createdBy("test")
+                    .modifiedBy("test")
                     .value("simm2")
                     .build()));
   }
@@ -235,9 +254,16 @@ public class ConceptServiceIT {
             .entityKey(concept1.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("simupdated")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
     conceptService.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept1.getKey()).value("hidden1").build());
+        HiddenLabel.builder()
+            .entityKey(concept1.getKey())
+            .value("hidden1")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
 
     Concept concept2 = createBasicConcept(vocabularyKeys[0]);
     long key2 = conceptService.create(concept2);
@@ -251,6 +277,8 @@ public class ConceptServiceIT {
                     .entityKey(concept2.getKey())
                     .language(LanguageRegion.ENGLISH)
                     .value("simupdated")
+                    .createdBy("test")
+                    .modifiedBy("test")
                     .build()));
 
     assertThrows(
@@ -261,6 +289,8 @@ public class ConceptServiceIT {
                     .entityKey(concept2.getKey())
                     .language(LanguageRegion.ENGLISH)
                     .value(concept1.getName())
+                    .createdBy("test")
+                    .modifiedBy("test")
                     .build()));
 
     assertDoesNotThrow(
@@ -270,19 +300,31 @@ public class ConceptServiceIT {
                     .entityKey(concept2.getKey())
                     .language(LanguageRegion.SPANISH)
                     .value("simupdated")
+                    .createdBy("test")
+                    .modifiedBy("test")
                     .build()));
 
     assertThrows(
         IllegalArgumentException.class,
         () ->
             conceptService.addHiddenLabel(
-                HiddenLabel.builder().entityKey(concept2.getKey()).value("simupdated").build()));
+                HiddenLabel.builder()
+                    .entityKey(concept2.getKey())
+                    .value("simupdated")
+                    .createdBy("test")
+                    .modifiedBy("test")
+                    .build()));
 
     assertThrows(
         IllegalArgumentException.class,
         () ->
             conceptService.addHiddenLabel(
-                HiddenLabel.builder().entityKey(concept2.getKey()).value("hidden1").build()));
+                HiddenLabel.builder()
+                    .entityKey(concept2.getKey())
+                    .value("hidden1")
+                    .createdBy("test")
+                    .modifiedBy("test")
+                    .build()));
 
     assertThrows(
         IllegalArgumentException.class,
@@ -292,6 +334,8 @@ public class ConceptServiceIT {
                     .entityKey(concept2.getKey())
                     .language(LanguageRegion.ENGLISH)
                     .value("hidden1")
+                    .createdBy("test")
+                    .modifiedBy("test")
                     .build()));
   }
 
@@ -626,13 +670,19 @@ public class ConceptServiceIT {
 
     // add label
     Label label =
-        Label.builder().entityKey(c1Key).language(LanguageRegion.ENGLISH).value("label").build();
+        Label.builder()
+            .entityKey(c1Key)
+            .language(LanguageRegion.ENGLISH)
+            .value("label")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
     long labelKey = conceptService.addLabel(label);
     assertTrue(labelKey > 0);
 
     // get label
     Label createdLabel = conceptService.getLabel(labelKey);
-    assertEquals(label, createdLabel);
+    assertTrue(label.lenientEquals(createdLabel));
 
     // list labels
     List<Label> labelList = conceptService.listLabels(c1Key);
@@ -641,7 +691,13 @@ public class ConceptServiceIT {
 
     // add another label
     Label label2 =
-        Label.builder().entityKey(c1Key).language(LanguageRegion.SPANISH).value("label2").build();
+        Label.builder()
+            .entityKey(c1Key)
+            .language(LanguageRegion.SPANISH)
+            .value("label2")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
     long labelKey2 = conceptService.addLabel(label2);
     assertTrue(labelKey2 > 0);
     assertEquals(2, conceptService.listLabels(c1Key).size());
@@ -660,13 +716,19 @@ public class ConceptServiceIT {
 
     // add label
     Label label =
-        Label.builder().entityKey(c1Key).language(LanguageRegion.ENGLISH).value("label").build();
+        Label.builder()
+            .entityKey(c1Key)
+            .language(LanguageRegion.ENGLISH)
+            .value("label")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
     long labelKey = conceptService.addAlternativeLabel(label);
     assertTrue(labelKey > 0);
 
     // get label
     Label createdLabel = conceptService.getAlternativeLabel(labelKey);
-    assertEquals(label, createdLabel);
+    assertTrue(label.lenientEquals(createdLabel));
 
     // list labels
     PagingResponse<Label> labelList = conceptService.listAlternativeLabels(c1Key, DEFAULT_PAGE);
@@ -675,7 +737,13 @@ public class ConceptServiceIT {
 
     // add another label
     Label label2 =
-        Label.builder().entityKey(c1Key).language(LanguageRegion.SPANISH).value("label2").build();
+        Label.builder()
+            .entityKey(c1Key)
+            .language(LanguageRegion.SPANISH)
+            .value("label2")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
     long labelKey2 = conceptService.addAlternativeLabel(label2);
     assertTrue(labelKey2 > 0);
     assertEquals(2, conceptService.listAlternativeLabels(c1Key, DEFAULT_PAGE).getResults().size());
@@ -693,13 +761,19 @@ public class ConceptServiceIT {
     long c1Key = conceptService.create(concept1);
 
     // add label
-    HiddenLabel label = HiddenLabel.builder().entityKey(c1Key).value("label").build();
+    HiddenLabel label =
+        HiddenLabel.builder()
+            .entityKey(c1Key)
+            .value("label")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
     long labelKey = conceptService.addHiddenLabel(label);
     assertTrue(labelKey > 0);
 
     // get label
     HiddenLabel createdLabel = conceptService.getHiddenLabel(labelKey);
-    assertEquals(label, createdLabel);
+    assertTrue(label.lenientEquals(createdLabel));
 
     // list labels
     PagingResponse<HiddenLabel> labelList = conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE);
@@ -707,7 +781,13 @@ public class ConceptServiceIT {
     assertEquals(labelKey, labelList.getResults().get(0).getKey());
 
     // add another label
-    HiddenLabel label2 = HiddenLabel.builder().entityKey(c1Key).value("label2").build();
+    HiddenLabel label2 =
+        HiddenLabel.builder()
+            .entityKey(c1Key)
+            .value("label2")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
     long labelKey2 = conceptService.addHiddenLabel(label2);
     assertTrue(labelKey2 > 0);
     assertEquals(2, conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE).getResults().size());

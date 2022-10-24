@@ -228,13 +228,19 @@ public class VocabularyServiceIT {
 
     // add label
     Label label =
-        Label.builder().entityKey(v1Key).language(LanguageRegion.ENGLISH).value("label").build();
+        Label.builder()
+            .entityKey(v1Key)
+            .language(LanguageRegion.ENGLISH)
+            .value("label")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
     long labelKey = vocabularyService.addLabel(label);
     assertTrue(labelKey > 0);
 
     // get label
     Label createdLabel = vocabularyService.getLabel(labelKey);
-    assertEquals(label, createdLabel);
+    assertTrue(label.lenientEquals(createdLabel));
 
     // list labels
     List<Label> labelList = vocabularyService.listLabels(v1Key);
@@ -243,7 +249,13 @@ public class VocabularyServiceIT {
 
     // add another label
     Label label2 =
-        Label.builder().entityKey(v1Key).language(LanguageRegion.SPANISH).value("label2").build();
+        Label.builder()
+            .entityKey(v1Key)
+            .language(LanguageRegion.SPANISH)
+            .value("label2")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
     long labelKey2 = vocabularyService.addLabel(label2);
     assertTrue(labelKey2 > 0);
     assertEquals(2, vocabularyService.listLabels(v1Key).size());

@@ -400,7 +400,7 @@
     SELECT key, concept_key, language, value, created_by, created, modified_by, modified
     FROM concept_alternative_label
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    ORDER BY key DESC
+    ORDER BY created DESC
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>
@@ -444,7 +444,7 @@
     SELECT key, concept_key, value, created_by, created, modified_by, modified
     FROM concept_hidden_label
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    ORDER BY key DESC
+    ORDER BY created DESC
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>

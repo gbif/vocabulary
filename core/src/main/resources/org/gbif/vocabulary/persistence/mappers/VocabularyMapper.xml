@@ -286,7 +286,7 @@
     SELECT key, vocabulary_key, language, value, created_by, created, modified_by, modified
     FROM vocabulary_label
     WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
-    ORDER BY key DESC
+    ORDER BY created DESC
   </select>
 
   <select id="getLabel" resultType="Label" resultMap="LABEL_RESULT_MAP">

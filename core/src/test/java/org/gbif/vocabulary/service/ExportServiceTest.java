@@ -168,8 +168,8 @@ public class ExportServiceTest extends MockServiceBaseTest {
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);
     when(conceptService.list(any(), any()))
         .thenReturn(new PagingResponse<>(0, 100, 3L, Arrays.asList(c1, c2, c3)));
-    when(conceptService.listLabels(c1.getKey())).thenReturn(c1Labels);
-    when(conceptService.listAlternativeLabels(c1.getKey(), new PagingRequest(0, 1000)))
+    when(conceptService.listLabels(c1.getKey(), null)).thenReturn(c1Labels);
+    when(conceptService.listAlternativeLabels(c1.getKey(), null, new PagingRequest(0, 1000)))
         .thenReturn(
             new PagingResponse<>(
                 0L,
@@ -180,13 +180,13 @@ public class ExportServiceTest extends MockServiceBaseTest {
         .thenReturn(
             new PagingResponse<>(
                 0L, c1HiddenLabels.size(), (long) c1HiddenLabels.size(), c1HiddenLabels));
-    when(conceptService.listLabels(c2.getKey())).thenReturn(c2Labels);
-    when(conceptService.listAlternativeLabels(c2.getKey(), new PagingRequest(0, 1000)))
+    when(conceptService.listLabels(c2.getKey(), null)).thenReturn(c2Labels);
+    when(conceptService.listAlternativeLabels(c2.getKey(), null, new PagingRequest(0, 1000)))
         .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
     when(conceptService.listHiddenLabels(c2.getKey(), new PagingRequest(0, 1000)))
         .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
-    when(conceptService.listLabels(c3.getKey())).thenReturn(c3Labels);
-    when(conceptService.listAlternativeLabels(c3.getKey(), new PagingRequest(0, 1000)))
+    when(conceptService.listLabels(c3.getKey(), null)).thenReturn(c3Labels);
+    when(conceptService.listAlternativeLabels(c3.getKey(), null, new PagingRequest(0, 1000)))
         .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
     when(conceptService.listHiddenLabels(c3.getKey(), new PagingRequest(0, 1000)))
         .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));

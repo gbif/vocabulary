@@ -243,7 +243,7 @@ public class VocabularyServiceIT {
     assertTrue(label.lenientEquals(createdLabel));
 
     // list labels
-    List<Label> labelList = vocabularyService.listLabels(v1Key);
+    List<Label> labelList = vocabularyService.listLabels(v1Key, null);
     assertEquals(1, labelList.size());
     assertEquals(labelKey, labelList.get(0).getKey());
 
@@ -258,11 +258,14 @@ public class VocabularyServiceIT {
             .build();
     long labelKey2 = vocabularyService.addLabel(label2);
     assertTrue(labelKey2 > 0);
-    assertEquals(2, vocabularyService.listLabels(v1Key).size());
+    assertEquals(2, vocabularyService.listLabels(v1Key, null).size());
+    assertEquals(1, vocabularyService.listLabels(v1Key, LanguageRegion.ENGLISH).size());
+    assertEquals(1, vocabularyService.listLabels(v1Key, LanguageRegion.SPANISH).size());
+    assertEquals(0, vocabularyService.listLabels(v1Key, LanguageRegion.ACHOLI).size());
 
     // delete label
     vocabularyService.deleteLabel(labelKey);
-    labelList = vocabularyService.listLabels(v1Key);
+    labelList = vocabularyService.listLabels(v1Key, null);
     assertEquals(1, labelList.size());
     assertEquals(labelKey2, labelList.get(0).getKey());
   }

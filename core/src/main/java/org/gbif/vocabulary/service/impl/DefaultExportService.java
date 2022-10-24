@@ -271,7 +271,7 @@ public class DefaultExportService implements ExportService {
     VocabularyExportView vocabularyExportView = new VocabularyExportView();
     vocabularyExportView.setVocabulary(vocabulary);
 
-    List<Label> labels = vocabularyService.listLabels(vocabulary.getKey());
+    List<Label> labels = vocabularyService.listLabels(vocabulary.getKey(), null);
     labels.forEach(l -> vocabularyExportView.getLabels().put(l.getLanguage(), l.getValue()));
 
     return vocabularyExportView;
@@ -282,7 +282,7 @@ public class DefaultExportService implements ExportService {
     conceptExportView.setConcept(concept);
 
     // labels
-    List<Label> labels = conceptService.listLabels(concept.getKey());
+    List<Label> labels = conceptService.listLabels(concept.getKey(), null);
     labels.forEach(l -> conceptExportView.getLabel().put(l.getLanguage(), l.getValue()));
 
     // alternative labels
@@ -291,7 +291,8 @@ public class DefaultExportService implements ExportService {
     PagingResponse<Label> responseAltLabels = null;
     do {
       responseAltLabels =
-          conceptService.listAlternativeLabels(concept.getKey(), new PagingRequest(offset, limit));
+          conceptService.listAlternativeLabels(
+              concept.getKey(), null, new PagingRequest(offset, limit));
 
       responseAltLabels
           .getResults()

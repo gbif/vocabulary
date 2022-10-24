@@ -13,11 +13,12 @@
 
   <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">
     <id property="key" column="key"/>
-    <collection property="labels" column="key" select="listLabels"/>
+    <collection property="labels" column="key" select="listConceptLabels"/>
   </resultMap>
 
   <resultMap id="LABEL_RESULT_MAP" type="Label" autoMapping="true">
     <id property="key" column="key"/>
+    <result property="language" column="language" typeHandler="LanguageRegionTypeHandler"/>
     <result property="entityKey" column="concept_key"/>
   </resultMap>
 
@@ -363,8 +364,18 @@
   <select id="listLabels" resultMap="LABEL_RESULT_MAP">
     SELECT key, concept_key, language, value, created_by, created, modified_by, modified
     FROM concept_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT} ORDER
-    BY key DESC
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    <if test="lang != null">
+      AND language = #{lang}
+    </if>
+    ORDER BY key DESC
+  </select>
+
+  <select id="listConceptLabels" resultMap="LABEL_RESULT_MAP">
+    SELECT key, concept_key, language, value, created_by, created, modified_by, modified
+    FROM concept_label
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    ORDER BY key DESC
   </select>
 
   <select id="getLabel" resultMap="LABEL_RESULT_MAP">
@@ -400,6 +411,9 @@
     SELECT key, concept_key, language, value, created_by, created, modified_by, modified
     FROM concept_alternative_label
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    <if test="lang != null">
+      AND language = #{lang}
+    </if>
     ORDER BY created DESC
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
@@ -410,6 +424,9 @@
     SELECT COUNT(DISTINCT key)
     FROM concept_alternative_label
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    <if test="lang != null">
+      AND language = #{lang}
+    </if>
   </select>
 
   <select id="getAlternativeLabel" resultMap="LABEL_RESULT_MAP">

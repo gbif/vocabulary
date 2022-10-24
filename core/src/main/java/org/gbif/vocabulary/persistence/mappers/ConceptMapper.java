@@ -116,9 +116,12 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   void deleteAlternativeLabel(@Param("key") long key);
 
   List<Label> listAlternativeLabels(
-      @Param("entityKey") long entityKey, @Nullable @Param("page") Pageable page);
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("lang") LanguageRegion languageRegion,
+      @Nullable @Param("page") Pageable page);
 
-  long countAlternativeLabels(@Param("entityKey") long entityKey);
+  long countAlternativeLabels(
+      @Param("entityKey") long entityKey, @Nullable @Param("lang") LanguageRegion languageRegion);
 
   Label getAlternativeLabel(@Param("key") long labelKey);
 

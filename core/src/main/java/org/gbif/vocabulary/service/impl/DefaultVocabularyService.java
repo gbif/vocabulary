@@ -167,8 +167,8 @@ public class DefaultVocabularyService implements VocabularyService {
   }
 
   @Override
-  public List<Label> listLabels(long entityKey) {
-    return vocabularyMapper.listLabels(entityKey);
+  public List<Label> listLabels(long entityKey, @Nullable LanguageRegion languageRegion) {
+    return vocabularyMapper.listLabels(entityKey, languageRegion);
   }
 
   @Override

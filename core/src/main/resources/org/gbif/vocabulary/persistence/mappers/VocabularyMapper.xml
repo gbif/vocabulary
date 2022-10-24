@@ -11,7 +11,7 @@
 
   <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">
     <id property="key" column="key"/>
-    <collection property="labels" column="key" select="listLabels"/>
+    <collection property="labels" column="key" select="listVocabularyLabels"/>
   </resultMap>
 
   <resultMap id="LABEL_RESULT_MAP" type="Label" autoMapping="true">
@@ -283,6 +283,16 @@
   </delete>
 
   <select id="listLabels" resultType="Label" resultMap="LABEL_RESULT_MAP">
+    SELECT key, vocabulary_key, language, value, created_by, created, modified_by, modified
+    FROM vocabulary_label
+    WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
+    <if test="lang != null">
+      AND language = #{lang}
+    </if>
+    ORDER BY created DESC
+  </select>
+
+  <select id="listVocabularyLabels" resultType="Label" resultMap="LABEL_RESULT_MAP">
     SELECT key, vocabulary_key, language, value, created_by, created, modified_by, modified
     FROM vocabulary_label
     WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}

@@ -273,16 +273,27 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         createdLabel,
         conceptClient.getLabel(defaultVocabularyName, c1.getName(), createdLabel.getKey()));
 
-    List<Label> labelList = conceptClient.listLabels(defaultVocabularyName, c1.getName());
+    List<Label> labelList = conceptClient.listLabels(defaultVocabularyName, c1.getName(), null);
     assertEquals(1, labelList.size());
     assertTrue(createdLabel.lenientEquals(labelList.get(0)));
+
+    assertEquals(
+        1,
+        conceptClient
+            .listLabels(defaultVocabularyName, c1.getName(), LanguageRegion.ENGLISH)
+            .size());
+    assertEquals(
+        0,
+        conceptClient
+            .listLabels(defaultVocabularyName, c1.getName(), LanguageRegion.SPANISH)
+            .size());
 
     label.setValue("Label2");
     Label updatedLabel = conceptClient.updateLabel(defaultVocabularyName, c1.getName(), label);
     assertTrue(label.lenientEquals(updatedLabel));
 
     conceptClient.deleteLabel(defaultVocabularyName, c1.getName(), updatedLabel.getKey());
-    assertEquals(0, conceptClient.listLabels(defaultVocabularyName, c1.getName()).size());
+    assertEquals(0, conceptClient.listLabels(defaultVocabularyName, c1.getName(), null).size());
   }
 
   @Test
@@ -309,9 +320,24 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
 
     PagingResponse<Label> labelList =
         conceptClient.listAlternativeLabels(
-            defaultVocabularyName, c1.getName(), new PagingRequest());
+            defaultVocabularyName, c1.getName(), null, new PagingRequest());
     assertEquals(1, labelList.getResults().size());
     assertTrue(createdLabel.lenientEquals(labelList.getResults().get(0)));
+
+    assertEquals(
+        1,
+        conceptClient
+            .listAlternativeLabels(
+                defaultVocabularyName, c1.getName(), LanguageRegion.ENGLISH, new PagingRequest())
+            .getResults()
+            .size());
+    assertEquals(
+        0,
+        conceptClient
+            .listAlternativeLabels(
+                defaultVocabularyName, c1.getName(), LanguageRegion.SPANISH, new PagingRequest())
+            .getResults()
+            .size());
 
     label.setValue("Label2");
     Label updatedLabel =
@@ -323,7 +349,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     assertEquals(
         0,
         conceptClient
-            .listAlternativeLabels(defaultVocabularyName, c1.getName(), new PagingRequest())
+            .listAlternativeLabels(defaultVocabularyName, c1.getName(), null, new PagingRequest())
             .getResults()
             .size());
   }

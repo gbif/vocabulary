@@ -685,7 +685,7 @@ public class ConceptServiceIT {
     assertTrue(label.lenientEquals(createdLabel));
 
     // list labels
-    List<Label> labelList = conceptService.listLabels(c1Key);
+    List<Label> labelList = conceptService.listLabels(c1Key, null);
     assertEquals(1, labelList.size());
     assertEquals(labelKey, labelList.get(0).getKey());
 
@@ -700,11 +700,14 @@ public class ConceptServiceIT {
             .build();
     long labelKey2 = conceptService.addLabel(label2);
     assertTrue(labelKey2 > 0);
-    assertEquals(2, conceptService.listLabels(c1Key).size());
+    assertEquals(2, conceptService.listLabels(c1Key, null).size());
+    assertEquals(1, conceptService.listLabels(c1Key, LanguageRegion.ENGLISH).size());
+    assertEquals(1, conceptService.listLabels(c1Key, LanguageRegion.SPANISH).size());
+    assertEquals(0, conceptService.listLabels(c1Key, LanguageRegion.ACHOLI).size());
 
     // delete label
     conceptService.deleteLabel(labelKey);
-    labelList = conceptService.listLabels(c1Key);
+    labelList = conceptService.listLabels(c1Key, null);
     assertEquals(1, labelList.size());
     assertEquals(labelKey2, labelList.get(0).getKey());
   }
@@ -731,7 +734,8 @@ public class ConceptServiceIT {
     assertTrue(label.lenientEquals(createdLabel));
 
     // list labels
-    PagingResponse<Label> labelList = conceptService.listAlternativeLabels(c1Key, DEFAULT_PAGE);
+    PagingResponse<Label> labelList =
+        conceptService.listAlternativeLabels(c1Key, null, DEFAULT_PAGE);
     assertEquals(1, labelList.getResults().size());
     assertEquals(labelKey, labelList.getResults().get(0).getKey());
 
@@ -746,11 +750,30 @@ public class ConceptServiceIT {
             .build();
     long labelKey2 = conceptService.addAlternativeLabel(label2);
     assertTrue(labelKey2 > 0);
-    assertEquals(2, conceptService.listAlternativeLabels(c1Key, DEFAULT_PAGE).getResults().size());
+    assertEquals(
+        2, conceptService.listAlternativeLabels(c1Key, null, DEFAULT_PAGE).getResults().size());
+    assertEquals(
+        1,
+        conceptService
+            .listAlternativeLabels(c1Key, LanguageRegion.ENGLISH, DEFAULT_PAGE)
+            .getResults()
+            .size());
+    assertEquals(
+        1,
+        conceptService
+            .listAlternativeLabels(c1Key, LanguageRegion.SPANISH, DEFAULT_PAGE)
+            .getResults()
+            .size());
+    assertEquals(
+        0,
+        conceptService
+            .listAlternativeLabels(c1Key, LanguageRegion.ACHOLI, DEFAULT_PAGE)
+            .getResults()
+            .size());
 
     // delete label
     conceptService.deleteAlternativeLabel(labelKey);
-    labelList = conceptService.listAlternativeLabels(c1Key, DEFAULT_PAGE);
+    labelList = conceptService.listAlternativeLabels(c1Key, null, DEFAULT_PAGE);
     assertEquals(1, labelList.getResults().size());
     assertEquals(labelKey2, labelList.getResults().get(0).getKey());
   }

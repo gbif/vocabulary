@@ -13,6 +13,8 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
@@ -23,8 +25,6 @@ import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
@@ -145,7 +145,8 @@ public interface ConceptService extends BaseService<Concept> {
 
   Label getAlternativeLabel(long key);
 
-  PagingResponse<Label> listAlternativeLabels(long entityKey, @Nullable Pageable page);
+  PagingResponse<Label> listAlternativeLabels(
+      long entityKey, @Nullable LanguageRegion languageRegion, @Nullable Pageable page);
 
   long addHiddenLabel(@NotNull @Valid HiddenLabel label);
 

@@ -144,16 +144,19 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
 
     assertEquals(createdLabel, vocabularyClient.getLabel(v1.getName(), createdLabel.getKey()));
 
-    List<Label> labelList = vocabularyClient.listLabels(v1.getName());
+    List<Label> labelList = vocabularyClient.listLabels(v1.getName(), null);
     assertEquals(1, labelList.size());
     assertTrue(createdLabel.lenientEquals(labelList.get(0)));
+
+    assertEquals(1, vocabularyClient.listLabels(v1.getName(), LanguageRegion.ENGLISH).size());
+    assertEquals(0, vocabularyClient.listLabels(v1.getName(), LanguageRegion.SPANISH).size());
 
     label.setValue("Label2");
     Label updatedLabel = vocabularyClient.updateLabel(v1.getName(), label);
     assertTrue(label.lenientEquals(updatedLabel));
 
     vocabularyClient.deleteLabel(v1.getName(), updatedLabel.getKey());
-    assertEquals(0, vocabularyClient.listLabels(v1.getName()).size());
+    assertEquals(0, vocabularyClient.listLabels(v1.getName(), null).size());
   }
 
   @Override

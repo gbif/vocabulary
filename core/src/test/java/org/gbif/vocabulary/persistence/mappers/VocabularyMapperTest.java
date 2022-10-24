@@ -329,8 +329,13 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
             .build();
     vocabularyMapper.addLabel(label);
 
-    List<Label> labels = vocabularyMapper.listLabels(vocabulary.getKey());
+    List<Label> labels = vocabularyMapper.listLabels(vocabulary.getKey(), null);
     assertEquals(1, labels.size());
+
+    assertEquals(
+        1, vocabularyMapper.listLabels(vocabulary.getKey(), LanguageRegion.ENGLISH).size());
+    assertEquals(
+        0, vocabularyMapper.listLabels(vocabulary.getKey(), LanguageRegion.SPANISH).size());
 
     label = vocabularyMapper.getLabel(label.getKey());
     assertEquals("test", label.getValue());
@@ -347,7 +352,7 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
     vocabularyMapper.deleteLabel(label.getKey());
 
-    labels = vocabularyMapper.listLabels(vocabulary.getKey());
+    labels = vocabularyMapper.listLabels(vocabulary.getKey(), null);
     assertEquals(0, labels.size());
   }
 

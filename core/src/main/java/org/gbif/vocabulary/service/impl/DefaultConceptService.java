@@ -333,8 +333,8 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public List<Label> listLabels(long entityKey) {
-    return conceptMapper.listLabels(entityKey);
+  public List<Label> listLabels(long entityKey, @Nullable LanguageRegion languageRegion) {
+    return conceptMapper.listLabels(entityKey, languageRegion);
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
@@ -394,12 +394,13 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public PagingResponse<Label> listAlternativeLabels(long entityKey, @Nullable Pageable page) {
+  public PagingResponse<Label> listAlternativeLabels(
+      long entityKey, @Nullable LanguageRegion languageRegion, @Nullable Pageable page) {
     page = page != null ? page : new PagingRequest();
     return new PagingResponse<>(
         page,
-        conceptMapper.countAlternativeLabels(entityKey),
-        conceptMapper.listAlternativeLabels(entityKey, page));
+        conceptMapper.countAlternativeLabels(entityKey, languageRegion),
+        conceptMapper.listAlternativeLabels(entityKey, languageRegion, page));
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})

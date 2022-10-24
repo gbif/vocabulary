@@ -22,6 +22,7 @@ import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
 import org.gbif.vocabulary.api.VocabularyView;
 import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -112,7 +113,9 @@ public interface VocabularyClient {
   void deleteVocabulary(@PathVariable("name") String vocabularyName);
 
   @GetMapping(value = "{name}/labels", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<Label> listLabels(@PathVariable("name") String vocabularyName);
+  List<Label> listLabels(
+      @PathVariable("name") String vocabularyName,
+      @RequestParam(required = false, value = "lang") LanguageRegion languageRegion);
 
   @GetMapping(value = "{name}/labels/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
   Label getLabel(@PathVariable("name") String vocabularyName, @PathVariable("key") long labelKey);

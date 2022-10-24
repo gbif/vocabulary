@@ -336,7 +336,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
             .language(LanguageRegion.ENGLISH)
             .value("Label")
             .build();
-    when(vocabularyService.listLabels(vocabulary.getKey()))
+    when(vocabularyService.listLabels(vocabulary.getKey(), null))
         .thenReturn(Collections.singletonList(vocabularyLabel));
 
     VocabularyRelease vr1 = new VocabularyRelease();
@@ -483,13 +483,18 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
     Label label = createLabel(vocabulary);
-    when(vocabularyService.listLabels(vocabulary.getKey()))
+    when(vocabularyService.listLabels(vocabulary.getKey(), LanguageRegion.ENGLISH))
         .thenReturn(Collections.singletonList(label));
     mockMvc
         .perform(
             get(getBasePath() + "/" + vocabulary.getName() + "/labels")
+                .param("lang", LanguageRegion.ENGLISH.getLocale())
                 .with(authorizationDocumentation()))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andDo(
+            document(
+                "{class-name}/{method-name}",
+                requestParameters(parameterWithName("lang").description("Language").optional())));
   }
 
   @Test

@@ -161,15 +161,16 @@ public class VocabularyImporter {
     VocabularyView updatedVocab = vocabularyClient.update(vocab.getVocabulary());
     log.info("Updated vocabulary {} with key {}", vocabName, updatedVocab.getVocabulary().getKey());
 
-    List<Label> labels = vocabularyClient.listLabels(vocab.getVocabulary().getName());
-    labels.stream()
-        .filter(l -> l.getLanguage() == LanguageRegion.ENGLISH)
-        .findFirst()
-        .ifPresent(
-            l -> {
-              l.setValue(vocabLabelEN);
-              vocabularyClient.updateLabel(vocabName, l);
-            });
+    List<Label> labels =
+        vocabularyClient.listLabels(vocab.getVocabulary().getName(), LanguageRegion.ENGLISH);
+    if (!labels.isEmpty()) {
+      Label englishLabel = labels.get(0);
+      englishLabel.setValue(vocabLabelEN);
+      vocabularyClient.updateLabel(vocabName, englishLabel);
+    } else {
+      vocabularyClient.addLabel(
+          vocabName, Label.builder().language(LanguageRegion.ENGLISH).value(vocabLabelEN).build());
+    }
 
     // retrieve all the existing concepts
     Map<String, Concept> existingConcepts = getVocabularyConcepts(vocabName);

@@ -497,12 +497,18 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
     Label label = createLabel(concept);
-    when(conceptService.listLabels(concept.getKey())).thenReturn(Collections.singletonList(label));
+    when(conceptService.listLabels(concept.getKey(), LanguageRegion.ENGLISH))
+        .thenReturn(Collections.singletonList(label));
     mockMvc
         .perform(
             get(getBasePath() + "/" + concept.getName() + "/labels")
+                .param("lang", LanguageRegion.ENGLISH.getLocale())
                 .with(authorizationDocumentation()))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andDo(
+            document(
+                "{class-name}/{method-name}",
+                requestParameters(parameterWithName("lang").description("Language").optional())));
   }
 
   @Test
@@ -513,13 +519,19 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
     Label label = createLabel(concept);
-    when(conceptService.listAlternativeLabels(anyLong(), any(PagingRequest.class)))
+    when(conceptService.listAlternativeLabels(
+            anyLong(), any(LanguageRegion.class), any(PagingRequest.class)))
         .thenReturn(new PagingResponse<>(0, 20, 1L, Collections.singletonList(label)));
     mockMvc
         .perform(
             get(getBasePath() + "/" + concept.getName() + "/alternativeLabels")
+                .param("lang", LanguageRegion.ENGLISH.getLocale())
                 .with(authorizationDocumentation()))
-        .andExpect(status().isOk());
+        .andExpect(status().isOk())
+        .andDo(
+            document(
+                "{class-name}/{method-name}",
+                requestParameters(parameterWithName("lang").description("Language").optional())));
   }
 
   @Test

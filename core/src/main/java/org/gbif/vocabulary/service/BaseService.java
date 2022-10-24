@@ -16,8 +16,10 @@ package org.gbif.vocabulary.service;
 import java.util.List;
 
 import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -59,5 +61,5 @@ public interface BaseService<T extends VocabularyEntity> {
 
   Label getLabel(long key);
 
-  List<Label> listLabels(long entityKey);
+  List<Label> listLabels(long entityKey, @Nullable LanguageRegion languageRegion);
 }

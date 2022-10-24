@@ -16,11 +16,12 @@ package org.gbif.vocabulary.persistence.mappers;
 import java.util.List;
 
 import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
-import javax.annotation.Nullable;
-
 import org.apache.ibatis.annotations.Param;
+
+import javax.annotation.Nullable;
 
 /**
  * Base mappers for {@link VocabularyEntity} entities.
@@ -50,7 +51,8 @@ public interface BaseMapper<T extends VocabularyEntity> {
 
   void deleteLabel(@Param("key") long key);
 
-  List<Label> listLabels(@Param("entityKey") long entityKey);
+  List<Label> listLabels(
+      @Param("entityKey") long entityKey, @Nullable @Param("lang") LanguageRegion languageRegion);
 
   Label getLabel(@Param("key") long labelKey);
 }

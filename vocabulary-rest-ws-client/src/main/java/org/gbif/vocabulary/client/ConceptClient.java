@@ -24,6 +24,7 @@ import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
@@ -109,12 +110,14 @@ public interface ConceptClient {
   @GetMapping(value = "{name}/labels", produces = MediaType.APPLICATION_JSON_VALUE)
   List<Label> listLabels(
       @PathVariable("vocabularyName") String vocabularyName,
-      @PathVariable("name") String conceptName);
+      @PathVariable("name") String conceptName,
+      @RequestParam(required = false, value = "lang") LanguageRegion languageRegion);
 
   @GetMapping(value = "{name}/alternativeLabels", produces = MediaType.APPLICATION_JSON_VALUE)
   PagingResponse<Label> listAlternativeLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
+      @RequestParam(required = false, value = "lang") LanguageRegion languageRegion,
       @SpringQueryMap Pageable page);
 
   @GetMapping(value = "{name}/hiddenLabels", produces = MediaType.APPLICATION_JSON_VALUE)

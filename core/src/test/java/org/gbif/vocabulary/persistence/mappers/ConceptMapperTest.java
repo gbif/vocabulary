@@ -744,8 +744,11 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .build();
     conceptMapper.addLabel(label);
 
-    List<Label> labels = conceptMapper.listLabels(concept.getKey());
+    List<Label> labels = conceptMapper.listLabels(concept.getKey(), null);
     assertEquals(1, labels.size());
+
+    assertEquals(1, conceptMapper.listLabels(concept.getKey(), LanguageRegion.ENGLISH).size());
+    assertEquals(0, conceptMapper.listLabels(concept.getKey(), LanguageRegion.SPANISH).size());
 
     label = conceptMapper.getLabel(label.getKey());
     assertEquals("test", label.getValue());
@@ -761,7 +764,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals("test2", label.getValue());
 
     conceptMapper.deleteLabel(label.getKey());
-    labels = conceptMapper.listLabels(concept.getKey());
+    labels = conceptMapper.listLabels(concept.getKey(), null);
     assertEquals(0, labels.size());
   }
 
@@ -780,9 +783,20 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .build();
     conceptMapper.addAlternativeLabel(label);
 
-    List<Label> labels = conceptMapper.listAlternativeLabels(concept.getKey(), DEFAULT_PAGE);
+    List<Label> labels = conceptMapper.listAlternativeLabels(concept.getKey(), null, DEFAULT_PAGE);
     assertEquals(1, labels.size());
-    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey()));
+    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey(), null));
+
+    assertEquals(
+        1,
+        conceptMapper
+            .listAlternativeLabels(concept.getKey(), LanguageRegion.ENGLISH, DEFAULT_PAGE)
+            .size());
+    assertEquals(
+        0,
+        conceptMapper
+            .listAlternativeLabels(concept.getKey(), LanguageRegion.SPANISH, DEFAULT_PAGE)
+            .size());
 
     label = conceptMapper.getAlternativeLabel(label.getKey());
     assertEquals("test", label.getValue());
@@ -797,14 +811,14 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     label = conceptMapper.getAlternativeLabel(label.getKey());
     assertEquals("test2", label.getValue());
 
-    labels = conceptMapper.listAlternativeLabels(concept.getKey(), PAGE_FN.apply(0, 0L));
+    labels = conceptMapper.listAlternativeLabels(concept.getKey(), null, PAGE_FN.apply(0, 0L));
     assertEquals(0, labels.size());
-    assertEquals(1, conceptMapper.countAlternativeLabels(concept.getKey()));
+    assertEquals(1, conceptMapper.countAlternativeLabels(concept.getKey(), null));
 
     conceptMapper.deleteAlternativeLabel(label.getKey());
-    labels = conceptMapper.listAlternativeLabels(concept.getKey(), DEFAULT_PAGE);
+    labels = conceptMapper.listAlternativeLabels(concept.getKey(), null, DEFAULT_PAGE);
     assertEquals(0, labels.size());
-    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey()));
+    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey(), null));
   }
 
   @Test

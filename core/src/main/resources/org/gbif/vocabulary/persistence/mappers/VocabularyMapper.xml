@@ -16,6 +16,7 @@
 
   <resultMap id="LABEL_RESULT_MAP" type="Label" autoMapping="true">
     <id property="key" column="key"/>
+    <result property="language" column="language" typeHandler="LanguageRegionTypeHandler"/>
     <result property="entityKey" column="vocabulary_key"/>
   </resultMap>
 
@@ -51,6 +52,15 @@
     deleted = null <!-- if we're updating it can't be deleted -->
   </sql>
 
+  <sql id="FULL_TEXT">
+    JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    OR EXISTS(
+      SELECT vl.key
+      FROM vocabulary_label vl
+      WHERE vl.vocabulary_key = v.key AND query @@ vl.fulltext_search
+    )
+  </sql>
+
   <!-- QUERIES FROM HERE -->
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
@@ -84,7 +94,7 @@
     <include refid="VOCABULARY_READ_FIELDS"/>
     FROM vocabulary v
     <if test="params.query != null">
-      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      <include refid="FULL_TEXT"/>
     </if>
     <if test="params.hasUnreleasedChanges != null">
       LEFT JOIN LATERAL (
@@ -129,7 +139,7 @@
     SELECT COUNT(DISTINCT v.key)
     FROM vocabulary v
     <if test="params.query != null">
-      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      <include refid="FULL_TEXT"/>
     </if>
     <if test="params.hasUnreleasedChanges != null">
       LEFT JOIN LATERAL (
@@ -249,15 +259,21 @@
 
   <!-- labels -->
   <insert id="addLabel" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
-    INSERT INTO vocabulary_label(vocabulary_key, language, value)
+    INSERT INTO vocabulary_label(vocabulary_key, language, value, created_by, modified_by, created, modified)
     VALUES(#{entityKey,jdbcType=BIGINT},
-           #{language,jdbcType=VARCHAR},
-           #{value,jdbcType=VARCHAR})
+           #{language,jdbcType=VARCHAR,typeHandler=LanguageRegionTypeHandler},
+           #{value,jdbcType=VARCHAR},
+           #{createdBy,jdbcType=VARCHAR},
+           #{modifiedBy,jdbcType=VARCHAR},
+           now(), <!-- created -->
+           now() <!-- modified -->)
   </insert>
 
   <update id="updateLabel">
     UPDATE vocabulary_label
-    SET value = #{value,jdbcType=VARCHAR}
+    SET value = #{value,jdbcType=VARCHAR},
+        modified_by = #{modifiedBy,jdbcType=VARCHAR},
+        modified = now()
     WHERE key = #{key,jdbcType=BIGINT}
   </update>
 
@@ -266,15 +282,15 @@
     WHERE key = #{key,jdbcType=BIGINT}
   </delete>
 
-  <select id="listLabels" resultMap="LABEL_RESULT_MAP">
-    SELECT key, vocabulary_key, language, value
+  <select id="listLabels" resultType="Label" resultMap="LABEL_RESULT_MAP">
+    SELECT key, vocabulary_key, language, value, created_by, created, modified_by, modified
     FROM vocabulary_label
     WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
     ORDER BY key DESC
   </select>
 
-  <select id="getLabel" resultMap="LABEL_RESULT_MAP">
-    SELECT key, vocabulary_key, language, value
+  <select id="getLabel" resultType="Label" resultMap="LABEL_RESULT_MAP">
+    SELECT key, vocabulary_key, language, value, created_by, created, modified_by, modified
     FROM vocabulary_label
     WHERE key = #{key,jdbcType=BIGINT}
   </select>

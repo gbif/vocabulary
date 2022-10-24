@@ -109,6 +109,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(concept1.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("alternative example")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     Concept concept2 = createNewEntity();
@@ -117,7 +119,12 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     conceptMapper.create(concept2);
 
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept2.getKey()).value("misspelt example").build());
+        HiddenLabel.builder()
+            .entityKey(concept2.getKey())
+            .value("misspelt example")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
 
     Concept concept3 = createNewEntity();
     concept3.setName("Concept3");
@@ -164,6 +171,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(c1.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("labelenglish")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     conceptMapper.addLabel(
@@ -171,12 +180,24 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(c1.getKey())
             .language(LanguageRegion.SPANISH)
             .value("labelspanish")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(c1.getKey()).value("lab,l").build());
+        HiddenLabel.builder()
+            .entityKey(c1.getKey())
+            .value("lab,l")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(c1.getKey()).value("lbel").build());
+        HiddenLabel.builder()
+            .entityKey(c1.getKey())
+            .value("lbel")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
 
     Concept c2 = createNewEntity();
     c2.setName("Suggest222");
@@ -188,12 +209,24 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(c2.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("Label")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(c2.getKey()).value("lab,l").build());
+        HiddenLabel.builder()
+            .entityKey(c2.getKey())
+            .value("lab,l")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(c2.getKey()).value("lbel").build());
+        HiddenLabel.builder()
+            .entityKey(c2.getKey())
+            .value("lbel")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
 
     // check result values
     List<KeyNameResult> result = conceptMapper.suggest("suggest1", c1.getVocabularyKey(), null);
@@ -235,14 +268,26 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(concept1.getKey())
             .language(LanguageRegion.SPANISH)
             .value("primero ")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     HiddenLabel hiddenLabel1 =
-        HiddenLabel.builder().entityKey(concept1.getKey()).value("primeiro").build();
+        HiddenLabel.builder()
+            .entityKey(concept1.getKey())
+            .value("primeiro")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build();
     conceptMapper.addHiddenLabel(hiddenLabel1);
 
     HiddenLabel hiddenLabel2 =
-        HiddenLabel.builder().entityKey(concept1.getKey()).value("otro primeiro").build();
+        HiddenLabel.builder()
+            .entityKey(concept1.getKey())
+            .value("otro primeiro")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build();
     conceptMapper.addHiddenLabel(hiddenLabel2);
 
     // check hidden labels
@@ -315,12 +360,24 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(concept1.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("normalization")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept1.getKey()).value("norm").build());
+        HiddenLabel.builder()
+            .entityKey(concept1.getKey())
+            .value("norm")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept1.getKey()).value("another norm").build());
+        HiddenLabel.builder()
+            .entityKey(concept1.getKey())
+            .value("another norm")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
 
     // check English labels
     List<KeyNameResult> similarities =
@@ -357,6 +414,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(concept1.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("l1")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     conceptMapper.addAlternativeLabel(
@@ -364,12 +423,24 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(concept1.getKey())
             .language(LanguageRegion.SPANISH)
             .value("l uno")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept1.getKey()).value("ll1").build());
+        HiddenLabel.builder()
+            .entityKey(concept1.getKey())
+            .value("ll1")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept1.getKey()).value("l1l").build());
+        HiddenLabel.builder()
+            .entityKey(concept1.getKey())
+            .value("l1l")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
 
     Concept concept2 = createNewEntity();
     concept2.setName("C2");
@@ -380,12 +451,24 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(concept2.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("l2")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept2.getKey()).value("ll2").build());
+        HiddenLabel.builder()
+            .entityKey(concept2.getKey())
+            .value("ll2")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
     conceptMapper.addHiddenLabel(
-        HiddenLabel.builder().entityKey(concept2.getKey()).value("l2l").build());
+        HiddenLabel.builder()
+            .entityKey(concept2.getKey())
+            .value("l2l")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
 
     // check Spanish labels
     List<KeyNameResult> similarities =
@@ -656,6 +739,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(concept.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("test")
+            .createdBy("test")
+            .modifiedBy("test")
             .build();
     conceptMapper.addLabel(label);
 
@@ -665,6 +750,10 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     label = conceptMapper.getLabel(label.getKey());
     assertEquals("test", label.getValue());
     assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
+    assertEquals("test", label.getCreatedBy());
+    assertEquals("test", label.getModifiedBy());
+    assertNotNull(label.getCreated());
+    assertNotNull(label.getModified());
 
     label.setValue("test2");
     conceptMapper.updateLabel(label);
@@ -686,6 +775,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .entityKey(concept.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("test")
+            .createdBy("test")
+            .modifiedBy("test")
             .build();
     conceptMapper.addAlternativeLabel(label);
 
@@ -696,6 +787,10 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     label = conceptMapper.getAlternativeLabel(label.getKey());
     assertEquals("test", label.getValue());
     assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
+    assertEquals("test", label.getCreatedBy());
+    assertEquals("test", label.getModifiedBy());
+    assertNotNull(label.getCreated());
+    assertNotNull(label.getModified());
 
     label.setValue("test2");
     conceptMapper.updateAlternativeLabel(label);
@@ -717,7 +812,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept concept = createNewEntity();
     conceptMapper.create(concept);
 
-    HiddenLabel label = HiddenLabel.builder().entityKey(concept.getKey()).value("test").build();
+    HiddenLabel label =
+        HiddenLabel.builder()
+            .entityKey(concept.getKey())
+            .value("test")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build();
     conceptMapper.addHiddenLabel(label);
 
     List<HiddenLabel> labels = conceptMapper.listHiddenLabels(concept.getKey(), DEFAULT_PAGE);
@@ -730,6 +831,10 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
     label = conceptMapper.getHiddenLabel(label.getKey());
     assertEquals("test", label.getValue());
+    assertEquals("test", label.getCreatedBy());
+    assertEquals("test", label.getModifiedBy());
+    assertNotNull(label.getCreated());
+    assertNotNull(label.getModified());
 
     label.setValue("test2");
     conceptMapper.updateHiddenLabel(label);

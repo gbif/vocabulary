@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.gbif.vocabulary.TestUtils;
-import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
@@ -167,7 +167,13 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 1);
 
     conceptMapper.addLabel(
-        Label.builder().entityKey(c1.getKey()).language(LanguageRegion.ACHOLI).value("aa").build());
+        Label.builder()
+            .entityKey(c1.getKey())
+            .language(LanguageRegion.ACHOLI)
+            .value("aa")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
     assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 0);
   }
 
@@ -205,6 +211,8 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
             .entityKey(v1.getKey())
             .language(LanguageRegion.SPANISH)
             .value("labelspanish")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     vocabularyMapper.addLabel(
@@ -212,6 +220,8 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
             .entityKey(v1.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("labelenglish")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     Vocabulary v2 = createNewEntity();
@@ -224,6 +234,8 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
             .entityKey(v2.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("Label")
+            .createdBy("test")
+            .modifiedBy("test")
             .build());
 
     // check result values
@@ -311,6 +323,8 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
         Label.builder()
             .entityKey(vocabulary.getKey())
             .language(LanguageRegion.ENGLISH)
+            .createdBy("test")
+            .modifiedBy("test")
             .value("test")
             .build();
     vocabularyMapper.addLabel(label);
@@ -321,6 +335,10 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     label = vocabularyMapper.getLabel(label.getKey());
     assertEquals("test", label.getValue());
     assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
+    assertEquals("test", label.getCreatedBy());
+    assertEquals("test", label.getModifiedBy());
+    assertNotNull(label.getCreated());
+    assertNotNull(label.getModified());
 
     label.setValue("test2");
     vocabularyMapper.updateLabel(label);

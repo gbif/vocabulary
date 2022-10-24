@@ -13,10 +13,10 @@
  */
 package org.gbif.vocabulary.restws.advices;
 
-import org.gbif.vocabulary.model.VocabularyEntity;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
+
+import org.gbif.vocabulary.model.Auditable;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
@@ -30,8 +30,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Intercepts all the requests with a {@link org.gbif.vocabulary.model.VocabularyEntity} in the body
- * and assigns the required {@link org.gbif.vocabulary.model.Auditable} fields.
+ * Intercepts all the requests with a {@link org.gbif.vocabulary.model.Auditable} in the body and
+ * sets the required fields.
  */
 @ControllerAdvice
 @Slf4j
@@ -43,7 +43,7 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
       Type targetType,
       @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     try {
-      return VocabularyEntity.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
+      return Auditable.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
     } catch (ClassNotFoundException e) {
       log.debug("Unexpected target type", e);
       return false;
@@ -72,15 +72,15 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
       @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     // set auditable fields
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    VocabularyEntity vocabularyEntity = (VocabularyEntity) body;
+    Auditable auditableEntity = (Auditable) body;
 
-    if (vocabularyEntity.getCreatedBy() == null) {
-      vocabularyEntity.setCreatedBy(authentication.getName());
+    if (auditableEntity.getCreatedBy() == null) {
+      auditableEntity.setCreatedBy(authentication.getName());
     }
 
-    vocabularyEntity.setModifiedBy(authentication.getName());
+    auditableEntity.setModifiedBy(authentication.getName());
 
-    return vocabularyEntity;
+    return auditableEntity;
   }
 
   @Override

@@ -11,6 +11,11 @@
          vocabulary_key bigint NOT NULL REFERENCES vocabulary(key),
          language varchar(8) NOT NULL,
          value text NOT NULL,
+         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+         modified_by varchar NOT NULL CHECK (assert_min_length(modified_by, 1)),
+         created timestamp with time zone NOT NULL DEFAULT now(),
+         modified timestamp with time zone NOT NULL DEFAULT now(),
+         fulltext_search tsvector,
          UNIQUE(vocabulary_key, language)
        );
 
@@ -19,7 +24,12 @@
          concept_key bigint NOT NULL REFERENCES concept(key),
          language varchar(8) NOT NULL,
          value text NOT NULL,
+         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+         modified_by varchar NOT NULL CHECK (assert_min_length(modified_by, 1)),
+         created timestamp with time zone NOT NULL DEFAULT now(),
+         modified timestamp with time zone NOT NULL DEFAULT now(),
          normalized_value text,
+         fulltext_search tsvector,
          UNIQUE(concept_key, language)
        );
 
@@ -29,6 +39,11 @@
          language varchar(8) NOT NULL,
          value text NOT NULL,
          normalized_value text,
+         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+         modified_by varchar NOT NULL CHECK (assert_min_length(modified_by, 1)),
+         created timestamp with time zone NOT NULL DEFAULT now(),
+         modified timestamp with time zone NOT NULL DEFAULT now(),
+         fulltext_search tsvector,
          UNIQUE(concept_key, language, value)
        );
 
@@ -37,6 +52,11 @@
          concept_key bigint NOT NULL REFERENCES concept(key),
          value text NOT NULL,
          normalized_value text,
+         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+         modified_by varchar NOT NULL CHECK (assert_min_length(modified_by, 1)),
+         created timestamp with time zone NOT NULL DEFAULT now(),
+         modified timestamp with time zone NOT NULL DEFAULT now(),
+         fulltext_search tsvector,
          UNIQUE(concept_key, value)
        );
 
@@ -69,17 +89,22 @@
        RETURNS TRIGGER AS
        $vocablabelchange$
            BEGIN
-             -- update full text search of the vocabulary
-             UPDATE vocabulary
-             SET fulltext_search = fulltext_search || TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.value,''))),
-                 modified = now()
-             WHERE key = NEW.vocabulary_key;
+            IF (TG_OP = 'DELETE') THEN
+              -- update modified date of vocabulary for the hasUnreleasedChanges filter
+              UPDATE vocabulary
+              SET modified = now()
+              WHERE key = OLD.vocabulary_key;
 
-             IF (TG_OP = 'DELETE') THEN
               RETURN OLD;
-             ELSE
+            ELSE
+              -- update modified date of vocabulary for the hasUnreleasedChanges filter
+              UPDATE vocabulary
+              SET modified = now()
+              WHERE key = NEW.vocabulary_key;
+
+              NEW.fulltext_search := TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.value,'')));
               RETURN NEW;
-             END IF;
+            END IF;
            END;
        $vocablabelchange$
        LANGUAGE plpgsql;
@@ -117,19 +142,23 @@
        RETURNS TRIGGER AS
        $conceptlabelchange$
            BEGIN
-             -- update full text search of the concept
-             UPDATE concept
-             SET fulltext_search = fulltext_search || TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.value,''))),
-                 modified = now()
-             WHERE key = NEW.concept_key;
-
-             NEW.normalized_value := normalize_label(COALESCE(NEW.value,''));
-
              IF (TG_OP = 'DELETE') THEN
+              -- update modified date of concept for the hasUnreleasedChanges filter
+              UPDATE concept
+              SET modified = now()
+              WHERE key = OLD.concept_key;
+
               RETURN OLD;
-             ELSE
+            ELSE
+              -- update modified date of concept for the hasUnreleasedChanges filter
+              UPDATE concept
+              SET modified = now()
+              WHERE key = NEW.concept_key;
+
+              NEW.normalized_value := normalize_label(COALESCE(NEW.value,''));
+              NEW.fulltext_search := TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.value,'')));
               RETURN NEW;
-             END IF;
+            END IF;
            END;
        $conceptlabelchange$
        LANGUAGE plpgsql;

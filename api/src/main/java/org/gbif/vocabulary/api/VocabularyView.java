@@ -7,7 +7,6 @@ import org.gbif.vocabulary.model.Vocabulary;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.jackson.Jacksonized;
 
 @Data
 @NoArgsConstructor

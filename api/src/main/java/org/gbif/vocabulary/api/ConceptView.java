@@ -95,8 +95,8 @@ public class ConceptView implements Serializable, EntityView<Concept> {
     return this;
   }
 
-  public ConceptView setHiddenLabelsLink(String alternativeLabelsLink) {
-    this.alternativeLabelsLink = alternativeLabelsLink;
+  public ConceptView setHiddenLabelsLink(String hiddenLabelsLink) {
+    this.hiddenLabelsLink = hiddenLabelsLink;
     return this;
   }
 

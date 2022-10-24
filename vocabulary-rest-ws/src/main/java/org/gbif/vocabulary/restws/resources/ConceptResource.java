@@ -481,11 +481,11 @@ public class ConceptResource {
         String.format(
             "%s/vocabularies/%s/concepts/%s/labels",
             wsConfig.getApiUrl(), vocabularyName, conceptName));
-    conceptView.setLabelsLink(
+    conceptView.setAlternativeLabelsLink(
         String.format(
             "%s/vocabularies/%s/concepts/%s/alternativeLabels",
             wsConfig.getApiUrl(), vocabularyName, conceptName));
-    conceptView.setLabelsLink(
+    conceptView.setHiddenLabelsLink(
         String.format(
             "%s/vocabularies/%s/concepts/%s/hiddenLabels",
             wsConfig.getApiUrl(), vocabularyName, conceptName));

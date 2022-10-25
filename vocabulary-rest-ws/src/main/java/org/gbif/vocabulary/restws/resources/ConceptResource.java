@@ -299,19 +299,19 @@ public class ConceptResource {
   public List<Label> listLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      @RequestParam(required = false, value = "lang") LanguageRegion languageRegion) {
+      LanguageRegion lang) {
     return conceptService.listLabels(
-        getConceptWithCheck(conceptName, vocabularyName).getKey(), languageRegion);
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), lang);
   }
 
   @GetMapping("{name}/alternativeLabels")
   public PagingResponse<Label> listAlternativeLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      @RequestParam(required = false, value = "lang") LanguageRegion languageRegion,
+      LanguageRegion lang,
       Pageable page) {
     return conceptService.listAlternativeLabels(
-        getConceptWithCheck(conceptName, vocabularyName).getKey(), languageRegion, page);
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, page);
   }
 
   @GetMapping("{name}/hiddenLabels")

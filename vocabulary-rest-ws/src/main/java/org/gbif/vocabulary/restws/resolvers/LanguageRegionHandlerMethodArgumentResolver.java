@@ -44,7 +44,10 @@ public class LanguageRegionHandlerMethodArgumentResolver implements HandlerMetho
     LanguageRegion languageRegion = LanguageRegion.fromLocale(locale);
 
     if (languageRegion == LanguageRegion.UNKNOWN) {
-      throw new IllegalArgumentException("Unknown language region: " + locale);
+      languageRegion = LanguageRegion.valueOf(locale);
+      if (languageRegion == LanguageRegion.UNKNOWN) {
+        throw new IllegalArgumentException("Unknown language region: " + locale);
+      }
     }
 
     return languageRegion;

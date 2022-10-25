@@ -38,6 +38,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import lombok.AllArgsConstructor;
+
 @RequestMapping("vocabularies")
 public interface VocabularyClient {
 
@@ -114,8 +116,12 @@ public interface VocabularyClient {
 
   @GetMapping(value = "{name}/labels", produces = MediaType.APPLICATION_JSON_VALUE)
   List<Label> listLabels(
-      @PathVariable("name") String vocabularyName,
-      @RequestParam(required = false, value = "lang") LanguageRegion languageRegion);
+      @PathVariable("name") String vocabularyName, @SpringQueryMap ListLabelsParams params);
+
+  // needed because the @SpringQueryMap params can't be null
+  default List<Label> listLabels(String vocabularyName, LanguageRegion languageRegion) {
+    return listLabels(vocabularyName, ListLabelsParams.of(languageRegion));
+  }
 
   @GetMapping(value = "{name}/labels/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
   Label getLabel(@PathVariable("name") String vocabularyName, @PathVariable("key") long labelKey);
@@ -141,4 +147,9 @@ public interface VocabularyClient {
 
   @DeleteMapping("{name}/labels/{key}")
   void deleteLabel(@PathVariable("name") String vocabularyName, @PathVariable("key") long key);
+
+  @AllArgsConstructor(staticName = "of")
+  class ListLabelsParams {
+    LanguageRegion lang;
+  }
 }

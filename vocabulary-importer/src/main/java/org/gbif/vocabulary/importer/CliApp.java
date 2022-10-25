@@ -13,10 +13,6 @@
  */
 package org.gbif.vocabulary.importer;
 
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.ws.client.ClientBuilder;
-
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
@@ -25,12 +21,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.ws.client.ClientBuilder;
+
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Strings;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -86,27 +85,15 @@ public class CliApp {
     }
 
     log.info("Calling the importer");
-    if (cliArgs.isReimport()) {
-      vocabularyImporter.reimportVocabulary(
-          cliArgs.getCsvDelimiter(),
-          cliArgs.getListDelimiter(),
-          cliArgs.getVocabularyName(),
-          cliArgs.getVocabularyLabelEN(),
-          cliArgs.getVocabularyDefinitionEN(),
-          conceptsPath,
-          hiddenLabelsPath,
-          parseEncoding(cliArgs.encoding));
-    } else {
-      vocabularyImporter.importVocabulary(
-          cliArgs.getCsvDelimiter(),
-          cliArgs.getListDelimiter(),
-          cliArgs.getVocabularyName(),
-          cliArgs.getVocabularyLabelEN(),
-          cliArgs.getVocabularyDefinitionEN(),
-          conceptsPath,
-          hiddenLabelsPath,
-          parseEncoding(cliArgs.encoding));
-    }
+    vocabularyImporter.importVocabulary(
+        cliArgs.getCsvDelimiter(),
+        cliArgs.getListDelimiter(),
+        cliArgs.getVocabularyName(),
+        cliArgs.getVocabularyLabelEN(),
+        cliArgs.getVocabularyDefinitionEN(),
+        conceptsPath,
+        hiddenLabelsPath,
+        parseEncoding(cliArgs.encoding));
     log.info("Import done");
   }
 
@@ -165,9 +152,6 @@ public class CliApp {
 
     @Parameter(names = {"--hiddenLabelsPath", "-hp"})
     private String hiddenLabelsPath;
-
-    @Parameter(names = {"--reimport", "-re"})
-    private boolean reimport;
 
     @Parameter(names = {"--encoding", "-enc"})
     private String encoding = "UTF-8";

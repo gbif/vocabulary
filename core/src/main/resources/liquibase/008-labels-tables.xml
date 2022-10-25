@@ -8,7 +8,7 @@
       <![CDATA[
         CREATE TABLE vocabulary_label(
          key bigserial NOT NULL PRIMARY KEY,
-         vocabulary_key bigint NOT NULL REFERENCES vocabulary(key),
+         vocabulary_key bigint NOT NULL REFERENCES vocabulary(key) ON DELETE CASCADE,
          language varchar(8) NOT NULL,
          value text NOT NULL,
          created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
@@ -21,7 +21,7 @@
 
        CREATE TABLE concept_label(
          key bigserial NOT NULL PRIMARY KEY,
-         concept_key bigint NOT NULL REFERENCES concept(key),
+         concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
          language varchar(8) NOT NULL,
          value text NOT NULL,
          created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
@@ -35,7 +35,7 @@
 
        CREATE TABLE concept_alternative_label(
          key bigserial NOT NULL PRIMARY KEY,
-         concept_key bigint NOT NULL REFERENCES concept(key),
+         concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
          language varchar(8) NOT NULL,
          value text NOT NULL,
          normalized_value text,
@@ -49,7 +49,7 @@
 
        CREATE TABLE concept_hidden_label(
          key bigserial NOT NULL PRIMARY KEY,
-         concept_key bigint NOT NULL REFERENCES concept(key),
+         concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
          value text NOT NULL,
          normalized_value text,
          created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),

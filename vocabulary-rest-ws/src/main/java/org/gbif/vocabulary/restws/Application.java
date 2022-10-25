@@ -39,6 +39,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -70,6 +71,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
   SecurityConfig.class,
   WsConfig.class
 })
+@EnableFeignClients
 public class Application {
 
   public static void main(String[] args) {

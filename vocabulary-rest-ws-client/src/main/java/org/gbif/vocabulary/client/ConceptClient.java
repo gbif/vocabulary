@@ -39,6 +39,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import lombok.AllArgsConstructor;
+
 @RequestMapping("vocabularies/{vocabularyName}/concepts")
 public interface ConceptClient {
 
@@ -111,20 +113,34 @@ public interface ConceptClient {
   List<Label> listLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      @RequestParam(required = false, value = "lang") LanguageRegion languageRegion);
+      @SpringQueryMap ListLabelsParams params);
+
+  default List<Label> listLabels(
+      String vocabularyName, String conceptName, LanguageRegion languageRegion) {
+    return listLabels(vocabularyName, conceptName, ListLabelsParams.of(languageRegion, null));
+  }
 
   @GetMapping(value = "{name}/alternativeLabels", produces = MediaType.APPLICATION_JSON_VALUE)
   PagingResponse<Label> listAlternativeLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      @RequestParam(required = false, value = "lang") LanguageRegion languageRegion,
-      @SpringQueryMap Pageable page);
+      @SpringQueryMap ListLabelsParams params);
+
+  default PagingResponse<Label> listAlternativeLabels(
+      String vocabularyName, String conceptName, LanguageRegion lang, Pageable page) {
+    return listAlternativeLabels(vocabularyName, conceptName, ListLabelsParams.of(lang, page));
+  }
 
   @GetMapping(value = "{name}/hiddenLabels", produces = MediaType.APPLICATION_JSON_VALUE)
   PagingResponse<HiddenLabel> listHiddenLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      @SpringQueryMap Pageable page);
+      @SpringQueryMap ListLabelsParams params);
+
+  default PagingResponse<HiddenLabel> listHiddenLabels(
+      String vocabularyName, String conceptName, Pageable page) {
+    return listHiddenLabels(vocabularyName, conceptName, ListLabelsParams.of(null, page));
+  }
 
   @GetMapping(value = "{name}/labels/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
   Label getLabel(
@@ -231,4 +247,10 @@ public interface ConceptClient {
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @PathVariable("key") long key);
+
+  @AllArgsConstructor(staticName = "of")
+  class ListLabelsParams {
+    LanguageRegion lang;
+    Pageable page;
+  }
 }

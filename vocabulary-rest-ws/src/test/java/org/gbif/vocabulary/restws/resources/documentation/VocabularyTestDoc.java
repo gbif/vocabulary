@@ -414,22 +414,23 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
     Label label = createLabel(vocabulary);
-    when(vocabularyService.addLabel(label)).thenReturn(1L);
+    when(vocabularyService.addLabel(any(Label.class))).thenReturn(label.getKey());
     when(vocabularyService.getLabel(label.getKey())).thenReturn(label);
+
+    Label labelBody = Label.builder().language(label.getLanguage()).value(label.getValue()).build();
 
     mockMvc
         .perform(
             post(getBasePath() + "/" + vocabulary.getName() + "/labels")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(label))
+                .content(OBJECT_MAPPER.writeValueAsString(labelBody))
                 .with(authorizationDocumentation()))
         .andExpect(status().isCreated())
         .andExpect(
             header()
                 .string(
                     "Location",
-                    endsWith(
-                        getBasePath() + "/" + vocabulary.getName() + "/labels/" + label.getKey())))
+                    endsWith(getBasePath() + "/" + vocabulary.getName() + "/labels/" + TEST_KEY)))
         .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
         .andDo(documentFields(Label.class));
   }
@@ -483,7 +484,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
     Label label = createLabel(vocabulary);
-    when(vocabularyService.listLabels(vocabulary.getKey(), LanguageRegion.ENGLISH))
+    when(vocabularyService.listLabels(any(Long.class), any(LanguageRegion.class)))
         .thenReturn(Collections.singletonList(label));
     mockMvc
         .perform(
@@ -517,7 +518,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
 
   private Label createLabel(Vocabulary vocabulary) {
     return Label.builder()
-        .key(1L)
+        .key(TEST_KEY)
         .entityKey(vocabulary.getKey())
         .language(LanguageRegion.ENGLISH)
         .value("Label")

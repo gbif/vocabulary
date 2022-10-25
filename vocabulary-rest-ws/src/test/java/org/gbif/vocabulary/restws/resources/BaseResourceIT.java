@@ -31,6 +31,7 @@ import org.gbif.vocabulary.restws.LoginServerExtension;
 import org.gbif.vocabulary.restws.PostgresDBExtension;
 import org.gbif.vocabulary.restws.TestCredentials;
 import org.gbif.ws.client.ClientBuilder;
+import org.gbif.ws.json.JacksonJsonObjectMapperProvider;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +72,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
 
   protected static final ObjectMapper OBJECT_MAPPER =
-      new ObjectMapper().registerModule(new JavaTimeModule());
+      JacksonJsonObjectMapperProvider.getObjectMapperWithBuilderSupport()
+          .registerModule(new JavaTimeModule());
 
   @RegisterExtension static PostgresDBExtension database = new PostgresDBExtension();
 

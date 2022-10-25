@@ -70,7 +70,7 @@ include::{snippets}/vocabulary-test-doc/update-label-test/auto-section.adoc[]
 
 include::{snippets}/vocabulary-test-doc/get-label-test/auto-section.adoc[]
 
-include::{snippets}/vocabulary-test-doc/list-labels-test/auto-section.adoc[]
+include::vocabulary/vocabulary-list-labels.adoc[]
 
 include::{snippets}/vocabulary-test-doc/delete-label-test/auto-section.adoc[]
 
@@ -104,7 +104,7 @@ include::{snippets}/concept-test-doc/update-label-test/auto-section.adoc[]
 
 include::{snippets}/concept-test-doc/get-label-test/auto-section.adoc[]
 
-include::{snippets}/concept-test-doc/list-labels-test/auto-section.adoc[]
+include::concept/concept-list-labels.adoc[]
 
 include::{snippets}/concept-test-doc/delete-label-test/auto-section.adoc[]
 
@@ -114,7 +114,7 @@ include::{snippets}/concept-test-doc/update-alternative-label-test/auto-section.
 
 include::{snippets}/concept-test-doc/get-alternative-label-test/auto-section.adoc[]
 
-include::{snippets}/concept-test-doc/list-alternative-labels-test/auto-section.adoc[]
+include::concept/concept-list-alternative-labels.adoc[]
 
 include::{snippets}/concept-test-doc/delete-alternative-label-test/auto-section.adoc[]
 
@@ -124,7 +124,7 @@ include::{snippets}/concept-test-doc/update-hidden-label-test/auto-section.adoc[
 
 include::{snippets}/concept-test-doc/get-hidden-label-test/auto-section.adoc[]
 
-include::{snippets}/concept-test-doc/list-hidden-labels-test/auto-section.adoc[]
+include::concept/concept-list-hidden-labels.adoc[]
 
 include::{snippets}/concept-test-doc/delete-hidden-label-test/auto-section.adoc[]
 

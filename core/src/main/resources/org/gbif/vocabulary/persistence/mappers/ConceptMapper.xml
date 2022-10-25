@@ -479,4 +479,25 @@
     WHERE key = #{key,jdbcType=BIGINT}
   </select>
 
+  <delete id="deleteAllLabels">
+    DELETE FROM concept_label cl
+    JOIN concept c ON c.key = cl.concept_key
+    JOIN vocabulary v ON v.key = c.vocabulary_key
+    WHERE v.key = #{key,jdbcType=BIGINT}
+  </delete>
+
+  <delete id="deleteAllAlternativeLabels">
+    DELETE FROM concept_alternative_label cal
+    JOIN concept c ON c.key = cal.concept_key
+    JOIN vocabulary v ON v.key = c.vocabulary_key
+    WHERE v.key = #{key,jdbcType=BIGINT}
+  </delete>
+
+  <delete id="deleteAllHiddenLabels">
+    DELETE FROM concept_hidden_label chl
+    JOIN concept c ON c.key = chl.concept_key
+    JOIN vocabulary v ON v.key = c.vocabulary_key
+    WHERE v.key = #{key,jdbcType=BIGINT}
+  </delete>
+
 </mapper>

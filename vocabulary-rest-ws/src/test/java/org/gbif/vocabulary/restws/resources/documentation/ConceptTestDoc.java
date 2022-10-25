@@ -323,10 +323,12 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
     Label label = createLabel(concept);
-    when(conceptService.addLabel(label)).thenReturn(1L);
+    when(conceptService.addLabel(any(Label.class))).thenReturn(label.getKey());
     when(conceptService.getLabel(label.getKey())).thenReturn(label);
 
-    addLabelCall(concept, "labels", label);
+    Label labelBody = Label.builder().language(label.getLanguage()).value(label.getValue()).build();
+
+    addLabelCall(concept, "labels", labelBody);
   }
 
   @Test
@@ -337,10 +339,12 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
     Label label = createLabel(concept);
-    when(conceptService.addAlternativeLabel(label)).thenReturn(1L);
+    when(conceptService.addAlternativeLabel(any(Label.class))).thenReturn(label.getKey());
     when(conceptService.getAlternativeLabel(label.getKey())).thenReturn(label);
 
-    addLabelCall(concept, "alternativeLabels", label);
+    Label labelBody = Label.builder().language(label.getLanguage()).value(label.getValue()).build();
+
+    addLabelCall(concept, "alternativeLabels", labelBody);
   }
 
   @Test
@@ -351,10 +355,12 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
     HiddenLabel label = createHiddenLabel(concept);
-    when(conceptService.addHiddenLabel(label)).thenReturn(1L);
+    when(conceptService.addHiddenLabel(any(HiddenLabel.class))).thenReturn(label.getKey());
     when(conceptService.getHiddenLabel(label.getKey())).thenReturn(label);
 
-    addLabelCall(concept, "hiddenLabels", label);
+    HiddenLabel labelBody = HiddenLabel.builder().value(label.getValue()).build();
+
+    addLabelCall(concept, "hiddenLabels", labelBody);
   }
 
   private <T extends LabelEntity> void addLabelCall(Concept concept, String path, T label)
@@ -372,11 +378,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
                     "Location",
                     endsWith(
                         String.join(
-                            "/",
-                            getBasePath(),
-                            concept.getName(),
-                            path,
-                            label.getKey().toString()))))
+                            "/", getBasePath(), concept.getName(), path, TEST_KEY.toString()))))
         .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
         .andDo(documentFields(label.getClass()));
   }
@@ -607,7 +609,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
 
   private Label createLabel(Concept concept) {
     return Label.builder()
-        .key(1L)
+        .key(TEST_KEY)
         .entityKey(concept.getKey())
         .language(LanguageRegion.ENGLISH)
         .value("Label")
@@ -615,7 +617,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
   }
 
   private HiddenLabel createHiddenLabel(Concept concept) {
-    return HiddenLabel.builder().key(1L).entityKey(concept.getKey()).value("Label").build();
+    return HiddenLabel.builder().key(TEST_KEY).entityKey(concept.getKey()).value("Label").build();
   }
 
   private void mockVocabulary() {

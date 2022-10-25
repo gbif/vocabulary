@@ -272,11 +272,8 @@ public class VocabularyResource {
   }
 
   @GetMapping("{name}/labels")
-  public List<Label> listLabels(
-      @PathVariable("name") String vocabularyName,
-      @RequestParam(required = false, value = "lang") LanguageRegion languageRegion) {
-    return vocabularyService.listLabels(
-        getVocabularyByName(vocabularyName).getKey(), languageRegion);
+  public List<Label> listLabels(@PathVariable("name") String vocabularyName, LanguageRegion lang) {
+    return vocabularyService.listLabels(getVocabularyByName(vocabularyName).getKey(), lang);
   }
 
   @GetMapping("{name}/labels/{key}")

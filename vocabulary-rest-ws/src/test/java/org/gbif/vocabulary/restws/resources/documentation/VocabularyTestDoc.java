@@ -360,7 +360,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
 
       VocabularyExportView vocabularyExportView = new VocabularyExportView();
       vocabularyExportView.setVocabulary(vocabulary);
-      vocabularyExportView.setLabels(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
+      vocabularyExportView.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
       export.setVocabularyExport(vocabularyExportView);
 
       Concept concept = new Concept();

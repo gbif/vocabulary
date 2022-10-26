@@ -13,5 +13,5 @@ import lombok.Data;
 public class VocabularyExportView {
 
   @JsonUnwrapped private Vocabulary vocabulary;
-  private Map<LanguageRegion, String> labels = new HashMap<>();
+  private Map<LanguageRegion, String> label = new HashMap<>();
 }

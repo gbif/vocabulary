@@ -272,7 +272,7 @@ public class DefaultExportService implements ExportService {
     vocabularyExportView.setVocabulary(vocabulary);
 
     List<Label> labels = vocabularyService.listLabels(vocabulary.getKey(), null);
-    labels.forEach(l -> vocabularyExportView.getLabels().put(l.getLanguage(), l.getValue()));
+    labels.forEach(l -> vocabularyExportView.getLabel().put(l.getLanguage(), l.getValue()));
 
     return vocabularyExportView;
   }

@@ -113,7 +113,7 @@ pipeline {
             }
             steps {
                 sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
-                    git 'https://github.com/gbif/vocabulary.git'
+                    git branch:'#117_performance_tables', url:'https://github.com/gbif/vocabulary.git'
                     sh '''
                 mvn clean package -Pdocumentation
                 git add *.html

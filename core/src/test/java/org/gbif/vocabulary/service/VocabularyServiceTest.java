@@ -123,31 +123,13 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
         AccessDeniedException.class,
         () ->
             vocabularyService.addLabel(
-                Label.builder()
-                    .entityKey(1L)
-                    .language(LanguageRegion.ENGLISH)
-                    .value("label")
-                    .build()));
-  }
-
-  @WithMockUser
-  @Test
-  public void unauthorizedUpdateLabelTest() {
-    assertThrows(
-        AccessDeniedException.class,
-        () ->
-            vocabularyService.updateLabel(
-                Label.builder()
-                    .entityKey(1L)
-                    .language(LanguageRegion.ENGLISH)
-                    .value("label")
-                    .build()));
+                1L, Label.builder().language(LanguageRegion.ENGLISH).value("label").build()));
   }
 
   @WithMockUser
   @Test
   public void unauthorizedDeleteLabelTest() {
-    assertThrows(AccessDeniedException.class, () -> vocabularyService.deleteLabel(1L));
+    assertThrows(AccessDeniedException.class, () -> vocabularyService.deleteLabel(1L, 1L));
   }
 
   @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
@@ -156,18 +138,7 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
     // required fields are null
     assertThrows(
         ConstraintViolationException.class,
-        () -> vocabularyService.addLabel(Label.builder().build()));
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> vocabularyService.updateLabel(Label.builder().build()));
-
-    // set value
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> vocabularyService.addLabel(Label.builder().value("v").build()));
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> vocabularyService.updateLabel(Label.builder().value("v").build()));
+        () -> vocabularyService.addLabel(1L, Label.builder().build()));
   }
 
   @Override

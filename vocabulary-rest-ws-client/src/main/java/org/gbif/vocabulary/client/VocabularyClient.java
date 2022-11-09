@@ -20,7 +20,7 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
-import org.gbif.vocabulary.api.VocabularyView;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -44,24 +44,24 @@ import lombok.AllArgsConstructor;
 public interface VocabularyClient {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  PagingResponse<VocabularyView> listVocabularies(@SpringQueryMap VocabularyListParams params);
+  PagingResponse<Vocabulary> listVocabularies(@SpringQueryMap VocabularyListParams params);
 
   @GetMapping(value = "{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-  VocabularyView get(@PathVariable("name") String name);
+  Vocabulary get(@PathVariable("name") String name);
 
   @PostMapping(
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  VocabularyView create(@RequestBody Vocabulary vocabulary);
+  Vocabulary create(@RequestBody Vocabulary vocabulary);
 
   @PutMapping(
       value = "{name}",
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  VocabularyView update(
+  Vocabulary update(
       @PathVariable("name") String vocabularyName, @RequestBody Vocabulary vocabulary);
 
-  default VocabularyView update(Vocabulary vocabulary) {
+  default Vocabulary update(Vocabulary vocabulary) {
     return update(vocabulary.getName(), vocabulary);
   }
 
@@ -114,42 +114,62 @@ public interface VocabularyClient {
   @DeleteMapping(value = "{name}")
   void deleteVocabulary(@PathVariable("name") String vocabularyName);
 
-  @GetMapping(value = "{name}/labels", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<Label> listLabels(
-      @PathVariable("name") String vocabularyName, @SpringQueryMap ListLabelsParams params);
+  @GetMapping(value = "{name}/definition", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<Definition> listDefinitions(
+      @PathVariable("name") String vocabularyName, @SpringQueryMap ListParams listParams);
 
-  // needed because the @SpringQueryMap params can't be null
-  default List<Label> listLabels(String vocabularyName, LanguageRegion languageRegion) {
-    return listLabels(vocabularyName, ListLabelsParams.of(languageRegion));
+  default List<Definition> listDefinitions(
+      @PathVariable("name") String vocabularyName, List<LanguageRegion> lang) {
+    return listDefinitions(vocabularyName, ListParams.of(lang));
   }
 
-  @GetMapping(value = "{name}/labels/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
-  Label getLabel(@PathVariable("name") String vocabularyName, @PathVariable("key") long labelKey);
+  @GetMapping(value = "{name}/definition/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
+  Definition getDefinition(
+      @PathVariable("name") String vocabularyName, @PathVariable("key") long definitionKey);
 
   @PostMapping(
-      value = "{name}/labels",
+      value = "{name}/definition",
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  Label addLabel(@PathVariable("name") String vocabularyName, @RequestBody Label label);
+  Definition addDefinition(
+      @PathVariable("name") String vocabularyName, @RequestBody Definition definition);
 
   @PutMapping(
-      value = "{name}/labels/{key}",
+      value = "{name}/definition/{key}",
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.APPLICATION_JSON_VALUE)
-  Label updateLabel(
+  Definition updateDefinition(
       @PathVariable("name") String vocabularyName,
-      @PathVariable("key") long labelKey,
-      @RequestBody Label label);
+      @PathVariable("key") long definitionKey,
+      @RequestBody Definition definition);
 
-  default Label updateLabel(String vocabularyName, Label label) {
-    return updateLabel(vocabularyName, label.getKey(), label);
+  default Definition updateDefinition(String vocabularyName, Definition definition) {
+    return updateDefinition(vocabularyName, definition.getKey(), definition);
   }
 
-  @DeleteMapping("{name}/labels/{key}")
+  @DeleteMapping("{name}/definition/{key}")
+  void deleteDefinition(@PathVariable("name") String vocabularyName, @PathVariable("key") long key);
+
+  @GetMapping(value = "{name}/label", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<Label> listLabels(
+      @PathVariable("name") String vocabularyName, @SpringQueryMap ListParams params);
+
+  // needed because the @SpringQueryMap params can't be null
+  default List<Label> listLabels(String vocabularyName, List<LanguageRegion> languageRegions) {
+    return listLabels(vocabularyName, ListParams.of(languageRegions));
+  }
+
+  @PostMapping(
+      value = "{name}/label",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  Long addLabel(@PathVariable("name") String vocabularyName, @RequestBody Label label);
+
+  @DeleteMapping("{name}/label/{key}")
   void deleteLabel(@PathVariable("name") String vocabularyName, @PathVariable("key") long key);
 
   @AllArgsConstructor(staticName = "of")
-  class ListLabelsParams {
-    LanguageRegion lang;
+  class ListParams {
+    List<LanguageRegion> lang;
   }
 }

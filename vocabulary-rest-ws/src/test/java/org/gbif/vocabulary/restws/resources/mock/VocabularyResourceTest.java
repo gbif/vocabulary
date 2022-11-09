@@ -13,12 +13,16 @@
  */
 package org.gbif.vocabulary.restws.resources.mock;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.DeprecateAction;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
-import org.gbif.vocabulary.api.VocabularyView;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
@@ -27,11 +31,6 @@ import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.resources.VocabularyResource;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
@@ -84,9 +83,9 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
         mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
-    List<VocabularyView> resultList =
+    List<Vocabulary> resultList =
         OBJECT_MAPPER.convertValue(
-            rootNode.get("results"), new TypeReference<List<VocabularyView>>() {});
+            rootNode.get("results"), new TypeReference<List<Vocabulary>>() {});
 
     assertEquals(vocabularies.size(), resultList.size());
   }

@@ -21,6 +21,7 @@ import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
@@ -124,11 +125,6 @@ public class DefaultVocabularyService implements VocabularyService {
     checkArgument(Objects.equals(oldVocabulary.getDeprecatedBy(), vocabulary.getDeprecatedBy()));
     checkArgument(Objects.equals(oldVocabulary.getReplacedByKey(), vocabulary.getReplacedByKey()));
 
-    checkArgument(oldVocabulary.getDeleted() == null, "Cannot update a deleted vocabulary");
-    checkArgument(
-        Objects.equals(oldVocabulary.getDeleted(), vocabulary.getDeleted()),
-        "Cannot delete or restore an vocabulary while updating");
-
     // update the vocabulary
     vocabularyMapper.update(vocabulary);
   }
@@ -137,38 +133,59 @@ public class DefaultVocabularyService implements VocabularyService {
   @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
-  public long addLabel(@NotNull @Valid Label label) {
-    checkArgument(label.getKey() == null, "Can't add a label that has a key");
-    checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
-
-    vocabularyMapper.addLabel(label);
-    return label.getKey();
+  public long addDefinition(long entityKey, Definition definition) {
+    checkArgument(definition.getKey() == null, "Can't add a definition that has a key");
+    vocabularyMapper.addDefinition(entityKey, definition);
+    return definition.getKey();
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Validated({PostPersist.class, Default.class})
   @Transactional
   @Override
-  public void updateLabel(@NotNull @Valid Label label) {
-    requireNonNull(label.getKey());
-    vocabularyMapper.updateLabel(label);
+  public void updateDefinition(long entityKey, @NotNull @Valid Definition definition) {
+    requireNonNull(definition.getKey());
+    vocabularyMapper.updateDefinition(entityKey, definition);
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Transactional
   @Override
-  public void deleteLabel(long key) {
-    vocabularyMapper.deleteLabel(key);
+  public void deleteDefinition(long entityKey, long key) {
+    vocabularyMapper.deleteDefinition(entityKey, key);
   }
 
   @Override
-  public Label getLabel(long key) {
-    return vocabularyMapper.getLabel(key);
+  public Definition getDefinition(long entityKey, long key) {
+    return vocabularyMapper.getDefinition(entityKey, key);
   }
 
   @Override
-  public List<Label> listLabels(long entityKey, @Nullable LanguageRegion languageRegion) {
-    return vocabularyMapper.listLabels(entityKey, languageRegion);
+  public List<Definition> listDefinitions(
+      long entityKey, @Nullable List<LanguageRegion> languageRegions) {
+    return vocabularyMapper.listDefinitions(entityKey, languageRegions);
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
+  @Override
+  public long addLabel(long entityKey, @NotNull @Valid Label label) {
+    checkArgument(label.getKey() == null, "Can't add a label that has a key");
+    vocabularyMapper.addLabel(entityKey, label);
+    return label.getKey();
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Transactional
+  @Override
+  public void deleteLabel(long entityKey, long key) {
+    vocabularyMapper.deleteLabel(entityKey, key);
+  }
+
+  @Override
+  public List<Label> listLabels(long entityKey, @Nullable List<LanguageRegion> languageRegions) {
+    return vocabularyMapper.listLabels(entityKey, languageRegions);
   }
 
   @Override

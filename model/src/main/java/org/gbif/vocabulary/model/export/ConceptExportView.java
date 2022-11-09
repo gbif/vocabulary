@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.model.export;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +16,8 @@ public class ConceptExportView {
 
   @JsonUnwrapped private Concept concept;
 
-  private Map<LanguageRegion, String> label = new HashMap<>();
-  private Map<LanguageRegion, Set<String>> alternativeLabels = new HashMap<>();
+  private Map<LanguageRegion, String> definition = new EnumMap<>(LanguageRegion.class);
+  private Map<LanguageRegion, String> label = new EnumMap<>(LanguageRegion.class);
+  private Map<LanguageRegion, Set<String>> alternativeLabels = new EnumMap<>(LanguageRegion.class);
   private Set<String> hiddenLabels = new HashSet<>();
 }

@@ -15,6 +15,7 @@ package org.gbif.vocabulary.service;
 
 import java.util.List;
 
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.VocabularyEntity;
@@ -53,13 +54,19 @@ public interface BaseService<T extends VocabularyEntity> {
    */
   void update(@NotNull @Valid T entity);
 
-  long addLabel(@NotNull @Valid Label label);
+  long addDefinition(long entityKey, @NotNull @Valid Definition definition);
 
-  void updateLabel(@NotNull @Valid Label label);
+  void updateDefinition(long entityKey, @NotNull @Valid Definition definition);
 
-  void deleteLabel(long key);
+  void deleteDefinition(long entityKey, long key);
 
-  Label getLabel(long key);
+  Definition getDefinition(long entityKey, long key);
 
-  List<Label> listLabels(long entityKey, @Nullable LanguageRegion languageRegion);
+  List<Definition> listDefinitions(long entityKey, @Nullable List<LanguageRegion> languageRegions);
+
+  long addLabel(long entityKey, @NotNull @Valid Label label);
+
+  void deleteLabel(long entityKey, long key);
+
+  List<Label> listLabels(long entityKey, @Nullable List<LanguageRegion> languageRegions);
 }

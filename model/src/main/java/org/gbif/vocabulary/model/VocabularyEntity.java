@@ -16,7 +16,6 @@ package org.gbif.vocabulary.model;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 import org.gbif.vocabulary.model.utils.PostPersist;
 import org.gbif.vocabulary.model.utils.PrePersist;
@@ -41,10 +40,15 @@ public interface VocabularyEntity extends Auditable, Deprecable, Serializable {
 
   void setName(String name);
 
-  /** Definition of the entity by language. */
-  Map<LanguageRegion, String> getDefinition();
+  /** Label of the entity by language. */
+  List<Label> getLabel();
 
-  void setDefinition(Map<LanguageRegion, String> definition);
+  void setLabel(List<Label> label);
+
+  /** Definition of the entity by language. */
+  List<Definition> getDefinition();
+
+  void setDefinition(List<Definition> definition);
 
   /** Additional external definitions. */
   List<URI> getExternalDefinitions();

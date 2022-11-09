@@ -22,11 +22,12 @@ import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
-import org.gbif.vocabulary.model.LabelEntity;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.ValueEntity;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -316,19 +317,140 @@ public class ConceptTestDoc extends DocumentationBaseTest {
   }
 
   @Test
+  public void addDefinitionTest() throws Exception {
+    setSecurityContext();
+    Concept concept = createConcept("concept1");
+    concept.setKey(TEST_KEY);
+    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+
+    Definition definition = createDefinition();
+    when(conceptService.addDefinition(any(Long.class), any(Definition.class)))
+        .thenReturn(definition.getKey());
+    when(conceptService.getDefinition(TEST_KEY, definition.getKey())).thenReturn(definition);
+
+    Definition definitionBody =
+        Definition.builder()
+            .language(definition.getLanguage())
+            .value(definition.getValue())
+            .build();
+
+    mockMvc
+        .perform(
+            post(getBasePath() + "/" + concept.getName() + "/definition")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(definitionBody))
+                .with(authorizationDocumentation()))
+        .andExpect(status().isCreated())
+        .andExpect(
+            header()
+                .string(
+                    "Location",
+                    endsWith(
+                        String.join(
+                            "/",
+                            getBasePath(),
+                            concept.getName(),
+                            "definition",
+                            TEST_KEY.toString()))))
+        .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
+        .andDo(documentFields(Definition.class));
+  }
+
+  @Test
+  public void updateDefinitionTest() throws Exception {
+    setSecurityContext();
+    Concept concept = createConcept("concept1");
+    concept.setKey(TEST_KEY);
+    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+
+    Definition definition = createDefinition();
+    doNothing().when(conceptService).updateDefinition(TEST_KEY, definition);
+    when(conceptService.getDefinition(TEST_KEY, definition.getKey())).thenReturn(definition);
+
+    mockMvc
+        .perform(
+            put(getBasePath() + "/" + concept.getName() + "/definition/" + definition.getKey())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(definition))
+                .with(authorizationDocumentation()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("key", is(definition.getKey().intValue())))
+        .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
+        .andExpect(jsonPath("value", is(definition.getValue())))
+        .andDo(documentFields(Definition.class));
+  }
+
+  @Test
+  public void deleteDefinitionTest() throws Exception {
+    setSecurityContext();
+    Concept concept = createConcept("concept1");
+    concept.setKey(TEST_KEY);
+    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+
+    Definition definition = createDefinition();
+    when(conceptService.getDefinition(TEST_KEY, definition.getKey())).thenReturn(definition);
+    doNothing().when(conceptService).deleteDefinition(TEST_KEY, definition.getKey());
+    mockMvc
+        .perform(
+            delete(getBasePath() + "/" + concept.getName() + "/definition/" + definition.getKey())
+                .with(authorizationDocumentation()))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  public void listDefinitionsTest() throws Exception {
+    setSecurityContext();
+    Concept concept = createConcept("concept1");
+    concept.setKey(TEST_KEY);
+    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+
+    Definition definition = createDefinition();
+    when(conceptService.listDefinitions(
+            concept.getKey(), Collections.singletonList(LanguageRegion.ENGLISH)))
+        .thenReturn(Collections.singletonList(definition));
+    mockMvc
+        .perform(
+            get(getBasePath() + "/" + concept.getName() + "/definition")
+                .param("lang", LanguageRegion.ENGLISH.getLocale())
+                .with(authorizationDocumentation()))
+        .andExpect(status().isOk())
+        .andDo(
+            document(
+                "{class-name}/{method-name}",
+                requestParameters(parameterWithName("lang").description("Language").optional())));
+  }
+
+  @Test
+  public void getDefinitionTest() throws Exception {
+    setSecurityContext();
+    Concept concept = createConcept("concept1");
+    concept.setKey(TEST_KEY);
+    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
+
+    Definition definition = createDefinition();
+    when(conceptService.getDefinition(TEST_KEY, definition.getKey())).thenReturn(definition);
+    mockMvc
+        .perform(
+            get(getBasePath() + "/" + concept.getName() + "/definition/" + definition.getKey())
+                .with(authorizationDocumentation()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("key", equalTo(definition.getKey().intValue())))
+        .andExpect(jsonPath("value", equalTo(definition.getValue())));
+  }
+
+  @Test
   public void addLabelTest() throws Exception {
     setSecurityContext();
     Concept concept = createConcept("concept1");
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
-    Label label = createLabel(concept);
-    when(conceptService.addLabel(any(Label.class))).thenReturn(label.getKey());
-    when(conceptService.getLabel(label.getKey())).thenReturn(label);
+    Label label = createLabel();
+    when(conceptService.addLabel(any(Long.class), any(Label.class))).thenReturn(label.getKey());
 
     Label labelBody = Label.builder().language(label.getLanguage()).value(label.getValue()).build();
 
-    addLabelCall(concept, "labels", labelBody);
+    addLabelCall(concept, "label", labelBody);
   }
 
   @Test
@@ -338,9 +460,9 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
-    Label label = createLabel(concept);
-    when(conceptService.addAlternativeLabel(any(Label.class))).thenReturn(label.getKey());
-    when(conceptService.getAlternativeLabel(label.getKey())).thenReturn(label);
+    Label label = createLabel();
+    when(conceptService.addAlternativeLabel(any(Long.class), any(Label.class)))
+        .thenReturn(label.getKey());
 
     Label labelBody = Label.builder().language(label.getLanguage()).value(label.getValue()).build();
 
@@ -354,16 +476,16 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
-    HiddenLabel label = createHiddenLabel(concept);
-    when(conceptService.addHiddenLabel(any(HiddenLabel.class))).thenReturn(label.getKey());
-    when(conceptService.getHiddenLabel(label.getKey())).thenReturn(label);
+    HiddenLabel label = createHiddenLabel();
+    when(conceptService.addHiddenLabel(any(Long.class), any(HiddenLabel.class)))
+        .thenReturn(label.getKey());
 
     HiddenLabel labelBody = HiddenLabel.builder().value(label.getValue()).build();
 
     addLabelCall(concept, "hiddenLabels", labelBody);
   }
 
-  private <T extends LabelEntity> void addLabelCall(Concept concept, String path, T label)
+  private <T extends ValueEntity> void addLabelCall(Concept concept, String path, T label)
       throws Exception {
     mockMvc
         .perform(
@@ -383,49 +505,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
         .andDo(documentFields(label.getClass()));
   }
 
-  @Test
-  public void updateLabelTest() throws Exception {
-    setSecurityContext();
-    Concept concept = createConcept("concept1");
-    concept.setKey(TEST_KEY);
-    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
-
-    Label label = createLabel(concept);
-    doNothing().when(conceptService).updateLabel(label);
-    when(conceptService.getLabel(label.getKey())).thenReturn(label);
-
-    updateLabelCall(concept, "labels", label);
-  }
-
-  @Test
-  public void updateAlternativeLabelTest() throws Exception {
-    setSecurityContext();
-    Concept concept = createConcept("concept1");
-    concept.setKey(TEST_KEY);
-    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
-
-    Label label = createLabel(concept);
-    doNothing().when(conceptService).updateAlternativeLabel(label);
-    when(conceptService.getAlternativeLabel(label.getKey())).thenReturn(label);
-
-    updateLabelCall(concept, "alternativeLabels", label);
-  }
-
-  @Test
-  public void updateHiddenLabelTest() throws Exception {
-    setSecurityContext();
-    Concept concept = createConcept("concept1");
-    concept.setKey(TEST_KEY);
-    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
-
-    HiddenLabel label = createHiddenLabel(concept);
-    doNothing().when(conceptService).updateHiddenLabel(label);
-    when(conceptService.getHiddenLabel(label.getKey())).thenReturn(label);
-
-    updateLabelCall(concept, "hiddenLabels", label);
-  }
-
-  private <T extends LabelEntity> void updateLabelCall(Concept concept, String path, T label)
+  private <T extends ValueEntity> void updateLabelCall(Concept concept, String path, T label)
       throws Exception {
     mockMvc
         .perform(
@@ -447,12 +527,11 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
-    Label label = createLabel(concept);
-    when(conceptService.getLabel(label.getKey())).thenReturn(label);
-    doNothing().when(conceptService).deleteLabel(label.getKey());
+    Label label = createLabel();
+    doNothing().when(conceptService).deleteLabel(TEST_KEY, label.getKey());
     mockMvc
         .perform(
-            delete(getBasePath() + "/" + concept.getName() + "/labels/" + label.getKey())
+            delete(getBasePath() + "/" + concept.getName() + "/label/" + label.getKey())
                 .with(authorizationDocumentation()))
         .andExpect(status().isNoContent());
   }
@@ -464,9 +543,8 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
-    Label label = createLabel(concept);
-    when(conceptService.getAlternativeLabel(label.getKey())).thenReturn(label);
-    doNothing().when(conceptService).deleteAlternativeLabel(label.getKey());
+    Label label = createLabel();
+    doNothing().when(conceptService).deleteAlternativeLabel(TEST_KEY, label.getKey());
     mockMvc
         .perform(
             delete(getBasePath() + "/" + concept.getName() + "/alternativeLabels/" + label.getKey())
@@ -481,9 +559,8 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
-    HiddenLabel label = createHiddenLabel(concept);
-    when(conceptService.getHiddenLabel(label.getKey())).thenReturn(label);
-    doNothing().when(conceptService).deleteHiddenLabel(label.getKey());
+    HiddenLabel label = createHiddenLabel();
+    doNothing().when(conceptService).deleteHiddenLabel(TEST_KEY, label.getKey());
     mockMvc
         .perform(
             delete(getBasePath() + "/" + concept.getName() + "/hiddenLabels/" + label.getKey())
@@ -498,12 +575,13 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
-    Label label = createLabel(concept);
-    when(conceptService.listLabels(concept.getKey(), LanguageRegion.ENGLISH))
+    Label label = createLabel();
+    when(conceptService.listLabels(
+            concept.getKey(), Collections.singletonList(LanguageRegion.ENGLISH)))
         .thenReturn(Collections.singletonList(label));
     mockMvc
         .perform(
-            get(getBasePath() + "/" + concept.getName() + "/labels")
+            get(getBasePath() + "/" + concept.getName() + "/label")
                 .param("lang", LanguageRegion.ENGLISH.getLocale())
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
@@ -520,9 +598,8 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
-    Label label = createLabel(concept);
-    when(conceptService.listAlternativeLabels(
-            anyLong(), any(LanguageRegion.class), any(PagingRequest.class)))
+    Label label = createLabel();
+    when(conceptService.listAlternativeLabels(anyLong(), any(List.class), any(PagingRequest.class)))
         .thenReturn(new PagingResponse<>(0, 20, 1L, Collections.singletonList(label)));
     mockMvc
         .perform(
@@ -543,7 +620,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
     concept.setKey(TEST_KEY);
     when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
 
-    HiddenLabel label = createHiddenLabel(concept);
+    HiddenLabel label = createHiddenLabel();
     when(conceptService.listHiddenLabels(anyLong(), any(PagingRequest.class)))
         .thenReturn(new PagingResponse<>(0, 20, 1L, Collections.singletonList(label)));
     mockMvc
@@ -553,71 +630,8 @@ public class ConceptTestDoc extends DocumentationBaseTest {
         .andExpect(status().isOk());
   }
 
-  @Test
-  public void getLabelTest() throws Exception {
-    setSecurityContext();
-    Concept concept = createConcept("concept1");
-    concept.setKey(TEST_KEY);
-    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
-
-    Label label = createLabel(concept);
-    when(conceptService.getLabel(label.getKey())).thenReturn(label);
-    mockMvc
-        .perform(
-            get(getBasePath() + "/" + concept.getName() + "/labels/" + label.getKey())
-                .with(authorizationDocumentation()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("key", equalTo(label.getKey().intValue())))
-        .andExpect(jsonPath("value", equalTo(label.getValue())));
-  }
-
-  @Test
-  public void getAlternativeLabelTest() throws Exception {
-    setSecurityContext();
-    Concept concept = createConcept("concept1");
-    concept.setKey(TEST_KEY);
-    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
-
-    Label label = createLabel(concept);
-    when(conceptService.getAlternativeLabel(label.getKey())).thenReturn(label);
-    mockMvc
-        .perform(
-            get(getBasePath() + "/" + concept.getName() + "/alternativeLabels/" + label.getKey())
-                .with(authorizationDocumentation()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("key", equalTo(label.getKey().intValue())))
-        .andExpect(jsonPath("value", equalTo(label.getValue())));
-  }
-
-  @Test
-  public void getHiddenLabelTest() throws Exception {
-    setSecurityContext();
-    Concept concept = createConcept("concept1");
-    concept.setKey(TEST_KEY);
-    when(conceptService.getByNameAndVocabulary(anyString(), anyString())).thenReturn(concept);
-
-    HiddenLabel label = createHiddenLabel(concept);
-    when(conceptService.getHiddenLabel(label.getKey())).thenReturn(label);
-    mockMvc
-        .perform(
-            get(getBasePath() + "/" + concept.getName() + "/hiddenLabels/" + label.getKey())
-                .with(authorizationDocumentation()))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("key", equalTo(label.getKey().intValue())))
-        .andExpect(jsonPath("value", equalTo(label.getValue())));
-  }
-
-  private Label createLabel(Concept concept) {
-    return Label.builder()
-        .key(TEST_KEY)
-        .entityKey(concept.getKey())
-        .language(LanguageRegion.ENGLISH)
-        .value("Label")
-        .build();
-  }
-
-  private HiddenLabel createHiddenLabel(Concept concept) {
-    return HiddenLabel.builder().key(TEST_KEY).entityKey(concept.getKey()).value("Label").build();
+  private HiddenLabel createHiddenLabel() {
+    return HiddenLabel.builder().key(TEST_KEY).value("Label").build();
   }
 
   private void mockVocabulary() {

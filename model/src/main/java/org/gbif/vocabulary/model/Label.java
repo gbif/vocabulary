@@ -15,20 +15,16 @@ import lombok.extern.jackson.Jacksonized;
 public class Label implements LabelEntity, LenientEquals<Label> {
 
   private Long key;
-  private Long entityKey;
   private LanguageRegion language;
   private String value;
   private String createdBy;
   private LocalDateTime created;
-  private String modifiedBy;
-  private LocalDateTime modified;
 
   @Override
   public boolean lenientEquals(Label other) {
     if (this == other) return true;
     if (other == null || getClass() != other.getClass()) return false;
     return Objects.equals(key, other.key)
-        && Objects.equals(entityKey, other.entityKey)
         && Objects.equals(language, other.language)
         && Objects.equals(value, other.value);
   }

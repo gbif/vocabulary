@@ -1,6 +1,6 @@
 package org.gbif.vocabulary.model.export;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.gbif.vocabulary.model.LanguageRegion;
@@ -13,5 +13,6 @@ import lombok.Data;
 public class VocabularyExportView {
 
   @JsonUnwrapped private Vocabulary vocabulary;
-  private Map<LanguageRegion, String> label = new HashMap<>();
+  private Map<LanguageRegion, String> definition = new EnumMap<>(LanguageRegion.class);
+  private Map<LanguageRegion, String> label = new EnumMap<>(LanguageRegion.class);
 }

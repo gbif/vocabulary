@@ -25,6 +25,7 @@ import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -330,12 +331,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
     vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
-    Label vocabularyLabel =
-        Label.builder()
-            .entityKey(vocabulary.getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("Label")
-            .build();
+    Label vocabularyLabel = Label.builder().language(LanguageRegion.ENGLISH).value("Label").build();
     when(vocabularyService.listLabels(vocabulary.getKey(), null))
         .thenReturn(Collections.singletonList(vocabularyLabel));
 
@@ -364,7 +360,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
       export.setVocabularyExport(vocabularyExportView);
 
       Concept concept = new Concept();
-      concept.setKey(1l);
+      concept.setKey(TEST_KEY);
       concept.setName("Concept");
       ConceptExportView conceptExportView = new ConceptExportView();
       conceptExportView.setConcept(concept);
@@ -396,9 +392,9 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
   @Test
   public void deleteVocabularyTest() throws Exception {
     Vocabulary vocabulary = createVocabulary("vocab1");
-    vocabulary.setKey(1L);
+    vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
-    doNothing().when(vocabularyService).deleteVocabulary(1L);
+    doNothing().when(vocabularyService).deleteVocabulary(TEST_KEY);
 
     mockMvc
         .perform(
@@ -407,88 +403,99 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
   }
 
   @Test
-  public void addLabelTest() throws Exception {
+  public void addDefinitionTest() throws Exception {
     setSecurityContext();
     Vocabulary vocabulary = createVocabulary("vocab1");
-    vocabulary.setKey(1L);
+    vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
-    Label label = createLabel(vocabulary);
-    when(vocabularyService.addLabel(any(Label.class))).thenReturn(label.getKey());
-    when(vocabularyService.getLabel(label.getKey())).thenReturn(label);
+    Definition definition = createDefinition();
+    when(vocabularyService.addDefinition(any(Long.class), any(Definition.class)))
+        .thenReturn(definition.getKey());
+    when(vocabularyService.getDefinition(TEST_KEY, definition.getKey())).thenReturn(definition);
 
-    Label labelBody = Label.builder().language(label.getLanguage()).value(label.getValue()).build();
+    Definition definitionBody =
+        Definition.builder()
+            .language(definition.getLanguage())
+            .value(definition.getValue())
+            .build();
 
     mockMvc
         .perform(
-            post(getBasePath() + "/" + vocabulary.getName() + "/labels")
+            post(getBasePath() + "/" + vocabulary.getName() + "/definition")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(labelBody))
+                .content(OBJECT_MAPPER.writeValueAsString(definitionBody))
                 .with(authorizationDocumentation()))
         .andExpect(status().isCreated())
         .andExpect(
             header()
                 .string(
                     "Location",
-                    endsWith(getBasePath() + "/" + vocabulary.getName() + "/labels/" + TEST_KEY)))
+                    endsWith(
+                        getBasePath() + "/" + vocabulary.getName() + "/definition/" + TEST_KEY)))
         .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
         .andDo(documentFields(Label.class));
   }
 
   @Test
-  public void updateLabelTest() throws Exception {
+  public void updateDefinitionTest() throws Exception {
     setSecurityContext();
     Vocabulary vocabulary = createVocabulary("vocab1");
-    vocabulary.setKey(1L);
+    vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
-    Label label = createLabel(vocabulary);
-    doNothing().when(vocabularyService).updateLabel(label);
-    when(vocabularyService.getLabel(label.getKey())).thenReturn(label);
+    Definition definition = createDefinition();
+    doNothing().when(vocabularyService).updateDefinition(TEST_KEY, definition);
+    when(vocabularyService.getDefinition(TEST_KEY, definition.getKey())).thenReturn(definition);
 
     mockMvc
         .perform(
-            put(getBasePath() + "/" + vocabulary.getName() + "/labels/" + label.getKey())
+            put(getBasePath() + "/" + vocabulary.getName() + "/definition/" + definition.getKey())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(OBJECT_MAPPER.writeValueAsString(label))
+                .content(OBJECT_MAPPER.writeValueAsString(definition))
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("key", is(label.getKey().intValue())))
+        .andExpect(jsonPath("key", is(definition.getKey().intValue())))
         .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
-        .andExpect(jsonPath("value", is(label.getValue())))
+        .andExpect(jsonPath("value", is(definition.getValue())))
         .andDo(documentFields(Label.class));
   }
 
   @Test
-  public void deleteLabelTest() throws Exception {
+  public void deleteDefinitionTest() throws Exception {
     setSecurityContext();
     Vocabulary vocabulary = createVocabulary("vocab1");
-    vocabulary.setKey(1L);
+    vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
-    Label label = createLabel(vocabulary);
-    when(vocabularyService.getLabel(label.getKey())).thenReturn(label);
-    doNothing().when(vocabularyService).deleteLabel(label.getKey());
+    Definition definition = createDefinition();
+    when(vocabularyService.getDefinition(TEST_KEY, definition.getKey())).thenReturn(definition);
+    doNothing().when(vocabularyService).deleteDefinition(TEST_KEY, definition.getKey());
     mockMvc
         .perform(
-            delete(getBasePath() + "/" + vocabulary.getName() + "/labels/" + label.getKey())
+            delete(
+                    getBasePath()
+                        + "/"
+                        + vocabulary.getName()
+                        + "/definition/"
+                        + definition.getKey())
                 .with(authorizationDocumentation()))
         .andExpect(status().isNoContent());
   }
 
   @Test
-  public void listLabelsTest() throws Exception {
+  public void listDefinitionsTest() throws Exception {
     setSecurityContext();
     Vocabulary vocabulary = createVocabulary("vocab1");
-    vocabulary.setKey(1L);
+    vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
-    Label label = createLabel(vocabulary);
-    when(vocabularyService.listLabels(any(Long.class), any(LanguageRegion.class)))
-        .thenReturn(Collections.singletonList(label));
+    Definition definition = createDefinition();
+    when(vocabularyService.listDefinitions(any(Long.class), any(List.class)))
+        .thenReturn(Collections.singletonList(definition));
     mockMvc
         .perform(
-            get(getBasePath() + "/" + vocabulary.getName() + "/labels")
+            get(getBasePath() + "/" + vocabulary.getName() + "/definition")
                 .param("lang", LanguageRegion.ENGLISH.getLocale())
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
@@ -499,30 +506,87 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
   }
 
   @Test
-  public void getLabelTest() throws Exception {
+  public void getDefinitionTest() throws Exception {
     setSecurityContext();
     Vocabulary vocabulary = createVocabulary("vocab1");
-    vocabulary.setKey(1L);
+    vocabulary.setKey(TEST_KEY);
     when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
 
-    Label label = createLabel(vocabulary);
-    when(vocabularyService.getLabel(label.getKey())).thenReturn(label);
+    Definition definition = createDefinition();
+    when(vocabularyService.getDefinition(TEST_KEY, definition.getKey())).thenReturn(definition);
     mockMvc
         .perform(
-            get(getBasePath() + "/" + vocabulary.getName() + "/labels/" + label.getKey())
+            get(getBasePath() + "/" + vocabulary.getName() + "/definition/" + definition.getKey())
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("key", equalTo(label.getKey().intValue())))
-        .andExpect(jsonPath("value", equalTo(label.getValue())));
+        .andExpect(jsonPath("key", equalTo(definition.getKey().intValue())))
+        .andExpect(jsonPath("value", equalTo(definition.getValue())));
   }
 
-  private Label createLabel(Vocabulary vocabulary) {
-    return Label.builder()
-        .key(TEST_KEY)
-        .entityKey(vocabulary.getKey())
-        .language(LanguageRegion.ENGLISH)
-        .value("Label")
-        .build();
+  @Test
+  public void addLabelTest() throws Exception {
+    setSecurityContext();
+    Vocabulary vocabulary = createVocabulary("vocab1");
+    vocabulary.setKey(TEST_KEY);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+
+    Label label = createLabel();
+    when(vocabularyService.addLabel(any(Long.class), any(Label.class))).thenReturn(label.getKey());
+
+    Label labelBody = Label.builder().language(label.getLanguage()).value(label.getValue()).build();
+
+    mockMvc
+        .perform(
+            post(getBasePath() + "/" + vocabulary.getName() + "/label")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(OBJECT_MAPPER.writeValueAsString(labelBody))
+                .with(authorizationDocumentation()))
+        .andExpect(status().isCreated())
+        .andExpect(
+            header()
+                .string(
+                    "Location",
+                    endsWith(getBasePath() + "/" + vocabulary.getName() + "/label/" + TEST_KEY)))
+        .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
+        .andDo(documentFields(Label.class));
+  }
+
+  @Test
+  public void deleteLabelTest() throws Exception {
+    setSecurityContext();
+    Vocabulary vocabulary = createVocabulary("vocab1");
+    vocabulary.setKey(TEST_KEY);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+
+    Label label = createLabel();
+    doNothing().when(vocabularyService).deleteLabel(TEST_KEY, label.getKey());
+    mockMvc
+        .perform(
+            delete(getBasePath() + "/" + vocabulary.getName() + "/label/" + label.getKey())
+                .with(authorizationDocumentation()))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  public void listLabelsTest() throws Exception {
+    setSecurityContext();
+    Vocabulary vocabulary = createVocabulary("vocab1");
+    vocabulary.setKey(TEST_KEY);
+    when(vocabularyService.getByName(vocabulary.getName())).thenReturn(vocabulary);
+
+    Label label = createLabel();
+    when(vocabularyService.listLabels(any(Long.class), any(List.class)))
+        .thenReturn(Collections.singletonList(label));
+    mockMvc
+        .perform(
+            get(getBasePath() + "/" + vocabulary.getName() + "/label")
+                .param("lang", LanguageRegion.ENGLISH.getLocale())
+                .with(authorizationDocumentation()))
+        .andExpect(status().isOk())
+        .andDo(
+            document(
+                "{class-name}/{method-name}",
+                requestParameters(parameterWithName("lang").description("Language").optional())));
   }
 
   @Override

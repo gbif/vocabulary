@@ -22,6 +22,7 @@ import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
@@ -158,11 +159,6 @@ public class DefaultConceptService implements ConceptService {
     checkArgument(Objects.equals(oldConcept.getDeprecatedBy(), concept.getDeprecatedBy()));
     checkArgument(Objects.equals(oldConcept.getReplacedByKey(), concept.getReplacedByKey()));
 
-    checkArgument(oldConcept.getDeleted() == null, "Cannot update a deleted entity");
-    checkArgument(
-        Objects.equals(oldConcept.getDeleted(), concept.getDeleted()),
-        "Cannot delete or restore an entity while updating");
-
     // update the concept
     conceptMapper.update(concept);
   }
@@ -294,87 +290,88 @@ public class DefaultConceptService implements ConceptService {
   @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
-  public long addLabel(@NotNull @Valid Label label) {
-    checkArgument(label.getKey() == null, "Can't add a label that has a key");
-    checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
-    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
-
-    // checking if there are other vocabs with the same label
-    checkSimilarLabels(label);
-
-    conceptMapper.addLabel(label);
-    return label.getKey();
+  public long addDefinition(long entityKey, @NotNull @Valid Definition definition) {
+    checkArgument(definition.getKey() == null, "Can't add a definition that has a key");
+    checkArgument(!Strings.isNullOrEmpty(definition.getValue()), "Definition is required");
+    conceptMapper.addDefinition(entityKey, definition);
+    return definition.getKey();
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Validated({PostPersist.class, Default.class})
   @Transactional
   @Override
-  public void updateLabel(@NotNull @Valid Label label) {
-    requireNonNull(label.getKey());
-    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
-
-    // checking if there are other vocabs with the same label
-    checkSimilarLabels(label);
-
-    conceptMapper.updateLabel(label);
+  public void updateDefinition(long entityKey, @NotNull @Valid Definition definition) {
+    requireNonNull(definition.getKey());
+    checkArgument(!Strings.isNullOrEmpty(definition.getValue()), "Definition is required");
+    conceptMapper.updateDefinition(entityKey, definition);
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Transactional
   @Override
-  public void deleteLabel(long key) {
-    conceptMapper.deleteLabel(key);
+  public void deleteDefinition(long entityKey, long key) {
+    conceptMapper.deleteDefinition(entityKey, key);
   }
 
   @Override
-  public Label getLabel(long key) {
-    return conceptMapper.getLabel(key);
+  public Definition getDefinition(long entityKey, long key) {
+    return conceptMapper.getDefinition(entityKey, key);
   }
 
   @Override
-  public List<Label> listLabels(long entityKey, @Nullable LanguageRegion languageRegion) {
-    return conceptMapper.listLabels(entityKey, languageRegion);
+  public List<Definition> listDefinitions(
+      long entityKey, @Nullable List<LanguageRegion> languageRegions) {
+    return conceptMapper.listDefinitions(entityKey, languageRegions);
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
-  public long addAlternativeLabel(@NotNull @Valid Label label) {
+  public long addLabel(long entityKey, @NotNull @Valid Label label) {
     checkArgument(label.getKey() == null, "Can't add a label that has a key");
-    checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
     checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
     // checking if there are other vocabs with the same label
-    checkSimilarLabels(label);
+    checkSimilarLabels(entityKey, label);
 
-    conceptMapper.addAlternativeLabel(label);
+    conceptMapper.addLabel(entityKey, label);
     return label.getKey();
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
-  @Validated({PostPersist.class, Default.class})
   @Transactional
   @Override
-  public void updateAlternativeLabel(@NotNull @Valid Label label) {
-    requireNonNull(label.getKey());
+  public void deleteLabel(long entityKey, long key) {
+    conceptMapper.deleteLabel(entityKey, key);
+  }
+
+  @Override
+  public List<Label> listLabels(long entityKey, @Nullable List<LanguageRegion> languageRegions) {
+    return conceptMapper.listLabels(entityKey, languageRegions);
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
+  @Override
+  public long addAlternativeLabel(long entityKey, @NotNull @Valid Label label) {
+    checkArgument(label.getKey() == null, "Can't add a label that has a key");
     checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
     // checking if there are other vocabs with the same label
-    checkSimilarLabels(label);
+    checkSimilarLabels(entityKey, label);
 
-    conceptMapper.updateAlternativeLabel(label);
+    conceptMapper.addAlternativeLabel(entityKey, label);
+    return label.getKey();
   }
 
-  private void checkSimilarLabels(Label label) {
-    long vocabularyKey = conceptMapper.getVocabularyKey(label.getEntityKey());
+  private void checkSimilarLabels(long entityKey, Label label) {
+    long vocabularyKey = conceptMapper.getVocabularyKey(entityKey);
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            normalizeLabel(label.getValue()),
-            label.getLanguage(),
-            vocabularyKey,
-            label.getEntityKey());
+            normalizeLabel(label.getValue()), label.getLanguage(), vocabularyKey, entityKey);
     if (!similarities.isEmpty()) {
       throw new IllegalArgumentException(
           "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);
@@ -384,60 +381,40 @@ public class DefaultConceptService implements ConceptService {
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Transactional
   @Override
-  public void deleteAlternativeLabel(long key) {
-    conceptMapper.deleteAlternativeLabel(key);
-  }
-
-  @Override
-  public Label getAlternativeLabel(long key) {
-    return conceptMapper.getAlternativeLabel(key);
+  public void deleteAlternativeLabel(long entityKey, long key) {
+    conceptMapper.deleteAlternativeLabel(entityKey, key);
   }
 
   @Override
   public PagingResponse<Label> listAlternativeLabels(
-      long entityKey, @Nullable LanguageRegion languageRegion, @Nullable Pageable page) {
+      long entityKey, @Nullable List<LanguageRegion> languageRegions, @Nullable Pageable page) {
     page = page != null ? page : new PagingRequest();
     return new PagingResponse<>(
         page,
-        conceptMapper.countAlternativeLabels(entityKey, languageRegion),
-        conceptMapper.listAlternativeLabels(entityKey, languageRegion, page));
+        conceptMapper.countAlternativeLabels(entityKey, languageRegions),
+        conceptMapper.listAlternativeLabels(entityKey, languageRegions, page));
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Validated({PrePersist.class, Default.class})
   @Transactional
   @Override
-  public long addHiddenLabel(@NotNull @Valid HiddenLabel label) {
+  public long addHiddenLabel(long entityKey, @NotNull @Valid HiddenLabel label) {
     checkArgument(label.getKey() == null, "Can't add a label that has a key");
-    checkArgument(label.getEntityKey() != null, "A label must be associated to an entity");
     checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
 
     // checking if there are other vocabs with the same label
-    checkSimilarHiddenLabels(label);
+    checkSimilarHiddenLabels(entityKey, label);
 
-    conceptMapper.addHiddenLabel(label);
+    conceptMapper.addHiddenLabel(entityKey, label);
     return label.getKey();
   }
 
-  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
-  @Validated({PostPersist.class, Default.class})
-  @Transactional
-  @Override
-  public void updateHiddenLabel(@NotNull @Valid HiddenLabel label) {
-    requireNonNull(label.getKey());
-    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
-
-    // checking if there are other vocabs with the same label
-    checkSimilarHiddenLabels(label);
-
-    conceptMapper.updateHiddenLabel(label);
-  }
-
-  private void checkSimilarHiddenLabels(HiddenLabel label) {
-    long vocabularyKey = conceptMapper.getVocabularyKey(label.getEntityKey());
+  private void checkSimilarHiddenLabels(long entityKey, HiddenLabel label) {
+    long vocabularyKey = conceptMapper.getVocabularyKey(entityKey);
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            normalizeName(label.getValue()), null, vocabularyKey, label.getEntityKey());
+            normalizeName(label.getValue()), null, vocabularyKey, entityKey);
     if (!similarities.isEmpty()) {
       throw new IllegalArgumentException(
           "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);
@@ -447,13 +424,8 @@ public class DefaultConceptService implements ConceptService {
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
   @Transactional
   @Override
-  public void deleteHiddenLabel(long key) {
-    conceptMapper.deleteHiddenLabel(key);
-  }
-
-  @Override
-  public HiddenLabel getHiddenLabel(long key) {
-    return conceptMapper.getHiddenLabel(key);
+  public void deleteHiddenLabel(long entityKey, long key) {
+    conceptMapper.deleteHiddenLabel(entityKey, key);
   }
 
   @Override

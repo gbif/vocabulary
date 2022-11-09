@@ -14,8 +14,8 @@
 package org.gbif.vocabulary.restws.advices;
 
 import org.gbif.vocabulary.api.EntityView;
-import org.gbif.vocabulary.model.LabelEntity;
 import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.ValueEntity;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
 import org.jetbrains.annotations.NotNull;
@@ -56,7 +56,9 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Object>
                   Class.forName(returnType.getGenericParameterType().getTypeName()))
               || Tag.class.isAssignableFrom(
                   Class.forName(returnType.getGenericParameterType().getTypeName()))
-              || LabelEntity.class.isAssignableFrom(
+              || ValueEntity.class.isAssignableFrom(
+                  Class.forName(returnType.getGenericParameterType().getTypeName()))
+              || Long.class.isAssignableFrom(
                   Class.forName(returnType.getGenericParameterType().getTypeName())));
     } catch (ClassNotFoundException e) {
       log.debug("Unexpected parameter type", e);
@@ -87,8 +89,10 @@ public class CreatedVocabularyEntityAdvice implements ResponseBodyAdvice<Object>
         entityName = ((EntityView) body).getEntity().getName();
       } else if (body instanceof Tag) {
         entityName = ((Tag) body).getName();
-      } else if (body instanceof LabelEntity) {
-        entityName = ((LabelEntity) body).getKey().toString();
+      } else if (body instanceof ValueEntity) {
+        entityName = ((ValueEntity) body).getKey().toString();
+      } else if (body instanceof Long) {
+        entityName = body.toString();
       }
 
       httpServletResponse.addHeader(

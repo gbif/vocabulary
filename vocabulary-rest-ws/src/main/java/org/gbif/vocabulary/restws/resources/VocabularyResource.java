@@ -18,7 +18,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -27,7 +26,7 @@ import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
-import org.gbif.vocabulary.api.VocabularyView;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -94,50 +93,38 @@ public class VocabularyResource {
   }
 
   @GetMapping
-  public PagingResponse<VocabularyView> listVocabularies(VocabularyListParams params) {
-    PagingResponse<Vocabulary> vocabulariesPage =
-        vocabularyService.list(
-            VocabularySearchParams.builder()
-                .namespace(params.getNamespace())
-                .name(params.getName())
-                .deprecated(params.getDeprecated())
-                .key(params.getKey())
-                .query(params.getQ())
-                .hasUnreleasedChanges(params.getHasUnreleasedChanges())
-                .build(),
-            params.getPage());
-
-    List<VocabularyView> views =
-        vocabulariesPage.getResults().stream()
-            .map(v -> new VocabularyView(v, createLabelsLink(v)))
-            .collect(Collectors.toList());
-
-    return new PagingResponse<>(
-        vocabulariesPage.getOffset(),
-        vocabulariesPage.getLimit(),
-        vocabulariesPage.getCount(),
-        views);
+  public PagingResponse<Vocabulary> listVocabularies(VocabularyListParams params) {
+    return vocabularyService.list(
+        VocabularySearchParams.builder()
+            .namespace(params.getNamespace())
+            .name(params.getName())
+            .deprecated(params.getDeprecated())
+            .key(params.getKey())
+            .query(params.getQ())
+            .hasUnreleasedChanges(params.getHasUnreleasedChanges())
+            .build(),
+        params.getPage());
   }
 
   @GetMapping("{name}")
-  public VocabularyView get(@PathVariable("name") String vocabularyName) {
-    return getVocabularyView(vocabularyService.getByName(vocabularyName));
+  public Vocabulary get(@PathVariable("name") String vocabularyName) {
+    return vocabularyService.getByName(vocabularyName);
   }
 
   @PostMapping
-  public VocabularyView create(@RequestBody Vocabulary vocabulary) {
+  public Vocabulary create(@RequestBody Vocabulary vocabulary) {
     long key = vocabularyService.create(vocabulary);
-    return getVocabularyView(vocabularyService.get(key));
+    return vocabularyService.get(key);
   }
 
   @PutMapping("{name}")
-  public VocabularyView update(
+  public Vocabulary update(
       @PathVariable("name") String vocabularyName, @RequestBody Vocabulary vocabulary) {
     checkArgument(
         vocabularyName.equals(vocabulary.getName()),
         "Provided entity must have the same name as the resource in the URL");
     vocabularyService.update(vocabulary);
-    return getVocabularyView(vocabularyService.get(vocabulary.getKey()));
+    return vocabularyService.get(vocabulary.getKey());
   }
 
   @GetMapping("suggest")
@@ -271,59 +258,61 @@ public class VocabularyResource {
     vocabularyService.deleteVocabulary(getVocabularyByName(vocabularyName).getKey());
   }
 
-  @GetMapping("{name}/labels")
-  public List<Label> listLabels(@PathVariable("name") String vocabularyName, LanguageRegion lang) {
+  @GetMapping("{name}/definition")
+  public List<Definition> listDefinitions(
+      @PathVariable("name") String vocabularyName, List<LanguageRegion> lang) {
+    return vocabularyService.listDefinitions(getVocabularyByName(vocabularyName).getKey(), lang);
+  }
+
+  @GetMapping("{name}/definition/{key}")
+  public Definition getDefinition(
+      @PathVariable("name") String vocabularyName, @PathVariable("key") long definitionKey) {
+    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
+    return vocabularyService.getDefinition(vocabulary.getKey(), definitionKey);
+  }
+
+  @PostMapping("{name}/definition")
+  public Definition addDefinition(
+      @PathVariable("name") String vocabularyName, @RequestBody Definition definition) {
+    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
+    long key = vocabularyService.addDefinition(vocabulary.getKey(), definition);
+    return vocabularyService.getDefinition(vocabulary.getKey(), key);
+  }
+
+  @PutMapping("{name}/definition/{key}")
+  public Definition updateDefinition(
+      @PathVariable("name") String vocabularyName,
+      @PathVariable("key") long definitionKey,
+      @RequestBody Definition definition) {
+    checkArgument(
+        definitionKey == definition.getKey(), "Definition key doesn't match with the path");
+    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
+    vocabularyService.updateDefinition(vocabulary.getKey(), definition);
+    return vocabularyService.getDefinition(vocabulary.getKey(), definitionKey);
+  }
+
+  @DeleteMapping("{name}/definition/{key}")
+  public void deleteDefinition(
+      @PathVariable("name") String vocabularyName, @PathVariable("key") long key) {
+    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
+    vocabularyService.deleteDefinition(vocabulary.getKey(), key);
+  }
+
+  @GetMapping("{name}/label")
+  public List<Label> listLabels(
+      @PathVariable("name") String vocabularyName, List<LanguageRegion> lang) {
     return vocabularyService.listLabels(getVocabularyByName(vocabularyName).getKey(), lang);
   }
 
-  @GetMapping("{name}/labels/{key}")
-  public Label getLabel(
-      @PathVariable("name") String vocabularyName, @PathVariable("key") long labelKey) {
-    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
-    Label label = vocabularyService.getLabel(labelKey);
-    checkArgument(
-        vocabulary.getKey().equals(label.getEntityKey()), "Label doesn't belong to the vocabulary");
-    return label;
+  @PostMapping("{name}/label")
+  public Long addLabel(@PathVariable("name") String vocabularyName, @RequestBody Label label) {
+    return vocabularyService.addLabel(getVocabularyByName(vocabularyName).getKey(), label);
   }
 
-  @PostMapping("{name}/labels")
-  public Label addLabel(@PathVariable("name") String vocabularyName, @RequestBody Label label) {
-    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
-    label.setEntityKey(vocabulary.getKey());
-    long key = vocabularyService.addLabel(label);
-    return vocabularyService.getLabel(key);
-  }
-
-  @PutMapping("{name}/labels/{key}")
-  public Label updateLabel(
-      @PathVariable("name") String vocabularyName,
-      @PathVariable("key") long labelKey,
-      @RequestBody Label label) {
-    checkArgument(labelKey == label.getKey(), "Label key doesn't match with the path");
-    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
-    checkArgument(
-        vocabulary.getKey().equals(label.getEntityKey()), "Label doesn't belong to the vocabulary");
-    vocabularyService.updateLabel(label);
-    return vocabularyService.getLabel(labelKey);
-  }
-
-  @DeleteMapping("{name}/labels/{key}")
+  @DeleteMapping("{name}/label/{key}")
   public void deleteLabel(
       @PathVariable("name") String vocabularyName, @PathVariable("key") long key) {
-    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
-    Label labelToDelete = vocabularyService.getLabel(key);
-    checkArgument(
-        vocabulary.getKey().equals(labelToDelete.getEntityKey()),
-        "Label doesn't belong to the vocabulary");
-    vocabularyService.deleteLabel(key);
-  }
-
-  private VocabularyView getVocabularyView(Vocabulary vocabulary) {
-    return vocabulary != null ? new VocabularyView(vocabulary, createLabelsLink(vocabulary)) : null;
-  }
-
-  private String createLabelsLink(Vocabulary v) {
-    return String.format("%s/vocabularies/%s/labels", wsConfig.getApiUrl(), v.getName());
+    vocabularyService.deleteLabel(getVocabularyByName(vocabularyName).getKey(), key);
   }
 
   @NotNull

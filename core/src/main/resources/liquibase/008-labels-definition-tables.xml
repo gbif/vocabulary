@@ -12,6 +12,52 @@
          language varchar(8) NOT NULL,
          value text NOT NULL,
          created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+         created timestamp with time zone NOT NULL DEFAULT now(),
+         fulltext_search tsvector,
+         UNIQUE(vocabulary_key, language)
+       );
+
+       CREATE TABLE concept_label(
+         key bigserial NOT NULL PRIMARY KEY,
+         concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
+         language varchar(8) NOT NULL,
+         value text NOT NULL,
+         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+         created timestamp with time zone NOT NULL DEFAULT now(),
+         normalized_value text,
+         fulltext_search tsvector,
+         UNIQUE(concept_key, language)
+       );
+
+       CREATE TABLE concept_alternative_label(
+         key bigserial NOT NULL PRIMARY KEY,
+         concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
+         language varchar(8) NOT NULL,
+         value text NOT NULL,
+         normalized_value text,
+         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+         created timestamp with time zone NOT NULL DEFAULT now(),
+         fulltext_search tsvector,
+         UNIQUE(concept_key, language, value)
+       );
+
+       CREATE TABLE concept_hidden_label(
+         key bigserial NOT NULL PRIMARY KEY,
+         concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
+         value text NOT NULL,
+         normalized_value text,
+         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
+         created timestamp with time zone NOT NULL DEFAULT now(),
+         fulltext_search tsvector,
+         UNIQUE(concept_key, value)
+       );
+
+       CREATE TABLE vocabulary_definition(
+         key bigserial NOT NULL PRIMARY KEY,
+         vocabulary_key bigint NOT NULL REFERENCES vocabulary(key) ON DELETE CASCADE,
+         language varchar(8) NOT NULL,
+         value text NOT NULL,
+         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
          modified_by varchar NOT NULL CHECK (assert_min_length(modified_by, 1)),
          created timestamp with time zone NOT NULL DEFAULT now(),
          modified timestamp with time zone NOT NULL DEFAULT now(),
@@ -19,7 +65,7 @@
          UNIQUE(vocabulary_key, language)
        );
 
-       CREATE TABLE concept_label(
+       CREATE TABLE concept_definition(
          key bigserial NOT NULL PRIMARY KEY,
          concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
          language varchar(8) NOT NULL,
@@ -33,45 +79,13 @@
          UNIQUE(concept_key, language)
        );
 
-       CREATE TABLE concept_alternative_label(
-         key bigserial NOT NULL PRIMARY KEY,
-         concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
-         language varchar(8) NOT NULL,
-         value text NOT NULL,
-         normalized_value text,
-         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
-         modified_by varchar NOT NULL CHECK (assert_min_length(modified_by, 1)),
-         created timestamp with time zone NOT NULL DEFAULT now(),
-         modified timestamp with time zone NOT NULL DEFAULT now(),
-         fulltext_search tsvector,
-         UNIQUE(concept_key, language, value)
-       );
-
-       CREATE TABLE concept_hidden_label(
-         key bigserial NOT NULL PRIMARY KEY,
-         concept_key bigint NOT NULL REFERENCES concept(key) ON DELETE CASCADE,
-         value text NOT NULL,
-         normalized_value text,
-         created_by varchar NOT NULL CHECK (assert_min_length(created_by, 1)),
-         modified_by varchar NOT NULL CHECK (assert_min_length(modified_by, 1)),
-         created timestamp with time zone NOT NULL DEFAULT now(),
-         modified timestamp with time zone NOT NULL DEFAULT now(),
-         fulltext_search tsvector,
-         UNIQUE(concept_key, value)
-       );
-
        CREATE OR REPLACE FUNCTION vocabulary_change_trigger()
        RETURNS TRIGGER AS
        $vocabchange$
-           DECLARE
-             definitions text[];
            BEGIN
-             definitions := COALESCE(get_json_values(NEW.definition), array[]::text[]);
-
              NEW.fulltext_search :=
                TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.namespace,''))) ||
                TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.name,''))) ||
-               TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(definitions, ' '),''))) ||
                TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.external_definition_urls, ' '),''))) ||
                TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.editorial_notes, ' '),'')));
 
@@ -82,7 +96,7 @@
 
        DROP TRIGGER vocabulary_fulltext_update ON vocabulary;
        CREATE TRIGGER vocabulary_fulltext_update
-       BEFORE INSERT OR UPDATE OF namespace, name, definition, external_definition_urls, editorial_notes ON vocabulary
+       BEFORE INSERT OR UPDATE OF namespace, name, external_definition_urls, editorial_notes ON vocabulary
        FOR EACH ROW EXECUTE PROCEDURE vocabulary_change_trigger();
 
       CREATE OR REPLACE FUNCTION vocabulary_label_change_trigger()
@@ -113,17 +127,16 @@
        BEFORE INSERT OR DELETE OR UPDATE OF value ON vocabulary_label
        FOR EACH ROW EXECUTE PROCEDURE vocabulary_label_change_trigger();
 
+       CREATE TRIGGER vocabulary_definition_update
+       BEFORE INSERT OR DELETE OR UPDATE OF value ON vocabulary_definition
+       FOR EACH ROW EXECUTE PROCEDURE vocabulary_label_change_trigger();
+
        CREATE OR REPLACE FUNCTION concept_change_trigger()
        RETURNS TRIGGER AS
        $conceptchange$
-           DECLARE
-             definitions text[];
            BEGIN
-             definitions := COALESCE(get_json_values(NEW.definition), array[]::text[]);
-
              NEW.fulltext_search :=
                TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.name,''))) ||
-               TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(definitions, ' '),''))) ||
                TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.external_definition_urls, ' '),''))) ||
                TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.same_as_uris, ' '),''))) ||
                TO_TSVECTOR('english_nostop', unaccent(COALESCE(array_to_string(NEW.editorial_notes, ' '),'')));
@@ -135,7 +148,7 @@
 
        DROP TRIGGER concept_fulltext_update ON concept;
        CREATE TRIGGER concept_fulltext_update
-       BEFORE INSERT OR UPDATE OF name, definition, external_definition_urls, same_as_uris, editorial_notes ON concept
+       BEFORE INSERT OR UPDATE OF name, external_definition_urls, same_as_uris, editorial_notes ON concept
        FOR EACH ROW EXECUTE PROCEDURE concept_change_trigger();
 
        CREATE OR REPLACE FUNCTION concept_label_change_trigger()
@@ -163,6 +176,10 @@
        $conceptlabelchange$
        LANGUAGE plpgsql;
 
+       CREATE TRIGGER concept_definition_update
+       BEFORE INSERT OR DELETE OR UPDATE OF value ON concept_definition
+       FOR EACH ROW EXECUTE PROCEDURE concept_label_change_trigger();
+
        CREATE TRIGGER concept_label_update
        BEFORE INSERT OR DELETE OR UPDATE OF value ON concept_label
        FOR EACH ROW EXECUTE PROCEDURE concept_label_change_trigger();
@@ -177,10 +194,15 @@
 
        ALTER TABLE vocabulary DROP COLUMN normalized_values;
        ALTER TABLE vocabulary DROP COLUMN label;
+       ALTER TABLE vocabulary DROP COLUMN definition;
+       ALTER TABLE concept DROP COLUMN definition;
        ALTER TABLE concept DROP COLUMN normalized_values;
        ALTER TABLE concept DROP COLUMN label;
        ALTER TABLE concept DROP COLUMN alternative_labels;
        ALTER TABLE concept DROP COLUMN hidden_labels;
+
+       DROP FUNCTION IF EXISTS get_json_values;
+       DROP FUNCTION IF EXISTS add_normalized_values;
       ]]>
     </sql>
   </changeSet>

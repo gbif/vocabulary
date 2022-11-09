@@ -18,17 +18,20 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.export.Export;
+import org.gbif.vocabulary.model.export.VocabularyExportView;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
 import org.junit.jupiter.api.Test;
@@ -60,6 +63,19 @@ public class ExportServiceTest extends MockServiceBaseTest {
 
   @Test
   public void exportVocabularyTest() throws IOException {
+    VocabularyExportView v = new VocabularyExportView();
+    Vocabulary voc = new Vocabulary();
+    Definition definition =
+        Definition.builder().language(LanguageRegion.ENGLISH).value("def").build();
+    definition.setLanguage(LanguageRegion.ENGLISH);
+    definition.setValue("v");
+    voc.setDefinition(Collections.singletonList(definition));
+    v.setVocabulary(voc);
+    v.setDefinition(Collections.singletonMap(LanguageRegion.ENGLISH, "f"));
+
+    ObjectMapper om = new ObjectMapper();
+    System.out.println(om.writeValueAsString(v));
+
     final String vocabularyName = "vocab";
     mockVocabulary(vocabularyName);
 
@@ -87,83 +103,43 @@ public class ExportServiceTest extends MockServiceBaseTest {
 
     // labels
     List<Label> c1Labels = new ArrayList<>();
-    c1Labels.add(
-        Label.builder()
-            .entityKey(c1.getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("Label")
-            .build());
-    c1Labels.add(
-        Label.builder()
-            .entityKey(c1.getKey())
-            .language(LanguageRegion.SPANISH)
-            .value("Etiqueta")
-            .build());
+    c1Labels.add(Label.builder().language(LanguageRegion.ENGLISH).value("Label").build());
+    c1Labels.add(Label.builder().language(LanguageRegion.SPANISH).value("Etiqueta").build());
 
     // alternative labels
     List<Label> c1AlternativeLabels = new ArrayList<>();
     c1AlternativeLabels.add(
-        Label.builder()
-            .entityKey(c1.getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("label2")
-            .build());
+        Label.builder().language(LanguageRegion.ENGLISH).value("label2").build());
     c1AlternativeLabels.add(
-        Label.builder()
-            .entityKey(c1.getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("label3")
-            .build());
+        Label.builder().language(LanguageRegion.ENGLISH).value("label3").build());
     c1AlternativeLabels.add(
-        Label.builder()
-            .entityKey(c1.getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("label4")
-            .build());
+        Label.builder().language(LanguageRegion.ENGLISH).value("label4").build());
     c1AlternativeLabels.add(
-        Label.builder()
-            .entityKey(c1.getKey())
-            .language(LanguageRegion.SPANISH)
-            .value("label5")
-            .build());
+        Label.builder().language(LanguageRegion.SPANISH).value("label5").build());
     c1AlternativeLabels.add(
-        Label.builder()
-            .entityKey(c1.getKey())
-            .language(LanguageRegion.SPANISH)
-            .value("label6")
-            .build());
+        Label.builder().language(LanguageRegion.SPANISH).value("label6").build());
 
     // hidden labels
     List<HiddenLabel> c1HiddenLabels = new ArrayList<>();
-    c1HiddenLabels.add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl2").build());
-    c1HiddenLabels.add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl3").build());
-    c1HiddenLabels.add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl4").build());
-    c1HiddenLabels.add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl5").build());
-    c1HiddenLabels.add(HiddenLabel.builder().entityKey(c1.getKey()).value("labl6").build());
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl2").build());
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl3").build());
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl4").build());
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl5").build());
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl6").build());
 
     Concept c2 = new Concept();
     c2.setKey(2L);
     c2.setName("c2");
     c2.setVocabularyKey(vocabulary.getKey());
     List<Label> c2Labels = new ArrayList<>();
-    c2Labels.add(
-        Label.builder()
-            .entityKey(c2.getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("Label")
-            .build());
+    c2Labels.add(Label.builder().language(LanguageRegion.ENGLISH).value("Label").build());
 
     Concept c3 = new Concept();
     c3.setKey(3L);
     c3.setName("c3");
     c3.setVocabularyKey(vocabulary.getKey());
     List<Label> c3Labels = new ArrayList<>();
-    c3Labels.add(
-        Label.builder()
-            .entityKey(c3.getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("Label")
-            .build());
+    c3Labels.add(Label.builder().language(LanguageRegion.ENGLISH).value("Label").build());
 
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);
     when(conceptService.list(any(), any()))

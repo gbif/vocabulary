@@ -15,6 +15,7 @@ package org.gbif.vocabulary.persistence.mappers;
 
 import java.util.List;
 
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.VocabularyEntity;
@@ -45,14 +46,23 @@ public interface BaseMapper<T extends VocabularyEntity> {
 
   boolean isDeprecated(@Param("key") long key);
 
-  void addLabel(Label label);
+  void addDefinition(@Param("entityKey") long entityKey, @Param("definition") Definition definition);
 
-  void updateLabel(Label label);
+  void updateDefinition(@Param("entityKey") long entityKey, @Param("definition") Definition definition);
 
-  void deleteLabel(@Param("key") long key);
+  void deleteDefinition(@Param("entityKey") long entityKey, @Param("key") long key);
+
+  List<Definition> listDefinitions(
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("langs") List<LanguageRegion> languageRegions);
+
+  Definition getDefinition(@Param("entityKey") long entityKey, @Param("key") long definitionKey);
+
+  void addLabel(@Param("entityKey") long entityKey, @Param("label") Label label);
+
+  void deleteLabel(@Param("entityKey") long entityKey, @Param("key") long key);
 
   List<Label> listLabels(
-      @Param("entityKey") long entityKey, @Nullable @Param("lang") LanguageRegion languageRegion);
-
-  Label getLabel(@Param("key") long labelKey);
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("langs") List<LanguageRegion> languageRegions);
 }

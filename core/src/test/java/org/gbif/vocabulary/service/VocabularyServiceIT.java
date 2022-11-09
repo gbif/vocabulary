@@ -15,11 +15,12 @@ package org.gbif.vocabulary.service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.gbif.vocabulary.PostgresDBExtension;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
@@ -143,16 +144,6 @@ public class VocabularyServiceIT {
   }
 
   @Test
-  public void deletingWhenUpdatingTest() {
-    Vocabulary vocabulary = createBasicVocabulary();
-    long key = vocabularyService.create(vocabulary);
-
-    Vocabulary createdVocabulary = vocabularyService.get(key);
-    createdVocabulary.setDeleted(LocalDateTime.now());
-    assertThrows(IllegalArgumentException.class, () -> vocabularyService.update(createdVocabulary));
-  }
-
-  @Test
   public void listConceptsTest() {
     Vocabulary v1 = createBasicVocabulary();
     v1.setNamespace("n1");
@@ -223,48 +214,103 @@ public class VocabularyServiceIT {
   }
 
   @Test
-  public void labelsTest() {
+  public void definitionTest() {
     long v1Key = vocabularyService.create(createBasicVocabulary());
 
-    // add label
-    Label label =
-        Label.builder()
-            .entityKey(v1Key)
+    // add definition
+    Definition definition =
+        Definition.builder()
             .language(LanguageRegion.ENGLISH)
             .value("label")
             .modifiedBy("test")
             .createdBy("test")
             .build();
-    long labelKey = vocabularyService.addLabel(label);
-    assertTrue(labelKey > 0);
+    long definitionKey = vocabularyService.addDefinition(v1Key, definition);
+    assertTrue(definitionKey > 0);
 
-    // get label
-    Label createdLabel = vocabularyService.getLabel(labelKey);
-    assertTrue(label.lenientEquals(createdLabel));
+    // get definition
+    Definition createdDefinition = vocabularyService.getDefinition(v1Key, definitionKey);
+    assertTrue(definition.lenientEquals(createdDefinition));
 
-    // list labels
-    List<Label> labelList = vocabularyService.listLabels(v1Key, null);
-    assertEquals(1, labelList.size());
-    assertEquals(labelKey, labelList.get(0).getKey());
+    // list definitions
+    List<Definition> definitionList = vocabularyService.listDefinitions(v1Key, null);
+    assertEquals(1, definitionList.size());
+    assertEquals(definitionKey, definitionList.get(0).getKey());
 
-    // add another label
-    Label label2 =
-        Label.builder()
-            .entityKey(v1Key)
+    // add another definition
+    Definition definition2 =
+        Definition.builder()
             .language(LanguageRegion.SPANISH)
             .value("label2")
             .modifiedBy("test")
             .createdBy("test")
             .build();
-    long labelKey2 = vocabularyService.addLabel(label2);
+    long definitionKey2 = vocabularyService.addDefinition(v1Key, definition2);
+    assertTrue(definitionKey2 > 0);
+    assertEquals(2, vocabularyService.listDefinitions(v1Key, null).size());
+    assertEquals(
+        1,
+        vocabularyService
+            .listDefinitions(v1Key, Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        1,
+        vocabularyService
+            .listDefinitions(v1Key, Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyService
+            .listDefinitions(v1Key, Collections.singletonList(LanguageRegion.ACHOLI))
+            .size());
+
+    // delete definition
+    vocabularyService.deleteDefinition(v1Key, definitionKey);
+    definitionList = vocabularyService.listDefinitions(v1Key, null);
+    assertEquals(1, definitionList.size());
+    assertEquals(definitionKey2, definitionList.get(0).getKey());
+  }
+
+  @Test
+  public void labelsTest() {
+    long v1Key = vocabularyService.create(createBasicVocabulary());
+
+    // add label
+    Label label =
+        Label.builder().language(LanguageRegion.ENGLISH).value("label").createdBy("test").build();
+    long labelKey = vocabularyService.addLabel(v1Key, label);
+    assertTrue(labelKey > 0);
+
+    // list labels
+    List<Label> labelList = vocabularyService.listLabels(v1Key, null);
+    assertEquals(1, labelList.size());
+    assertEquals(labelKey, labelList.get(0).getKey());
+    assertTrue(label.lenientEquals(labelList.get(0)));
+
+    // add another label
+    Label label2 =
+        Label.builder().language(LanguageRegion.SPANISH).value("label2").createdBy("test").build();
+    long labelKey2 = vocabularyService.addLabel(v1Key, label2);
     assertTrue(labelKey2 > 0);
     assertEquals(2, vocabularyService.listLabels(v1Key, null).size());
-    assertEquals(1, vocabularyService.listLabels(v1Key, LanguageRegion.ENGLISH).size());
-    assertEquals(1, vocabularyService.listLabels(v1Key, LanguageRegion.SPANISH).size());
-    assertEquals(0, vocabularyService.listLabels(v1Key, LanguageRegion.ACHOLI).size());
+    assertEquals(
+        1,
+        vocabularyService
+            .listLabels(v1Key, Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        1,
+        vocabularyService
+            .listLabels(v1Key, Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyService
+            .listLabels(v1Key, Collections.singletonList(LanguageRegion.ACHOLI))
+            .size());
 
     // delete label
-    vocabularyService.deleteLabel(labelKey);
+    vocabularyService.deleteLabel(v1Key, labelKey);
     labelList = vocabularyService.listLabels(v1Key, null);
     assertEquals(1, labelList.size());
     assertEquals(labelKey2, labelList.get(0).getKey());

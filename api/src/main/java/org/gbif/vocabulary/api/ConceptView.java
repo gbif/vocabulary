@@ -32,8 +32,6 @@ public class ConceptView implements Serializable, EntityView<Concept> {
   private Integer childrenCount;
   private List<String> children;
 
-  private String labelsLink;
-
   /** Indicates alternative labels commonly associated to the concept. */
   private String alternativeLabelsLink;
 
@@ -82,11 +80,6 @@ public class ConceptView implements Serializable, EntityView<Concept> {
 
   public ConceptView setChildren(List<String> children) {
     this.children = children;
-    return this;
-  }
-
-  public ConceptView setLabelsLink(String labelsLink) {
-    this.labelsLink = labelsLink;
     return this;
   }
 

@@ -29,9 +29,9 @@ import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.AbstractVocabularyEntity;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
-import org.gbif.vocabulary.model.LabelEntity;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -265,6 +265,56 @@ public class ConceptResource {
         getConceptWithCheck(conceptName, vocabularyName).getKey(), restoreDeprecatedChildren);
   }
 
+  @GetMapping("{name}/definition")
+  public List<Definition> listDefinitions(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      List<LanguageRegion> lang) {
+    return conceptService.listDefinitions(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), lang);
+  }
+
+  @GetMapping("{name}/definition/{key}")
+  public Definition getDefinition(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long definitionKey) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    return conceptService.getDefinition(concept.getKey(), definitionKey);
+  }
+
+  @PostMapping("{name}/definition")
+  public Definition addDefinition(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody Definition definition) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    long key = conceptService.addDefinition(concept.getKey(), definition);
+    return conceptService.getDefinition(concept.getKey(), key);
+  }
+
+  @PutMapping("{name}/definition/{key}")
+  public Definition updateDefinition(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long definitionKey,
+      @RequestBody Definition definition) {
+    checkArgument(
+        definitionKey == definition.getKey(), "Definition key doesn't match with the path");
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    conceptService.updateDefinition(concept.getKey(), definition);
+    return conceptService.getDefinition(concept.getKey(), definitionKey);
+  }
+
+  @DeleteMapping("{name}/definition/{key}")
+  public void deleteDefinition(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long key) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    conceptService.deleteDefinition(concept.getKey(), key);
+  }
+
   @GetMapping("{name}/tags")
   public List<Tag> listTags(
       @PathVariable("vocabularyName") String vocabularyName,
@@ -295,11 +345,11 @@ public class ConceptResource {
     conceptService.removeTag(concept.getKey(), tag.getKey());
   }
 
-  @GetMapping("{name}/labels")
+  @GetMapping("{name}/label")
   public List<Label> listLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      LanguageRegion lang) {
+      List<LanguageRegion> lang) {
     return conceptService.listLabels(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), lang);
   }
@@ -308,7 +358,7 @@ public class ConceptResource {
   public PagingResponse<Label> listAlternativeLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      LanguageRegion lang,
+      List<LanguageRegion> lang,
       Pageable page) {
     return conceptService.listAlternativeLabels(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, page);
@@ -323,117 +373,40 @@ public class ConceptResource {
         getConceptWithCheck(conceptName, vocabularyName).getKey(), page);
   }
 
-  @GetMapping("{name}/labels/{key}")
-  public Label getLabel(
-      @PathVariable("vocabularyName") String vocabularyName,
-      @PathVariable("name") String conceptName,
-      @PathVariable("key") long labelKey) {
-    return getLabelWithCheck(conceptName, vocabularyName, conceptService.getLabel(labelKey));
-  }
-
-  @GetMapping("{name}/alternativeLabels/{key}")
-  public Label getAlternativeLabel(
-      @PathVariable("vocabularyName") String vocabularyName,
-      @PathVariable("name") String conceptName,
-      @PathVariable("key") long labelKey) {
-    return getLabelWithCheck(
-        conceptName, vocabularyName, conceptService.getAlternativeLabel(labelKey));
-  }
-
-  @GetMapping("{name}/hiddenLabels/{key}")
-  public HiddenLabel getHiddenLabel(
-      @PathVariable("vocabularyName") String vocabularyName,
-      @PathVariable("name") String conceptName,
-      @PathVariable("key") long labelKey) {
-    return getLabelWithCheck(conceptName, vocabularyName, conceptService.getHiddenLabel(labelKey));
-  }
-
-  @PostMapping("{name}/labels")
-  public Label addLabel(
+  @PostMapping("{name}/label")
+  public Long addLabel(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody Label label) {
     Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    label.setEntityKey(concept.getKey());
-    long key = conceptService.addLabel(label);
-    return conceptService.getLabel(key);
+    return conceptService.addLabel(concept.getKey(), label);
   }
 
   @PostMapping("{name}/alternativeLabels")
-  public Label addAlternativeLabel(
+  public Long addAlternativeLabel(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody Label label) {
     Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    label.setEntityKey(concept.getKey());
-    long key = conceptService.addAlternativeLabel(label);
-    return conceptService.getAlternativeLabel(key);
+    return conceptService.addAlternativeLabel(concept.getKey(), label);
   }
 
   @PostMapping("{name}/hiddenLabels")
-  public HiddenLabel addHiddenLabel(
+  public Long addHiddenLabel(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody HiddenLabel label) {
     Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    label.setEntityKey(concept.getKey());
-    long key = conceptService.addHiddenLabel(label);
-    return conceptService.getHiddenLabel(key);
+    return conceptService.addHiddenLabel(concept.getKey(), label);
   }
 
-  @PutMapping("{name}/labels/{key}")
-  public Label updateLabel(
-      @PathVariable("vocabularyName") String vocabularyName,
-      @PathVariable("name") String conceptName,
-      @PathVariable("key") long labelKey,
-      @RequestBody Label label) {
-    checkArgument(labelKey == label.getKey(), "Label key doesn't match with the path");
-    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    checkArgument(
-        concept.getKey().equals(label.getEntityKey()), "Label doesn't belong to the concept");
-    conceptService.updateLabel(label);
-    return conceptService.getLabel(labelKey);
-  }
-
-  @PutMapping("{name}/alternativeLabels/{key}")
-  public Label updateAlternativeLabel(
-      @PathVariable("vocabularyName") String vocabularyName,
-      @PathVariable("name") String conceptName,
-      @PathVariable("key") long labelKey,
-      @RequestBody Label label) {
-    checkArgument(labelKey == label.getKey(), "Label key doesn't match with the path");
-    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    checkArgument(
-        concept.getKey().equals(label.getEntityKey()), "Label doesn't belong to the concept");
-    conceptService.updateAlternativeLabel(label);
-    return conceptService.getAlternativeLabel(labelKey);
-  }
-
-  @PutMapping("{name}/hiddenLabels/{key}")
-  public HiddenLabel updateHiddenLabel(
-      @PathVariable("vocabularyName") String vocabularyName,
-      @PathVariable("name") String conceptName,
-      @PathVariable("key") long labelKey,
-      @RequestBody HiddenLabel label) {
-    checkArgument(labelKey == label.getKey(), "Label key doesn't match with the path");
-    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    checkArgument(
-        concept.getKey().equals(label.getEntityKey()), "Label doesn't belong to the concept");
-    conceptService.updateHiddenLabel(label);
-    return conceptService.getHiddenLabel(labelKey);
-  }
-
-  @DeleteMapping("{name}/labels/{key}")
+  @DeleteMapping("{name}/label/{key}")
   public void deleteLabel(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @PathVariable("key") long key) {
     Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    Label labelToDelete = conceptService.getLabel(key);
-    checkArgument(
-        concept.getKey().equals(labelToDelete.getEntityKey()),
-        "Label doesn't belong to the concept");
-    conceptService.deleteLabel(key);
+    conceptService.deleteLabel(concept.getKey(), key);
   }
 
   @DeleteMapping("{name}/alternativeLabels/{key}")
@@ -442,11 +415,7 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @PathVariable("key") long key) {
     Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    Label labelToDelete = conceptService.getAlternativeLabel(key);
-    checkArgument(
-        concept.getKey().equals(labelToDelete.getEntityKey()),
-        "Label doesn't belong to the concept");
-    conceptService.deleteAlternativeLabel(key);
+    conceptService.deleteAlternativeLabel(concept.getKey(), key);
   }
 
   @DeleteMapping("{name}/hiddenLabels/{key}")
@@ -455,11 +424,7 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @PathVariable("key") long key) {
     Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    HiddenLabel labelToDelete = conceptService.getHiddenLabel(key);
-    checkArgument(
-        concept.getKey().equals(labelToDelete.getEntityKey()),
-        "Label doesn't belong to the concept");
-    conceptService.deleteHiddenLabel(key);
+    conceptService.deleteHiddenLabel(concept.getKey(), key);
   }
 
   private Concept getConceptWithCheck(String conceptName, String vocabularyName) {
@@ -470,20 +435,8 @@ public class ConceptResource {
     return concept;
   }
 
-  private <T extends LabelEntity> T getLabelWithCheck(
-      String conceptName, String vocabularyName, T label) {
-    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-    checkArgument(
-        concept.getKey().equals(label.getEntityKey()), "Label doesn't belong to the concept");
-    return label;
-  }
-
   private ConceptView createLabelsLinks(
       ConceptView conceptView, String vocabularyName, String conceptName) {
-    conceptView.setLabelsLink(
-        String.format(
-            "%s/vocabularies/%s/concepts/%s/labels",
-            wsConfig.getApiUrl(), vocabularyName, conceptName));
     conceptView.setAlternativeLabelsLink(
         String.format(
             "%s/vocabularies/%s/concepts/%s/alternativeLabels",

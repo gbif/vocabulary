@@ -96,31 +96,13 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
         AccessDeniedException.class,
         () ->
             conceptService.addLabel(
-                Label.builder()
-                    .entityKey(1L)
-                    .language(LanguageRegion.ENGLISH)
-                    .value("label")
-                    .build()));
-  }
-
-  @WithMockUser
-  @Test
-  public void unauthorizedUpdateLabelTest() {
-    assertThrows(
-        AccessDeniedException.class,
-        () ->
-            conceptService.updateLabel(
-                Label.builder()
-                    .entityKey(1L)
-                    .language(LanguageRegion.ENGLISH)
-                    .value("label")
-                    .build()));
+                1L, Label.builder().language(LanguageRegion.ENGLISH).value("label").build()));
   }
 
   @WithMockUser
   @Test
   public void unauthorizedDeleteLabelTest() {
-    assertThrows(AccessDeniedException.class, () -> conceptService.deleteLabel(1L));
+    assertThrows(AccessDeniedException.class, () -> conceptService.deleteLabel(1L, 1L));
   }
 
   @WithMockUser
@@ -130,31 +112,13 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
         AccessDeniedException.class,
         () ->
             conceptService.addAlternativeLabel(
-                Label.builder()
-                    .entityKey(1L)
-                    .language(LanguageRegion.ENGLISH)
-                    .value("label")
-                    .build()));
-  }
-
-  @WithMockUser
-  @Test
-  public void unauthorizedUpdateAlternativeLabelTest() {
-    assertThrows(
-        AccessDeniedException.class,
-        () ->
-            conceptService.updateAlternativeLabel(
-                Label.builder()
-                    .entityKey(1L)
-                    .language(LanguageRegion.ENGLISH)
-                    .value("label")
-                    .build()));
+                1L, Label.builder().language(LanguageRegion.ENGLISH).value("label").build()));
   }
 
   @WithMockUser
   @Test
   public void unauthorizedDeleteAlternativeLabelTest() {
-    assertThrows(AccessDeniedException.class, () -> conceptService.deleteAlternativeLabel(1L));
+    assertThrows(AccessDeniedException.class, () -> conceptService.deleteAlternativeLabel(1L, 1L));
   }
 
   @WithMockUser
@@ -162,25 +126,13 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
   public void unauthorizedAddHiddenLabelTest() {
     assertThrows(
         AccessDeniedException.class,
-        () ->
-            conceptService.addHiddenLabel(
-                HiddenLabel.builder().entityKey(1L).value("label").build()));
-  }
-
-  @WithMockUser
-  @Test
-  public void unauthorizedUpdateHiddenLabelTest() {
-    assertThrows(
-        AccessDeniedException.class,
-        () ->
-            conceptService.updateHiddenLabel(
-                HiddenLabel.builder().entityKey(1L).value("label").build()));
+        () -> conceptService.addHiddenLabel(1L, HiddenLabel.builder().value("label").build()));
   }
 
   @WithMockUser
   @Test
   public void unauthorizedDeleteHiddenLabelTest() {
-    assertThrows(AccessDeniedException.class, () -> conceptService.deleteHiddenLabel(1L));
+    assertThrows(AccessDeniedException.class, () -> conceptService.deleteHiddenLabel(1L, 1L));
   }
 
   @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
@@ -188,18 +140,8 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
   public void invalidLabelTest() {
     // required fields are null
     assertThrows(
-        ConstraintViolationException.class, () -> conceptService.addLabel(Label.builder().build()));
-    assertThrows(
         ConstraintViolationException.class,
-        () -> conceptService.updateLabel(Label.builder().build()));
-
-    // set value
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> conceptService.addLabel(Label.builder().value("v").build()));
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> conceptService.updateLabel(Label.builder().value("v").build()));
+        () -> conceptService.addLabel(1L, Label.builder().build()));
   }
 
   @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
@@ -208,18 +150,7 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
     // required fields are null
     assertThrows(
         ConstraintViolationException.class,
-        () -> conceptService.addAlternativeLabel(Label.builder().build()));
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> conceptService.updateAlternativeLabel(Label.builder().build()));
-
-    // set value
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> conceptService.addAlternativeLabel(Label.builder().value("v").build()));
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> conceptService.updateAlternativeLabel(Label.builder().value("v").build()));
+        () -> conceptService.addAlternativeLabel(1L, Label.builder().build()));
   }
 
   @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
@@ -228,18 +159,7 @@ public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept>
     // required fields are null
     assertThrows(
         ConstraintViolationException.class,
-        () -> conceptService.addHiddenLabel(HiddenLabel.builder().build()));
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> conceptService.updateHiddenLabel(HiddenLabel.builder().build()));
-
-    // set value
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> conceptService.addHiddenLabel(HiddenLabel.builder().value("v").build()));
-    assertThrows(
-        ConstraintViolationException.class,
-        () -> conceptService.updateHiddenLabel(HiddenLabel.builder().value("v").build()));
+        () -> conceptService.addHiddenLabel(1L, HiddenLabel.builder().build()));
   }
 
   @Override

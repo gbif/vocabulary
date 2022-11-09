@@ -109,32 +109,25 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   void deleteAllConcepts(@Param("vocabularyKey") long vocabularyKey);
 
-  void addAlternativeLabel(Label label);
+  void addAlternativeLabel(@Param("entityKey") long entityKey, @Param("label") Label label);
 
-  void updateAlternativeLabel(Label label);
-
-  void deleteAlternativeLabel(@Param("key") long key);
+  void deleteAlternativeLabel(@Param("entityKey") long entityKey, @Param("key") long key);
 
   List<Label> listAlternativeLabels(
       @Param("entityKey") long entityKey,
-      @Nullable @Param("lang") LanguageRegion languageRegion,
+      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
       @Nullable @Param("page") Pageable page);
 
   long countAlternativeLabels(
-      @Param("entityKey") long entityKey, @Nullable @Param("lang") LanguageRegion languageRegion);
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("langs") List<LanguageRegion> languageRegions);
 
-  Label getAlternativeLabel(@Param("key") long labelKey);
+  void addHiddenLabel(@Param("entityKey") long entityKey, @Param("label") HiddenLabel label);
 
-  void addHiddenLabel(HiddenLabel label);
-
-  void updateHiddenLabel(HiddenLabel label);
-
-  void deleteHiddenLabel(@Param("key") long key);
+  void deleteHiddenLabel(@Param("entityKey") long entityKey, @Param("key") long key);
 
   List<HiddenLabel> listHiddenLabels(
       @Param("entityKey") long entityKey, @Nullable @Param("page") Pageable page);
 
   long countHiddenLabels(@Param("entityKey") long entityKey);
-
-  HiddenLabel getHiddenLabel(@Param("key") long labelKey);
 }

@@ -16,8 +16,8 @@ package org.gbif.vocabulary.persistence.mappers;
 import java.util.List;
 
 import org.gbif.api.model.common.paging.Pageable;
-import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
@@ -37,6 +37,8 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
   long count(@Nullable @Param("params") VocabularySearchParams params);
 
   Vocabulary getByName(@Param("name") String name);
+
+  Long getKeyByName(@Param("name") String name);
 
   List<KeyNameResult> suggest(
       @Param("query") String query, @Nullable @Param("lang") LanguageRegion language);

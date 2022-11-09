@@ -34,12 +34,13 @@ public class ConceptTest {
     c1.setVocabularyKey(1L);
     c1.setParentKey(2L);
     c1.setReplacedByKey(1L);
-    c1.setDefinition(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
+    c1.setDefinition(
+        Collections.singletonList(
+            Definition.builder().language(LanguageRegion.ENGLISH).value("def").build()));
     c1.setSameAsUris(Collections.singletonList(URI.create("http://test.com")));
     c1.setEditorialNotes(Arrays.asList("n1", "n2"));
     c1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
     c1.setCreated(LocalDateTime.now());
-    c1.setDeleted(LocalDateTime.now());
     c1.setDeprecated(LocalDateTime.now());
 
     Concept c2 = new Concept();
@@ -53,7 +54,6 @@ public class ConceptTest {
     c2.setEditorialNotes(c1.getEditorialNotes());
     c2.setExternalDefinitions(c1.getExternalDefinitions());
     c2.setCreated(c1.getCreated());
-    c2.setDeleted(c1.getDeleted());
     c2.setDeprecated(c1.getDeprecated());
 
     assertTrue(c1.lenientEquals(c2));

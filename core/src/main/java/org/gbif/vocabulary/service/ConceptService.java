@@ -137,24 +137,16 @@ public interface ConceptService extends BaseService<Concept> {
    */
   List<Tag> listTags(long conceptKey);
 
-  long addAlternativeLabel(@NotNull @Valid Label label);
+  long addAlternativeLabel(long entityKey, @NotNull @Valid Label label);
 
-  void updateAlternativeLabel(@NotNull @Valid Label label);
-
-  void deleteAlternativeLabel(long key);
-
-  Label getAlternativeLabel(long key);
+  void deleteAlternativeLabel(long entityKey, long key);
 
   PagingResponse<Label> listAlternativeLabels(
-      long entityKey, @Nullable LanguageRegion languageRegion, @Nullable Pageable page);
+      long entityKey, @Nullable List<LanguageRegion> languageRegions, @Nullable Pageable page);
 
-  long addHiddenLabel(@NotNull @Valid HiddenLabel label);
+  long addHiddenLabel(long entityKey, @NotNull @Valid HiddenLabel label);
 
-  void updateHiddenLabel(@NotNull @Valid HiddenLabel label);
-
-  void deleteHiddenLabel(long key);
-
-  HiddenLabel getHiddenLabel(long key);
+  void deleteHiddenLabel(long entityKey, long key);
 
   PagingResponse<HiddenLabel> listHiddenLabels(long entityKey, @Nullable Pageable page);
 }

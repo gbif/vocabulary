@@ -16,11 +16,11 @@ package org.gbif.vocabulary.persistence.mappers;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import org.gbif.vocabulary.TestUtils;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -167,13 +167,8 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 1);
 
     conceptMapper.addLabel(
-        Label.builder()
-            .entityKey(c1.getKey())
-            .language(LanguageRegion.ACHOLI)
-            .value("aa")
-            .createdBy("test")
-            .modifiedBy("test")
-            .build());
+        c1.getKey(),
+        Label.builder().language(LanguageRegion.ACHOLI).value("aa").createdBy("test").build());
     assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 0);
   }
 
@@ -207,21 +202,19 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertNotNull(v1.getKey());
 
     vocabularyMapper.addLabel(
+        v1.getKey(),
         Label.builder()
-            .entityKey(v1.getKey())
             .language(LanguageRegion.SPANISH)
             .value("labelspanish")
             .createdBy("test")
-            .modifiedBy("test")
             .build());
 
     vocabularyMapper.addLabel(
+        v1.getKey(),
         Label.builder()
-            .entityKey(v1.getKey())
             .language(LanguageRegion.ENGLISH)
             .value("labelenglish")
             .createdBy("test")
-            .modifiedBy("test")
             .build());
 
     Vocabulary v2 = createNewEntity();
@@ -230,13 +223,8 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertNotNull(v2.getKey());
 
     vocabularyMapper.addLabel(
-        Label.builder()
-            .entityKey(v2.getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("Label")
-            .createdBy("test")
-            .modifiedBy("test")
-            .build());
+        v2.getKey(),
+        Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
 
     // check result values
     List<KeyNameResult> result = vocabularyMapper.suggest("suggest1", null);
@@ -315,42 +303,81 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   }
 
   @Test
-  public void labelsTest() {
+  public void definitionTest() {
     Vocabulary vocabulary = createNewEntity();
     vocabularyMapper.create(vocabulary);
 
-    Label label =
-        Label.builder()
-            .entityKey(vocabulary.getKey())
+    Definition definition =
+        Definition.builder()
             .language(LanguageRegion.ENGLISH)
             .createdBy("test")
             .modifiedBy("test")
             .value("test")
             .build();
-    vocabularyMapper.addLabel(label);
+    vocabularyMapper.addDefinition(vocabulary.getKey(), definition);
+
+    List<Definition> definitions = vocabularyMapper.listDefinitions(vocabulary.getKey(), null);
+    assertEquals(1, definitions.size());
+
+    assertEquals(
+        1,
+        vocabularyMapper
+            .listDefinitions(vocabulary.getKey(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyMapper
+            .listDefinitions(vocabulary.getKey(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    definition = vocabularyMapper.getDefinition(vocabulary.getKey(), definition.getKey());
+    assertEquals("test", definition.getValue());
+    assertEquals(LanguageRegion.ENGLISH, definition.getLanguage());
+    assertEquals("test", definition.getCreatedBy());
+    assertEquals("test", definition.getModifiedBy());
+    assertNotNull(definition.getCreated());
+    assertNotNull(definition.getModified());
+
+    definition.setValue("test2");
+    vocabularyMapper.updateDefinition(vocabulary.getKey(), definition);
+    definition = vocabularyMapper.getDefinition(vocabulary.getKey(), definition.getKey());
+    assertEquals("test2", definition.getValue());
+
+    vocabularyMapper.deleteDefinition(vocabulary.getKey(), definition.getKey());
+
+    definitions = vocabularyMapper.listDefinitions(vocabulary.getKey(), null);
+    assertEquals(0, definitions.size());
+  }
+
+  @Test
+  public void labelsTest() {
+    Vocabulary vocabulary = createNewEntity();
+    vocabularyMapper.create(vocabulary);
+
+    Label label =
+        Label.builder().language(LanguageRegion.ENGLISH).createdBy("test").value("test").build();
+    vocabularyMapper.addLabel(vocabulary.getKey(), label);
 
     List<Label> labels = vocabularyMapper.listLabels(vocabulary.getKey(), null);
     assertEquals(1, labels.size());
-
-    assertEquals(
-        1, vocabularyMapper.listLabels(vocabulary.getKey(), LanguageRegion.ENGLISH).size());
-    assertEquals(
-        0, vocabularyMapper.listLabels(vocabulary.getKey(), LanguageRegion.SPANISH).size());
-
-    label = vocabularyMapper.getLabel(label.getKey());
+    label = labels.get(0);
     assertEquals("test", label.getValue());
     assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
     assertEquals("test", label.getCreatedBy());
-    assertEquals("test", label.getModifiedBy());
     assertNotNull(label.getCreated());
-    assertNotNull(label.getModified());
 
-    label.setValue("test2");
-    vocabularyMapper.updateLabel(label);
-    label = vocabularyMapper.getLabel(label.getKey());
-    assertEquals("test2", label.getValue());
+    assertEquals(
+        1,
+        vocabularyMapper
+            .listLabels(vocabulary.getKey(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyMapper
+            .listLabels(vocabulary.getKey(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
 
-    vocabularyMapper.deleteLabel(label.getKey());
+    vocabularyMapper.deleteLabel(vocabulary.getKey(), label.getKey());
 
     labels = vocabularyMapper.listLabels(vocabulary.getKey(), null);
     assertEquals(0, labels.size());
@@ -360,8 +387,6 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
   Vocabulary createNewEntity() {
     Vocabulary entity = new Vocabulary();
     entity.setName(TestUtils.getRandomName());
-    entity.setDefinition(
-        new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
     entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));

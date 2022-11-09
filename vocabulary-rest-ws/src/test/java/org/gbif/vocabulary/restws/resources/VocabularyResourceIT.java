@@ -15,14 +15,15 @@ package org.gbif.vocabulary.restws.resources;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.VocabularyListParams;
-import org.gbif.vocabulary.api.VocabularyView;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
@@ -61,12 +62,11 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     Vocabulary v1 = createEntity();
     v1.setNamespace(namespace);
     vocabularyClient.create(v1);
-    VocabularyView view1 = vocabularyClient.get(v1.getName());
-    assertNotNull(view1.getVocabulary().getKey());
-    assertTrue(view1.getLabelsLink().endsWith("/labels"));
+    v1 = vocabularyClient.get(v1.getName());
+    assertNotNull(v1.getKey());
 
     // list entities
-    PagingResponse<VocabularyView> vocabularies =
+    PagingResponse<Vocabulary> vocabularies =
         vocabularyClient.listVocabularies(
             VocabularyListParams.builder().namespace(namespace).build());
     assertEquals(1, vocabularies.getResults().size());
@@ -74,9 +74,8 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     // create entity
     Vocabulary v2 = createEntity();
     v2.setNamespace(namespace);
-    VocabularyView view2 = vocabularyClient.create(v2);
-    assertNotNull(view2.getVocabulary().getKey());
-    assertTrue(view2.getLabelsLink().endsWith("/labels"));
+    v2 = vocabularyClient.create(v2);
+    assertNotNull(v2.getKey());
 
     // list entities
     vocabularies =
@@ -89,8 +88,8 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
   public void exportVocabularyTest() throws IOException {
     // create entity
     Vocabulary v1 = createEntity();
-    VocabularyView vView1 = vocabularyClient.create(v1);
-    assertNotNull(vView1.getVocabulary().getKey());
+    v1 = vocabularyClient.create(v1);
+    assertNotNull(v1.getKey());
 
     Concept c1 = new Concept();
     c1.setName("C1");
@@ -127,36 +126,75 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
   }
 
   @Test
+  void definitionTest() {
+    Vocabulary v1 = createEntity();
+    v1 = vocabularyClient.create(v1);
+
+    Definition definition =
+        Definition.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+
+    Definition createdDefinition = vocabularyClient.addDefinition(v1.getName(), definition);
+    definition.setKey(createdDefinition.getKey());
+    assertTrue(definition.lenientEquals(createdDefinition));
+
+    assertEquals(
+        createdDefinition,
+        vocabularyClient.getDefinition(v1.getName(), createdDefinition.getKey()));
+
+    List<Definition> definitionList =
+        vocabularyClient.listDefinitions(v1.getName(), Collections.emptyList());
+    assertEquals(1, definitionList.size());
+    assertTrue(createdDefinition.lenientEquals(definitionList.get(0)));
+    assertEquals(createdDefinition.getKey(), definitionList.get(0).getKey());
+
+    assertEquals(
+        1,
+        vocabularyClient
+            .listDefinitions(v1.getName(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyClient
+            .listDefinitions(v1.getName(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    definition.setValue("Label2");
+    Definition updatedDefinition = vocabularyClient.updateDefinition(v1.getName(), definition);
+    assertTrue(definition.lenientEquals(updatedDefinition));
+
+    vocabularyClient.deleteDefinition(v1.getName(), updatedDefinition.getKey());
+    assertEquals(0, vocabularyClient.listDefinitions(v1.getName(), Collections.emptyList()).size());
+  }
+
+  @Test
   void labelsTest() {
     Vocabulary v1 = createEntity();
-    VocabularyView vView1 = vocabularyClient.create(v1);
+    v1 = vocabularyClient.create(v1);
 
-    Label label =
-        Label.builder()
-            .entityKey(vView1.getEntity().getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("Label")
-            .build();
+    Label label = Label.builder().language(LanguageRegion.ENGLISH).value("Label").build();
 
-    Label createdLabel = vocabularyClient.addLabel(v1.getName(), label);
-    label.setKey(createdLabel.getKey());
-    assertTrue(label.lenientEquals(createdLabel));
+    Long labelKey = vocabularyClient.addLabel(v1.getName(), label);
+    label.setKey(labelKey);
+    assertTrue(labelKey > 0);
 
-    assertEquals(createdLabel, vocabularyClient.getLabel(v1.getName(), createdLabel.getKey()));
-
-    List<Label> labelList = vocabularyClient.listLabels(v1.getName(), (LanguageRegion) null);
+    List<Label> labelList = vocabularyClient.listLabels(v1.getName(), Collections.emptyList());
     assertEquals(1, labelList.size());
-    assertTrue(createdLabel.lenientEquals(labelList.get(0)));
+    assertEquals(labelKey, labelList.get(0).getKey());
+    assertTrue(label.lenientEquals(labelList.get(0)));
 
-    assertEquals(1, vocabularyClient.listLabels(v1.getName(), LanguageRegion.ENGLISH).size());
-    assertEquals(0, vocabularyClient.listLabels(v1.getName(), LanguageRegion.SPANISH).size());
+    assertEquals(
+        1,
+        vocabularyClient
+            .listLabels(v1.getName(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyClient
+            .listLabels(v1.getName(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
 
-    label.setValue("Label2");
-    Label updatedLabel = vocabularyClient.updateLabel(v1.getName(), label);
-    assertTrue(label.lenientEquals(updatedLabel));
-
-    vocabularyClient.deleteLabel(v1.getName(), updatedLabel.getKey());
-    assertEquals(0, vocabularyClient.listLabels(v1.getName(), (LanguageRegion) null).size());
+    vocabularyClient.deleteLabel(v1.getName(), labelKey);
+    assertEquals(0, vocabularyClient.listLabels(v1.getName(), Collections.emptyList()).size());
   }
 
   @Override

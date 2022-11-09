@@ -13,14 +13,14 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
-
-import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
@@ -29,7 +29,7 @@ import javax.validation.constraints.NotBlank;
 public interface VocabularyService extends BaseService<Vocabulary> {
 
   /**
-   * Retrives a vocabulary by its name.
+   * Retreives a vocabulary by its name.
    *
    * @param name name of the vocabulary to retrieve.
    * @return vocabulary

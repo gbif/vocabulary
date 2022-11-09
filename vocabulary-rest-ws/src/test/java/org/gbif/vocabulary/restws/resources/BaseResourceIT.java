@@ -169,20 +169,19 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
     // update vocabulary
     Label label =
         Label.builder()
-            .entityKey(created.getKey())
             .language(LanguageRegion.SPANISH)
             .value("Etiqueta")
             .build();
     webClient
         .post()
-        .uri(String.format(urlEntityFormat, created.getName()) + "/labels")
+        .uri(String.format(urlEntityFormat, created.getName()) + "/label")
         .header("Authorization", BASIC_AUTH_HEADER.apply(EDITOR))
         .body(BodyInserters.fromValue(label))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
         .isCreated()
-        .expectBodyList(KeyNameResult.class);
+        .expectBodyList(Long.class);
   }
 
   @Test
@@ -320,20 +319,19 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
 
     Label label =
         Label.builder()
-            .entityKey(entity1.getKey())
             .language(LanguageRegion.SPANISH)
             .value("Label")
             .build();
     webClient
         .post()
-        .uri(String.format(urlEntityFormat, entity1.getName()) + "/labels")
+        .uri(String.format(urlEntityFormat, entity1.getName()) + "/label")
         .header("Authorization", BASIC_AUTH_HEADER.apply(EDITOR))
         .body(BodyInserters.fromValue(label))
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
         .isCreated()
-        .expectBodyList(Label.class);
+        .expectBodyList(Long.class);
 
     webClient
         .get()

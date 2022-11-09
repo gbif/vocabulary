@@ -28,6 +28,7 @@ import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.UserRoles;
@@ -50,6 +51,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,6 +74,9 @@ public class DefaultExportService implements ExportService {
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper()
           .registerModule(new JavaTimeModule())
+          .addMixIn(Vocabulary.class, VocabularyMixin.class)
+          .addMixIn(Concept.class, ConceptMixin.class)
+          .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
           .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
   private static final Pattern VERSION_PATTERN =
@@ -271,6 +276,10 @@ public class DefaultExportService implements ExportService {
     VocabularyExportView vocabularyExportView = new VocabularyExportView();
     vocabularyExportView.setVocabulary(vocabulary);
 
+    vocabulary
+        .getDefinition()
+        .forEach(d -> vocabularyExportView.getDefinition().put(d.getLanguage(), d.getValue()));
+
     List<Label> labels = vocabularyService.listLabels(vocabulary.getKey(), null);
     labels.forEach(l -> vocabularyExportView.getLabel().put(l.getLanguage(), l.getValue()));
 
@@ -280,6 +289,11 @@ public class DefaultExportService implements ExportService {
   private ConceptExportView getConceptExportView(Concept concept) {
     ConceptExportView conceptExportView = new ConceptExportView();
     conceptExportView.setConcept(concept);
+
+    // definitions
+    concept
+        .getDefinition()
+        .forEach(d -> conceptExportView.getDefinition().put(d.getLanguage(), d.getValue()));
 
     // labels
     List<Label> labels = conceptService.listLabels(concept.getKey(), null);
@@ -321,5 +335,15 @@ public class DefaultExportService implements ExportService {
     } while (!responseHidden.isEndOfRecords());
 
     return conceptExportView;
+  }
+
+  private abstract class VocabularyMixin {
+    @JsonIgnore private List<Definition> definition;
+    @JsonIgnore private List<Label> label;
+  }
+
+  private abstract class ConceptMixin {
+    @JsonIgnore private List<Definition> definition;
+    @JsonIgnore private List<Label> label;
   }
 }

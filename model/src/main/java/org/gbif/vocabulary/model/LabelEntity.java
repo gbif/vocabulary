@@ -1,41 +1,15 @@
 package org.gbif.vocabulary.model;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import org.gbif.vocabulary.model.utils.PostPersist;
-import org.gbif.vocabulary.model.utils.PrePersist;
+public interface LabelEntity extends ValueEntity {
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
+  LocalDateTime getCreated();
 
-public interface LabelEntity extends Auditable, Serializable {
+  void setCreated(LocalDateTime created);
 
-  @Null(groups = {PrePersist.class})
-  @NotNull(groups = {PostPersist.class})
-  Long getKey();
+  String getCreatedBy();
 
-  void setKey(Long key);
+  void setCreatedBy(String createdBy);
 
-  @NotNull
-  Long getEntityKey();
-
-  void setEntityKey(Long key);
-
-  @NotBlank
-  String getValue();
-
-  void setValue(String value);
-
-  @JsonIgnore
-  default LocalDateTime getDeleted() {
-    // not implemented
-    return null;
-  }
-
-  default void setDeleted(LocalDateTime deleted) {
-    // do nothing
-  }
 }

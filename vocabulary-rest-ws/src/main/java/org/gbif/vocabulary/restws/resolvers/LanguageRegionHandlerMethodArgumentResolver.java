@@ -13,6 +13,10 @@
  */
 package org.gbif.vocabulary.restws.resolvers;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.gbif.vocabulary.model.LanguageRegion;
 
 import org.springframework.core.MethodParameter;
@@ -21,11 +25,13 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+
 public class LanguageRegionHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
   @Override
   public boolean supportsParameter(MethodParameter parameter) {
-    return LanguageRegion.class.equals(parameter.getParameterType());
+    return LanguageRegion.class.equals(parameter.getParameterType()) || isList(parameter);
   }
 
   @Override
@@ -35,12 +41,27 @@ public class LanguageRegionHandlerMethodArgumentResolver implements HandlerMetho
       NativeWebRequest webRequest,
       WebDataBinderFactory binderFactory) {
     String paramName = parameter.getParameterName();
-    String locale = paramName != null ? webRequest.getParameter(paramName) : null;
 
-    if (locale == null || locale.isEmpty()) {
+    if (paramName == null) {
       return null;
     }
 
+    if (isList(parameter)) {
+      String[] locales = webRequest.getParameterMap().get(paramName);
+      if (locales == null) {
+        return null;
+      }
+      return Arrays.stream(locales).map(this::convertToLanguageRegion).collect(Collectors.toList());
+    } else {
+      String locale = webRequest.getParameter(paramName);
+      if (locale == null || locale.isEmpty()) {
+        return null;
+      }
+      return convertToLanguageRegion(locale);
+    }
+  }
+
+  private LanguageRegion convertToLanguageRegion(String locale) {
     LanguageRegion languageRegion = LanguageRegion.fromLocale(locale);
 
     if (languageRegion == LanguageRegion.UNKNOWN) {
@@ -49,7 +70,15 @@ public class LanguageRegionHandlerMethodArgumentResolver implements HandlerMetho
         throw new IllegalArgumentException("Unknown language region: " + locale);
       }
     }
-
     return languageRegion;
+  }
+
+  private boolean isList(MethodParameter parameter) {
+    return List.class.equals(parameter.getParameterType())
+        && LanguageRegion.class
+            .getName()
+            .equals(
+                ((ParameterizedTypeImpl) parameter.getGenericParameterType())
+                    .getActualTypeArguments()[0].getTypeName());
   }
 }

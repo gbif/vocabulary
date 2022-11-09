@@ -20,6 +20,9 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
   /** Vocabulary of the concept. */
   @NotNull Long vocabularyKey;
 
+  private List<Definition> definition = new ArrayList<>();
+  private List<Label> label = new ArrayList<>();
+
   /** Concept parent key in case it exists. */
   Long parentKey;
 
@@ -44,7 +47,6 @@ public class Concept extends AbstractVocabularyEntity implements LenientEquals<C
         && Objects.equals(replacedByKey, other.replacedByKey)
         && Objects.equals(deprecated, other.deprecated)
         && Objects.equals(deprecatedBy, other.deprecatedBy)
-        && Objects.equals(deleted, other.deleted)
         && Objects.equals(tags, other.tags);
   }
 }

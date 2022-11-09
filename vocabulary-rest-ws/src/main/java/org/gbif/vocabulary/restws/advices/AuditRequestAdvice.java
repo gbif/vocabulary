@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 import org.gbif.vocabulary.model.Auditable;
+import org.gbif.vocabulary.model.LabelEntity;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
@@ -43,7 +44,8 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
       Type targetType,
       @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     try {
-      return Auditable.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
+      return Auditable.class.isAssignableFrom(Class.forName(targetType.getTypeName()))
+          || LabelEntity.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
     } catch (ClassNotFoundException e) {
       log.debug("Unexpected target type", e);
       return false;
@@ -72,15 +74,25 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
       @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     // set auditable fields
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    Auditable auditableEntity = (Auditable) body;
 
-    if (auditableEntity.getCreatedBy() == null) {
-      auditableEntity.setCreatedBy(authentication.getName());
+    if (body instanceof Auditable) {
+      Auditable auditableEntity = (Auditable) body;
+      if (auditableEntity.getCreatedBy() == null) {
+        auditableEntity.setCreatedBy(authentication.getName());
+      }
+      auditableEntity.setModifiedBy(authentication.getName());
+
+      return auditableEntity;
+    } else if (body instanceof LabelEntity) {
+      LabelEntity labelEntity = (LabelEntity) body;
+      if (labelEntity.getCreatedBy() == null) {
+        labelEntity.setCreatedBy(authentication.getName());
+      }
+
+      return labelEntity;
     }
 
-    auditableEntity.setModifiedBy(authentication.getName());
-
-    return auditableEntity;
+    return body;
   }
 
   @Override

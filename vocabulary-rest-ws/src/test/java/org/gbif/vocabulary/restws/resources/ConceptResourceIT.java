@@ -13,6 +13,7 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptListParams;
 import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
@@ -220,6 +222,60 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   }
 
   @Test
+  void definitionTest() {
+    Concept c1 = createEntity();
+    ConceptView cView1 = conceptClient.create(defaultVocabularyName, c1);
+
+    Definition definition =
+        Definition.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+
+    Definition createdDefinition =
+        conceptClient.addDefinition(defaultVocabularyName, c1.getName(), definition);
+    definition.setKey(createdDefinition.getKey());
+    assertTrue(definition.lenientEquals(createdDefinition));
+
+    assertEquals(
+        createdDefinition,
+        conceptClient.getDefinition(
+            defaultVocabularyName, c1.getName(), createdDefinition.getKey()));
+
+    List<Definition> definitionList =
+        conceptClient.listDefinitions(defaultVocabularyName, c1.getName(), new ArrayList<>());
+    assertEquals(1, definitionList.size());
+    assertTrue(createdDefinition.lenientEquals(definitionList.get(0)));
+    assertEquals(createdDefinition.getKey(), definitionList.get(0).getKey());
+
+    assertEquals(
+        1,
+        conceptClient
+            .listDefinitions(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        conceptClient
+            .listDefinitions(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    definition.setValue("Label2");
+    Definition updatedDefinition =
+        conceptClient.updateDefinition(defaultVocabularyName, c1.getName(), definition);
+    assertTrue(definition.lenientEquals(updatedDefinition));
+
+    conceptClient.deleteDefinition(defaultVocabularyName, c1.getName(), updatedDefinition.getKey());
+    assertEquals(
+        0,
+        conceptClient
+            .listDefinitions(defaultVocabularyName, c1.getName(), new ArrayList<>())
+            .size());
+  }
+
+  @Test
   public void tagsTest() {
     Tag tag = new Tag();
     tag.setName("myTag");
@@ -258,46 +314,40 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     Concept c1 = createEntity();
     ConceptView cView1 = conceptClient.create(defaultVocabularyName, c1);
 
-    Label label =
-        Label.builder()
-            .entityKey(cView1.getEntity().getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("Label")
-            .build();
+    Label label = Label.builder().language(LanguageRegion.ENGLISH).value("Label").build();
 
-    Label createdLabel = conceptClient.addLabel(defaultVocabularyName, c1.getName(), label);
-    label.setKey(createdLabel.getKey());
-    assertTrue(label.lenientEquals(createdLabel));
-
-    assertEquals(
-        createdLabel,
-        conceptClient.getLabel(defaultVocabularyName, c1.getName(), createdLabel.getKey()));
+    Long labelKey = conceptClient.addLabel(defaultVocabularyName, c1.getName(), label);
+    label.setKey(labelKey);
+    assertTrue(labelKey > 0);
 
     List<Label> labelList =
-        conceptClient.listLabels(defaultVocabularyName, c1.getName(), (LanguageRegion) null);
+        conceptClient.listLabels(defaultVocabularyName, c1.getName(), Collections.emptyList());
     assertEquals(1, labelList.size());
-    assertTrue(createdLabel.lenientEquals(labelList.get(0)));
+    assertTrue(label.lenientEquals(labelList.get(0)));
+    assertEquals(labelKey, labelList.get(0).getKey());
 
     assertEquals(
         1,
         conceptClient
-            .listLabels(defaultVocabularyName, c1.getName(), LanguageRegion.ENGLISH)
+            .listLabels(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.ENGLISH))
             .size());
     assertEquals(
         0,
         conceptClient
-            .listLabels(defaultVocabularyName, c1.getName(), LanguageRegion.SPANISH)
+            .listLabels(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.SPANISH))
             .size());
 
-    label.setValue("Label2");
-    Label updatedLabel = conceptClient.updateLabel(defaultVocabularyName, c1.getName(), label);
-    assertTrue(label.lenientEquals(updatedLabel));
-
-    conceptClient.deleteLabel(defaultVocabularyName, c1.getName(), updatedLabel.getKey());
+    conceptClient.deleteLabel(defaultVocabularyName, c1.getName(), labelKey);
     assertEquals(
         0,
         conceptClient
-            .listLabels(defaultVocabularyName, c1.getName(), (LanguageRegion) null)
+            .listLabels(defaultVocabularyName, c1.getName(), Collections.emptyList())
             .size());
   }
 
@@ -306,51 +356,40 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     Concept c1 = createEntity();
     ConceptView cView1 = conceptClient.create(defaultVocabularyName, c1);
 
-    Label label =
-        Label.builder()
-            .entityKey(cView1.getEntity().getKey())
-            .language(LanguageRegion.ENGLISH)
-            .value("Label")
-            .build();
+    Label label = Label.builder().language(LanguageRegion.ENGLISH).value("Label").build();
 
-    Label createdLabel =
-        conceptClient.addAlternativeLabel(defaultVocabularyName, c1.getName(), label);
-    label.setKey(createdLabel.getKey());
-    assertTrue(label.lenientEquals(createdLabel));
-
-    assertEquals(
-        createdLabel,
-        conceptClient.getAlternativeLabel(
-            defaultVocabularyName, c1.getName(), createdLabel.getKey()));
+    Long labelKey = conceptClient.addAlternativeLabel(defaultVocabularyName, c1.getName(), label);
+    label.setKey(labelKey);
+    assertTrue(labelKey > 0);
 
     PagingResponse<Label> labelList =
         conceptClient.listAlternativeLabels(
             defaultVocabularyName, c1.getName(), null, new PagingRequest());
     assertEquals(1, labelList.getResults().size());
-    assertTrue(createdLabel.lenientEquals(labelList.getResults().get(0)));
+    assertTrue(label.lenientEquals(labelList.getResults().get(0)));
 
     assertEquals(
         1,
         conceptClient
             .listAlternativeLabels(
-                defaultVocabularyName, c1.getName(), LanguageRegion.ENGLISH, new PagingRequest())
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.ENGLISH),
+                new PagingRequest())
             .getResults()
             .size());
     assertEquals(
         0,
         conceptClient
             .listAlternativeLabels(
-                defaultVocabularyName, c1.getName(), LanguageRegion.SPANISH, new PagingRequest())
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.SPANISH),
+                new PagingRequest())
             .getResults()
             .size());
 
-    label.setValue("Label2");
-    Label updatedLabel =
-        conceptClient.updateAlternativeLabel(defaultVocabularyName, c1.getName(), label);
-    assertTrue(label.lenientEquals(updatedLabel));
-
-    conceptClient.deleteAlternativeLabel(
-        defaultVocabularyName, c1.getName(), updatedLabel.getKey());
+    conceptClient.deleteAlternativeLabel(defaultVocabularyName, c1.getName(), labelKey);
     assertEquals(
         0,
         conceptClient
@@ -364,29 +403,18 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     Concept c1 = createEntity();
     ConceptView cView1 = conceptClient.create(defaultVocabularyName, c1);
 
-    HiddenLabel label =
-        HiddenLabel.builder().entityKey(cView1.getEntity().getKey()).value("Label").build();
+    HiddenLabel label = HiddenLabel.builder().value("Label").build();
 
-    HiddenLabel createdLabel =
-        conceptClient.addHiddenLabel(defaultVocabularyName, c1.getName(), label);
-    label.setKey(createdLabel.getKey());
-    assertTrue(label.lenientEquals(createdLabel));
-
-    assertEquals(
-        createdLabel,
-        conceptClient.getHiddenLabel(defaultVocabularyName, c1.getName(), createdLabel.getKey()));
+    Long labelKey = conceptClient.addHiddenLabel(defaultVocabularyName, c1.getName(), label);
+    label.setKey(labelKey);
+    assertTrue(labelKey > 0);
 
     PagingResponse<HiddenLabel> labelList =
         conceptClient.listHiddenLabels(defaultVocabularyName, c1.getName(), new PagingRequest());
     assertEquals(1, labelList.getResults().size());
-    assertTrue(createdLabel.lenientEquals(labelList.getResults().get(0)));
+    assertTrue(label.lenientEquals(labelList.getResults().get(0)));
 
-    label.setValue("Label2");
-    HiddenLabel updatedLabel =
-        conceptClient.updateHiddenLabel(defaultVocabularyName, c1.getName(), label);
-    assertTrue(label.lenientEquals(updatedLabel));
-
-    conceptClient.deleteHiddenLabel(defaultVocabularyName, c1.getName(), updatedLabel.getKey());
+    conceptClient.deleteHiddenLabel(defaultVocabularyName, c1.getName(), labelKey);
     assertEquals(
         0,
         conceptClient

@@ -72,6 +72,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -433,7 +434,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                     "Location",
                     endsWith(
                         getBasePath() + "/" + vocabulary.getName() + "/definition/" + TEST_KEY)))
-        .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
+        .andExpect(jsonPath("key", is(TEST_KEY.intValue())))
         .andDo(documentFields(Label.class));
   }
 
@@ -456,7 +457,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("key", is(definition.getKey().intValue())))
-        .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
+        .andExpect(jsonPath("language", is(definition.getLanguage().getLocale())))
         .andExpect(jsonPath("value", is(definition.getValue())))
         .andDo(documentFields(Label.class));
   }
@@ -547,7 +548,7 @@ public class VocabularyTestDoc extends DocumentationBaseTest {
                 .string(
                     "Location",
                     endsWith(getBasePath() + "/" + vocabulary.getName() + "/label/" + TEST_KEY)))
-        .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
+        .andExpect(content().string(TEST_KEY.toString()))
         .andDo(documentFields(Label.class));
   }
 

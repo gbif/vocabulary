@@ -65,6 +65,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -352,7 +353,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
                             concept.getName(),
                             "definition",
                             TEST_KEY.toString()))))
-        .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
+        .andExpect(jsonPath("key", is(TEST_KEY.intValue())))
         .andDo(documentFields(Definition.class));
   }
 
@@ -375,7 +376,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
                 .with(authorizationDocumentation()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("key", is(definition.getKey().intValue())))
-        .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
+        .andExpect(jsonPath("language", is(definition.getLanguage().getLocale())))
         .andExpect(jsonPath("value", is(definition.getValue())))
         .andDo(documentFields(Definition.class));
   }
@@ -501,7 +502,7 @@ public class ConceptTestDoc extends DocumentationBaseTest {
                     endsWith(
                         String.join(
                             "/", getBasePath(), concept.getName(), path, TEST_KEY.toString()))))
-        .andExpect(jsonPath("entityKey", is(TEST_KEY.intValue())))
+        .andExpect(content().string(TEST_KEY.toString()))
         .andDo(documentFields(label.getClass()));
   }
 

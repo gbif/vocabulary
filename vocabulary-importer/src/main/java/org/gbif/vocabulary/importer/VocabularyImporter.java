@@ -32,10 +32,10 @@ import java.util.stream.Stream;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.ConceptListParams;
 import org.gbif.vocabulary.api.ConceptView;
-import org.gbif.vocabulary.api.VocabularyView;
 import org.gbif.vocabulary.client.ConceptClient;
 import org.gbif.vocabulary.client.VocabularyClient;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
@@ -74,17 +74,20 @@ public class VocabularyImporter {
     // create vocabulary
     Vocabulary vocab = new Vocabulary();
     vocab.setName(vocabName);
-    if (!Strings.isNullOrEmpty(vocabDefinitionEN)) {
-      vocab.getDefinition().put(LanguageRegion.ENGLISH, vocabDefinitionEN);
-    }
-    VocabularyView createdVocab = vocabularyClient.create(vocab);
-    log.info("Created vocabulary {} with key {}", vocabName, createdVocab.getVocabulary().getKey());
+    Vocabulary createdVocab = vocabularyClient.create(vocab);
+    log.info("Created vocabulary {} with key {}", vocabName, createdVocab.getKey());
 
-    Label vocabLabel =
+    if (!Strings.isNullOrEmpty(vocabDefinitionEN)) {
+      vocabularyClient.addDefinition(
+          vocabName,
+          Definition.builder().language(LanguageRegion.ENGLISH).value(vocabDefinitionEN).build());
+    }
+
+    Long vocabLabelKey =
         vocabularyClient.addLabel(
             vocabName,
             Label.builder().language(LanguageRegion.ENGLISH).value(vocabLabelEN).build());
-    log.info("Added vocabulary label with key {}", vocabLabel.getKey());
+    log.info("Added vocabulary label with key {}", vocabLabelKey);
 
     // create the concepts
     Map<String, Concept> conceptsMap = new HashMap<>();
@@ -119,8 +122,7 @@ public class VocabularyImporter {
                 // create concept
                 try {
                   ConceptView created =
-                      conceptClient.create(
-                          createdVocab.getVocabulary().getName(), conceptData.concept);
+                      conceptClient.create(createdVocab.getName(), conceptData.concept);
                   conceptsMap.put(created.getConcept().getName(), created.getConcept());
                   log.info(
                       "Created concept {} with key {}",
@@ -131,6 +133,8 @@ public class VocabularyImporter {
                   log.error("Cannot create concept {}", concept.getName(), ex);
                 }
 
+                conceptData.definitions.forEach(
+                    d -> addDefinition(vocabName, conceptName, d, errors));
                 conceptData.labels.forEach(lab -> addLabel(vocabName, conceptName, lab, errors));
                 conceptData.alternativeLabels.forEach(
                     lab -> addAlternativeLabel(vocabName, conceptName, lab, errors));
@@ -215,6 +219,7 @@ public class VocabularyImporter {
 
     List<Label> labels = new ArrayList<>();
     List<Label> alternativeLabels = new ArrayList<>();
+    List<Definition> definitions = new ArrayList<>();
 
     // parent
     if (values.length > 1 && !Strings.isNullOrEmpty(values[1])) {
@@ -261,7 +266,8 @@ public class VocabularyImporter {
 
     // add EN definitions
     if (values.length > 6 && !Strings.isNullOrEmpty(values[6])) {
-      concept.getDefinition().put(LanguageRegion.ENGLISH, values[6].trim());
+      definitions.add(
+          Definition.builder().language(LanguageRegion.ENGLISH).value(values[6].trim()).build());
     }
 
     // add sameAs URIs
@@ -294,7 +300,25 @@ public class VocabularyImporter {
       concept.setExternalDefinitions(new ArrayList<>(externalDefinitions));
     }
 
-    return ConceptData.of(concept, labels, alternativeLabels, null);
+    return ConceptData.of(concept, definitions, labels, alternativeLabels, null);
+  }
+
+  private void addDefinition(
+      String vocabName, String conceptName, Definition definition, List<Error> errors) {
+    try {
+      conceptClient.addDefinition(vocabName, conceptName, definition);
+    } catch (Exception ex) {
+      errors.add(
+          Error.of(
+              "Error adding definition "
+                  + definition.getLanguage()
+                  + "->"
+                  + definition.getValue()
+                  + " in concept "
+                  + conceptName,
+              ex));
+      log.error("Couldn't add definition {} in concept {}", definition, conceptName, ex);
+    }
   }
 
   private void addLabel(String vocabName, String conceptName, Label label, List<Error> errors) {
@@ -380,6 +404,7 @@ public class VocabularyImporter {
   @AllArgsConstructor(staticName = "of")
   private static class ConceptData {
     private Concept concept;
+    private List<Definition> definitions;
     private List<Label> labels;
     private List<Label> alternativeLabels;
     private List<HiddenLabel> hiddenLabels;

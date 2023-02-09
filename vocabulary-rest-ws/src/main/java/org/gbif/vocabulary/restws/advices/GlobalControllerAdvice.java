@@ -83,7 +83,7 @@ public class GlobalControllerAdvice {
 
   @ExceptionHandler(UnsupportedOperationException.class)
   public ResponseEntity<Object> handleUnsupportedOperationException(
-      WebRequest request, IOException ex) {
+      WebRequest request, UnsupportedOperationException ex) {
     return buildResponse(
         request, HttpStatus.FORBIDDEN, UNSUPPORTED_OPERATION_ERROR, ex.getMessage());
   }

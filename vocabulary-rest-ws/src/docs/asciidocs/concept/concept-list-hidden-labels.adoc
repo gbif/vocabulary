@@ -1,5 +1,5 @@
 :sourcedir: {snippets}/concept-test-doc/list-hidden-labels-test
-=== List Labels
+=== List Hidden Labels
 
 include::{sourcedir}/auto-method-path.adoc[]
 

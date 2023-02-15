@@ -1,5 +1,5 @@
 :sourcedir: {snippets}/concept-test-doc/list-alternative-labels-test
-=== List Labels
+=== List Alternative Labels
 
 include::{sourcedir}/auto-method-path.adoc[]
 

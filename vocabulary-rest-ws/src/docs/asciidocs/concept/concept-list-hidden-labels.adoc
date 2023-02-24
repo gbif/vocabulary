@@ -9,10 +9,6 @@ include::{sourcedir}/auto-description.adoc[]
 
 include::{sourcedir}/auto-path-parameters.adoc[]
 
-==== Query parameters
-
-include::{sourcedir}/request-parameters.adoc[]
-
 ==== Example request
 
 include::{sourcedir}/curl-request.adoc[]

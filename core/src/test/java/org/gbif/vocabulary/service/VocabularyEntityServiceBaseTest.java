@@ -13,18 +13,18 @@
  */
 package org.gbif.vocabulary.service;
 
-import java.time.LocalDateTime;
-
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
+
+import java.time.LocalDateTime;
+
+import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
-
-import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

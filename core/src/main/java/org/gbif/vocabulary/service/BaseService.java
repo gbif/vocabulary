@@ -13,12 +13,12 @@
  */
 package org.gbif.vocabulary.service;
 
-import java.util.List;
-
 import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.VocabularyEntity;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;

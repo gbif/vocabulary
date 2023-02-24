@@ -13,9 +13,9 @@
  */
 package org.gbif.vocabulary.model.search;
 
-import java.util.List;
-
 import org.gbif.vocabulary.model.Label;
+
+import java.util.List;
 
 import lombok.Data;
 

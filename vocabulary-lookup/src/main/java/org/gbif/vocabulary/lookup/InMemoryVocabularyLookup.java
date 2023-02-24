@@ -268,13 +268,19 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       addNameToCache(conceptExport.getConcept());
 
       // add labels to the cache
-      conceptExport.getLabel().forEach((key, value) -> addLabelToCache(value, conceptExport.getConcept(), key));
+      conceptExport
+          .getLabel()
+          .forEach((key, value) -> addLabelToCache(value, conceptExport.getConcept(), key));
 
       // add alternative labels to the cache
-      conceptExport.getAlternativeLabels().forEach((key, value) -> addLabelsToCache(value, conceptExport.getConcept(), key));
+      conceptExport
+          .getAlternativeLabels()
+          .forEach((key, value) -> addLabelsToCache(value, conceptExport.getConcept(), key));
 
       // add hidden labels to the cache
-      conceptExport.getHiddenLabels().forEach(label -> addHiddenLabelToCache(label, conceptExport.getConcept()));
+      conceptExport
+          .getHiddenLabels()
+          .forEach(label -> addHiddenLabelToCache(label, conceptExport.getConcept()));
     }
   }
 

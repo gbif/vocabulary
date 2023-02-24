@@ -13,12 +13,13 @@
  */
 package org.gbif.vocabulary.api;
 
+import org.gbif.vocabulary.model.Concept;
+
 import java.io.Serializable;
 import java.util.List;
 
-import org.gbif.vocabulary.model.Concept;
-
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -56,7 +56,7 @@
   </sql>
 
   <sql id="FULL_TEXT">
-    JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(quote_literal(#{params.query}))),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
     OR EXISTS(
     SELECT vd.key
     FROM vocabulary_definition vd

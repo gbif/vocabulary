@@ -130,6 +130,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     conceptMapper.update(concept3);
 
     assertList(ConceptSearchParams.builder().query("concept1").key(concept1.getKey()).build(), 1);
+    assertList(ConceptSearchParams.builder().query("(concept1)").key(concept1.getKey()).build(), 1);
     assertList(ConceptSearchParams.builder().query("concept1").key(Long.MAX_VALUE).build(), 0);
     assertList(ConceptSearchParams.builder().key(concept1.getKey()).build(), 1);
     assertList(ConceptSearchParams.builder().query("conc").build(), 3);

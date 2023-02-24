@@ -13,16 +13,16 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
-import java.util.List;
-
 import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
-import org.apache.ibatis.annotations.Param;
+import java.util.List;
 
 import javax.annotation.Nullable;
+
+import org.apache.ibatis.annotations.Param;
 
 /**
  * Base mappers for {@link VocabularyEntity} entities.
@@ -46,9 +46,11 @@ public interface BaseMapper<T extends VocabularyEntity> {
 
   boolean isDeprecated(@Param("key") long key);
 
-  void addDefinition(@Param("entityKey") long entityKey, @Param("definition") Definition definition);
+  void addDefinition(
+      @Param("entityKey") long entityKey, @Param("definition") Definition definition);
 
-  void updateDefinition(@Param("entityKey") long entityKey, @Param("definition") Definition definition);
+  void updateDefinition(
+      @Param("entityKey") long entityKey, @Param("definition") Definition definition);
 
   void deleteDefinition(@Param("entityKey") long entityKey, @Param("key") long key);
 

@@ -13,12 +13,12 @@
  */
 package org.gbif.vocabulary.model;
 
+import org.gbif.vocabulary.model.utils.PostPersist;
+import org.gbif.vocabulary.model.utils.PrePersist;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
-
-import org.gbif.vocabulary.model.utils.PostPersist;
-import org.gbif.vocabulary.model.utils.PrePersist;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

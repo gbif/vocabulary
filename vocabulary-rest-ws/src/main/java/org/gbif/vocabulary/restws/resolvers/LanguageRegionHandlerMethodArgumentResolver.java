@@ -13,11 +13,11 @@
  */
 package org.gbif.vocabulary.restws.resolvers;
 
+import org.gbif.vocabulary.model.LanguageRegion;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.gbif.vocabulary.model.LanguageRegion;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;

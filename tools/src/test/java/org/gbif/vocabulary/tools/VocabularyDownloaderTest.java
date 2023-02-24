@@ -36,9 +36,7 @@ public class VocabularyDownloaderTest {
             "http://api.gbif-dev.org/v1/", "LifeStage");
 
     Export export =
-        new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .readValue(in, Export.class);
+        new ObjectMapper().registerModule(new JavaTimeModule()).readValue(in, Export.class);
     assertNotNull(export);
   }
 }

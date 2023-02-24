@@ -13,12 +13,6 @@
  */
 package org.gbif.vocabulary.service;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
@@ -26,6 +20,14 @@ import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,8 +44,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.sql.DataSource;
 
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertDeprecated;

@@ -13,11 +13,6 @@
  */
 package org.gbif.vocabulary.restws.resources.mock;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.ConceptView;
@@ -31,6 +26,11 @@ import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.restws.resources.ConceptResource;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -88,7 +88,8 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
     List<ConceptView> resultList =
-        OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<ConceptView>>() {});
+        OBJECT_MAPPER.convertValue(
+            rootNode.get("results"), new TypeReference<List<ConceptView>>() {});
 
     assertEquals(concepts.size(), resultList.size());
   }

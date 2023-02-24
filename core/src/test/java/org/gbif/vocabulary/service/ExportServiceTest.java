@@ -13,14 +13,6 @@
  */
 package org.gbif.vocabulary.service;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
@@ -33,6 +25,14 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.export.Export;
 import org.gbif.vocabulary.model.export.VocabularyExportView;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

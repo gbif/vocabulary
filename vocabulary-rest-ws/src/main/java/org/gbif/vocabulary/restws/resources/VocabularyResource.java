@@ -13,6 +13,12 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -20,6 +26,8 @@ import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
 import org.gbif.vocabulary.api.VocabularyListParams;
 import org.gbif.vocabulary.api.VocabularyReleaseParams;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
@@ -27,18 +35,12 @@ import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.config.ExportConfig;
+import org.gbif.vocabulary.restws.config.WsConfig;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -56,12 +58,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @Slf4j
@@ -73,15 +77,18 @@ public class VocabularyResource {
   private final ExportService exportService;
   private final ExportConfig exportConfig;
   private final MessagePublisher messagePublisher;
+  private final WsConfig wsConfig;
 
   VocabularyResource(
       VocabularyService vocabularyService,
       ExportService exportService,
       ExportConfig exportConfig,
+      WsConfig wsConfig,
       @Autowired(required = false) MessagePublisher messagePublisher) {
     this.vocabularyService = vocabularyService;
     this.exportService = exportService;
     this.exportConfig = exportConfig;
+    this.wsConfig = wsConfig;
     this.messagePublisher = messagePublisher;
   }
 
@@ -130,11 +137,8 @@ public class VocabularyResource {
   public void deprecate(
       @PathVariable("name") String vocabularyName,
       @RequestBody DeprecateVocabularyAction deprecateVocabularyAction) {
-    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
-
     vocabularyService.deprecate(
-        vocabulary.getKey(),
+        getVocabularyByName(vocabularyName).getKey(),
         deprecateVocabularyAction.getDeprecatedBy(),
         deprecateVocabularyAction.getReplacementKey(),
         deprecateVocabularyAction.isDeprecateConcepts());
@@ -145,8 +149,7 @@ public class VocabularyResource {
       @PathVariable("name") String vocabularyName,
       @RequestParam(value = "restoreDeprecatedConcepts", required = false)
           boolean restoreDeprecatedConcepts) {
-    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
 
     vocabularyService.restoreDeprecated(vocabulary.getKey(), restoreDeprecatedConcepts);
   }
@@ -252,9 +255,70 @@ public class VocabularyResource {
 
   @DeleteMapping("{name}")
   public void deleteVocabulary(@PathVariable("name") String vocabularyName) {
+    vocabularyService.deleteVocabulary(getVocabularyByName(vocabularyName).getKey());
+  }
+
+  @GetMapping("{name}/definition")
+  public List<Definition> listDefinitions(
+      @PathVariable("name") String vocabularyName, List<LanguageRegion> lang) {
+    return vocabularyService.listDefinitions(getVocabularyByName(vocabularyName).getKey(), lang);
+  }
+
+  @GetMapping("{name}/definition/{key}")
+  public Definition getDefinition(
+      @PathVariable("name") String vocabularyName, @PathVariable("key") long definitionKey) {
+    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
+    return vocabularyService.getDefinition(vocabulary.getKey(), definitionKey);
+  }
+
+  @PostMapping("{name}/definition")
+  public Definition addDefinition(
+      @PathVariable("name") String vocabularyName, @RequestBody Definition definition) {
+    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
+    long key = vocabularyService.addDefinition(vocabulary.getKey(), definition);
+    return vocabularyService.getDefinition(vocabulary.getKey(), key);
+  }
+
+  @PutMapping("{name}/definition/{key}")
+  public Definition updateDefinition(
+      @PathVariable("name") String vocabularyName,
+      @PathVariable("key") long definitionKey,
+      @RequestBody Definition definition) {
+    checkArgument(
+        definitionKey == definition.getKey(), "Definition key doesn't match with the path");
+    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
+    vocabularyService.updateDefinition(vocabulary.getKey(), definition);
+    return vocabularyService.getDefinition(vocabulary.getKey(), definitionKey);
+  }
+
+  @DeleteMapping("{name}/definition/{key}")
+  public void deleteDefinition(
+      @PathVariable("name") String vocabularyName, @PathVariable("key") long key) {
+    Vocabulary vocabulary = getVocabularyByName(vocabularyName);
+    vocabularyService.deleteDefinition(vocabulary.getKey(), key);
+  }
+
+  @GetMapping("{name}/label")
+  public List<Label> listLabels(
+      @PathVariable("name") String vocabularyName, List<LanguageRegion> lang) {
+    return vocabularyService.listLabels(getVocabularyByName(vocabularyName).getKey(), lang);
+  }
+
+  @PostMapping("{name}/label")
+  public Long addLabel(@PathVariable("name") String vocabularyName, @RequestBody Label label) {
+    return vocabularyService.addLabel(getVocabularyByName(vocabularyName).getKey(), label);
+  }
+
+  @DeleteMapping("{name}/label/{key}")
+  public void deleteLabel(
+      @PathVariable("name") String vocabularyName, @PathVariable("key") long key) {
+    vocabularyService.deleteLabel(getVocabularyByName(vocabularyName).getKey(), key);
+  }
+
+  @NotNull
+  private Vocabulary getVocabularyByName(String vocabularyName) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
-
-    vocabularyService.deleteVocabulary(vocabulary.getKey());
+    return vocabulary;
   }
 }

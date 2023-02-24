@@ -13,23 +13,26 @@
  */
 package org.gbif.vocabulary.service;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.UserRoles;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
+
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.export.Export;
+import org.gbif.vocabulary.model.export.VocabularyExportView;
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +63,19 @@ public class ExportServiceTest extends MockServiceBaseTest {
 
   @Test
   public void exportVocabularyTest() throws IOException {
+    VocabularyExportView v = new VocabularyExportView();
+    Vocabulary voc = new Vocabulary();
+    Definition definition =
+        Definition.builder().language(LanguageRegion.ENGLISH).value("def").build();
+    definition.setLanguage(LanguageRegion.ENGLISH);
+    definition.setValue("v");
+    voc.setDefinition(Collections.singletonList(definition));
+    v.setVocabulary(voc);
+    v.setDefinition(Collections.singletonMap(LanguageRegion.ENGLISH, "f"));
+
+    ObjectMapper om = new ObjectMapper();
+    System.out.println(om.writeValueAsString(v));
+
     final String vocabularyName = "vocab";
     mockVocabulary(vocabularyName);
 
@@ -68,50 +84,88 @@ public class ExportServiceTest extends MockServiceBaseTest {
     assertNotNull(path);
     assertTrue(path.getFileName().toString().startsWith(vocabularyName));
 
-    VocabularyExport export = OBJECT_MAPPER.readValue(path.toFile(), VocabularyExport.class);
-    assertEquals(export.getVocabulary().getName(), vocabularyName);
-    assertEquals(3, export.getConcepts().size());
+    Export export = OBJECT_MAPPER.readValue(path.toFile(), Export.class);
+    assertEquals(export.getVocabularyExport().getVocabulary().getName(), vocabularyName);
+    assertEquals(3, export.getConceptExports().size());
     assertNotNull(export.getMetadata().getCreatedDate());
   }
 
   private void mockVocabulary(String vocabularyName) {
     Vocabulary vocabulary = new Vocabulary();
+    vocabulary.setKey(1L);
     vocabulary.setName(vocabularyName);
 
     Concept c1 = new Concept();
+    c1.setKey(1L);
     c1.setName("c1");
     c1.setVocabularyKey(vocabulary.getKey());
     c1.setCreated(LocalDateTime.now());
 
     // labels
-    Map<LanguageRegion, String> labels = new HashMap<>();
-    labels.put(LanguageRegion.ENGLISH, "Label");
-    labels.put(LanguageRegion.SPANISH, "Etiqueta");
-    c1.setLabel(labels);
+    List<Label> c1Labels = new ArrayList<>();
+    c1Labels.add(Label.builder().language(LanguageRegion.ENGLISH).value("Label").build());
+    c1Labels.add(Label.builder().language(LanguageRegion.SPANISH).value("Etiqueta").build());
 
     // alternative labels
-    Map<LanguageRegion, Set<String>> alternativeLabels = new HashMap<>();
-    alternativeLabels.put(
-        LanguageRegion.ENGLISH, new HashSet<>(Arrays.asList("label2", "label3", "label4")));
-    alternativeLabels.put(LanguageRegion.SPANISH, new HashSet<>(Arrays.asList("label5", "label6")));
-    c1.setAlternativeLabels(alternativeLabels);
+    List<Label> c1AlternativeLabels = new ArrayList<>();
+    c1AlternativeLabels.add(
+        Label.builder().language(LanguageRegion.ENGLISH).value("label2").build());
+    c1AlternativeLabels.add(
+        Label.builder().language(LanguageRegion.ENGLISH).value("label3").build());
+    c1AlternativeLabels.add(
+        Label.builder().language(LanguageRegion.ENGLISH).value("label4").build());
+    c1AlternativeLabels.add(
+        Label.builder().language(LanguageRegion.SPANISH).value("label5").build());
+    c1AlternativeLabels.add(
+        Label.builder().language(LanguageRegion.SPANISH).value("label6").build());
 
     // hidden labels
-    c1.setHiddenLabels(new HashSet<>(Arrays.asList("labl2", "labl3", "labl4", "labl5", "labl6")));
+    List<HiddenLabel> c1HiddenLabels = new ArrayList<>();
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl2").build());
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl3").build());
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl4").build());
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl5").build());
+    c1HiddenLabels.add(HiddenLabel.builder().value("labl6").build());
 
     Concept c2 = new Concept();
+    c2.setKey(2L);
     c2.setName("c2");
     c2.setVocabularyKey(vocabulary.getKey());
-    c2.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
+    List<Label> c2Labels = new ArrayList<>();
+    c2Labels.add(Label.builder().language(LanguageRegion.ENGLISH).value("Label").build());
 
     Concept c3 = new Concept();
+    c3.setKey(3L);
     c3.setName("c3");
     c3.setVocabularyKey(vocabulary.getKey());
-    c3.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
+    List<Label> c3Labels = new ArrayList<>();
+    c3Labels.add(Label.builder().language(LanguageRegion.ENGLISH).value("Label").build());
 
     when(vocabularyService.getByName(vocabularyName)).thenReturn(vocabulary);
     when(conceptService.list(any(), any()))
         .thenReturn(new PagingResponse<>(0, 100, 3L, Arrays.asList(c1, c2, c3)));
+    when(conceptService.listLabels(c1.getKey(), null)).thenReturn(c1Labels);
+    when(conceptService.listAlternativeLabels(c1.getKey(), null, new PagingRequest(0, 1000)))
+        .thenReturn(
+            new PagingResponse<>(
+                0L,
+                c1AlternativeLabels.size(),
+                (long) c1AlternativeLabels.size(),
+                c1AlternativeLabels));
+    when(conceptService.listHiddenLabels(c1.getKey(), new PagingRequest(0, 1000)))
+        .thenReturn(
+            new PagingResponse<>(
+                0L, c1HiddenLabels.size(), (long) c1HiddenLabels.size(), c1HiddenLabels));
+    when(conceptService.listLabels(c2.getKey(), null)).thenReturn(c2Labels);
+    when(conceptService.listAlternativeLabels(c2.getKey(), null, new PagingRequest(0, 1000)))
+        .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
+    when(conceptService.listHiddenLabels(c2.getKey(), new PagingRequest(0, 1000)))
+        .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
+    when(conceptService.listLabels(c3.getKey(), null)).thenReturn(c3Labels);
+    when(conceptService.listAlternativeLabels(c3.getKey(), null, new PagingRequest(0, 1000)))
+        .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
+    when(conceptService.listHiddenLabels(c3.getKey(), new PagingRequest(0, 1000)))
+        .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
   }
 
   @WithMockUser

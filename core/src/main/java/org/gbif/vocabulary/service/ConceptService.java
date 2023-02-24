@@ -13,19 +13,23 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /** Services for a {@link Concept}. */
 public interface ConceptService extends BaseService<Concept> {
@@ -132,4 +136,17 @@ public interface ConceptService extends BaseService<Concept> {
    * @return list of {@link Tag}
    */
   List<Tag> listTags(long conceptKey);
+
+  long addAlternativeLabel(long entityKey, @NotNull @Valid Label label);
+
+  void deleteAlternativeLabel(long entityKey, long key);
+
+  PagingResponse<Label> listAlternativeLabels(
+      long entityKey, @Nullable List<LanguageRegion> languageRegions, @Nullable Pageable page);
+
+  long addHiddenLabel(long entityKey, @NotNull @Valid HiddenLabel label);
+
+  void deleteHiddenLabel(long entityKey, long key);
+
+  PagingResponse<HiddenLabel> listHiddenLabels(long entityKey, @Nullable Pageable page);
 }

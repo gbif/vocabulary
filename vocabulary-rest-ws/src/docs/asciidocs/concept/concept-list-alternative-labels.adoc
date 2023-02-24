@@ -1,0 +1,22 @@
+:sourcedir: {snippets}/concept-test-doc/list-alternative-labels-test
+=== List Alternative Labels
+
+include::{sourcedir}/auto-method-path.adoc[]
+
+include::{sourcedir}/auto-description.adoc[]
+
+==== Path parameters
+
+include::{sourcedir}/auto-path-parameters.adoc[]
+
+==== Query parameters
+
+include::{sourcedir}/request-parameters.adoc[]
+
+==== Example request
+
+include::{sourcedir}/curl-request.adoc[]
+
+==== Example response
+
+include::{sourcedir}/http-response.adoc[]

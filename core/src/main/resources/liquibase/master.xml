@@ -11,5 +11,7 @@
   <include file="liquibase/005-tags.xml" />
   <include file="liquibase/006-constraint-names-format.xml" />
   <include file="liquibase/007-dictionary_without_stop_words.xml" />
+  <include file="liquibase/008-labels-definition-tables.xml" />
+  <include file="liquibase/009-remove-deleted-field.xml" />
 
 </databaseChangeLog>

@@ -13,18 +13,18 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.time.LocalDateTime;
+
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.VocabularyEntity;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
-
-import java.time.LocalDateTime;
-
-import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
+
+import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -89,7 +89,6 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
     T entityDB = createNewEntity("e1");
     entityDB.setKey(TEST_KEY);
     entityDB.setKey(TEST_KEY);
-    entityDB.setDeleted(LocalDateTime.now());
 
     // mock
     when(getMapper().get(TEST_KEY)).thenReturn(entityDB);
@@ -98,37 +97,6 @@ abstract class VocabularyEntityServiceBaseTest<T extends VocabularyEntity>
     BeanUtils.copyProperties(entityDB, newEntity);
     newEntity.setName("e2");
     assertThrows(IllegalArgumentException.class, () -> getService().update(newEntity));
-  }
-
-  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
-  @Test
-  public void updateDeletedEntityTest() {
-    T deletedEntity = createNewEntity("e1");
-    deletedEntity.setKey(TEST_KEY);
-    deletedEntity.setKey(TEST_KEY);
-    deletedEntity.setDeleted(LocalDateTime.now());
-
-    // mock
-    when(getMapper().get(TEST_KEY)).thenReturn(deletedEntity);
-
-    T newEntity = createNewEntity("name");
-    BeanUtils.copyProperties(deletedEntity, newEntity);
-    assertThrows(IllegalArgumentException.class, () -> getService().update(newEntity));
-  }
-
-  @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
-  @Test
-  public void deletingWhenUpdatingTest() {
-    T entityDB = createNewEntity("e1");
-    entityDB.setKey(TEST_KEY);
-    T updatedEntity = createNewEntity("e1");
-    BeanUtils.copyProperties(entityDB, updatedEntity);
-    updatedEntity.setDeleted(LocalDateTime.now());
-
-    // mock
-    when(getMapper().get(TEST_KEY)).thenReturn(entityDB);
-
-    assertThrows(IllegalArgumentException.class, () -> getService().update(updatedEntity));
   }
 
   @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)

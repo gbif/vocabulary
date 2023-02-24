@@ -13,26 +13,30 @@
  */
 package org.gbif.vocabulary.api;
 
-import org.gbif.vocabulary.model.Concept;
-
 import java.io.Serializable;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import org.gbif.vocabulary.model.Concept;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /** Custom view to represent a {@link Concept} plus some additional information. */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@EqualsAndHashCode
-public class ConceptView implements Serializable {
+@Data
+@NoArgsConstructor
+public class ConceptView implements Serializable, EntityView<Concept> {
 
   @JsonUnwrapped private Concept concept;
   private List<String> parents;
   private Integer childrenCount;
   private List<String> children;
+
+  /** Indicates alternative labels commonly associated to the concept. */
+  private String alternativeLabelsLink;
+
+  /** Indicates hidden labels commonly associated to the concept. */
+  private String hiddenLabelsLink;
 
   public ConceptView(Concept concept) {
     this.concept = concept;
@@ -77,5 +81,20 @@ public class ConceptView implements Serializable {
   public ConceptView setChildren(List<String> children) {
     this.children = children;
     return this;
+  }
+
+  public ConceptView setAlternativeLabelsLink(String alternativeLabelsLink) {
+    this.alternativeLabelsLink = alternativeLabelsLink;
+    return this;
+  }
+
+  public ConceptView setHiddenLabelsLink(String hiddenLabelsLink) {
+    this.hiddenLabelsLink = hiddenLabelsLink;
+    return this;
+  }
+
+  @Override
+  public Concept getEntity() {
+    return concept;
   }
 }

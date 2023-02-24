@@ -13,17 +13,21 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.VocabularyListParams;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.export.VocabularyExport;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
+
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.api.VocabularyListParams;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.export.Export;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -36,6 +40,7 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** IT for the {@link VocabularyResource}. */
 @ContextConfiguration(initializers = {VocabularyResourceIT.ContexInitializer.class})
@@ -50,7 +55,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
   }
 
   @Test
-  void listTest() {
+  public void listTest() {
     final String namespace = "listns";
 
     // create entity
@@ -58,6 +63,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     v1.setNamespace(namespace);
     vocabularyClient.create(v1);
     v1 = vocabularyClient.get(v1.getName());
+    assertNotNull(v1.getKey());
 
     // list entities
     PagingResponse<Vocabulary> vocabularies =
@@ -88,13 +94,13 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     Concept c1 = new Concept();
     c1.setName("C1");
     c1.setVocabularyKey(v1.getKey());
-    c1 = conceptClient.create(v1.getName(), c1);
+    ConceptView cView1 = conceptClient.create(v1.getName(), c1);
 
     byte[] bytesResponse = vocabularyClient.exportVocabulary(v1.getName());
-    VocabularyExport export = OBJECT_MAPPER.readValue(bytesResponse, VocabularyExport.class);
+    Export export = OBJECT_MAPPER.readValue(bytesResponse, Export.class);
     assertNotNull(export.getMetadata().getCreatedDate());
-    assertEquals(v1.getName(), export.getVocabulary().getName());
-    assertEquals(1, export.getConcepts().size());
+    assertEquals(v1.getName(), export.getVocabularyExport().getVocabulary().getName());
+    assertEquals(1, export.getConceptExports().size());
 
     // test the headers in the response
     webClient
@@ -108,7 +114,7 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
   }
 
   @Test
-  void deleteVocabularyTest() {
+  public void deleteVocabularyTest() {
     // create entity
     Vocabulary v1 = createEntity();
     vocabularyClient.create(v1);
@@ -119,14 +125,84 @@ public class VocabularyResourceIT extends BaseResourceIT<Vocabulary> {
     assertNull(vocabularyClient.get(v1.getName()));
   }
 
+  @Test
+  void definitionTest() {
+    Vocabulary v1 = createEntity();
+    v1 = vocabularyClient.create(v1);
+
+    Definition definition =
+        Definition.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+
+    Definition createdDefinition = vocabularyClient.addDefinition(v1.getName(), definition);
+    definition.setKey(createdDefinition.getKey());
+    assertTrue(definition.lenientEquals(createdDefinition));
+
+    assertEquals(
+        createdDefinition,
+        vocabularyClient.getDefinition(v1.getName(), createdDefinition.getKey()));
+
+    List<Definition> definitionList =
+        vocabularyClient.listDefinitions(v1.getName(), Collections.emptyList());
+    assertEquals(1, definitionList.size());
+    assertTrue(createdDefinition.lenientEquals(definitionList.get(0)));
+    assertEquals(createdDefinition.getKey(), definitionList.get(0).getKey());
+
+    assertEquals(
+        1,
+        vocabularyClient
+            .listDefinitions(v1.getName(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyClient
+            .listDefinitions(v1.getName(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    definition.setValue("Label2");
+    Definition updatedDefinition = vocabularyClient.updateDefinition(v1.getName(), definition);
+    assertTrue(definition.lenientEquals(updatedDefinition));
+
+    vocabularyClient.deleteDefinition(v1.getName(), updatedDefinition.getKey());
+    assertEquals(0, vocabularyClient.listDefinitions(v1.getName(), Collections.emptyList()).size());
+  }
+
+  @Test
+  void labelsTest() {
+    Vocabulary v1 = createEntity();
+    v1 = vocabularyClient.create(v1);
+
+    Label label = Label.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+
+    Long labelKey = vocabularyClient.addLabel(v1.getName(), label);
+    label.setKey(labelKey);
+    assertTrue(labelKey > 0);
+
+    List<Label> labelList = vocabularyClient.listLabels(v1.getName(), Collections.emptyList());
+    assertEquals(1, labelList.size());
+    assertEquals(labelKey, labelList.get(0).getKey());
+    assertTrue(label.lenientEquals(labelList.get(0)));
+
+    assertEquals(
+        1,
+        vocabularyClient
+            .listLabels(v1.getName(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyClient
+            .listLabels(v1.getName(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    vocabularyClient.deleteLabel(v1.getName(), labelKey);
+    assertEquals(0, vocabularyClient.listLabels(v1.getName(), Collections.emptyList()).size());
+  }
+
   @Override
   Vocabulary createEntity() {
     Vocabulary vocabulary = new Vocabulary();
     vocabulary.setName("N" + UUID.randomUUID().toString().replace("-", ""));
     vocabulary.setNamespace(TEST_NAMESPACE);
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
-    vocabulary.setLabel(
-        Collections.singletonMap(LanguageRegion.ENGLISH, UUID.randomUUID().toString()));
     return vocabulary;
   }
 

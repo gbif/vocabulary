@@ -27,3 +27,6 @@ export:
 
 messaging:
   enabled: false
+
+ws:
+  apiUrl: http://localhost:8080

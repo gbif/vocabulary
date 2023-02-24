@@ -13,26 +13,25 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-
-import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +50,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.sql.DataSource;
+
+import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
 import static org.gbif.vocabulary.TestUtils.assertDeprecated;
 import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
@@ -155,9 +157,13 @@ public class ConceptServiceIT {
   @Test
   public void createSimilarConceptTest() {
     Concept concept = createBasicConcept(vocabularyKeys[0]);
-    concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "sim1"));
-    concept.setHiddenLabels(Collections.singleton("simm1"));
     conceptService.create(concept);
+
+    conceptService.addLabel(
+        concept.getKey(),
+        Label.builder().language(LanguageRegion.ENGLISH).value("sim1").createdBy("test").build());
+    conceptService.addHiddenLabel(
+        concept.getKey(), HiddenLabel.builder().value("simm1").createdBy("test").build());
 
     Concept similar = createBasicConcept(vocabularyKeys[0]);
     similar.setName(concept.getName());
@@ -170,16 +176,32 @@ public class ConceptServiceIT {
     assertDoesNotThrow(() -> conceptService.create(similar));
 
     Concept similar2 = createBasicConcept(vocabularyKeys[0]);
-    similar2.getHiddenLabels().add("simm1");
-    assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar2));
+    conceptService.create(similar2);
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            conceptService.addHiddenLabel(
+                similar2.getKey(), HiddenLabel.builder().value("simm1").createdBy("test").build()));
 
     Concept similar3 = createBasicConcept(vocabularyKeys[0]);
-    similar3.getHiddenLabels().add("simm2");
-    assertDoesNotThrow(() -> conceptService.create(similar3));
+    conceptService.create(similar3);
+    assertDoesNotThrow(
+        () ->
+            conceptService.addHiddenLabel(
+                similar3.getKey(), HiddenLabel.builder().value("simm2").createdBy("test").build()));
 
     Concept similar4 = createBasicConcept(vocabularyKeys[0]);
-    similar4.getAlternativeLabels().put(LanguageRegion.SPANISH, Collections.singleton("simm2"));
-    assertThrows(IllegalArgumentException.class, () -> conceptService.create(similar4));
+    conceptService.create(similar4);
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            conceptService.addAlternativeLabel(
+                similar4.getKey(),
+                Label.builder()
+                    .language(LanguageRegion.SPANISH)
+                    .createdBy("test")
+                    .value("simm2")
+                    .build()));
   }
 
   @Test
@@ -189,8 +211,7 @@ public class ConceptServiceIT {
     concept = conceptService.get(key);
 
     // update concept
-    concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "label"));
-    concept.setHiddenLabels(new HashSet<>(Arrays.asList("labl", "lbel")));
+    concept.getEditorialNotes().add("note1");
 
     Concept parent = createBasicConcept(vocabularyKeys[0]);
     long parentKey = conceptService.create(parent);
@@ -198,52 +219,85 @@ public class ConceptServiceIT {
     conceptService.update(concept);
 
     Concept updatedConcept = conceptService.get(key);
-    assertEquals("label", updatedConcept.getLabel().get(LanguageRegion.ENGLISH));
-    assertEquals(2, updatedConcept.getHiddenLabels().size());
-    assertTrue(updatedConcept.getHiddenLabels().containsAll(Arrays.asList("labl", "lbel")));
+    assertTrue(updatedConcept.getEditorialNotes().contains("note1"));
     assertEquals(parentKey, updatedConcept.getParentKey().intValue());
   }
 
   @Test
-  public void updateSimilarConceptTest() {
+  public void updateSimilarLabelsTest() {
     Concept concept1 = createBasicConcept(vocabularyKeys[0]);
     concept1.setName("SimConcept");
-    concept1
-        .getAlternativeLabels()
-        .put(LanguageRegion.ENGLISH, Collections.singleton("simupdated"));
-    concept1.setHiddenLabels(Collections.singleton("hidden1"));
     conceptService.create(concept1);
+    conceptService.addAlternativeLabel(
+        concept1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.ENGLISH)
+            .value("simupdated")
+            .createdBy("test")
+            .build());
+    conceptService.addHiddenLabel(
+        concept1.getKey(), HiddenLabel.builder().value("hidden1").createdBy("test").build());
 
     Concept concept2 = createBasicConcept(vocabularyKeys[0]);
     long key2 = conceptService.create(concept2);
 
     // update concept
-    Concept updatedConcept = conceptService.get(key2);
-    updatedConcept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "simupdated"));
-    assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            conceptService.addLabel(
+                concept2.getKey(),
+                Label.builder()
+                    .language(LanguageRegion.ENGLISH)
+                    .value("simupdated")
+                    .createdBy("test")
+                    .build()));
 
-    Concept updatedConcept2 = conceptService.get(key2);
-    updatedConcept2.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, concept1.getName()));
-    assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept2));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            conceptService.addLabel(
+                concept2.getKey(),
+                Label.builder()
+                    .language(LanguageRegion.ENGLISH)
+                    .value(concept1.getName())
+                    .createdBy("test")
+                    .build()));
 
-    Concept updatedConcept3 = conceptService.get(key2);
-    updatedConcept3.setAlternativeLabels(
-        Collections.singletonMap(LanguageRegion.SPANISH, Collections.singleton("simupdated")));
-    assertDoesNotThrow(() -> conceptService.update(updatedConcept3));
+    assertDoesNotThrow(
+        () ->
+            conceptService.addAlternativeLabel(
+                concept2.getKey(),
+                Label.builder()
+                    .language(LanguageRegion.SPANISH)
+                    .value("simupdated")
+                    .createdBy("test")
+                    .build()));
 
-    Concept updatedConcept4 = conceptService.get(key2);
-    updatedConcept4.setHiddenLabels(Collections.singleton("simupdated"));
-    assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept4));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            conceptService.addHiddenLabel(
+                concept2.getKey(),
+                HiddenLabel.builder().value("simupdated").createdBy("test").build()));
 
-    Concept updatedConcept5 = conceptService.get(key2);
-    updatedConcept5.setHiddenLabels(Collections.singleton("hidden1"));
-    assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept5));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            conceptService.addHiddenLabel(
+                concept2.getKey(),
+                HiddenLabel.builder().value("hidden1").createdBy("test").build()));
 
-    Concept updatedConcept6 = conceptService.get(key2);
-    updatedConcept6
-        .getAlternativeLabels()
-        .put(LanguageRegion.ENGLISH, Collections.singleton("hidden1"));
-    assertThrows(IllegalArgumentException.class, () -> conceptService.update(updatedConcept6));
+    assertThrows(
+        IllegalArgumentException.class,
+        () ->
+            conceptService.addAlternativeLabel(
+                concept2.getKey(),
+                Label.builder()
+                    .language(LanguageRegion.ENGLISH)
+                    .value("hidden1")
+                    .createdBy("test")
+                    .build()));
   }
 
   @Test
@@ -312,16 +366,6 @@ public class ConceptServiceIT {
 
     Concept createdConcept = conceptService.get(key);
     createdConcept.setReplacedByKey(2L);
-    assertThrows(IllegalArgumentException.class, () -> conceptService.update(createdConcept));
-  }
-
-  @Test
-  public void deletingWhenUpdatingTest() {
-    Concept concept = createBasicConcept(vocabularyKeys[0]);
-    long key = conceptService.create(concept);
-
-    Concept createdConcept = conceptService.get(key);
-    createdConcept.setDeleted(LocalDateTime.now());
     assertThrows(IllegalArgumentException.class, () -> conceptService.update(createdConcept));
   }
 
@@ -568,6 +612,188 @@ public class ConceptServiceIT {
                 .build(),
             new PagingRequest(0, 5));
     assertEquals(0, concepts.getResults().size());
+  }
+
+  @Test
+  public void definitionTest() {
+    Concept concept1 = createBasicConcept(vocabularyKeys[0]);
+    long c1Key = conceptService.create(concept1);
+
+    // add definition
+    Definition definition =
+        Definition.builder()
+            .language(LanguageRegion.ENGLISH)
+            .value("label")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
+    long definitionKey = conceptService.addDefinition(c1Key, definition);
+    assertTrue(definitionKey > 0);
+
+    // get definition
+    Definition createdDefinition = conceptService.getDefinition(c1Key, definitionKey);
+    assertTrue(definition.lenientEquals(createdDefinition));
+
+    // list definitions
+    List<Definition> definitionList = conceptService.listDefinitions(c1Key, null);
+    assertEquals(1, definitionList.size());
+    assertEquals(definitionKey, definitionList.get(0).getKey());
+
+    // add another definition
+    Definition definition2 =
+        Definition.builder()
+            .language(LanguageRegion.SPANISH)
+            .value("label2")
+            .modifiedBy("test")
+            .createdBy("test")
+            .build();
+    long definitionKey2 = conceptService.addDefinition(c1Key, definition2);
+    assertTrue(definitionKey2 > 0);
+    assertEquals(2, conceptService.listDefinitions(c1Key, null).size());
+    assertEquals(
+        1,
+        conceptService
+            .listDefinitions(c1Key, Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        1,
+        conceptService
+            .listDefinitions(c1Key, Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+    assertEquals(
+        0,
+        conceptService
+            .listDefinitions(c1Key, Collections.singletonList(LanguageRegion.ACHOLI))
+            .size());
+
+    // delete definition
+    conceptService.deleteDefinition(c1Key, definitionKey);
+    definitionList = conceptService.listDefinitions(c1Key, null);
+    assertEquals(1, definitionList.size());
+    assertEquals(definitionKey2, definitionList.get(0).getKey());
+  }
+
+  @Test
+  public void labelsTest() {
+    Concept concept1 = createBasicConcept(vocabularyKeys[0]);
+    long c1Key = conceptService.create(concept1);
+
+    // add label
+    Label label =
+        Label.builder().language(LanguageRegion.ENGLISH).value("label").createdBy("test").build();
+    long labelKey = conceptService.addLabel(c1Key, label);
+    assertTrue(labelKey > 0);
+
+    // list labels
+    List<Label> labelList = conceptService.listLabels(c1Key, null);
+    assertEquals(1, labelList.size());
+    assertEquals(labelKey, labelList.get(0).getKey());
+    assertTrue(label.lenientEquals(labelList.get(0)));
+
+    // add another label
+    Label label2 =
+        Label.builder().language(LanguageRegion.SPANISH).value("label2").createdBy("test").build();
+    long labelKey2 = conceptService.addLabel(c1Key, label2);
+    assertTrue(labelKey2 > 0);
+    assertEquals(2, conceptService.listLabels(c1Key, null).size());
+    assertEquals(
+        1,
+        conceptService.listLabels(c1Key, Collections.singletonList(LanguageRegion.ENGLISH)).size());
+    assertEquals(
+        1,
+        conceptService.listLabels(c1Key, Collections.singletonList(LanguageRegion.SPANISH)).size());
+    assertEquals(
+        0,
+        conceptService.listLabels(c1Key, Collections.singletonList(LanguageRegion.ACHOLI)).size());
+
+    // delete label
+    conceptService.deleteLabel(c1Key, labelKey);
+    labelList = conceptService.listLabels(c1Key, null);
+    assertEquals(1, labelList.size());
+    assertEquals(labelKey2, labelList.get(0).getKey());
+  }
+
+  @Test
+  public void alternativeLabelsTest() {
+    Concept concept1 = createBasicConcept(vocabularyKeys[0]);
+    long c1Key = conceptService.create(concept1);
+
+    // add label
+    Label label =
+        Label.builder().language(LanguageRegion.ENGLISH).value("label").createdBy("test").build();
+    long labelKey = conceptService.addAlternativeLabel(c1Key, label);
+    assertTrue(labelKey > 0);
+
+    // list labels
+    PagingResponse<Label> labelList =
+        conceptService.listAlternativeLabels(c1Key, null, DEFAULT_PAGE);
+    assertEquals(1, labelList.getResults().size());
+    assertEquals(labelKey, labelList.getResults().get(0).getKey());
+    assertTrue(label.lenientEquals(labelList.getResults().get(0)));
+
+    // add another label
+    Label label2 =
+        Label.builder().language(LanguageRegion.SPANISH).value("label2").createdBy("test").build();
+    long labelKey2 = conceptService.addAlternativeLabel(c1Key, label2);
+    assertTrue(labelKey2 > 0);
+    assertEquals(
+        2, conceptService.listAlternativeLabels(c1Key, null, DEFAULT_PAGE).getResults().size());
+    assertEquals(
+        1,
+        conceptService
+            .listAlternativeLabels(
+                c1Key, Collections.singletonList(LanguageRegion.ENGLISH), DEFAULT_PAGE)
+            .getResults()
+            .size());
+    assertEquals(
+        1,
+        conceptService
+            .listAlternativeLabels(
+                c1Key, Collections.singletonList(LanguageRegion.SPANISH), DEFAULT_PAGE)
+            .getResults()
+            .size());
+    assertEquals(
+        0,
+        conceptService
+            .listAlternativeLabels(
+                c1Key, Collections.singletonList(LanguageRegion.ACHOLI), DEFAULT_PAGE)
+            .getResults()
+            .size());
+
+    // delete label
+    conceptService.deleteAlternativeLabel(c1Key, labelKey);
+    labelList = conceptService.listAlternativeLabels(c1Key, null, DEFAULT_PAGE);
+    assertEquals(1, labelList.getResults().size());
+    assertEquals(labelKey2, labelList.getResults().get(0).getKey());
+  }
+
+  @Test
+  public void hiddenLabelsTest() {
+    Concept concept1 = createBasicConcept(vocabularyKeys[0]);
+    long c1Key = conceptService.create(concept1);
+
+    // add label
+    HiddenLabel label = HiddenLabel.builder().value("label").createdBy("test").build();
+    long labelKey = conceptService.addHiddenLabel(c1Key, label);
+    assertTrue(labelKey > 0);
+
+    // list labels
+    PagingResponse<HiddenLabel> labelList = conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE);
+    assertEquals(1, labelList.getResults().size());
+    assertEquals(labelKey, labelList.getResults().get(0).getKey());
+    assertTrue(label.lenientEquals(labelList.getResults().get(0)));
+
+    // add another label
+    HiddenLabel label2 = HiddenLabel.builder().value("label2").createdBy("test").build();
+    long labelKey2 = conceptService.addHiddenLabel(c1Key, label2);
+    assertTrue(labelKey2 > 0);
+    assertEquals(2, conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE).getResults().size());
+
+    // delete label
+    conceptService.deleteHiddenLabel(c1Key, labelKey);
+    labelList = conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE);
+    assertEquals(1, labelList.getResults().size());
+    assertEquals(labelKey2, labelList.getResults().get(0).getKey());
   }
 
   static class ContexInitializer

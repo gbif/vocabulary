@@ -13,24 +13,23 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.gbif.vocabulary.TestUtils;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -43,13 +42,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+import static org.gbif.vocabulary.TestUtils.PAGE_FN;
 import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
-import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
-import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.HIDDEN_NODE;
-import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -106,16 +102,24 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void listConceptsTest() {
     Concept concept1 = createNewEntity();
     concept1.setName("Concept1");
-    concept1.setAlternativeLabels(
-        Collections.singletonMap(
-            LanguageRegion.ENGLISH, Collections.singleton("alternative example")));
     conceptMapper.create(concept1);
+
+    conceptMapper.addAlternativeLabel(
+        concept1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.ENGLISH)
+            .value("alternative example")
+            .createdBy("test")
+            .build());
 
     Concept concept2 = createNewEntity();
     concept2.setName("Concept2");
     concept2.setParentKey(concept1.getKey());
-    concept2.setHiddenLabels(Collections.singleton("misspelt example"));
     conceptMapper.create(concept2);
+
+    conceptMapper.addHiddenLabel(
+        concept2.getKey(),
+        HiddenLabel.builder().value("misspelt example").createdBy("test").build());
 
     Concept concept3 = createNewEntity();
     concept3.setName("Concept3");
@@ -154,18 +158,43 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept c1 = createNewEntity();
     c1.setName("Suggest111");
 
-    Map<LanguageRegion, String> labelsC1 = new HashMap<>();
-    labelsC1.put(LanguageRegion.SPANISH, "labelspanish");
-    labelsC1.put(LanguageRegion.ENGLISH, "labelenglish");
-
-    c1.setLabel(labelsC1);
     conceptMapper.create(c1);
     assertNotNull(c1.getKey());
+
+    conceptMapper.addLabel(
+        c1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.ENGLISH)
+            .value("labelenglish")
+            .createdBy("test")
+            .build());
+
+    conceptMapper.addLabel(
+        c1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.SPANISH)
+            .value("labelspanish")
+            .createdBy("test")
+            .build());
+
+    conceptMapper.addHiddenLabel(
+        c1.getKey(), HiddenLabel.builder().value("lab,l").createdBy("test").build());
+    conceptMapper.addHiddenLabel(
+        c1.getKey(), HiddenLabel.builder().value("lbel").createdBy("test").build());
 
     Concept c2 = createNewEntity();
     c2.setName("Suggest222");
     conceptMapper.create(c2);
     assertNotNull(c2.getKey());
+
+    conceptMapper.addLabel(
+        c2.getKey(),
+        Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
+
+    conceptMapper.addHiddenLabel(
+        c2.getKey(), HiddenLabel.builder().value("lab,l").createdBy("test").build());
+    conceptMapper.addHiddenLabel(
+        c2.getKey(), HiddenLabel.builder().value("lbel").createdBy("test").build());
 
     // check result values
     List<KeyNameResult> result = conceptMapper.suggest("suggest1", c1.getVocabularyKey(), null);
@@ -181,15 +210,9 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(2, conceptMapper.suggest("label", c1.getVocabularyKey(), null).size());
     assertEquals(1, conceptMapper.suggest("labeleng", c1.getVocabularyKey(), null).size());
     assertEquals(
-        0,
-        conceptMapper
-            .suggest("labeleng", c1.getVocabularyKey(), LanguageRegion.SPANISH.getLocale())
-            .size());
+        0, conceptMapper.suggest("labeleng", c1.getVocabularyKey(), LanguageRegion.SPANISH).size());
     assertEquals(
-        1,
-        conceptMapper
-            .suggest("labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH.getLocale())
-            .size());
+        1, conceptMapper.suggest("labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH).size());
 
     Concept c3 = createNewEntity();
     c3.setVocabularyKey(vocabularyKeys[1]);
@@ -206,72 +229,77 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @Test
   public void findSimilaritiesTest() {
     Concept concept1 = createNewEntity();
-    concept1.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.SPANISH, "primero ")));
-    concept1.setHiddenLabels(new HashSet<>(Arrays.asList("primeiro", "otro primeiro")));
     conceptMapper.create(concept1);
 
+    conceptMapper.addLabel(
+        concept1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.SPANISH)
+            .value("primero ")
+            .createdBy("test")
+            .build());
+
+    HiddenLabel hiddenLabel1 = HiddenLabel.builder().value("primeiro").createdBy("test").build();
+    conceptMapper.addHiddenLabel(concept1.getKey(), hiddenLabel1);
+
+    HiddenLabel hiddenLabel2 =
+        HiddenLabel.builder().value("otro primeiro").createdBy("test").build();
+    conceptMapper.addHiddenLabel(concept1.getKey(), hiddenLabel2);
+
     // check hidden labels
-    NormalizedValuesParam hiddenValues =
-        NormalizedValuesParam.from(
-            HIDDEN_NODE, Collections.singletonList(normalizeLabel("primeiro")));
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(hiddenValues), concept1.getVocabularyKey(), null);
+            normalizeLabel("primeiro"), null, concept1.getVocabularyKey(), null);
     assertSimilarity(similarities, concept1);
 
     // remove hidden labels and there shouldn't be similarities
     concept1 = conceptMapper.get(concept1.getKey());
-    concept1.setHiddenLabels(null);
+    conceptMapper.deleteHiddenLabel(concept1.getKey(), hiddenLabel1.getKey());
+    conceptMapper.deleteHiddenLabel(concept1.getKey(), hiddenLabel2.getKey());
+
     conceptMapper.update(concept1);
     assertEquals(
         0,
         conceptMapper
             .findSimilarities(
-                Collections.singletonList(hiddenValues), concept1.getVocabularyKey(), null)
+                normalizeLabel(hiddenLabel1.getValue()), null, concept1.getVocabularyKey(), null)
             .size());
 
-    NormalizedValuesParam spanishValues =
-        NormalizedValuesParam.from(
-            LanguageRegion.SPANISH.getLocale(),
-            Collections.singletonList(normalizeLabel("Primero")));
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(spanishValues), concept1.getVocabularyKey(), null);
+            normalizeLabel("Primero"), LanguageRegion.SPANISH, concept1.getVocabularyKey(), null);
     assertSimilarity(similarities, concept1);
 
-    NormalizedValuesParam nameValues =
-        NormalizedValuesParam.from(
-            NAME_NODE, Collections.singletonList(normalizeName(concept1.getName())));
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(nameValues), concept1.getVocabularyKey(), null);
+            normalizeName(concept1.getName()), null, concept1.getVocabularyKey(), null);
     assertSimilarity(similarities, concept1);
 
-    spanishValues.setValues(Collections.singletonList(normalizeLabel("foo")));
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(spanishValues), concept1.getVocabularyKey(), null);
+            normalizeLabel("foo"), null, concept1.getVocabularyKey(), null);
     assertEquals(0, similarities.size());
 
     // for another vocabulary there should be no match
     similarities =
-        conceptMapper.findSimilarities(Collections.singletonList(spanishValues), 200, null);
+        conceptMapper.findSimilarities(
+            normalizeLabel("Primero"), LanguageRegion.SPANISH, 200, null);
     assertEquals(0, similarities.size());
 
     // for the same concept there should be no matches
-    spanishValues.setValues(Collections.singletonList(normalizeLabel("primero")));
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(spanishValues),
+            normalizeLabel("primero"),
+            LanguageRegion.SPANISH,
             concept1.getVocabularyKey(),
             concept1.getKey());
     assertEquals(0, similarities.size());
 
     // for other LanguageRegion there should be no matches
-    spanishValues.setNode(LanguageRegion.ENGLISH.getLocale());
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(spanishValues),
+            normalizeLabel("primero"),
+            LanguageRegion.ENGLISH,
             concept1.getVocabularyKey(),
             concept1.getKey());
     assertEquals(0, similarities.size());
@@ -281,43 +309,42 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void findSimilaritiesNormalizationTest() {
     Concept concept1 = createNewEntity();
     concept1.setName("MyConcept");
-    concept1.setLabel(
-        new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "normalization")));
-    concept1.setHiddenLabels(new HashSet<>(Arrays.asList("norm", "another norm")));
     conceptMapper.create(concept1);
 
-    // check Spanish labels
-    NormalizedValuesParam englishValues =
-        NormalizedValuesParam.from(
-            LanguageRegion.ENGLISH.getLocale(),
-            Collections.singletonList(normalizeLabel(" normaLiZA tion  ")));
+    conceptMapper.addLabel(
+        concept1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.ENGLISH)
+            .value("normalization")
+            .createdBy("test")
+            .build());
+
+    conceptMapper.addHiddenLabel(
+        concept1.getKey(), HiddenLabel.builder().value("norm").createdBy("test").build());
+    conceptMapper.addHiddenLabel(
+        concept1.getKey(), HiddenLabel.builder().value("another norm").createdBy("test").build());
+
+    // check English labels
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(englishValues), concept1.getVocabularyKey(), null);
+            normalizeLabel(" normaLiZA tion  "),
+            LanguageRegion.ENGLISH,
+            concept1.getVocabularyKey(),
+            null);
     assertSimilarity(similarities, concept1);
 
-    NormalizedValuesParam hiddenValues =
-        NormalizedValuesParam.from(
-            HIDDEN_NODE, normalizeLabels(Arrays.asList(" aNotHer  NORM  ", "segundo")));
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(hiddenValues), concept1.getVocabularyKey(), null);
+            normalizeLabel(" aNotHer  NORM  "), null, concept1.getVocabularyKey(), null);
     assertSimilarity(similarities, concept1);
-
-    hiddenValues =
-        NormalizedValuesParam.from(
-            ALL_NODE, normalizeLabels(Arrays.asList(" aNotHer  NORM  ", "segundo")));
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(hiddenValues), concept1.getVocabularyKey(), null);
-    assertSimilarity(similarities, concept1);
+            normalizeLabel("segundo"), null, concept1.getVocabularyKey(), null);
+    assertEquals(0, similarities.size());
 
-    NormalizedValuesParam nameValues =
-        NormalizedValuesParam.from(
-            NAME_NODE, Collections.singletonList(normalizeName("My Concept")));
     similarities =
         conceptMapper.findSimilarities(
-            Collections.singletonList(nameValues), concept1.getVocabularyKey(), null);
+            normalizeName("My Concept"), null, concept1.getVocabularyKey(), null);
     assertSimilarity(similarities, concept1);
   }
 
@@ -325,44 +352,54 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void findSimilaritiesMultipleParamsTest() {
     Concept concept1 = createNewEntity();
     concept1.setName("C1");
-    concept1.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "l1")));
-    concept1.setAlternativeLabels(
-        Collections.singletonMap(LanguageRegion.SPANISH, Collections.singleton("l uno")));
-    concept1.setHiddenLabels(new HashSet<>(Arrays.asList("ll1", "l1l")));
     conceptMapper.create(concept1);
+
+    conceptMapper.addLabel(
+        concept1.getKey(),
+        Label.builder().language(LanguageRegion.ENGLISH).value("l1").createdBy("test").build());
+
+    conceptMapper.addAlternativeLabel(
+        concept1.getKey(),
+        Label.builder().language(LanguageRegion.SPANISH).value("l uno").createdBy("test").build());
+
+    conceptMapper.addHiddenLabel(
+        concept1.getKey(), HiddenLabel.builder().value("ll1").createdBy("test").build());
+    conceptMapper.addHiddenLabel(
+        concept1.getKey(), HiddenLabel.builder().value("l1l").createdBy("test").build());
 
     Concept concept2 = createNewEntity();
     concept2.setName("C2");
-    concept2.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "l2")));
-    concept2.setHiddenLabels(new HashSet<>(Arrays.asList("ll2", "l2l")));
     conceptMapper.create(concept2);
 
+    conceptMapper.addLabel(
+        concept2.getKey(),
+        Label.builder().language(LanguageRegion.ENGLISH).value("l2").createdBy("test").build());
+
+    conceptMapper.addHiddenLabel(
+        concept2.getKey(), HiddenLabel.builder().value("ll2").createdBy("test").build());
+    conceptMapper.addHiddenLabel(
+        concept2.getKey(), HiddenLabel.builder().value("l2l").createdBy("test").build());
+
     // check Spanish labels
-    NormalizedValuesParam spanishValues =
-        NormalizedValuesParam.from(
-            LanguageRegion.SPANISH.getLocale(), Collections.singletonList(normalizeLabel("l UNo")));
-
-    NormalizedValuesParam englishValues =
-        NormalizedValuesParam.from(
-            LanguageRegion.ENGLISH.getLocale(), Collections.singletonList(normalizeLabel("l2")));
-
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            Arrays.asList(spanishValues, englishValues), concept1.getVocabularyKey(), null);
-    assertEquals(2, similarities.size());
-
-    spanishValues.setNode(LanguageRegion.ITALIAN.getLocale());
-    similarities =
-        conceptMapper.findSimilarities(
-            Arrays.asList(spanishValues, englishValues), concept1.getVocabularyKey(), null);
+            normalizeLabel("l UNo"), LanguageRegion.SPANISH, concept1.getVocabularyKey(), null);
     assertEquals(1, similarities.size());
 
-    NormalizedValuesParam hiddenValues =
-        NormalizedValuesParam.from(HIDDEN_NODE, Collections.singletonList(normalizeLabel("LL1")));
     similarities =
         conceptMapper.findSimilarities(
-            Arrays.asList(englishValues, hiddenValues), concept1.getVocabularyKey(), null);
-    assertEquals(2, similarities.size());
+            normalizeLabel("l2"), LanguageRegion.ENGLISH, concept1.getVocabularyKey(), null);
+    assertEquals(1, similarities.size());
+
+    similarities =
+        conceptMapper.findSimilarities(
+            normalizeLabel("l2"), LanguageRegion.ITALIAN, concept1.getVocabularyKey(), null);
+    assertEquals(0, similarities.size());
+
+    similarities =
+        conceptMapper.findSimilarities(
+            normalizeLabel("LL1"), null, concept1.getVocabularyKey(), null);
+    assertEquals(1, similarities.size());
   }
 
   @Test
@@ -429,14 +466,17 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(concept1.getKey(), conceptMapper.findReplacement(concept3.getKey()));
 
     // concept 2 deprecated without replacement, hence concept 3 hasn't a non-deprecated replacement
+    conceptMapper.restoreDeprecated(concept2.getKey());
     conceptMapper.deprecate(concept2.getKey(), DEPRECATED_BY, null);
     assertNull(conceptMapper.findReplacement(concept3.getKey()));
 
     // concept 3 deprecated by concept 1
+    conceptMapper.restoreDeprecated(concept3.getKey());
     conceptMapper.deprecate(concept3.getKey(), DEPRECATED_BY, concept1.getKey());
     assertEquals(concept1.getKey(), conceptMapper.findReplacement(concept3.getKey()));
 
     // concept 3 deprecated without replacement
+    conceptMapper.restoreDeprecated(concept3.getKey());
     conceptMapper.deprecate(concept3.getKey(), DEPRECATED_BY, null);
     assertNull(conceptMapper.findReplacement(concept3.getKey()));
 
@@ -602,6 +642,152 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(0, conceptsFound.size());
   }
 
+  @Test
+  public void definitionTest() {
+    Concept concept = createNewEntity();
+    conceptMapper.create(concept);
+
+    Definition definition =
+        Definition.builder()
+            .language(LanguageRegion.ENGLISH)
+            .value("test")
+            .createdBy("test")
+            .modifiedBy("test")
+            .build();
+    conceptMapper.addDefinition(concept.getKey(), definition);
+
+    List<Definition> definitions = conceptMapper.listDefinitions(concept.getKey(), null);
+    assertEquals(1, definitions.size());
+
+    assertEquals(
+        1,
+        conceptMapper
+            .listDefinitions(concept.getKey(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        conceptMapper
+            .listDefinitions(concept.getKey(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    definition = conceptMapper.getDefinition(concept.getKey(), definition.getKey());
+    assertEquals("test", definition.getValue());
+    assertEquals(LanguageRegion.ENGLISH, definition.getLanguage());
+    assertEquals("test", definition.getCreatedBy());
+    assertEquals("test", definition.getModifiedBy());
+    assertNotNull(definition.getCreated());
+    assertNotNull(definition.getModified());
+
+    definition.setValue("test2");
+    conceptMapper.updateDefinition(concept.getKey(), definition);
+    definition = conceptMapper.getDefinition(concept.getKey(), definition.getKey());
+    assertEquals("test2", definition.getValue());
+
+    conceptMapper.deleteDefinition(concept.getKey(), definition.getKey());
+    definitions = conceptMapper.listDefinitions(concept.getKey(), null);
+    assertEquals(0, definitions.size());
+  }
+
+  @Test
+  public void labelsTest() {
+    Concept concept = createNewEntity();
+    conceptMapper.create(concept);
+
+    Label label =
+        Label.builder().language(LanguageRegion.ENGLISH).value("test").createdBy("test").build();
+    conceptMapper.addLabel(concept.getKey(), label);
+
+    List<Label> labels = conceptMapper.listLabels(concept.getKey(), null);
+    assertEquals(1, labels.size());
+    label = labels.get(0);
+    assertEquals("test", label.getValue());
+    assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
+    assertEquals("test", label.getCreatedBy());
+    assertNotNull(label.getCreated());
+
+    assertEquals(
+        1,
+        conceptMapper
+            .listLabels(concept.getKey(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        conceptMapper
+            .listLabels(concept.getKey(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    conceptMapper.deleteLabel(concept.getKey(), label.getKey());
+    labels = conceptMapper.listLabels(concept.getKey(), null);
+    assertEquals(0, labels.size());
+  }
+
+  @Test
+  public void alternativeLabelsTest() {
+    Concept concept = createNewEntity();
+    conceptMapper.create(concept);
+
+    Label label =
+        Label.builder().language(LanguageRegion.ENGLISH).value("test").createdBy("test").build();
+    conceptMapper.addAlternativeLabel(concept.getKey(), label);
+
+    List<Label> labels = conceptMapper.listAlternativeLabels(concept.getKey(), null, DEFAULT_PAGE);
+    assertEquals(1, labels.size());
+    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey(), null));
+    label = labels.get(0);
+    assertEquals("test", label.getValue());
+    assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
+    assertEquals("test", label.getCreatedBy());
+    assertNotNull(label.getCreated());
+
+    assertEquals(
+        1,
+        conceptMapper
+            .listAlternativeLabels(
+                concept.getKey(), Collections.singletonList(LanguageRegion.ENGLISH), DEFAULT_PAGE)
+            .size());
+    assertEquals(
+        0,
+        conceptMapper
+            .listAlternativeLabels(
+                concept.getKey(), Collections.singletonList(LanguageRegion.SPANISH), DEFAULT_PAGE)
+            .size());
+
+    labels = conceptMapper.listAlternativeLabels(concept.getKey(), null, PAGE_FN.apply(0, 0L));
+    assertEquals(0, labels.size());
+    assertEquals(1, conceptMapper.countAlternativeLabels(concept.getKey(), null));
+
+    conceptMapper.deleteAlternativeLabel(concept.getKey(), label.getKey());
+    labels = conceptMapper.listAlternativeLabels(concept.getKey(), null, DEFAULT_PAGE);
+    assertEquals(0, labels.size());
+    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey(), null));
+  }
+
+  @Test
+  public void hiddenLabelsTest() {
+    Concept concept = createNewEntity();
+    conceptMapper.create(concept);
+
+    HiddenLabel label = HiddenLabel.builder().value("test").createdBy("test").build();
+    conceptMapper.addHiddenLabel(concept.getKey(), label);
+
+    List<HiddenLabel> labels = conceptMapper.listHiddenLabels(concept.getKey(), DEFAULT_PAGE);
+    assertEquals(1, labels.size());
+    assertEquals(labels.size(), conceptMapper.countHiddenLabels(concept.getKey()));
+    label = labels.get(0);
+    assertEquals("test", label.getValue());
+    assertEquals("test", label.getCreatedBy());
+    assertNotNull(label.getCreated());
+
+    labels = conceptMapper.listHiddenLabels(concept.getKey(), PAGE_FN.apply(0, 0L));
+    assertEquals(0, labels.size());
+    assertEquals(1, conceptMapper.countHiddenLabels(concept.getKey()));
+
+    conceptMapper.deleteHiddenLabel(concept.getKey(), label.getKey());
+    labels = conceptMapper.listHiddenLabels(concept.getKey(), DEFAULT_PAGE);
+    assertEquals(0, labels.size());
+    assertEquals(labels.size(), conceptMapper.countHiddenLabels(concept.getKey()));
+  }
+
   private void assertList(ConceptSearchParams searchParams, int expectedResult) {
     assertEquals(expectedResult, conceptMapper.list(searchParams, DEFAULT_PAGE).size());
     assertEquals(expectedResult, conceptMapper.count(searchParams));
@@ -618,10 +804,6 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Concept entity = new Concept();
     entity.setVocabularyKey(vocabularyKeys[0]);
     entity.setName(TestUtils.getRandomName());
-    entity.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Label")));
-    entity.setHiddenLabels(new HashSet<>(Arrays.asList("lab,l", "lbel")));
-    entity.setDefinition(
-        new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
     entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));

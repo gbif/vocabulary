@@ -2,11 +2,13 @@
 
 ## Business logic
 
+// TODO: deleted
+
 ### Vocabulary
 - Validity check for vocabularies 
   - A new vocabulary will be created as long as there is no conflict with other vocabularies.
   A conflict happens when there is already another vocabulary with the same name. 
-  This also checks deleted and replaced vocabularies, it doesn't make sense to create a vocabulary that was already deleted.
+  This also checks deprecated and replaced vocabularies, it doesn't make sense to create a vocabulary that was already deprecated.
   - The name of a vocabulary cannot contain spaces or special characters.
   - The name of a vocabulary cannot be updated, since it's used in URIs.
 

@@ -13,13 +13,12 @@
  */
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.utils.PostPersist;
-import org.gbif.vocabulary.model.utils.PrePersist;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
+
+import org.gbif.vocabulary.model.utils.PostPersist;
+import org.gbif.vocabulary.model.utils.PrePersist;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -41,15 +40,15 @@ public interface VocabularyEntity extends Auditable, Deprecable, Serializable {
 
   void setName(String name);
 
-  /** Representative label per language. */
-  Map<LanguageRegion, String> getLabel();
+  /** Label of the entity by language. */
+  List<Label> getLabel();
 
-  void setLabel(Map<LanguageRegion, String> label);
+  void setLabel(List<Label> label);
 
   /** Definition of the entity by language. */
-  Map<LanguageRegion, String> getDefinition();
+  List<Definition> getDefinition();
 
-  void setDefinition(Map<LanguageRegion, String> definition);
+  void setDefinition(List<Definition> definition);
 
   /** Additional external definitions. */
   List<URI> getExternalDefinitions();

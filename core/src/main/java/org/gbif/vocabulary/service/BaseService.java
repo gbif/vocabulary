@@ -13,8 +13,14 @@
  */
 package org.gbif.vocabulary.service;
 
+import java.util.List;
+
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -47,4 +53,20 @@ public interface BaseService<T extends VocabularyEntity> {
    * @param entity to be updated.
    */
   void update(@NotNull @Valid T entity);
+
+  long addDefinition(long entityKey, @NotNull @Valid Definition definition);
+
+  void updateDefinition(long entityKey, @NotNull @Valid Definition definition);
+
+  void deleteDefinition(long entityKey, long key);
+
+  Definition getDefinition(long entityKey, long key);
+
+  List<Definition> listDefinitions(long entityKey, @Nullable List<LanguageRegion> languageRegions);
+
+  long addLabel(long entityKey, @NotNull @Valid Label label);
+
+  void deleteLabel(long entityKey, long key);
+
+  List<Label> listLabels(long entityKey, @Nullable List<LanguageRegion> languageRegions);
 }

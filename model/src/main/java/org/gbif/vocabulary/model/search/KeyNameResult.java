@@ -13,9 +13,9 @@
  */
 package org.gbif.vocabulary.model.search;
 
-import org.gbif.vocabulary.model.LanguageRegion;
+import java.util.List;
 
-import java.util.Map;
+import org.gbif.vocabulary.model.Label;
 
 import lombok.Data;
 
@@ -27,5 +27,5 @@ import lombok.Data;
 public class KeyNameResult {
   private long key;
   private String name;
-  private Map<LanguageRegion, String> label;
+  private List<Label> labels;
 }

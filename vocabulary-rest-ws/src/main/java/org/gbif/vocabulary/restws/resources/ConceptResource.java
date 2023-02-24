@@ -13,23 +13,6 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.AddTagAction;
-import org.gbif.vocabulary.api.ConceptListParams;
-import org.gbif.vocabulary.api.ConceptView;
-import org.gbif.vocabulary.api.DeprecateConceptAction;
-import org.gbif.vocabulary.model.AbstractVocabularyEntity;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Tag;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.search.ChildrenResult;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.service.ConceptService;
-import org.gbif.vocabulary.service.TagService;
-import org.gbif.vocabulary.service.VocabularyService;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +20,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.AddTagAction;
+import org.gbif.vocabulary.api.ConceptListParams;
+import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.api.DeprecateConceptAction;
+import org.gbif.vocabulary.model.AbstractVocabularyEntity;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.ChildrenResult;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.restws.config.WsConfig;
+import org.gbif.vocabulary.service.ConceptService;
+import org.gbif.vocabulary.service.TagService;
+import org.gbif.vocabulary.service.VocabularyService;
 
 import org.assertj.core.util.Strings;
 import org.springframework.http.MediaType;
@@ -50,9 +55,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 @RestController
 @RequestMapping(
@@ -63,12 +69,17 @@ public class ConceptResource {
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
   private final TagService tagService;
+  private final WsConfig wsConfig;
 
   ConceptResource(
-      ConceptService conceptService, VocabularyService vocabularyService, TagService tagService) {
+      ConceptService conceptService,
+      VocabularyService vocabularyService,
+      TagService tagService,
+      WsConfig wsConfig) {
     this.conceptService = conceptService;
     this.vocabularyService = vocabularyService;
     this.tagService = tagService;
+    this.wsConfig = wsConfig;
   }
 
   @GetMapping()
@@ -149,6 +160,10 @@ public class ConceptResource {
                       : v);
     }
 
+    // labels links
+    viewStream =
+        viewStream.map(v -> createLabelsLinks(v, vocabularyName, v.getConcept().getName()));
+
     return new PagingResponse<>(
         conceptsPage.getOffset(),
         conceptsPage.getLimit(),
@@ -183,22 +198,23 @@ public class ConceptResource {
           children.stream().map(ChildrenResult::getChildName).collect(Collectors.toList()));
     }
 
-    return conceptView;
+    return createLabelsLinks(conceptView, vocabularyName, conceptName);
   }
 
   @PostMapping
-  public Concept create(
+  public ConceptView create(
       @PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
     checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
     concept.setVocabularyKey(vocabulary.getKey());
 
     long key = conceptService.create(concept);
-    return conceptService.get(key);
+    return createLabelsLinks(
+        new ConceptView(conceptService.get(key)), vocabularyName, concept.getName());
   }
 
   @PutMapping("{name}")
-  public Concept update(
+  public ConceptView update(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody Concept concept) {
@@ -212,7 +228,8 @@ public class ConceptResource {
         "Concept name doesn't match with the resource name in the URL");
 
     conceptService.update(concept);
-    return conceptService.get(concept.getKey());
+    return createLabelsLinks(
+        new ConceptView(conceptService.get(concept.getKey())), vocabularyName, concept.getName());
   }
 
   @GetMapping("suggest")
@@ -231,13 +248,8 @@ public class ConceptResource {
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody DeprecateConceptAction deprecateConceptAction) {
-    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
-    checkArgument(
-        concept != null,
-        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
-
     conceptService.deprecate(
-        concept.getKey(),
+        getConceptWithCheck(conceptName, vocabularyName).getKey(),
         deprecateConceptAction.getDeprecatedBy(),
         deprecateConceptAction.getReplacementKey(),
         deprecateConceptAction.isDeprecateChildren());
@@ -249,23 +261,65 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @RequestParam(value = "restoreDeprecatedChildren", required = false)
           boolean restoreDeprecatedChildren) {
-    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
-    checkArgument(
-        concept != null,
-        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
+    conceptService.restoreDeprecated(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), restoreDeprecatedChildren);
+  }
 
-    conceptService.restoreDeprecated(concept.getKey(), restoreDeprecatedChildren);
+  @GetMapping("{name}/definition")
+  public List<Definition> listDefinitions(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      List<LanguageRegion> lang) {
+    return conceptService.listDefinitions(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), lang);
+  }
+
+  @GetMapping("{name}/definition/{key}")
+  public Definition getDefinition(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long definitionKey) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    return conceptService.getDefinition(concept.getKey(), definitionKey);
+  }
+
+  @PostMapping("{name}/definition")
+  public Definition addDefinition(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody Definition definition) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    long key = conceptService.addDefinition(concept.getKey(), definition);
+    return conceptService.getDefinition(concept.getKey(), key);
+  }
+
+  @PutMapping("{name}/definition/{key}")
+  public Definition updateDefinition(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long definitionKey,
+      @RequestBody Definition definition) {
+    checkArgument(
+        definitionKey == definition.getKey(), "Definition key doesn't match with the path");
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    conceptService.updateDefinition(concept.getKey(), definition);
+    return conceptService.getDefinition(concept.getKey(), definitionKey);
+  }
+
+  @DeleteMapping("{name}/definition/{key}")
+  public void deleteDefinition(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long key) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    conceptService.deleteDefinition(concept.getKey(), key);
   }
 
   @GetMapping("{name}/tags")
   public List<Tag> listTags(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName) {
-    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
-    checkArgument(
-        concept != null,
-        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
-    return conceptService.listTags(concept.getKey());
+    return conceptService.listTags(getConceptWithCheck(conceptName, vocabularyName).getKey());
   }
 
   @PutMapping("{name}/tags")
@@ -274,10 +328,7 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @RequestBody AddTagAction addTagAction) {
     checkArgument(!Strings.isNullOrEmpty(addTagAction.getTagName()), "Tag name is required");
-    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
-    checkArgument(
-        concept != null,
-        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
     Tag tag = tagService.getByName(addTagAction.getTagName());
     checkArgument(tag != null, "Tag not found for name " + addTagAction.getTagName());
     conceptService.addTag(concept.getKey(), tag.getKey());
@@ -288,12 +339,112 @@ public class ConceptResource {
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @PathVariable("tagName") String tagName) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    Tag tag = tagService.getByName(tagName);
+    checkArgument(tag != null, "Tag not found for name " + tagName);
+    conceptService.removeTag(concept.getKey(), tag.getKey());
+  }
+
+  @GetMapping("{name}/label")
+  public List<Label> listLabels(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      List<LanguageRegion> lang) {
+    return conceptService.listLabels(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), lang);
+  }
+
+  @GetMapping("{name}/alternativeLabels")
+  public PagingResponse<Label> listAlternativeLabels(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      List<LanguageRegion> lang,
+      Pageable page) {
+    return conceptService.listAlternativeLabels(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, page);
+  }
+
+  @GetMapping("{name}/hiddenLabels")
+  public PagingResponse<HiddenLabel> listHiddenLabels(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      Pageable page) {
+    return conceptService.listHiddenLabels(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), page);
+  }
+
+  @PostMapping("{name}/label")
+  public Long addLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody Label label) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    return conceptService.addLabel(concept.getKey(), label);
+  }
+
+  @PostMapping("{name}/alternativeLabels")
+  public Long addAlternativeLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody Label label) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    return conceptService.addAlternativeLabel(concept.getKey(), label);
+  }
+
+  @PostMapping("{name}/hiddenLabels")
+  public Long addHiddenLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestBody HiddenLabel label) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    return conceptService.addHiddenLabel(concept.getKey(), label);
+  }
+
+  @DeleteMapping("{name}/label/{key}")
+  public void deleteLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long key) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    conceptService.deleteLabel(concept.getKey(), key);
+  }
+
+  @DeleteMapping("{name}/alternativeLabels/{key}")
+  public void deleteAlternativeLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long key) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    conceptService.deleteAlternativeLabel(concept.getKey(), key);
+  }
+
+  @DeleteMapping("{name}/hiddenLabels/{key}")
+  public void deleteHiddenLabel(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @PathVariable("key") long key) {
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+    conceptService.deleteHiddenLabel(concept.getKey(), key);
+  }
+
+  private Concept getConceptWithCheck(String conceptName, String vocabularyName) {
     Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
     checkArgument(
         concept != null,
         "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
-    Tag tag = tagService.getByName(tagName);
-    checkArgument(tag != null, "Tag not found for name " + tagName);
-    conceptService.removeTag(concept.getKey(), tag.getKey());
+    return concept;
+  }
+
+  private ConceptView createLabelsLinks(
+      ConceptView conceptView, String vocabularyName, String conceptName) {
+    conceptView.setAlternativeLabelsLink(
+        String.format(
+            "%s/vocabularies/%s/concepts/%s/alternativeLabels",
+            wsConfig.getApiUrl(), vocabularyName, conceptName));
+    conceptView.setHiddenLabelsLink(
+        String.format(
+            "%s/vocabularies/%s/concepts/%s/hiddenLabels",
+            wsConfig.getApiUrl(), vocabularyName, conceptName));
+    return conceptView;
   }
 }

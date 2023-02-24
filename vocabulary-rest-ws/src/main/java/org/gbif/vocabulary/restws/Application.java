@@ -13,6 +13,9 @@
  */
 package org.gbif.vocabulary.restws;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.gbif.common.messaging.ConnectionParameters;
 import org.gbif.common.messaging.DefaultMessagePublisher;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -20,6 +23,7 @@ import org.gbif.vocabulary.SpringConfig;
 import org.gbif.vocabulary.restws.config.ConfigPropertiesValidator;
 import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.restws.config.MessagingConfig;
+import org.gbif.vocabulary.restws.config.WsConfig;
 import org.gbif.vocabulary.restws.resolvers.LanguageRegionHandlerMethodArgumentResolver;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.ws.remoteauth.RemoteAuthClient;
@@ -29,15 +33,13 @@ import org.gbif.ws.server.filter.HttpServletRequestWrapperFilter;
 import org.gbif.ws.server.filter.RequestHeaderParamUpdateFilter;
 import org.gbif.ws.server.provider.PageableHandlerMethodArgumentResolver;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -63,7 +65,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ComponentScan(
     basePackages = {"org.gbif.vocabulary.restws", "org.gbif.ws.remoteauth"},
     excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE)})
-@EnableConfigurationProperties({ExportConfig.class, MessagingConfig.class, SecurityConfig.class})
+@EnableConfigurationProperties({
+  ExportConfig.class,
+  MessagingConfig.class,
+  SecurityConfig.class,
+  WsConfig.class
+})
+@EnableFeignClients
 public class Application {
 
   public static void main(String[] args) {

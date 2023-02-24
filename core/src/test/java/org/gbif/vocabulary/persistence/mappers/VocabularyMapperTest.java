@@ -13,22 +13,20 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.gbif.vocabulary.TestUtils;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +39,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
-import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -170,9 +166,9 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
     assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 1);
 
-    c1.getLabel().put(LanguageRegion.ACHOLI, "aa");
-    conceptMapper.update(c1);
-
+    conceptMapper.addLabel(
+        c1.getKey(),
+        Label.builder().language(LanguageRegion.ACHOLI).value("aa").createdBy("test").build());
     assertList(VocabularySearchParams.builder().hasUnreleasedChanges(false).build(), 0);
   }
 
@@ -202,18 +198,33 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     Vocabulary v1 = createNewEntity();
     v1.setName("Suggest111");
 
-    Map<LanguageRegion, String> labelsV1 = new HashMap<>();
-    labelsV1.put(LanguageRegion.SPANISH, "labelspanish");
-    labelsV1.put(LanguageRegion.ENGLISH, "labelenglish");
-    v1.setLabel(labelsV1);
-
     vocabularyMapper.create(v1);
     assertNotNull(v1.getKey());
+
+    vocabularyMapper.addLabel(
+        v1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.SPANISH)
+            .value("labelspanish")
+            .createdBy("test")
+            .build());
+
+    vocabularyMapper.addLabel(
+        v1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.ENGLISH)
+            .value("labelenglish")
+            .createdBy("test")
+            .build());
 
     Vocabulary v2 = createNewEntity();
     v2.setName("Suggest222");
     vocabularyMapper.create(v2);
     assertNotNull(v2.getKey());
+
+    vocabularyMapper.addLabel(
+        v2.getKey(),
+        Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
 
     // check result values
     List<KeyNameResult> result = vocabularyMapper.suggest("suggest1", null);
@@ -228,92 +239,38 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertEquals(0, vocabularyMapper.suggest(null, null).size());
     assertEquals(2, vocabularyMapper.suggest("label", null).size());
     assertEquals(1, vocabularyMapper.suggest("labeleng", null).size());
-    assertEquals(
-        0, vocabularyMapper.suggest("labeleng", LanguageRegion.SPANISH.getLocale()).size());
-    assertEquals(
-        1, vocabularyMapper.suggest("labeleng", LanguageRegion.ENGLISH.getLocale()).size());
+    assertEquals(0, vocabularyMapper.suggest("labeleng", LanguageRegion.SPANISH).size());
+    assertEquals(1, vocabularyMapper.suggest("labeleng", LanguageRegion.ENGLISH).size());
   }
 
   @Test
   public void findSimilaritiesTest() {
     Vocabulary vocabulary1 = createNewEntity();
-    vocabulary1.setLabel(Collections.singletonMap(LanguageRegion.SPANISH, "igual"));
     vocabularyMapper.create(vocabulary1);
 
-    // check Spanish labels
-    NormalizedValuesParam spanishValues =
-        NormalizedValuesParam.from(
-            LanguageRegion.SPANISH.getLocale(), Arrays.asList("igual", "foo"));
-
-    List<KeyNameResult> similarities =
-        vocabularyMapper.findSimilarities(Collections.singletonList(spanishValues), null);
-    assertEquals(1, similarities.size());
-    assertSimilarity(similarities, vocabulary1);
-
-    spanishValues.setValues(Arrays.asList("foo", "bar"));
-    assertEquals(
-        0,
-        vocabularyMapper.findSimilarities(Collections.singletonList(spanishValues), null).size());
-
     // check name
-    NormalizedValuesParam namesValues =
-        NormalizedValuesParam.from(
-            NAME_NODE, Collections.singletonList(normalizeName(vocabulary1.getName())));
-
-    similarities = vocabularyMapper.findSimilarities(Collections.singletonList(namesValues), null);
+    List<KeyNameResult> similarities =
+        vocabularyMapper.findSimilarities(normalizeName(vocabulary1.getName()), null);
     assertEquals(1, similarities.size());
     assertSimilarity(similarities, vocabulary1);
 
     // create another vocabulary
     Vocabulary vocabulary2 = createNewEntity();
     vocabulary2.setName("AnotherVocab");
-    vocabulary2.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "another label "));
     vocabularyMapper.create(vocabulary2);
 
     // check with multiple labels
-    spanishValues.setValues(Collections.singletonList("igual"));
-    namesValues.setValues(Collections.singletonList(normalizeName("Another Vocab")));
-    similarities =
-        vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
-    assertEquals(2, similarities.size());
-
-    namesValues.setValues(Collections.singletonList(normalizeName("new Vocab")));
-    similarities =
-        vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
+    similarities = vocabularyMapper.findSimilarities(normalizeName("Another Vocab"), null);
     assertEquals(1, similarities.size());
-    assertSimilarity(similarities, vocabulary1);
+    assertSimilarity(similarities, vocabulary2);
 
-    similarities =
-        vocabularyMapper.findSimilarities(
-            Arrays.asList(spanishValues, namesValues), vocabulary1.getKey());
+    similarities = vocabularyMapper.findSimilarities(normalizeName("new Vocab"), null);
     assertEquals(0, similarities.size());
-
-    spanishValues.setNode(LanguageRegion.ENGLISH.getLocale());
-    similarities =
-        vocabularyMapper.findSimilarities(Arrays.asList(spanishValues, namesValues), null);
-    assertEquals(0, similarities.size());
-
-    NormalizedValuesParam englishValues =
-        NormalizedValuesParam.from(
-            LanguageRegion.ENGLISH.getLocale(),
-            Collections.singletonList(normalizeLabel("another label")));
-    assertEquals(
-        1,
-        vocabularyMapper.findSimilarities(Collections.singletonList(englishValues), null).size());
-
-    // remove labels and there shouldn't be similarities in labels
-    vocabulary2 = vocabularyMapper.get(vocabulary2.getKey());
-    vocabulary2.setLabel(null);
-    vocabularyMapper.update(vocabulary2);
-
-    assertEquals(
-        0,
-        vocabularyMapper.findSimilarities(Collections.singletonList(englishValues), null).size());
   }
 
   private void assertSimilarity(List<KeyNameResult> similarities, Vocabulary vocabulary) {
     assertEquals(1, similarities.size());
-    assertEquals(vocabulary.getKey().intValue(), similarities.get(0).getKey());
+    assertEquals(vocabulary.getKey(), similarities.get(0).getKey());
     assertEquals(vocabulary.getName(), similarities.get(0).getName());
   }
 
@@ -345,13 +302,91 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertEquals(0, vocabs.size());
   }
 
+  @Test
+  public void definitionTest() {
+    Vocabulary vocabulary = createNewEntity();
+    vocabularyMapper.create(vocabulary);
+
+    Definition definition =
+        Definition.builder()
+            .language(LanguageRegion.ENGLISH)
+            .createdBy("test")
+            .modifiedBy("test")
+            .value("test")
+            .build();
+    vocabularyMapper.addDefinition(vocabulary.getKey(), definition);
+
+    List<Definition> definitions = vocabularyMapper.listDefinitions(vocabulary.getKey(), null);
+    assertEquals(1, definitions.size());
+
+    assertEquals(
+        1,
+        vocabularyMapper
+            .listDefinitions(vocabulary.getKey(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyMapper
+            .listDefinitions(vocabulary.getKey(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    definition = vocabularyMapper.getDefinition(vocabulary.getKey(), definition.getKey());
+    assertEquals("test", definition.getValue());
+    assertEquals(LanguageRegion.ENGLISH, definition.getLanguage());
+    assertEquals("test", definition.getCreatedBy());
+    assertEquals("test", definition.getModifiedBy());
+    assertNotNull(definition.getCreated());
+    assertNotNull(definition.getModified());
+
+    definition.setValue("test2");
+    vocabularyMapper.updateDefinition(vocabulary.getKey(), definition);
+    definition = vocabularyMapper.getDefinition(vocabulary.getKey(), definition.getKey());
+    assertEquals("test2", definition.getValue());
+
+    vocabularyMapper.deleteDefinition(vocabulary.getKey(), definition.getKey());
+
+    definitions = vocabularyMapper.listDefinitions(vocabulary.getKey(), null);
+    assertEquals(0, definitions.size());
+  }
+
+  @Test
+  public void labelsTest() {
+    Vocabulary vocabulary = createNewEntity();
+    vocabularyMapper.create(vocabulary);
+
+    Label label =
+        Label.builder().language(LanguageRegion.ENGLISH).createdBy("test").value("test").build();
+    vocabularyMapper.addLabel(vocabulary.getKey(), label);
+
+    List<Label> labels = vocabularyMapper.listLabels(vocabulary.getKey(), null);
+    assertEquals(1, labels.size());
+    label = labels.get(0);
+    assertEquals("test", label.getValue());
+    assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
+    assertEquals("test", label.getCreatedBy());
+    assertNotNull(label.getCreated());
+
+    assertEquals(
+        1,
+        vocabularyMapper
+            .listLabels(vocabulary.getKey(), Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        vocabularyMapper
+            .listLabels(vocabulary.getKey(), Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    vocabularyMapper.deleteLabel(vocabulary.getKey(), label.getKey());
+
+    labels = vocabularyMapper.listLabels(vocabulary.getKey(), null);
+    assertEquals(0, labels.size());
+  }
+
   @Override
   Vocabulary createNewEntity() {
     Vocabulary entity = new Vocabulary();
     entity.setName(TestUtils.getRandomName());
-    entity.setLabel(new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Label")));
-    entity.setDefinition(
-        new HashMap<>(Collections.singletonMap(LanguageRegion.ENGLISH, "Definition")));
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));
     entity.setEditorialNotes(new ArrayList<>(Collections.singletonList("Note test")));

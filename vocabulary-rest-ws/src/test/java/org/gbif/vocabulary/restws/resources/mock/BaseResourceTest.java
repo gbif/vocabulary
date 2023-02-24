@@ -126,7 +126,6 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     Vocabulary vocabulary = new Vocabulary();
     vocabulary.setName(name);
     vocabulary.setNamespace(NAMESPACE_TEST);
-    vocabulary.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
     vocabulary.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return vocabulary;

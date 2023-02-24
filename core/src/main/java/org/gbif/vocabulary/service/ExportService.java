@@ -16,6 +16,7 @@ package org.gbif.vocabulary.service;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.export.Export;
 import org.gbif.vocabulary.model.export.ExportParams;
 
 import java.nio.file.Path;
@@ -31,7 +32,7 @@ public interface ExportService {
    *
    * @param vocabularyName name of the vocabulary to import
    * @return path of the file that contains the {@link
-   *     org.gbif.vocabulary.model.export.VocabularyExport} serialized in json
+   *     Export} serialized in json
    */
   Path exportVocabulary(@NotBlank String vocabularyName);
 
@@ -41,7 +42,7 @@ public interface ExportService {
    * @param vocabularyName name of the vocabulary to import
    * @param version version to set in the metadata
    * @return path of the file that contains the {@link
-   *     org.gbif.vocabulary.model.export.VocabularyExport} serialized in json
+   *     Export} serialized in json
    */
   Path exportVocabulary(@NotBlank String vocabularyName, String version);
 

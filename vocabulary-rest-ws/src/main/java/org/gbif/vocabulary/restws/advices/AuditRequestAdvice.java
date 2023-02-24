@@ -13,10 +13,11 @@
  */
 package org.gbif.vocabulary.restws.advices;
 
-import org.gbif.vocabulary.model.VocabularyEntity;
-
 import java.io.IOException;
 import java.lang.reflect.Type;
+
+import org.gbif.vocabulary.model.Auditable;
+import org.gbif.vocabulary.model.LabelEntity;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
@@ -30,8 +31,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Intercepts all the requests with a {@link org.gbif.vocabulary.model.VocabularyEntity} in the body
- * and assigns the required {@link org.gbif.vocabulary.model.Auditable} fields.
+ * Intercepts all the requests with a {@link org.gbif.vocabulary.model.Auditable} in the body and
+ * sets the required fields.
  */
 @ControllerAdvice
 @Slf4j
@@ -43,7 +44,8 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
       Type targetType,
       @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     try {
-      return VocabularyEntity.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
+      return Auditable.class.isAssignableFrom(Class.forName(targetType.getTypeName()))
+          || LabelEntity.class.isAssignableFrom(Class.forName(targetType.getTypeName()));
     } catch (ClassNotFoundException e) {
       log.debug("Unexpected target type", e);
       return false;
@@ -72,15 +74,25 @@ public class AuditRequestAdvice implements RequestBodyAdvice {
       @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
     // set auditable fields
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    VocabularyEntity vocabularyEntity = (VocabularyEntity) body;
 
-    if (vocabularyEntity.getCreatedBy() == null) {
-      vocabularyEntity.setCreatedBy(authentication.getName());
+    if (body instanceof Auditable) {
+      Auditable auditableEntity = (Auditable) body;
+      if (auditableEntity.getCreatedBy() == null) {
+        auditableEntity.setCreatedBy(authentication.getName());
+      }
+      auditableEntity.setModifiedBy(authentication.getName());
+
+      return auditableEntity;
+    } else if (body instanceof LabelEntity) {
+      LabelEntity labelEntity = (LabelEntity) body;
+      if (labelEntity.getCreatedBy() == null) {
+        labelEntity.setCreatedBy(authentication.getName());
+      }
+
+      return labelEntity;
     }
 
-    vocabularyEntity.setModifiedBy(authentication.getName());
-
-    return vocabularyEntity;
+    return body;
   }
 
   @Override

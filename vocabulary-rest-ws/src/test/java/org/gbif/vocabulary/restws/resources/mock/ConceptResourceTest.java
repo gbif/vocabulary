@@ -13,12 +13,17 @@
  */
 package org.gbif.vocabulary.restws.resources.mock;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.api.DeprecateAction;
 import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
@@ -26,12 +31,6 @@ import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.restws.resources.ConceptResource;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -88,8 +87,8 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
         mockMvc.perform(get(getBasePath())).andExpect(status().isOk()).andReturn();
 
     JsonNode rootNode = OBJECT_MAPPER.readTree(mvcResult.getResponse().getContentAsString());
-    List<Concept> resultList =
-        OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<Concept>>() {});
+    List<ConceptView> resultList =
+        OBJECT_MAPPER.convertValue(rootNode.get("results"), new TypeReference<List<ConceptView>>() {});
 
     assertEquals(concepts.size(), resultList.size());
   }
@@ -251,10 +250,6 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
     Concept concept = new Concept();
     concept.setVocabularyKey(TEST_VOCABULARY_KEY);
     concept.setName(UUID.randomUUID().toString());
-    concept.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "Label"));
-    concept.setAlternativeLabels(
-        Collections.singletonMap(
-            LanguageRegion.ENGLISH, new HashSet<>(Arrays.asList("Label2", "Label3"))));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

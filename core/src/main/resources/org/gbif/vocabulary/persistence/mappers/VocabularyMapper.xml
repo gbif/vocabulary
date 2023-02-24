@@ -4,31 +4,39 @@
 
   <resultMap id="VOCABULARY_MAP" type="Vocabulary" autoMapping="true">
     <id property="key" column="key"/>
-    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
-    <result property="definition" column="definition" typeHandler="ValueByLanguageMapTypeHandler"/>
     <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
+    <collection property="definition" column="key" select="listVocabularyDefinitions"/>
+    <collection property="label" column="key" select="listVocabularyLabels"/>
   </resultMap>
 
   <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">
     <id property="key" column="key"/>
-    <result property="label" column="label" typeHandler="ValueByLanguageMapTypeHandler"/>
+    <collection property="labels" column="key" select="listVocabularyLabels"/>
+  </resultMap>
+
+  <resultMap id="LABEL_RESULT_MAP" type="Label" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="language" column="language" typeHandler="LanguageRegionTypeHandler"/>
+  </resultMap>
+
+  <resultMap id="DEFINITION_RESULT_MAP" type="Definition" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="language" column="language" typeHandler="LanguageRegionTypeHandler"/>
   </resultMap>
 
   <sql id="VOCABULARY_READ_FIELDS">
-    v.key, v.namespace, v.name, v.label, v.definition, v.external_definition_urls, v.editorial_notes, v.replaced_by_key,
-    v.deprecated_by, v.deprecated, v.created_by, v.modified_by, v.created, v.modified, v.deleted
+    v.key, v.namespace, v.name, v.external_definition_urls, v.editorial_notes, v.replaced_by_key,
+    v.deprecated_by, v.deprecated, v.created_by, v.modified_by, v.created, v.modified
   </sql>
 
   <sql id="VOCABULARY_INSERT_FIELDS">
-    namespace, name, label, definition, external_definition_urls, editorial_notes, created_by, modified_by, created, modified
+    namespace, name, external_definition_urls, editorial_notes, created_by, modified_by, created, modified
   </sql>
 
   <sql id="VOCABULARY_INSERT_PARAMS">
     #{namespace,jdbcType=VARCHAR},
     #{name,jdbcType=VARCHAR},
-    #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
-    #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
     #{createdBy,jdbcType=VARCHAR},
@@ -40,13 +48,25 @@
   <sql id="VOCABULARY_PARAMS_UPDATE">
     namespace = #{namespace,jdbcType=VARCHAR},
     name = #{name,jdbcType=VARCHAR},
-    label = #{label,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
-    definition = #{definition,jdbcType=OTHER,typeHandler=ValueByLanguageMapTypeHandler}::jsonb,
     external_definition_urls = #{externalDefinitions,jdbcType=ARRAY,typeHandler=UriArrayTypeHandler},
     editorial_notes = #{editorialNotes,jdbcType=ARRAY,typeHandler=StringArrayTypeHandler},
     modified_by = #{modifiedBy,jdbcType=VARCHAR},
     modified = now(),
-    deleted = null <!-- if we're updating it can't be deleted -->
+    deprecated = null <!-- if we're updating it can't be deprecated -->
+  </sql>
+
+  <sql id="FULL_TEXT">
+    JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    OR EXISTS(
+    SELECT vd.key
+    FROM vocabulary_definition vd
+    WHERE vd.vocabulary_key = v.key AND query @@ vd.fulltext_search
+    )
+    OR EXISTS(
+      SELECT vl.key
+      FROM vocabulary_label vl
+      WHERE vl.vocabulary_key = v.key AND query @@ vl.fulltext_search
+    )
   </sql>
 
   <!-- QUERIES FROM HERE -->
@@ -60,7 +80,7 @@
     UPDATE vocabulary
     SET
     <include refid="VOCABULARY_PARAMS_UPDATE"/>
-    WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
+    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NULL
   </update>
 
   <select id="get" resultMap="VOCABULARY_MAP">
@@ -77,12 +97,18 @@
     WHERE v.name = #{name,jdbcType=VARCHAR}
   </select>
 
+  <select id="getKeyByName" resultMap="VOCABULARY_MAP">
+    SELECT v.key
+    FROM vocabulary v
+    WHERE v.name = #{name,jdbcType=VARCHAR}
+  </select>
+
   <select id="list" resultType="Vocabulary" resultMap="VOCABULARY_MAP">
     SELECT DISTINCT ON (<if test="params.query != null">ts_rank_cd(v.fulltext_search, query),</if> v.created, v.key)
     <include refid="VOCABULARY_READ_FIELDS"/>
     FROM vocabulary v
     <if test="params.query != null">
-      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      <include refid="FULL_TEXT"/>
     </if>
     <if test="params.hasUnreleasedChanges != null">
       LEFT JOIN LATERAL (
@@ -94,29 +120,30 @@
       ) latestRelease ON true
       LEFT JOIN concept c ON c.vocabulary_key = v.key
     </if>
-    WHERE v.deleted IS NULL
-    <if test="params.deprecated != null">
-      AND v.deprecated IS <if test="params.deprecated">NOT</if> NULL
-    </if>
-    <if test="params.name != null">
-      AND v.name = #{params.name}
-    </if>
-    <if test="params.namespace != null">
-      AND v.namespace = #{params.namespace}
-    </if>
-    <if test="params.key != null">
-      AND v.key = #{params.key}
-    </if>
-    <if test="params.hasUnreleasedChanges != null">
-      <choose>
-        <when test="params.hasUnreleasedChanges">
-          AND (latestRelease IS NULL OR v.modified > latestRelease.created OR c.modified > latestRelease.created)
-        </when>
-        <otherwise>
-          AND (latestRelease IS NOT NULL AND v.modified &lt;= latestRelease.created AND (c IS NULL OR c.modified &lt;= latestRelease.created))
-        </otherwise>
-      </choose>
-    </if>
+    <where>
+      <if test="params.deprecated != null">
+        v.deprecated IS <if test="params.deprecated">NOT</if> NULL
+      </if>
+      <if test="params.name != null">
+        AND v.name = #{params.name}
+      </if>
+      <if test="params.namespace != null">
+        AND v.namespace = #{params.namespace}
+      </if>
+      <if test="params.key != null">
+        AND v.key = #{params.key}
+      </if>
+      <if test="params.hasUnreleasedChanges != null">
+        <choose>
+          <when test="params.hasUnreleasedChanges">
+            AND (latestRelease IS NULL OR v.modified > latestRelease.created OR c.modified > latestRelease.created)
+          </when>
+          <otherwise>
+            AND (latestRelease IS NOT NULL AND v.modified &lt;= latestRelease.created AND (c IS NULL OR c.modified &lt;= latestRelease.created))
+          </otherwise>
+        </choose>
+      </if>
+    </where>
     ORDER BY <if test="params.query != null">ts_rank_cd(v.fulltext_search, query) DESC,</if> v.created DESC, v.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
@@ -127,7 +154,7 @@
     SELECT COUNT(DISTINCT v.key)
     FROM vocabulary v
     <if test="params.query != null">
-      JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(#{params.query})),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+      <include refid="FULL_TEXT"/>
     </if>
     <if test="params.hasUnreleasedChanges != null">
       LEFT JOIN LATERAL (
@@ -139,62 +166,63 @@
       ) latestRelease ON true
       LEFT JOIN concept c ON c.vocabulary_key = v.key
     </if>
-    WHERE v.deleted IS NULL
-    <if test="params.deprecated != null">
-      AND v.deprecated IS <if test="params.deprecated">NOT</if> NULL
-    </if>
-    <if test="params.name != null">
-      AND v.name = #{params.name}
-    </if>
-    <if test="params.namespace != null">
-      AND v.namespace = #{params.namespace}
-    </if>
-    <if test="params.key != null">
-      AND v.key = #{params.key}
-    </if>
-    <if test="params.hasUnreleasedChanges != null">
-      <choose>
-        <when test="params.hasUnreleasedChanges">
-          AND (latestRelease IS NULL OR v.modified > latestRelease.created OR c.modified > latestRelease.created)
-        </when>
-        <otherwise>
-          AND (latestRelease IS NOT NULL AND v.modified &lt;= latestRelease.created AND (c IS NULL OR c.modified &lt;= latestRelease.created))
-        </otherwise>
-      </choose>
-    </if>
+    <where>
+      <if test="params.deprecated != null">
+        v.deprecated IS <if test="params.deprecated">NOT</if> NULL
+      </if>
+      <if test="params.name != null">
+        AND v.name = #{params.name}
+      </if>
+      <if test="params.namespace != null">
+        AND v.namespace = #{params.namespace}
+      </if>
+      <if test="params.key != null">
+        AND v.key = #{params.key}
+      </if>
+      <if test="params.hasUnreleasedChanges != null">
+        <choose>
+          <when test="params.hasUnreleasedChanges">
+            AND (latestRelease IS NULL OR v.modified > latestRelease.created OR c.modified > latestRelease.created)
+          </when>
+          <otherwise>
+            AND (latestRelease IS NOT NULL AND v.modified &lt;= latestRelease.created AND (c IS NULL OR c.modified &lt;= latestRelease.created))
+          </otherwise>
+        </choose>
+      </if>
+    </where>
   </select>
 
   <select id="suggest" resultMap="KEY_NAME_RESULT_MAP">
-    SELECT DISTINCT ON(key) key, name, label
+    SELECT DISTINCT ON(key) key, name
     FROM (
-    (SELECT key, name, label
-    FROM vocabulary
-    WHERE name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
-    ORDER BY name LIMIT 20
-    )
+      (SELECT key, name
+      FROM vocabulary
+      WHERE name ilike #{query}||'%' AND deprecated IS NULL
+      ORDER BY name LIMIT 20
+      )
     UNION ALL
-    (SELECT key, name, label
-    FROM vocabulary
-    WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deleted IS NULL AND deprecated IS NULL
-    ORDER BY name LIMIT 20
-    )
+      (SELECT key, name
+      FROM vocabulary
+      WHERE name ilike '%'||#{query}||'%' AND NOT name ilike #{query}||'%' AND deprecated IS NULL
+      ORDER BY name LIMIT 20
+      )
     UNION ALL
-    (SELECT DISTINCT v.key, v.name, v.label
-    FROM vocabulary v
-    JOIN jsonb_each_text(v.label) l ON true
-    WHERE l.value ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
-    <if test="locale != null">
-      AND l.key = #{locale}
+      (SELECT DISTINCT v.key, v.name
+      FROM vocabulary v
+      JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
+      WHERE vl.value ilike #{query}||'%' AND v.deprecated IS NULL
+    <if test="lang != null">
+      AND vl.language = #{lang}
     </if>
     LIMIT 20
     )
     UNION ALL
-    (SELECT DISTINCT v.key, v.name, v.label
+    (SELECT DISTINCT v.key, v.name
     FROM vocabulary v
-    JOIN jsonb_each_text(v.label) l ON true
-    WHERE l.value ilike '%'||#{query}||'%' AND NOT l.value ilike #{query}||'%' AND v.deleted IS NULL AND v.deprecated IS NULL
-    <if test="locale != null">
-      AND l.key = #{locale}
+    JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
+    WHERE vl.value ilike '%'||#{query}||'%' AND NOT vl.value ilike #{query}||'%' AND v.deprecated IS NULL
+    <if test="lang != null">
+      AND vl.language= #{lang}
     </if>
     LIMIT 20
     )
@@ -202,16 +230,13 @@
   </select>
 
   <select id="findSimilarities" resultType="KeyNameResult">
-    SELECT key, name
+    SELECT DISTINCT ON(key) key, name
     FROM vocabulary
     <where>
       <if test="vocabularyKey != null">
         key != #{vocabularyKey}
       </if>
-      AND
-      <foreach collection="normalizedValues" item="v" separator=" OR " open="(" close=")">
-        normalized_values::jsonb->#{v.node} ??| #{v.values, typeHandler=StringArrayTypeHandler}
-      </foreach>
+      AND normalize_name(name) = #{name,jdbcType=VARCHAR}
     </where>
     LIMIT 3
   </select>
@@ -228,13 +253,13 @@
         ,replaced_by_key=null
       </otherwise>
     </choose>
-    WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
+    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NULL
   </update>
 
   <update id="restoreDeprecated">
     UPDATE vocabulary
     SET deprecated = null, deprecated_by = null, replaced_by_key = null
-    WHERE key = #{key,jdbcType=BIGINT} AND deleted IS NULL
+    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NOT NULL
   </update>
 
   <select id="isDeprecated" resultType="Boolean">
@@ -247,5 +272,95 @@
     DELETE FROM vocabulary
     WHERE key = #{key,jdbcType=BIGINT}
   </delete>
+
+  <!-- definition -->
+  <insert id="addDefinition" useGeneratedKeys="true" keyProperty="definition.key" keyColumn="key">
+    INSERT INTO vocabulary_definition(vocabulary_key, language, value, created_by, modified_by, created, modified)
+    VALUES(#{entityKey,jdbcType=BIGINT},
+    #{definition.language,jdbcType=VARCHAR,typeHandler=LanguageRegionTypeHandler},
+    #{definition.value,jdbcType=VARCHAR},
+    #{definition.createdBy,jdbcType=VARCHAR},
+    #{definition.modifiedBy,jdbcType=VARCHAR},
+    now(), <!-- created -->
+    now() <!-- modified -->)
+  </insert>
+
+  <update id="updateDefinition">
+    UPDATE vocabulary_definition
+    SET value = #{definition.value,jdbcType=VARCHAR},
+        modified_by = #{definition.modifiedBy,jdbcType=VARCHAR},
+        modified = now()
+    WHERE key = #{definition.key,jdbcType=BIGINT} AND vocabulary_key = #{entityKey,jdbcType=BIGINT}
+  </update>
+
+  <delete id="deleteDefinition">
+    DELETE FROM vocabulary_definition
+    WHERE key = #{key,jdbcType=BIGINT} AND vocabulary_key = #{entityKey,jdbcType=BIGINT}
+  </delete>
+
+  <select id="listDefinitions" resultType="Definition" resultMap="DEFINITION_RESULT_MAP">
+    SELECT key, language, value, created_by, created, modified_by, modified
+    FROM vocabulary_definition
+    WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
+    <if test="langs != null">
+      AND language IN
+      <foreach item="item" collection="langs" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    ORDER BY created DESC
+  </select>
+
+  <select id="listVocabularyDefinitions" resultType="Definition" resultMap="DEFINITION_RESULT_MAP">
+    SELECT key, language, value, created_by, created, modified_by, modified
+    FROM vocabulary_definition
+    WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
+    ORDER BY created DESC
+  </select>
+
+  <select id="getDefinition" resultType="Definition" resultMap="DEFINITION_RESULT_MAP">
+    SELECT key, language, value, created_by, created, modified_by, modified
+    FROM vocabulary_definition
+    WHERE key = #{key,jdbcType=BIGINT} AND vocabulary_key = #{entityKey,jdbcType=BIGINT}
+  </select>
+
+  <!-- labels -->
+  <sql id="LABEL_FIELDS">
+    key, language, value, created_by, created
+  </sql>
+
+  <insert id="addLabel" useGeneratedKeys="true" keyProperty="label.key" keyColumn="key">
+    INSERT INTO vocabulary_label(vocabulary_key, language, value, created_by, created)
+    VALUES(#{entityKey,jdbcType=BIGINT},
+           #{label.language,jdbcType=VARCHAR,typeHandler=LanguageRegionTypeHandler},
+           #{label.value,jdbcType=VARCHAR},
+           #{label.createdBy,jdbcType=VARCHAR},
+           now()<!-- created -->)
+  </insert>
+
+  <delete id="deleteLabel">
+    DELETE FROM vocabulary_label
+    WHERE key = #{key,jdbcType=BIGINT} AND vocabulary_key = #{entityKey,jdbcType=BIGINT}
+  </delete>
+
+  <select id="listLabels" resultType="Label" resultMap="LABEL_RESULT_MAP">
+    SELECT <include refid="LABEL_FIELDS"/>
+    FROM vocabulary_label
+    WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
+    <if test="langs != null">
+      AND language IN
+      <foreach item="item" collection="langs" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    ORDER BY created DESC
+  </select>
+
+  <select id="listVocabularyLabels" resultType="Label" resultMap="LABEL_RESULT_MAP">
+    SELECT <include refid="LABEL_FIELDS"/>
+    FROM vocabulary_label
+    WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
+    ORDER BY created DESC
+  </select>
 
 </mapper>

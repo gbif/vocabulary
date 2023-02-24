@@ -13,7 +13,7 @@
  */
 package org.gbif.vocabulary.tools;
 
-import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.model.export.Export;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,10 +35,10 @@ public class VocabularyDownloaderTest {
         VocabularyDownloader.downloadLatestVocabularyVersion(
             "http://api.gbif-dev.org/v1/", "LifeStage");
 
-    VocabularyExport export =
+    Export export =
         new ObjectMapper()
             .registerModule(new JavaTimeModule())
-            .readValue(in, VocabularyExport.class);
+            .readValue(in, Export.class);
     assertNotNull(export);
   }
 }

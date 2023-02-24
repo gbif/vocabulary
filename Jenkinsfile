@@ -74,7 +74,7 @@ pipeline {
                 allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
-                    branch 'master';
+                    branch '#117_performance_tables';
                 }
             }
             steps {
@@ -108,17 +108,17 @@ pipeline {
             when {
                 allOf {
                     anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION }; };
-                    branch 'master';
+                    branch '#117_performance_tables';
                 }
             }
             steps {
                 sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
-                    git 'https://github.com/gbif/vocabulary.git'
+                    git branch:'#117_performance_tables', url:'https://github.com/gbif/vocabulary.git'
                     sh '''
                 mvn clean package -Pdocumentation
                 git add *.html
                 git commit -m "Generated API documentation"
-                git push git@github.com:gbif/vocabulary.git master
+                git push git@github.com:gbif/vocabulary.git #117_performance_tables
               '''
                 }
             }
@@ -134,7 +134,7 @@ pipeline {
                 allOf {
                     not { expression { params.RELEASE } };
                     not { expression { params.DOCUMENTATION } };
-                    branch 'master';
+                    branch '#117_performance_tables';
                 }
             }
             steps {

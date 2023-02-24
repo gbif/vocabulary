@@ -459,6 +459,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#resources-vocabulary-test-doc-get-vocabulary-release-test">Get Release</a></li>
 <li><a href="#resources-vocabulary-test-doc-get-release-export-test">Get Released Export</a></li>
 <li><a href="#resources-vocabulary-test-doc-delete-vocabulary-test">Delete Vocabulary</a></li>
+<li><a href="#resources-vocabulary-test-doc-add-definition-test">Add Definition</a></li>
+<li><a href="#resources-vocabulary-test-doc-update-definition-test">Update Definition</a></li>
+<li><a href="#resources-vocabulary-test-doc-get-definition-test">Get Definition</a></li>
+<li><a href="#_list_definitions">List Definitions</a></li>
+<li><a href="#resources-vocabulary-test-doc-delete-definition-test">Delete Definition</a></li>
+<li><a href="#resources-vocabulary-test-doc-add-label-test">Add Label</a></li>
+<li><a href="#_list_labels">List Labels</a></li>
+<li><a href="#resources-vocabulary-test-doc-delete-label-test">Delete Label</a></li>
 </ul>
 </li>
 <li><a href="#_concept">Concept</a>
@@ -473,6 +481,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#resources-concept-test-doc-list-tags-test">List Tags</a></li>
 <li><a href="#resources-concept-test-doc-add-tag-test">Add Tag</a></li>
 <li><a href="#resources-concept-test-doc-remove-tag-test">Remove Tag</a></li>
+<li><a href="#resources-concept-test-doc-add-definition-test">Add Definition</a></li>
+<li><a href="#resources-concept-test-doc-update-definition-test">Update Definition</a></li>
+<li><a href="#resources-concept-test-doc-get-definition-test">Get Definition</a></li>
+<li><a href="#_list_definitions_2">List Definitions</a></li>
+<li><a href="#resources-concept-test-doc-delete-definition-test">Delete Definition</a></li>
+<li><a href="#resources-concept-test-doc-add-label-test">Add Label</a></li>
+<li><a href="#_list_labels_2">List Labels</a></li>
+<li><a href="#resources-concept-test-doc-delete-label-test">Delete Label</a></li>
+<li><a href="#resources-concept-test-doc-add-alternative-label-test">Add Alternative Label</a></li>
+<li><a href="#_list_labels_3">List Labels</a></li>
+<li><a href="#resources-concept-test-doc-delete-alternative-label-test">Delete Alternative Label</a></li>
+<li><a href="#resources-concept-test-doc-add-hidden-label-test">Add Hidden Label</a></li>
+<li><a href="#_list_labels_4">List Labels</a></li>
+<li><a href="#resources-concept-test-doc-delete-hidden-label-test">Delete Hidden Label</a></li>
 </ul>
 </li>
 <li><a href="#_tag">Tag</a>
@@ -623,9 +645,9 @@ This call should be done using basic auth.</p>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 344
+Content-Length: 275
 
-{"offset":0,"limit":20,"endOfRecords":true,"count":3,"results":[{"name":"vocab1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"namespace":"ns"},{"name":"vocab2","label":{"en":"Label"},"editorialNotes":["note1","note2"],"namespace":"ns"},{"name":"vocab3","label":{"en":"Label"},"editorialNotes":["note1","note2"],"namespace":"ns"}]}</code></pre>
+{"offset":0,"limit":20,"endOfRecords":true,"count":3,"results":[{"name":"vocab1","editorialNotes":["note1","note2"],"namespace":"ns"},{"name":"vocab2","editorialNotes":["note1","note2"],"namespace":"ns"},{"name":"vocab3","editorialNotes":["note1","note2"],"namespace":"ns"}]}</code></pre>
 </div>
 </div>
 </div>
@@ -682,13 +704,10 @@ Content-Length: 344
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 126
+Content-Length: 88
 
 {
   "name" : "vocab1",
-  "label" : {
-    "en" : "Label"
-  },
   "editorialNotes" : [ "note1", "note2" ],
   "namespace" : "ns"
 }</code></pre>
@@ -735,6 +754,16 @@ Content-Length: 126
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
@@ -743,16 +772,6 @@ Content-Length: 126
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be blank</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>externalDefinitions</code></p></td>
@@ -797,11 +816,6 @@ Content-Length: 126
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>modifiedBy</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleted</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LocalDateTime</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 </tbody>
@@ -829,6 +843,16 @@ Content-Length: 126
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
@@ -837,16 +861,6 @@ Content-Length: 126
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be blank</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>externalDefinitions</code></p></td>
@@ -893,11 +907,6 @@ Content-Length: 126
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleted</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LocalDateTime</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -907,7 +916,7 @@ Content-Length: 126
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies' -i -u 'user:password' -X POST \
     -H 'Content-Type: application/json' \
-    -d '{"name":"vocab1","label":{"en":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"namespace":"ns"}'</code></pre>
+    -d '{"name":"vocab1","externalDefinitions":[],"editorialNotes":["note1","note2"],"namespace":"ns","definition":[],"label":[]}'</code></pre>
 </div>
 </div>
 </div>
@@ -918,9 +927,9 @@ Content-Length: 126
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
 Location: http://api.gbif.org/vocabularies/vocab1
 Content-Type: application/json
-Content-Length: 100
+Content-Length: 77
 
-{"key":1,"name":"vocab1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"namespace":"ns"}</code></pre>
+{"key":1,"name":"vocab1","editorialNotes":["note1","note2"],"namespace":"ns"}</code></pre>
 </div>
 </div>
 </div>
@@ -985,6 +994,16 @@ Content-Length: 100
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
@@ -993,16 +1012,6 @@ Content-Length: 100
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be blank</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>externalDefinitions</code></p></td>
@@ -1047,11 +1056,6 @@ Content-Length: 100
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>modifiedBy</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleted</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LocalDateTime</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 </tbody>
@@ -1079,6 +1083,16 @@ Content-Length: 100
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>key</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must be null,Must not be null</p></td>
@@ -1087,16 +1101,6 @@ Content-Length: 100
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be blank</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>externalDefinitions</code></p></td>
@@ -1143,11 +1147,6 @@ Content-Length: 100
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleted</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LocalDateTime</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -1157,7 +1156,7 @@ Content-Length: 100
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1' -i -u 'user:password' -X PUT \
     -H 'Content-Type: application/json' \
-    -d '{"key":1,"name":"vocab1","label":{"en":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"namespace":"ns"}'</code></pre>
+    -d '{"key":1,"name":"vocab1","externalDefinitions":[],"editorialNotes":["note1","note2"],"namespace":"ns","definition":[],"label":[]}'</code></pre>
 </div>
 </div>
 </div>
@@ -1167,9 +1166,9 @@ Content-Length: 100
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 100
+Content-Length: 77
 
-{"key":1,"name":"vocab1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"namespace":"ns"}</code></pre>
+{"key":1,"name":"vocab1","editorialNotes":["note1","note2"],"namespace":"ns"}</code></pre>
 </div>
 </div>
 </div>
@@ -1457,7 +1456,7 @@ Content-Length: 74
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
-Content-Disposition: attachment; filename=export2013940032414832863.json
+Content-Disposition: attachment; filename=export7232080104929655921.json
 Accept-Ranges: bytes
 Content-Type: application/octet-stream</code></pre>
 </div>
@@ -1755,27 +1754,27 @@ Content-Length: 609
   "vocabulary" : {
     "key" : 1,
     "name" : "vocab",
-    "label" : {
-      "en" : "Label"
-    },
-    "definition" : { },
     "externalDefinitions" : [ ],
     "editorialNotes" : [ "note1", "note2" ],
-    "namespace" : "ns"
+    "namespace" : "ns",
+    "definition" : { },
+    "label" : {
+      "en" : "Label"
+    }
   },
   "concepts" : [ {
     "key" : 1,
     "name" : "Concept",
+    "externalDefinitions" : [ ],
+    "editorialNotes" : [ ],
+    "definition" : { },
     "label" : {
       "en" : "concept"
     },
-    "definition" : { },
-    "externalDefinitions" : [ ],
-    "editorialNotes" : [ ],
-    "alternativeLabels" : { },
-    "hiddenLabels" : [ ],
     "sameAsUris" : [ ],
-    "tags" : [ ]
+    "tags" : [ ],
+    "alternativeLabels" : { },
+    "hiddenLabels" : [ ]
   } ]
 }</code></pre>
 </div>
@@ -1837,6 +1836,536 @@ Content-Length: 609
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="resources-vocabulary-test-doc-add-definition-test">Add Definition</h3>
+<div class="paragraph">
+<p><code>POST /vocabularies/{name}/definition</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_14">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_14">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_14">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/definition' -i -u 'user:password' -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{"language":"en","value":"Label"}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_14">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
+Location: http://api.gbif.org/vocabularies/vocab1/definition/1
+Content-Type: application/json
+Content-Length: 41
+
+{"key":1,"language":"en","value":"Label"}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-vocabulary-test-doc-update-definition-test">Update Definition</h3>
+<div class="paragraph">
+<p><code>PUT /vocabularies/{name}/definition/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_15">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_15">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_15">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/definition/1' -i -u 'user:password' -X PUT \
+    -H 'Content-Type: application/json' \
+    -d '{"key":1,"language":"en","value":"Label"}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_15">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 41
+
+{"key":1,"language":"en","value":"Label"}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-vocabulary-test-doc-get-definition-test">Get Definition</h3>
+<div class="paragraph">
+<p><code>GET /vocabularies/{name}/definition/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_16">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_16">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_16">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/definition/1' -i -u 'user:password' -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_16">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 57
+
+{
+  "key" : 1,
+  "language" : "en",
+  "value" : "Label"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_list_definitions">List Definitions</h3>
+<div class="paragraph">
+<p><code>GET /vocabularies/{name}/definition</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_17">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_17">Query parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>lang</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Language</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_example_request_17">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/definition?lang=en' -i -u 'user:password' -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_17">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 43
+
+[{"key":1,"language":"en","value":"Label"}]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-vocabulary-test-doc-delete-definition-test">Delete Definition</h3>
+<div class="paragraph">
+<p><code>DELETE /vocabularies/{name}/definition/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_18">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_18">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_18">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/definition/1' -i -u 'user:password' -X DELETE</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_18">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-vocabulary-test-doc-add-label-test">Add Label</h3>
+<div class="paragraph">
+<p><code>POST /vocabularies/{name}/label</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_19">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_19">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_19">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/label' -i -u 'user:password' -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{"language":"en","value":"Label"}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_19">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
+Location: http://api.gbif.org/vocabularies/vocab1/label/1
+Content-Type: application/json
+Content-Length: 1
+
+1</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_list_labels">List Labels</h3>
+<div class="paragraph">
+<p><code>GET /vocabularies/{name}/label</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_20">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_20">Query parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>lang</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Language</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_example_request_20">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/label?lang=en' -i -u 'user:password' -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_20">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 43
+
+[{"key":1,"language":"en","value":"Label"}]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-vocabulary-test-doc-delete-label-test">Delete Label</h3>
+<div class="paragraph">
+<p><code>DELETE /vocabularies/{name}/label/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_21">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_21">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_21">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/label/1' -i -u 'user:password' -X DELETE</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_21">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1851,7 +2380,7 @@ Content-Length: 609
 <p><code>GET /vocabularies/{vocabularyName}/concepts</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_14">Path parameters</h4>
+<h4 id="_path_parameters_22">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -1878,7 +2407,7 @@ Content-Length: 609
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_14">Query parameters</h4>
+<h4 id="_query_parameters_22">Query parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -1955,7 +2484,7 @@ Content-Length: 609
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_14">Example request</h4>
+<h4 id="_example_request_22">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts?q=test&amp;parentKey=2&amp;parent=concept2&amp;replacedByKey=2&amp;name=concept1&amp;deprecated=false&amp;key=1&amp;hasParent=true&amp;hasReplacement=false&amp;includeChildrenCount=true&amp;includeChildren=true&amp;includeParents=true&amp;tags=tag1%2Ctag2&amp;offset=0&amp;limit=20' -i -X GET</code></pre>
@@ -1963,14 +2492,14 @@ Content-Length: 609
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_14">Example response</h4>
+<h4 id="_example_response_22">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 662
+Content-Length: 932
 
-{"offset":0,"limit":20,"endOfRecords":true,"count":3,"results":[{"name":"concept1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"],"childrenCount":0},{"name":"concept2","label":{"en":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"],"childrenCount":0},{"name":"concept3","label":{"en":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"],"childrenCount":0}]}</code></pre>
+{"offset":0,"limit":20,"endOfRecords":true,"count":3,"results":[{"name":"concept1","editorialNotes":["note1","note2"],"vocabularyKey":1,"childrenCount":0,"alternativeLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept1/alternativeLabels","hiddenLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept1/hiddenLabels"},{"name":"concept2","editorialNotes":["note1","note2"],"vocabularyKey":1,"childrenCount":0,"alternativeLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept2/alternativeLabels","hiddenLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept2/hiddenLabels"},{"name":"concept3","editorialNotes":["note1","note2"],"vocabularyKey":1,"childrenCount":0,"alternativeLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept3/alternativeLabels","hiddenLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept3/hiddenLabels"}]}</code></pre>
 </div>
 </div>
 </div>
@@ -1981,7 +2510,7 @@ Content-Length: 662
 <p><code>GET /vocabularies/{vocabularyName}/concepts/{name}</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_15">Path parameters</h4>
+<h4 id="_path_parameters_23">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2014,7 +2543,7 @@ Content-Length: 662
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_15">Query parameters</h4>
+<h4 id="_query_parameters_23">Query parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2047,7 +2576,7 @@ Content-Length: 662
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_15">Example request</h4>
+<h4 id="_example_request_23">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1' -i -X GET</code></pre>
@@ -2055,24 +2584,19 @@ Content-Length: 662
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_15">Example response</h4>
+<h4 id="_example_response_23">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 239
+Content-Length: 299
 
 {
   "name" : "concept1",
-  "label" : {
-    "en" : "Label"
-  },
   "editorialNotes" : [ "note1", "note2" ],
   "vocabularyKey" : 1,
-  "alternativeLabels" : {
-    "en" : [ "Alt label", "Another alt label" ]
-  },
-  "hiddenLabels" : [ "Labl" ]
+  "alternativeLabelsLink" : "http://localhost:8080/vocabularies/vocab1/concepts/concept1/alternativeLabels",
+  "hiddenLabelsLink" : "http://localhost:8080/vocabularies/vocab1/concepts/concept1/hiddenLabels"
 }</code></pre>
 </div>
 </div>
@@ -2084,7 +2608,7 @@ Content-Length: 239
 <p><code>POST /vocabularies/{vocabularyName}/concepts</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_16">Path parameters</h4>
+<h4 id="_path_parameters_24">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2111,7 +2635,7 @@ Content-Length: 239
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_16">Query parameters</h4>
+<h4 id="_query_parameters_24">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
@@ -2138,18 +2662,18 @@ Content-Length: 239
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be null</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>parentKey</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>alternativeLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hiddenLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Set</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -2171,16 +2695,6 @@ Content-Length: 239
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be blank</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>externalDefinitions</code></p></td>
@@ -2225,11 +2739,6 @@ Content-Length: 239
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>modifiedBy</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleted</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LocalDateTime</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 </tbody>
@@ -2257,18 +2766,18 @@ Content-Length: 239
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be null</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>parentKey</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>alternativeLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hiddenLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Set</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -2290,16 +2799,6 @@ Content-Length: 239
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be blank</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>externalDefinitions</code></p></td>
@@ -2346,34 +2845,29 @@ Content-Length: 239
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleted</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LocalDateTime</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
 </tbody>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_16">Example request</h4>
+<h4 id="_example_request_24">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts' -i -u 'user:password' -X POST \
     -H 'Content-Type: application/json' \
-    -d '{"name":"concept1","label":{"en":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"],"sameAsUris":[],"tags":[]}'</code></pre>
+    -d '{"name":"concept1","externalDefinitions":[],"editorialNotes":["note1","note2"],"vocabularyKey":1,"definition":[],"label":[],"sameAsUris":[],"tags":[]}'</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_16">Example response</h4>
+<h4 id="_example_response_24">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
 Location: http://api.gbif.org/vocabularies/vocab1/concepts/concept1
 Content-Type: application/json
-Content-Length: 188
+Content-Length: 278
 
-{"key":1,"name":"concept1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"]}</code></pre>
+{"key":1,"name":"concept1","editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept1/alternativeLabels","hiddenLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept1/hiddenLabels"}</code></pre>
 </div>
 </div>
 </div>
@@ -2384,7 +2878,7 @@ Content-Length: 188
 <p><code>PUT /vocabularies/{vocabularyName}/concepts/{name}</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_17">Path parameters</h4>
+<h4 id="_path_parameters_25">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2417,7 +2911,7 @@ Content-Length: 188
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_17">Query parameters</h4>
+<h4 id="_query_parameters_25">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
@@ -2444,18 +2938,18 @@ Content-Length: 188
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be null</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>parentKey</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>alternativeLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hiddenLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Set</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -2477,16 +2971,6 @@ Content-Length: 188
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be blank</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>externalDefinitions</code></p></td>
@@ -2531,11 +3015,6 @@ Content-Length: 188
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>modifiedBy</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleted</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LocalDateTime</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 </tbody>
@@ -2563,18 +3042,18 @@ Content-Length: 188
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be null</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>List</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>parentKey</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Long</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>alternativeLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hiddenLabels</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Set</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
@@ -2596,16 +3075,6 @@ Content-Length: 188
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be blank</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>label</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>definition</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Map</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>externalDefinitions</code></p></td>
@@ -2652,33 +3121,28 @@ Content-Length: 188
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 </tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deleted</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>LocalDateTime</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-</tr>
 </tbody>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_17">Example request</h4>
+<h4 id="_example_request_25">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1' -i -u 'user:password' -X PUT \
     -H 'Content-Type: application/json' \
-    -d '{"key":1,"name":"concept1","label":{"en":"Label"},"definition":{},"externalDefinitions":[],"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"],"sameAsUris":[],"tags":[]}'</code></pre>
+    -d '{"key":1,"name":"concept1","externalDefinitions":[],"editorialNotes":["note1","note2"],"vocabularyKey":1,"definition":[],"label":[],"sameAsUris":[],"tags":[]}'</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_17">Example response</h4>
+<h4 id="_example_response_25">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 188
+Content-Length: 278
 
-{"key":1,"name":"concept1","label":{"en":"Label"},"editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabels":{"en":["Alt label","Another alt label"]},"hiddenLabels":["Labl"]}</code></pre>
+{"key":1,"name":"concept1","editorialNotes":["note1","note2"],"vocabularyKey":1,"alternativeLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept1/alternativeLabels","hiddenLabelsLink":"http://localhost:8080/vocabularies/vocab1/concepts/concept1/hiddenLabels"}</code></pre>
 </div>
 </div>
 </div>
@@ -2689,7 +3153,7 @@ Content-Length: 188
 <p><code>PUT /vocabularies/{vocabularyName}/concepts/{name}/deprecate</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_18">Path parameters</h4>
+<h4 id="_path_parameters_26">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2722,7 +3186,7 @@ Content-Length: 188
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_18">Query parameters</h4>
+<h4 id="_query_parameters_26">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
@@ -2762,7 +3226,7 @@ Content-Length: 188
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_18">Example request</h4>
+<h4 id="_example_request_26">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/deprecate' -i -u 'user:password' -X PUT \
@@ -2772,7 +3236,7 @@ Content-Length: 188
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_18">Example response</h4>
+<h4 id="_example_response_26">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
@@ -2786,7 +3250,7 @@ Content-Length: 188
 <p><code>DELETE /vocabularies/{vocabularyName}/concepts/{name}/deprecate</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_19">Path parameters</h4>
+<h4 id="_path_parameters_27">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2819,7 +3283,7 @@ Content-Length: 188
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_19">Query parameters</h4>
+<h4 id="_query_parameters_27">Query parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2846,7 +3310,7 @@ Content-Length: 188
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_19">Example request</h4>
+<h4 id="_example_request_27">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/deprecate' -i -u 'user:password' -X DELETE</code></pre>
@@ -2854,7 +3318,7 @@ Content-Length: 188
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_19">Example response</h4>
+<h4 id="_example_response_27">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
@@ -2868,7 +3332,7 @@ Content-Length: 188
 <p><code>GET /vocabularies/{vocabularyName}/concepts/suggest</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_20">Path parameters</h4>
+<h4 id="_path_parameters_28">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2895,7 +3359,7 @@ Content-Length: 188
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_20">Query parameters</h4>
+<h4 id="_query_parameters_28">Query parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2922,7 +3386,7 @@ Content-Length: 188
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_20">Example request</h4>
+<h4 id="_example_request_28">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/suggest?q=foo' -i -X GET</code></pre>
@@ -2930,7 +3394,7 @@ Content-Length: 188
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_20">Example response</h4>
+<h4 id="_example_response_28">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -2954,7 +3418,7 @@ Content-Length: 74
 <p><code>GET /vocabularies/{vocabularyName}/concepts/{name}/tags</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_21">Path parameters</h4>
+<h4 id="_path_parameters_29">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2987,13 +3451,13 @@ Content-Length: 74
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_21">Query parameters</h4>
+<h4 id="_query_parameters_29">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_request_21">Example request</h4>
+<h4 id="_example_request_29">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/tags' -i -X GET</code></pre>
@@ -3001,7 +3465,7 @@ Content-Length: 74
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_21">Example response</h4>
+<h4 id="_example_response_29">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -3027,7 +3491,7 @@ Content-Length: 168
 <p><code>PUT /vocabularies/{vocabularyName}/concepts/{name}/tags</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_22">Path parameters</h4>
+<h4 id="_path_parameters_30">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3060,13 +3524,13 @@ Content-Length: 168
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_22">Query parameters</h4>
+<h4 id="_query_parameters_30">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_request_22">Example request</h4>
+<h4 id="_example_request_30">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/tags' -i -X PUT \
@@ -3076,7 +3540,7 @@ Content-Length: 168
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_22">Example response</h4>
+<h4 id="_example_response_30">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
@@ -3090,7 +3554,7 @@ Content-Length: 168
 <p><code>DELETE /vocabularies/{vocabularyName}/concepts/{name}/tags/{tagName}</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_23">Path parameters</h4>
+<h4 id="_path_parameters_31">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3129,13 +3593,13 @@ Content-Length: 168
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_23">Query parameters</h4>
+<h4 id="_query_parameters_31">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_request_23">Example request</h4>
+<h4 id="_example_request_31">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/tags/tag1' -i -X DELETE</code></pre>
@@ -3143,7 +3607,1009 @@ Content-Length: 168
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_23">Example response</h4>
+<h4 id="_example_response_31">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-add-definition-test">Add Definition</h3>
+<div class="paragraph">
+<p><code>POST /vocabularies/{vocabularyName}/concepts/{name}/definition</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_32">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_32">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_32">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/definition' -i -u 'user:password' -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{"language":"en","value":"Label"}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_32">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
+Location: http://api.gbif.org/vocabularies/vocab1/concepts/concept1/definition/1
+Content-Type: application/json
+Content-Length: 41
+
+{"key":1,"language":"en","value":"Label"}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-update-definition-test">Update Definition</h3>
+<div class="paragraph">
+<p><code>PUT /vocabularies/{vocabularyName}/concepts/{name}/definition/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_33">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_33">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_33">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/definition/1' -i -u 'user:password' -X PUT \
+    -H 'Content-Type: application/json' \
+    -d '{"key":1,"language":"en","value":"Label"}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_33">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 41
+
+{"key":1,"language":"en","value":"Label"}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-get-definition-test">Get Definition</h3>
+<div class="paragraph">
+<p><code>GET /vocabularies/{vocabularyName}/concepts/{name}/definition/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_34">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_34">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_34">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/definition/1' -i -u 'user:password' -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_34">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 57
+
+{
+  "key" : 1,
+  "language" : "en",
+  "value" : "Label"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_list_definitions_2">List Definitions</h3>
+<div class="paragraph">
+<p><code>GET /vocabularies/{vocabularyName}/concepts/{name}/definition</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_35">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_35">Query parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>lang</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Language</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_example_request_35">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/definition?lang=en' -i -u 'user:password' -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_35">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 43
+
+[{"key":1,"language":"en","value":"Label"}]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-delete-definition-test">Delete Definition</h3>
+<div class="paragraph">
+<p><code>DELETE /vocabularies/{vocabularyName}/concepts/{name}/definition/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_36">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_36">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_36">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/definition/1' -i -u 'user:password' -X DELETE</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_36">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-add-label-test">Add Label</h3>
+<div class="paragraph">
+<p><code>POST /vocabularies/{vocabularyName}/concepts/{name}/label</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_37">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_37">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_37">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/label' -i -u 'user:password' -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{"language":"en","value":"Label"}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_37">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
+Location: http://api.gbif.org/vocabularies/vocab1/concepts/concept1/label/1
+Content-Type: application/json
+Content-Length: 1
+
+1</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_list_labels_2">List Labels</h3>
+<div class="paragraph">
+<p><code>GET /vocabularies/{vocabularyName}/concepts/{name}/label</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_38">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_38">Query parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>lang</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Language</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_example_request_38">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/label?lang=en' -i -u 'user:password' -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_38">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 43
+
+[{"key":1,"language":"en","value":"Label"}]</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-delete-label-test">Delete Label</h3>
+<div class="paragraph">
+<p><code>DELETE /vocabularies/{vocabularyName}/concepts/{name}/label/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_39">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_39">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_39">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/label/1' -i -u 'user:password' -X DELETE</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_39">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-add-alternative-label-test">Add Alternative Label</h3>
+<div class="paragraph">
+<p><code>POST /vocabularies/{vocabularyName}/concepts/{name}/alternativeLabels</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_40">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_40">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_40">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/alternativeLabels' -i -u 'user:password' -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{"language":"en","value":"Label"}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_40">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
+Location: http://api.gbif.org/vocabularies/vocab1/concepts/concept1/alternativeLabels/1
+Content-Type: application/json
+Content-Length: 1
+
+1</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_list_labels_3">List Labels</h3>
+<div class="paragraph">
+<p><code>GET /vocabularies/{vocabularyName}/concepts/{name}/alternativeLabels</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_41">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_41">Query parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>lang</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Language</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_example_request_41">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/alternativeLabels?lang=en' -i -u 'user:password' -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_41">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 107
+
+{"offset":0,"limit":20,"endOfRecords":true,"count":1,"results":[{"key":1,"language":"en","value":"Label"}]}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-delete-alternative-label-test">Delete Alternative Label</h3>
+<div class="paragraph">
+<p><code>DELETE /vocabularies/{vocabularyName}/concepts/{name}/alternativeLabels/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_42">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_42">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_42">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/alternativeLabels/1' -i -u 'user:password' -X DELETE</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_42">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-add-hidden-label-test">Add Hidden Label</h3>
+<div class="paragraph">
+<p><code>POST /vocabularies/{vocabularyName}/concepts/{name}/hiddenLabels</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_43">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_43">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_43">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/hiddenLabels' -i -u 'user:password' -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{"value":"Label"}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_43">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
+Location: http://api.gbif.org/vocabularies/vocab1/concepts/concept1/hiddenLabels/1
+Content-Type: application/json
+Content-Length: 1
+
+1</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_list_labels_4">List Labels</h3>
+<div class="paragraph">
+<p><code>GET /vocabularies/{vocabularyName}/concepts/{name}/hiddenLabels</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_44">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_44">Query parameters</h4>
+<div class="paragraph">
+<p>Unresolved directive in concept/concept-list-hidden-labels.adoc - include::/var/lib/jenkins/jobs/vocabulary/branches/0_23117-perf.lhq1k7.mance-tables/workspace/vocabulary-rest-ws/target/generated-snippets/concept-test-doc/list-hidden-labels-test/request-parameters.adoc[]</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_44">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/hiddenLabels' -i -u 'user:password' -X GET</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_44">Example response</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 136
+
+{
+  "offset" : 0,
+  "limit" : 20,
+  "endOfRecords" : true,
+  "count" : 1,
+  "results" : [ {
+    "key" : 1,
+    "value" : "Label"
+  } ]
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="resources-concept-test-doc-delete-hidden-label-test">Delete Hidden Label</h3>
+<div class="paragraph">
+<p><code>DELETE /vocabularies/{vocabularyName}/concepts/{name}/hiddenLabels/{key}</code></p>
+</div>
+<div class="sect3">
+<h4 id="_path_parameters_45">Path parameters</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Optional</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">vocabularyName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">key</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Integer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">false</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_query_parameters_45">Query parameters</h4>
+<div class="paragraph">
+<p>No parameters.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_request_45">Example request</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularies/vocab1/concepts/concept1/hiddenLabels/1' -i -u 'user:password' -X DELETE</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_response_45">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
@@ -3165,13 +4631,13 @@ Content-Length: 168
 <p><code>GET /vocabularyTags</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_24">Path parameters</h4>
+<h4 id="_path_parameters_46">Path parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_24">Query parameters</h4>
+<h4 id="_query_parameters_46">Query parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -3196,7 +4662,7 @@ Content-Length: 168
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_24">Example request</h4>
+<h4 id="_example_request_46">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularyTags?offset=0&amp;limit=20' -i -X GET</code></pre>
@@ -3204,7 +4670,7 @@ Content-Length: 168
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_24">Example response</h4>
+<h4 id="_example_response_46">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -3222,7 +4688,7 @@ Content-Length: 263
 <p><code>GET /vocabularyTags/{name}</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_25">Path parameters</h4>
+<h4 id="_path_parameters_47">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3249,13 +4715,13 @@ Content-Length: 263
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_25">Query parameters</h4>
+<h4 id="_query_parameters_47">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_request_25">Example request</h4>
+<h4 id="_example_request_47">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularyTags/tag1' -i -X GET</code></pre>
@@ -3263,7 +4729,7 @@ Content-Length: 263
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_25">Example response</h4>
+<h4 id="_example_response_47">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -3285,13 +4751,13 @@ Content-Length: 81
 <p><code>POST /vocabularyTags</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_26">Path parameters</h4>
+<h4 id="_path_parameters_48">Path parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_26">Query parameters</h4>
+<h4 id="_query_parameters_48">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
@@ -3415,7 +4881,7 @@ Content-Length: 81
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_26">Example request</h4>
+<h4 id="_example_request_48">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularyTags' -i -u 'user:password' -X POST \
@@ -3425,7 +4891,7 @@ Content-Length: 81
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_26">Example response</h4>
+<h4 id="_example_response_48">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
@@ -3444,7 +4910,7 @@ Content-Length: 73
 <p><code>PUT /vocabularyTags/{name}</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_27">Path parameters</h4>
+<h4 id="_path_parameters_49">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3471,7 +4937,7 @@ Content-Length: 73
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_27">Query parameters</h4>
+<h4 id="_query_parameters_49">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
@@ -3595,7 +5061,7 @@ Content-Length: 73
 </table>
 </div>
 <div class="sect3">
-<h4 id="_example_request_27">Example request</h4>
+<h4 id="_example_request_49">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularyTags/tag1' -i -u 'user:password' -X PUT \
@@ -3605,7 +5071,7 @@ Content-Length: 73
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_27">Example response</h4>
+<h4 id="_example_response_49">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
@@ -3623,7 +5089,7 @@ Content-Length: 73
 <p><code>DELETE /vocabularyTags/{name}</code></p>
 </div>
 <div class="sect3">
-<h4 id="_path_parameters_28">Path parameters</h4>
+<h4 id="_path_parameters_50">Path parameters</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3650,13 +5116,13 @@ Content-Length: 73
 </table>
 </div>
 <div class="sect3">
-<h4 id="_query_parameters_28">Query parameters</h4>
+<h4 id="_query_parameters_50">Query parameters</h4>
 <div class="paragraph">
 <p>No parameters.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_request_28">Example request</h4>
+<h4 id="_example_request_50">Example request</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://api.gbif.org/vocabularyTags/tag1' -i -u 'user:password' -X DELETE \
@@ -3665,7 +5131,7 @@ Content-Length: 73
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_response_28">Example response</h4>
+<h4 id="_example_response_50">Example response</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 204 No Content</code></pre>
@@ -3678,7 +5144,7 @@ Content-Length: 73
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-11-09 17:07:38 UTC
+Last updated 2022-11-09 17:27:52 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">

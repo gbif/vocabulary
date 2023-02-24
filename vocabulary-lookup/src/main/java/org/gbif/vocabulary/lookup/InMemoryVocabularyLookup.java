@@ -15,7 +15,8 @@ package org.gbif.vocabulary.lookup;
 
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.export.VocabularyExport;
+import org.gbif.vocabulary.model.export.ConceptExportView;
+import org.gbif.vocabulary.model.export.Export;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
 
 import java.io.InputStream;
@@ -257,23 +258,23 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
 
   @SneakyThrows
   private void importVocabulary(InputStream in) {
-    VocabularyExport export = OBJECT_MAPPER.readValue(in, VocabularyExport.class);
+    Export export = OBJECT_MAPPER.readValue(in, Export.class);
 
-    for (Concept concept : export.getConcepts()) {
+    for (ConceptExportView conceptExport : export.getConceptExports()) {
       // add to the cache concepts
-      conceptsByKeyCache.put(concept.getKey(), concept);
+      conceptsByKeyCache.put(conceptExport.getConcept().getKey(), conceptExport.getConcept());
 
       // add name to the cache
-      addNameToCache(concept);
+      addNameToCache(conceptExport.getConcept());
 
       // add labels to the cache
-      concept.getLabel().forEach((key, value) -> addLabelToCache(value, concept, key));
+      conceptExport.getLabel().forEach((key, value) -> addLabelToCache(value, conceptExport.getConcept(), key));
 
       // add alternative labels to the cache
-      concept.getAlternativeLabels().forEach((key, value) -> addLabelsToCache(value, concept, key));
+      conceptExport.getAlternativeLabels().forEach((key, value) -> addLabelsToCache(value, conceptExport.getConcept(), key));
 
       // add hidden labels to the cache
-      concept.getHiddenLabels().forEach(label -> addHiddenLabelToCache(label, concept));
+      conceptExport.getHiddenLabels().forEach(label -> addHiddenLabelToCache(label, conceptExport.getConcept()));
     }
   }
 

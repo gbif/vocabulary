@@ -32,24 +32,22 @@ public class VocabularyTest {
     v1.setKey(1L);
     v1.setName("v1");
     v1.setNamespace("ns");
-    v1.setLabel(Collections.singletonMap(LanguageRegion.ENGLISH, "label"));
-    v1.setDefinition(Collections.singletonMap(LanguageRegion.ENGLISH, "def"));
+    v1.setDefinition(
+        Collections.singletonList(
+            Definition.builder().language(LanguageRegion.ENGLISH).value("def").build()));
     v1.setEditorialNotes(Arrays.asList("n1", "n2"));
     v1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
     v1.setCreated(LocalDateTime.now());
-    v1.setDeleted(LocalDateTime.now());
     v1.setDeprecated(LocalDateTime.now());
 
     Vocabulary v2 = new Vocabulary();
     v2.setKey(v1.getKey());
     v2.setName(v1.getName());
     v2.setNamespace(v1.getNamespace());
-    v2.setLabel(v1.getLabel());
     v2.setDefinition(v1.getDefinition());
     v2.setEditorialNotes(v1.getEditorialNotes());
     v2.setExternalDefinitions(v1.getExternalDefinitions());
     v2.setCreated(v1.getCreated());
-    v2.setDeleted(v1.getDeleted());
     v2.setDeprecated(v1.getDeprecated());
 
     assertTrue(v1.lenientEquals(v2));

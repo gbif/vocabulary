@@ -13,10 +13,18 @@
  */
 package org.gbif.vocabulary.service.impl;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.UserRoles;
@@ -27,26 +35,7 @@ import org.gbif.vocabulary.model.utils.PostPersist;
 import org.gbif.vocabulary.model.utils.PrePersist;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
 import org.gbif.vocabulary.service.ConceptService;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -55,15 +44,21 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
+
+import static java.util.Objects.requireNonNull;
+
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.NAME_FORMAT_PATTERN;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.isValidName;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabels;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
-import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.ALL_NODE;
-import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.HIDDEN_NODE;
-import static org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam.NAME_NODE;
-import static org.gbif.vocabulary.service.validator.EntityValidator.validateEntity;
 
 /** Default implementation for {@link ConceptService}. */
 @Service
@@ -96,8 +91,19 @@ public class DefaultConceptService implements ConceptService {
   public long create(@NotNull @Valid Concept concept) {
     checkArgument(concept.getKey() == null, "Can't create a concept which already has a key");
 
-    // checking the validity of the concept.
-    validateEntity(concept, createSimilaritiesExtractor(concept, false));
+    // checking the format of the name
+    checkArgument(
+        isValidName(concept.getName()),
+        "Entity name has to match the regex " + NAME_FORMAT_PATTERN.pattern());
+
+    // checking if there are other vocabs with the same name
+    List<KeyNameResult> similarities =
+        conceptMapper.findSimilarities(
+            normalizeName(concept.getName()), null, concept.getVocabularyKey(), null);
+    if (!similarities.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);
+    }
 
     checkArgument(
         !vocabularyMapper.isDeprecated(concept.getVocabularyKey()),
@@ -153,14 +159,6 @@ public class DefaultConceptService implements ConceptService {
     checkArgument(Objects.equals(oldConcept.getDeprecatedBy(), concept.getDeprecatedBy()));
     checkArgument(Objects.equals(oldConcept.getReplacedByKey(), concept.getReplacedByKey()));
 
-    checkArgument(oldConcept.getDeleted() == null, "Cannot update a deleted entity");
-    checkArgument(
-        Objects.equals(oldConcept.getDeleted(), concept.getDeleted()),
-        "Cannot delete or restore an entity while updating");
-
-    // validity check
-    validateEntity(concept, createSimilaritiesExtractor(concept, true));
-
     // update the concept
     conceptMapper.update(concept);
   }
@@ -179,8 +177,7 @@ public class DefaultConceptService implements ConceptService {
   public List<KeyNameResult> suggest(
       String query, long vocabularyKey, @Nullable LanguageRegion languageRegion) {
     query = query != null ? query : "";
-    return conceptMapper.suggest(
-        query, vocabularyKey, languageRegion != null ? languageRegion.getLocale() : null);
+    return conceptMapper.suggest(query, vocabularyKey, languageRegion);
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
@@ -289,6 +286,157 @@ public class DefaultConceptService implements ConceptService {
     return conceptMapper.listTags(conceptKey);
   }
 
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
+  @Override
+  public long addDefinition(long entityKey, @NotNull @Valid Definition definition) {
+    checkArgument(definition.getKey() == null, "Can't add a definition that has a key");
+    checkArgument(!Strings.isNullOrEmpty(definition.getValue()), "Definition is required");
+    conceptMapper.addDefinition(entityKey, definition);
+    return definition.getKey();
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PostPersist.class, Default.class})
+  @Transactional
+  @Override
+  public void updateDefinition(long entityKey, @NotNull @Valid Definition definition) {
+    requireNonNull(definition.getKey());
+    checkArgument(!Strings.isNullOrEmpty(definition.getValue()), "Definition is required");
+    conceptMapper.updateDefinition(entityKey, definition);
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Transactional
+  @Override
+  public void deleteDefinition(long entityKey, long key) {
+    conceptMapper.deleteDefinition(entityKey, key);
+  }
+
+  @Override
+  public Definition getDefinition(long entityKey, long key) {
+    return conceptMapper.getDefinition(entityKey, key);
+  }
+
+  @Override
+  public List<Definition> listDefinitions(
+      long entityKey, @Nullable List<LanguageRegion> languageRegions) {
+    return conceptMapper.listDefinitions(entityKey, languageRegions);
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
+  @Override
+  public long addLabel(long entityKey, @NotNull @Valid Label label) {
+    checkArgument(label.getKey() == null, "Can't add a label that has a key");
+    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
+
+    // checking if there are other vocabs with the same label
+    checkSimilarLabels(entityKey, label);
+
+    conceptMapper.addLabel(entityKey, label);
+    return label.getKey();
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Transactional
+  @Override
+  public void deleteLabel(long entityKey, long key) {
+    conceptMapper.deleteLabel(entityKey, key);
+  }
+
+  @Override
+  public List<Label> listLabels(long entityKey, @Nullable List<LanguageRegion> languageRegions) {
+    return conceptMapper.listLabels(entityKey, languageRegions);
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
+  @Override
+  public long addAlternativeLabel(long entityKey, @NotNull @Valid Label label) {
+    checkArgument(label.getKey() == null, "Can't add a label that has a key");
+    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
+
+    // checking if there are other vocabs with the same label
+    checkSimilarLabels(entityKey, label);
+
+    conceptMapper.addAlternativeLabel(entityKey, label);
+    return label.getKey();
+  }
+
+  private void checkSimilarLabels(long entityKey, Label label) {
+    long vocabularyKey = conceptMapper.getVocabularyKey(entityKey);
+    List<KeyNameResult> similarities =
+        conceptMapper.findSimilarities(
+            normalizeLabel(label.getValue()), label.getLanguage(), vocabularyKey, entityKey);
+    if (!similarities.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);
+    }
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Transactional
+  @Override
+  public void deleteAlternativeLabel(long entityKey, long key) {
+    conceptMapper.deleteAlternativeLabel(entityKey, key);
+  }
+
+  @Override
+  public PagingResponse<Label> listAlternativeLabels(
+      long entityKey, @Nullable List<LanguageRegion> languageRegions, @Nullable Pageable page) {
+    page = page != null ? page : new PagingRequest();
+    return new PagingResponse<>(
+        page,
+        conceptMapper.countAlternativeLabels(entityKey, languageRegions),
+        conceptMapper.listAlternativeLabels(entityKey, languageRegions, page));
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Validated({PrePersist.class, Default.class})
+  @Transactional
+  @Override
+  public long addHiddenLabel(long entityKey, @NotNull @Valid HiddenLabel label) {
+    checkArgument(label.getKey() == null, "Can't add a label that has a key");
+    checkArgument(!Strings.isNullOrEmpty(label.getValue()), "Label is required");
+
+    // checking if there are other vocabs with the same label
+    checkSimilarHiddenLabels(entityKey, label);
+
+    conceptMapper.addHiddenLabel(entityKey, label);
+    return label.getKey();
+  }
+
+  private void checkSimilarHiddenLabels(long entityKey, HiddenLabel label) {
+    long vocabularyKey = conceptMapper.getVocabularyKey(entityKey);
+    List<KeyNameResult> similarities =
+        conceptMapper.findSimilarities(
+            normalizeName(label.getValue()), null, vocabularyKey, entityKey);
+    if (!similarities.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);
+    }
+  }
+
+  @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
+  @Transactional
+  @Override
+  public void deleteHiddenLabel(long entityKey, long key) {
+    conceptMapper.deleteHiddenLabel(entityKey, key);
+  }
+
+  @Override
+  public PagingResponse<HiddenLabel> listHiddenLabels(long entityKey, @Nullable Pageable page) {
+    page = page != null ? page : new PagingRequest();
+    return new PagingResponse<>(
+        page,
+        conceptMapper.countHiddenLabels(entityKey),
+        conceptMapper.listHiddenLabels(entityKey, page));
+  }
+
   /** Returns the keys of all the children of the given concept. */
   private List<Long> findChildrenKeys(long parentKey, boolean deprecated) {
     return conceptMapper
@@ -297,55 +445,5 @@ public class DefaultConceptService implements ConceptService {
         .stream()
         .map(Concept::getKey)
         .collect(Collectors.toList());
-  }
-
-  /**
-   * Supplies the required method to the DB that checks if the name or labels of the concept
-   * received are already present in any other concept.
-   *
-   * <p><b>NOTICE that the normalization of the name and labels has to be the same as the one the DB
-   * does.</b>
-   */
-  private Supplier<List<KeyNameResult>> createSimilaritiesExtractor(
-      Concept concept, boolean update) {
-    return () -> {
-      List<NormalizedValuesParam> valuesToCheck = new ArrayList<>();
-
-      // add name
-      valuesToCheck.add(
-          NormalizedValuesParam.from(
-              ALL_NODE, Collections.singletonList(normalizeName(concept.getName()))));
-
-      BiFunction<LanguageRegion, Set<String>, List<NormalizedValuesParam>> normalizer =
-          (lang, labels) -> {
-            List<String> normalizedLabels = normalizeLabels(labels);
-
-            return Arrays.asList(
-                NormalizedValuesParam.from(lang.getLocale(), normalizedLabels),
-                NormalizedValuesParam.from(NAME_NODE, normalizedLabels),
-                NormalizedValuesParam.from(HIDDEN_NODE, normalizedLabels));
-          };
-
-      // add labels
-      valuesToCheck.addAll(
-          concept.getLabel().entrySet().stream()
-              .map(e -> normalizer.apply(e.getKey(), Collections.singleton(e.getValue())))
-              .flatMap(Collection::stream)
-              .collect(Collectors.toList()));
-
-      // add alternative labels
-      valuesToCheck.addAll(
-          concept.getAlternativeLabels().entrySet().stream()
-              .map(e -> normalizer.apply(e.getKey(), e.getValue()))
-              .flatMap(Collection::stream)
-              .collect(Collectors.toList()));
-
-      // add hidden labels
-      valuesToCheck.add(
-          NormalizedValuesParam.from(ALL_NODE, normalizeLabels(concept.getHiddenLabels())));
-
-      return conceptMapper.findSimilarities(
-          valuesToCheck, concept.getVocabularyKey(), update ? concept.getKey() : null);
-    };
   }
 }

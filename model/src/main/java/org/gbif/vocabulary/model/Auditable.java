@@ -33,8 +33,4 @@ public interface Auditable {
   String getModifiedBy();
 
   void setModifiedBy(String modifiedBy);
-
-  LocalDateTime getDeleted();
-
-  void setDeleted(LocalDateTime deleted);
 }

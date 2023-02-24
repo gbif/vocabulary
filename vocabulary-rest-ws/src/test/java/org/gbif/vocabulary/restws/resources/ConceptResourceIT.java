@@ -13,20 +13,24 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptListParams;
 import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.Vocabulary;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,6 +48,7 @@ import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** IT for the {@link ConceptResource}. */
 @ContextConfiguration(initializers = {ConceptResourceIT.ContextInitializer.class})
@@ -107,7 +112,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   void listTest() {
     Concept c1 = createEntity();
     c1.setName("Concept1");
-    Concept created1 = conceptClient.create(defaultVocabularyName, c1);
+    ConceptView view1 = conceptClient.create(defaultVocabularyName, c1);
 
     // create a concept in other vocab to see that the list concepts filters by vocab key
     Concept otherVocabConcept = createEntity();
@@ -124,8 +129,8 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     // Add another concept
     Concept c2 = createEntity();
     c2.setName("Concept2");
-    c2.setParentKey(created1.getKey());
-    c2 = conceptClient.create(defaultVocabularyName, c2);
+    c2.setParentKey(view1.getConcept().getKey());
+    ConceptView view2 = conceptClient.create(defaultVocabularyName, c2);
 
     // list entities
     concepts =
@@ -137,13 +142,16 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     concepts =
         conceptClient.listConcepts(
             defaultVocabularyName,
-            ConceptListParams.builder().q("concept").parentKey(created1.getKey()).build());
+            ConceptListParams.builder()
+                .q("concept")
+                .parentKey(view1.getConcept().getKey())
+                .build());
     assertEquals(1, concepts.getResults().size());
 
     concepts =
         conceptClient.listConcepts(
             defaultVocabularyName,
-            ConceptListParams.builder().q("concept").parent(created1.getName()).build());
+            ConceptListParams.builder().q("concept").parent(view1.getConcept().getName()).build());
     assertEquals(1, concepts.getResults().size());
 
     // list entities with parent
@@ -157,7 +165,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         conceptClient.listConcepts(
             defaultVocabularyName,
             ConceptListParams.builder()
-                .name(created1.getName())
+                .name(view1.getConcept().getName())
                 .includeChildrenCount(true)
                 .build());
     assertEquals(1, concepts.getResults().size());
@@ -167,7 +175,10 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     concepts =
         conceptClient.listConcepts(
             defaultVocabularyName,
-            ConceptListParams.builder().name(created1.getName()).includeChildren(true).build());
+            ConceptListParams.builder()
+                .name(view1.getConcept().getName())
+                .includeChildren(true)
+                .build());
     assertEquals(1, concepts.getResults().size());
     assertEquals(c2.getName(), concepts.getResults().get(0).getChildren().get(0));
 
@@ -184,30 +195,84 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   public void getWithParentsAndChildren() {
     // create entity
     Concept c1 = createEntity();
-    Concept created1 = conceptClient.create(defaultVocabularyName, c1);
+    ConceptView view1 = conceptClient.create(defaultVocabularyName, c1);
 
     Concept c2 = createEntity();
-    c2.setParentKey(created1.getKey());
-    Concept created2 = conceptClient.create(defaultVocabularyName, c2);
+    c2.setParentKey(view1.getConcept().getKey());
+    ConceptView view2 = conceptClient.create(defaultVocabularyName, c2);
 
     // get concept with parents
-    ConceptView expected = new ConceptView(created2);
-    expected.setParents(Collections.singletonList(created1.getName()));
+    view2.setParents(Collections.singletonList(view1.getConcept().getName()));
 
     ConceptView conceptView =
-        conceptClient.get(defaultVocabularyName, created2.getName(), true, false);
-    assertEquals(expected, conceptView);
+        conceptClient.get(defaultVocabularyName, view2.getConcept().getName(), true, false);
+    assertEquals(view2, conceptView);
 
     // get concept without parents
-    expected = new ConceptView(created2);
-    conceptView = conceptClient.get(defaultVocabularyName, created2.getName(), false, false);
-    assertEquals(expected, conceptView);
+    view2.setParents(null);
+    conceptView =
+        conceptClient.get(defaultVocabularyName, view2.getConcept().getName(), false, false);
+    assertEquals(view2, conceptView);
 
     // include children test
-    expected = new ConceptView(created1);
-    expected.setChildren(Collections.singletonList(created2.getName()));
-    conceptView = conceptClient.get(defaultVocabularyName, created1.getName(), false, true);
-    assertEquals(expected, conceptView);
+    view1.setChildren(Collections.singletonList(view2.getConcept().getName()));
+    conceptView =
+        conceptClient.get(defaultVocabularyName, view1.getConcept().getName(), false, true);
+    assertEquals(view1, conceptView);
+  }
+
+  @Test
+  void definitionTest() {
+    Concept c1 = createEntity();
+    ConceptView cView1 = conceptClient.create(defaultVocabularyName, c1);
+
+    Definition definition =
+        Definition.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+
+    Definition createdDefinition =
+        conceptClient.addDefinition(defaultVocabularyName, c1.getName(), definition);
+    definition.setKey(createdDefinition.getKey());
+    assertTrue(definition.lenientEquals(createdDefinition));
+
+    assertEquals(
+        createdDefinition,
+        conceptClient.getDefinition(
+            defaultVocabularyName, c1.getName(), createdDefinition.getKey()));
+
+    List<Definition> definitionList =
+        conceptClient.listDefinitions(defaultVocabularyName, c1.getName(), new ArrayList<>());
+    assertEquals(1, definitionList.size());
+    assertTrue(createdDefinition.lenientEquals(definitionList.get(0)));
+    assertEquals(createdDefinition.getKey(), definitionList.get(0).getKey());
+
+    assertEquals(
+        1,
+        conceptClient
+            .listDefinitions(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        conceptClient
+            .listDefinitions(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    definition.setValue("Label2");
+    Definition updatedDefinition =
+        conceptClient.updateDefinition(defaultVocabularyName, c1.getName(), definition);
+    assertTrue(definition.lenientEquals(updatedDefinition));
+
+    conceptClient.deleteDefinition(defaultVocabularyName, c1.getName(), updatedDefinition.getKey());
+    assertEquals(
+        0,
+        conceptClient
+            .listDefinitions(defaultVocabularyName, c1.getName(), new ArrayList<>())
+            .size());
   }
 
   @Test
@@ -217,12 +282,12 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     tagClient.create(tag);
 
     Concept c1 = createEntity();
-    Concept created1 = conceptClient.create(defaultVocabularyName, c1);
+    ConceptView view1 = conceptClient.create(defaultVocabularyName, c1);
 
     conceptClient.addTag(
-        defaultVocabularyName, created1.getName(), new AddTagAction(tag.getName()));
+        defaultVocabularyName, view1.getConcept().getName(), new AddTagAction(tag.getName()));
 
-    List<Tag> tags = conceptClient.listTags(defaultVocabularyName, created1.getName());
+    List<Tag> tags = conceptClient.listTags(defaultVocabularyName, view1.getConcept().getName());
     assertEquals(1, tags.size());
 
     PagingResponse<ConceptView> concepts =
@@ -230,11 +295,11 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
             defaultVocabularyName,
             ConceptListParams.builder().tags(Collections.singletonList(tag.getName())).build());
     assertEquals(1, concepts.getResults().size());
-    assertEquals(created1.getKey(), concepts.getResults().get(0).getConcept().getKey());
+    assertEquals(view1.getConcept().getKey(), concepts.getResults().get(0).getConcept().getKey());
 
-    conceptClient.removeTag(defaultVocabularyName, created1.getName(), tag.getName());
+    conceptClient.removeTag(defaultVocabularyName, view1.getConcept().getName(), tag.getName());
 
-    tags = conceptClient.listTags(defaultVocabularyName, created1.getName());
+    tags = conceptClient.listTags(defaultVocabularyName, view1.getConcept().getName());
     assertEquals(0, tags.size());
 
     concepts =
@@ -244,18 +309,125 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     assertEquals(0, concepts.getResults().size());
   }
 
+  @Test
+  void labelsTest() {
+    Concept c1 = createEntity();
+    ConceptView cView1 = conceptClient.create(defaultVocabularyName, c1);
+
+    Label label = Label.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+
+    Long labelKey = conceptClient.addLabel(defaultVocabularyName, c1.getName(), label);
+    label.setKey(labelKey);
+    assertTrue(labelKey > 0);
+
+    List<Label> labelList =
+        conceptClient.listLabels(defaultVocabularyName, c1.getName(), Collections.emptyList());
+    assertEquals(1, labelList.size());
+    assertTrue(label.lenientEquals(labelList.get(0)));
+    assertEquals(labelKey, labelList.get(0).getKey());
+
+    assertEquals(
+        1,
+        conceptClient
+            .listLabels(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.ENGLISH))
+            .size());
+    assertEquals(
+        0,
+        conceptClient
+            .listLabels(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.SPANISH))
+            .size());
+
+    conceptClient.deleteLabel(defaultVocabularyName, c1.getName(), labelKey);
+    assertEquals(
+        0,
+        conceptClient
+            .listLabels(defaultVocabularyName, c1.getName(), Collections.emptyList())
+            .size());
+  }
+
+  @Test
+  void alternativeLabelsTest() {
+    Concept c1 = createEntity();
+    ConceptView cView1 = conceptClient.create(defaultVocabularyName, c1);
+
+    Label label = Label.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+
+    Long labelKey = conceptClient.addAlternativeLabel(defaultVocabularyName, c1.getName(), label);
+    label.setKey(labelKey);
+    assertTrue(labelKey > 0);
+
+    PagingResponse<Label> labelList =
+        conceptClient.listAlternativeLabels(
+            defaultVocabularyName, c1.getName(), null, new PagingRequest());
+    assertEquals(1, labelList.getResults().size());
+    assertTrue(label.lenientEquals(labelList.getResults().get(0)));
+
+    assertEquals(
+        1,
+        conceptClient
+            .listAlternativeLabels(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.ENGLISH),
+                new PagingRequest())
+            .getResults()
+            .size());
+    assertEquals(
+        0,
+        conceptClient
+            .listAlternativeLabels(
+                defaultVocabularyName,
+                c1.getName(),
+                Collections.singletonList(LanguageRegion.SPANISH),
+                new PagingRequest())
+            .getResults()
+            .size());
+
+    conceptClient.deleteAlternativeLabel(defaultVocabularyName, c1.getName(), labelKey);
+    assertEquals(
+        0,
+        conceptClient
+            .listAlternativeLabels(defaultVocabularyName, c1.getName(), null, new PagingRequest())
+            .getResults()
+            .size());
+  }
+
+  @Test
+  void hiddenLabelsTest() {
+    Concept c1 = createEntity();
+    ConceptView cView1 = conceptClient.create(defaultVocabularyName, c1);
+
+    HiddenLabel label = HiddenLabel.builder().value("Label").build();
+
+    Long labelKey = conceptClient.addHiddenLabel(defaultVocabularyName, c1.getName(), label);
+    label.setKey(labelKey);
+    assertTrue(labelKey > 0);
+
+    PagingResponse<HiddenLabel> labelList =
+        conceptClient.listHiddenLabels(defaultVocabularyName, c1.getName(), new PagingRequest());
+    assertEquals(1, labelList.getResults().size());
+    assertTrue(label.lenientEquals(labelList.getResults().get(0)));
+
+    conceptClient.deleteHiddenLabel(defaultVocabularyName, c1.getName(), labelKey);
+    assertEquals(
+        0,
+        conceptClient
+            .listHiddenLabels(defaultVocabularyName, c1.getName(), new PagingRequest())
+            .getResults()
+            .size());
+  }
+
   @Override
   Concept createEntity() {
     Concept concept = new Concept();
     concept.setName("N" + UUID.randomUUID().toString().replace("-", ""));
     concept.setVocabularyKey(defaultVocabularyKey);
-    concept.setLabel(
-        Collections.singletonMap(LanguageRegion.ENGLISH, UUID.randomUUID().toString()));
-    concept.setAlternativeLabels(
-        Collections.singletonMap(
-            LanguageRegion.ENGLISH,
-            new HashSet<>(
-                Arrays.asList(UUID.randomUUID().toString(), UUID.randomUUID().toString()))));
     concept.setEditorialNotes(Arrays.asList("note1", "note2"));
 
     return concept;

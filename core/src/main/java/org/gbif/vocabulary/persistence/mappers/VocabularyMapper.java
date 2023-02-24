@@ -13,18 +13,18 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import java.util.List;
+
 import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.persistence.parameters.NormalizedValuesParam;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import javax.annotation.Nullable;
 
 /** Mapper for {@link Vocabulary}. */
 @Mapper
@@ -38,20 +38,21 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
 
   Vocabulary getByName(@Param("name") String name);
 
+  Long getKeyByName(@Param("name") String name);
+
   List<KeyNameResult> suggest(
-      @Param("query") String query, @Nullable @Param("locale") String locale);
+      @Param("query") String query, @Nullable @Param("lang") LanguageRegion language);
 
   /**
-   * Searchs for a similar vocabulary whose name or any of its labels are the same as the ones
+   * Searches for a similar vocabulary whose name or any of its labels are the same as the ones
    * received as parameter.
    *
-   * @param normalizedValues values that we want to check that are unique in the vocabulary. <b>They
-   *     must be normalized</b>
+   * @param normalizedName name that we want to check that is unique in the vocabulary. <b>It must
+   *     be normalized</b>
    * @param vocabularyKey if we are updating a vocabulary we exclude it from the searh
    */
   List<KeyNameResult> findSimilarities(
-      @Param("normalizedValues") List<NormalizedValuesParam> normalizedValues,
-      @Nullable @Param("vocabularyKey") Long vocabularyKey);
+      @Param("name") String normalizedName, @Nullable @Param("vocabularyKey") Long vocabularyKey);
 
   void delete(@Param("key") long vocabularyKey);
 }

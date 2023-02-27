@@ -37,11 +37,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 import lombok.AllArgsConstructor;
@@ -69,6 +71,8 @@ public class VocabularyImporter {
     Path conceptsPath,
     Path hiddenLabelsPath,
     Charset charset) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(vocabLabelEN));
+    Objects.requireNonNull(conceptsPath);
 
     // list to keep the errors and then print them to a file
     List<Error> errors = new ArrayList<>();

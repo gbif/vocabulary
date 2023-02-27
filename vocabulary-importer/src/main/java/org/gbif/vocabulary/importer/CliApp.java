@@ -65,12 +65,6 @@ public class CliApp {
     log.info("Creating the importer");
     VocabularyImporter vocabularyImporter = new VocabularyImporter(vocabularyClient, conceptClient);
 
-    Path conceptsPath = Paths.get(cliArgs.getConceptsPath());
-
-    if (!Files.exists(conceptsPath)) {
-      throw new IllegalArgumentException("Concepts path " + conceptsPath + " doesn't exist");
-    }
-
     Path hiddenLabelsPath = null;
     if (cliArgs.getHiddenLabelsPath() != null) {
       hiddenLabelsPath = Paths.get(cliArgs.getHiddenLabelsPath());
@@ -92,6 +86,12 @@ public class CliApp {
         hiddenLabelsPath,
         parseEncoding(cliArgs.encoding));
     } else {
+      Path conceptsPath = Paths.get(cliArgs.getConceptsPath());
+
+      if (!Files.exists(conceptsPath)) {
+        throw new IllegalArgumentException("Concepts path " + conceptsPath + " doesn't exist");
+      }
+
       log.info("Calling the importer");
       vocabularyImporter.importVocabulary(
         cliArgs.getCsvDelimiter(),
@@ -147,16 +147,14 @@ public class CliApp {
     private String vocabularyName;
 
     @Parameter(
-      names = {"--vocabularyLabelEN", "-vlen"},
-      required = true)
+      names = {"--vocabularyLabelEN", "-vlen"})
     private String vocabularyLabelEN;
 
     @Parameter(names = {"--vocabularyDefinitionEN", "-vden"})
     private String vocabularyDefinitionEN;
 
     @Parameter(
-      names = {"--conceptsPath", "-cp"},
-      required = true)
+      names = {"--conceptsPath", "-cp"})
     private String conceptsPath;
 
     @Parameter(names = {"--hiddenLabelsPath", "-hp"})

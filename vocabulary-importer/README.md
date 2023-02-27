@@ -55,6 +55,7 @@ CSV that it's described in the section above. This is an example:
 ```
 java -jar vocabulary-importer/target/vocabulary-importer-0.37-SNAPSHOT.jar \
 --vocabularyName LifeStage \
+--importHiddenLabelsOnly \
 --hiddenLabelsPath "/mydir/my_hidden_labels.csv" \
 --csvDelimiter ";" \
 --apiUrl https://api.gbif-dev.org/v1/ \
@@ -116,7 +117,8 @@ This tool can be run via command line by sending these params:
 
 * *--importHiddenLabelsOnly, -hlo*
 
-    Flag to indicate the import of only hidden labels to exising concepts
+    Flag to indicate the import of only hidden labels to exising concepts. When this option is used the concepts path
+    and the vocabulary label are not required.
 
 For example:
 

@@ -48,19 +48,19 @@ public class CliApp {
 
     ClientBuilder clientBuilder = new ClientBuilder();
     VocabularyClient vocabularyClient =
-        clientBuilder
-            .withUrl(cliArgs.getApiUrl())
-            .withExponentialBackoffRetry(Duration.ofMillis(1000), 2, 4)
-            .withCredentials(cliArgs.getApiUser(), cliArgs.getApiPassword())
-            .withObjectMapper(objectMapper)
-            .build(VocabularyClient.class);
+      clientBuilder
+        .withUrl(cliArgs.getApiUrl())
+        .withExponentialBackoffRetry(Duration.ofMillis(1000), 2, 4)
+        .withCredentials(cliArgs.getApiUser(), cliArgs.getApiPassword())
+        .withObjectMapper(objectMapper)
+        .build(VocabularyClient.class);
     ConceptClient conceptClient =
-        clientBuilder
-            .withUrl(cliArgs.getApiUrl())
-            .withExponentialBackoffRetry(Duration.ofMillis(1000), 2, 4)
-            .withCredentials(cliArgs.getApiUser(), cliArgs.getApiPassword())
-            .withObjectMapper(objectMapper)
-            .build(ConceptClient.class);
+      clientBuilder
+        .withUrl(cliArgs.getApiUrl())
+        .withExponentialBackoffRetry(Duration.ofMillis(1000), 2, 4)
+        .withCredentials(cliArgs.getApiUser(), cliArgs.getApiPassword())
+        .withObjectMapper(objectMapper)
+        .build(ConceptClient.class);
 
     log.info("Creating the importer");
     VocabularyImporter vocabularyImporter = new VocabularyImporter(vocabularyClient, conceptClient);
@@ -77,7 +77,7 @@ public class CliApp {
 
       if (!Files.exists(hiddenLabelsPath)) {
         throw new IllegalArgumentException(
-            "Hidden labels path " + hiddenLabelsPath + " doesn't exist");
+          "Hidden labels path " + hiddenLabelsPath + " doesn't exist");
       }
     }
 
@@ -85,8 +85,15 @@ public class CliApp {
       throw new IllegalArgumentException("CSV delimiter is required");
     }
 
-    log.info("Calling the importer");
-    vocabularyImporter.importVocabulary(
+    if (cliArgs.importHiddenLabelsOnly) {
+      log.info("Calling the hidden labels importer");
+      vocabularyImporter.importHiddenLabels(cliArgs.getCsvDelimiter(),
+        cliArgs.getVocabularyName(),
+        hiddenLabelsPath,
+        parseEncoding(cliArgs.encoding));
+    } else {
+      log.info("Calling the importer");
+      vocabularyImporter.importVocabulary(
         cliArgs.getCsvDelimiter(),
         cliArgs.getListDelimiter(),
         cliArgs.getVocabularyName(),
@@ -95,6 +102,7 @@ public class CliApp {
         conceptsPath,
         hiddenLabelsPath,
         parseEncoding(cliArgs.encoding));
+    }
     log.info("Import done");
   }
 
@@ -118,37 +126,37 @@ public class CliApp {
     private String listDelimiter = "\\|";
 
     @Parameter(
-        names = {"--apiUrl", "-a"},
-        required = true)
+      names = {"--apiUrl", "-a"},
+      required = true)
     private String apiUrl;
 
     @Parameter(
-        names = {"--apiUser", "-au"},
-        required = true)
+      names = {"--apiUser", "-au"},
+      required = true)
     private String apiUser;
 
     @Parameter(
-        names = {"--apiPassword", "-ap"},
-        required = true,
-        password = true)
+      names = {"--apiPassword", "-ap"},
+      required = true,
+      password = true)
     private String apiPassword;
 
     @Parameter(
-        names = {"--vocabularyName", "-vn"},
-        required = true)
+      names = {"--vocabularyName", "-vn"},
+      required = true)
     private String vocabularyName;
 
     @Parameter(
-        names = {"--vocabularyLabelEN", "-vlen"},
-        required = true)
+      names = {"--vocabularyLabelEN", "-vlen"},
+      required = true)
     private String vocabularyLabelEN;
 
     @Parameter(names = {"--vocabularyDefinitionEN", "-vden"})
     private String vocabularyDefinitionEN;
 
     @Parameter(
-        names = {"--conceptsPath", "-cp"},
-        required = true)
+      names = {"--conceptsPath", "-cp"},
+      required = true)
     private String conceptsPath;
 
     @Parameter(names = {"--hiddenLabelsPath", "-hp"})
@@ -156,5 +164,8 @@ public class CliApp {
 
     @Parameter(names = {"--encoding", "-enc"})
     private String encoding = "UTF-8";
+
+    @Parameter(names = {"--importHiddenLabelsOnly", "-hlo"})
+    private boolean importHiddenLabelsOnly;
   }
 }

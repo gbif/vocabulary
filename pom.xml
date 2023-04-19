@@ -88,6 +88,7 @@
     <jcommander.version>1.60</jcommander.version>
     <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
     <feign.version>10.11</feign.version>
+    <opencsv.version>5.7.1</opencsv.version>
 
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
@@ -271,6 +272,11 @@
         <groupId>io.github.openfeign</groupId>
         <artifactId>feign-jackson</artifactId>
         <version>${feign.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.opencsv</groupId>
+        <artifactId>opencsv</artifactId>
+        <version>${opencsv.version}</version>
       </dependency>
 
       <!-- logging -->

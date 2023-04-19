@@ -15,15 +15,15 @@ It contains the concepts of the vocabulary with its labels and alternative label
 The columns of this file are (note that it uses a semicolon as separator):
 
 ```
-Concept;Parent;Label_en;AlternativeLabels_en;Label_es;AlternativeLabels_es;Definition_en;sameAsUris;externalDefinitions
+Concept;Parent;Label_en;AlternativeLabels_en;Label_es;AlternativeLabels_es;Definition_en;sameAsUris;externalDefinitions;tags
 ```
 
 For example, for `LifeStage` we could have a concepts file like this:
 
 ```
-Concept;Parent;Label_en;AlternativeLabels_en;Label_es;AlternativeLabels_es;Definition_en;sameAsUris;externalDefinitions
-Egg;;Egg;;Huevo;;The egg is the organic vessel containing the zygote in which an embryo develops until it can survive on its own, at which point the animal hatches;;
-Chick;;Chick;;Polluelo;;A chick is a bird that has not yet reached adulthood;;
+Concept;Parent;Label_en;AlternativeLabels_en;Label_es;AlternativeLabels_es;Definition_en;sameAsUris;externalDefinitions;tags
+Egg;;Egg;;Huevo;;The egg is the organic vessel containing the zygote in which an embryo develops until it can survive on its own, at which point the animal hatches;;;tag1|tag2
+Chick;;Chick;;Polluelo;;A chick is a bird that has not yet reached adulthood;;;
 ```
 
 For columns that accept a list of values, such as alternative labels, sameAs uris and external definitions, we should use a delimiter to separate them.

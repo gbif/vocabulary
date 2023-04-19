@@ -14,6 +14,7 @@
 package org.gbif.vocabulary.importer;
 
 import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.TagClient;
 import org.gbif.vocabulary.client.VocabularyClient;
 import org.gbif.ws.client.ClientBuilder;
 
@@ -29,7 +30,6 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.base.Strings;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -61,9 +61,17 @@ public class CliApp {
             .withCredentials(cliArgs.getApiUser(), cliArgs.getApiPassword())
             .withObjectMapper(objectMapper)
             .build(ConceptClient.class);
+    TagClient tagClient =
+        clientBuilder
+            .withUrl(cliArgs.getApiUrl())
+            .withExponentialBackoffRetry(Duration.ofMillis(1000), 2, 4)
+            .withCredentials(cliArgs.getApiUser(), cliArgs.getApiPassword())
+            .withObjectMapper(objectMapper)
+            .build(TagClient.class);
 
     log.info("Creating the importer");
-    VocabularyImporter vocabularyImporter = new VocabularyImporter(vocabularyClient, conceptClient);
+    VocabularyImporter vocabularyImporter =
+        new VocabularyImporter(vocabularyClient, conceptClient, tagClient);
 
     Path hiddenLabelsPath = null;
     if (cliArgs.getHiddenLabelsPath() != null) {
@@ -75,14 +83,14 @@ public class CliApp {
       }
     }
 
-    if (Strings.isNullOrEmpty(cliArgs.getCsvDelimiter())) {
+    if (cliArgs.getCsvDelimiter() == null) {
       throw new IllegalArgumentException("CSV delimiter is required");
     }
 
     if (cliArgs.importHiddenLabelsOnly) {
       log.info("Calling the hidden labels importer");
       vocabularyImporter.importHiddenLabels(
-          cliArgs.getCsvDelimiter(),
+          cliArgs.getCsvDelimiter().charAt(0),
           cliArgs.getVocabularyName(),
           hiddenLabelsPath,
           parseEncoding(cliArgs.encoding));
@@ -95,7 +103,7 @@ public class CliApp {
 
       log.info("Calling the importer");
       vocabularyImporter.importVocabulary(
-          cliArgs.getCsvDelimiter(),
+          cliArgs.getCsvDelimiter().charAt(0),
           cliArgs.getListDelimiter(),
           cliArgs.getVocabularyName(),
           cliArgs.getVocabularyLabelEN(),

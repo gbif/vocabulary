@@ -46,7 +46,9 @@ import static org.gbif.vocabulary.TestUtils.PAGE_FN;
 import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,7 +64,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
   private static final String DEFAULT_VOCABULARY = "Default";
 
-  private static long[] vocabularyKeys = new long[2];
+  private static final Vocabulary[] vocabularies = new Vocabulary[2];
 
   private final ConceptMapper conceptMapper;
   private final TagMapper tagMapper;
@@ -88,14 +90,14 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     vocabulary.setCreatedBy("test");
     vocabulary.setModifiedBy("test");
     vocabularyMapper.create(vocabulary);
-    vocabularyKeys[0] = vocabulary.getKey();
+    vocabularies[0] = vocabulary;
 
     Vocabulary vocabulary2 = new Vocabulary();
     vocabulary2.setName("Default2");
     vocabulary2.setCreatedBy("test");
     vocabulary2.setModifiedBy("test");
     vocabularyMapper.create(vocabulary2);
-    vocabularyKeys[1] = vocabulary2.getKey();
+    vocabularies[1] = vocabulary2;
   }
 
   @Test
@@ -117,9 +119,9 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept2.setParentKey(concept1.getKey());
     conceptMapper.create(concept2);
 
-    conceptMapper.addHiddenLabel(
-        concept2.getKey(),
-        HiddenLabel.builder().value("misspelt example").createdBy("test").build());
+    HiddenLabel hiddenLabel =
+        HiddenLabel.builder().value("misspelt example").createdBy("test").build();
+    conceptMapper.addHiddenLabel(concept2.getKey(), hiddenLabel);
 
     Concept concept3 = createNewEntity();
     concept3.setName("Concept3");
@@ -129,7 +131,12 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept3.setReplacedByKey(concept2.getKey());
     conceptMapper.update(concept3);
 
+    // we create a release view to test it at the same time
+    conceptMapper.createLatestReleaseView(
+        DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
+
     assertList(ConceptSearchParams.builder().query("concept1").key(concept1.getKey()).build(), 1);
+    assertList(ConceptSearchParams.builder().query("misspelt").build(), 1);
     assertList(ConceptSearchParams.builder().query("(concept1)").key(concept1.getKey()).build(), 1);
     assertList(ConceptSearchParams.builder().query("concept1").key(Long.MAX_VALUE).build(), 0);
     assertList(ConceptSearchParams.builder().key(concept1.getKey()).build(), 1);
@@ -137,7 +144,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertList(ConceptSearchParams.builder().query("example").build(), 2);
     assertList(ConceptSearchParams.builder().query("altern ex").build(), 1);
     assertList(ConceptSearchParams.builder().query("oncept").build(), 0);
-    assertList(ConceptSearchParams.builder().vocabularyKey(vocabularyKeys[0]).build(), 3);
+    assertList(ConceptSearchParams.builder().vocabularyKey(vocabularies[0].getKey()).build(), 3);
     assertList(ConceptSearchParams.builder().parentKey(concept1.getKey()).build(), 2);
     assertList(ConceptSearchParams.builder().parent(concept1.getName()).build(), 2);
     assertList(ConceptSearchParams.builder().parentKey(concept2.getKey()).build(), 0);
@@ -145,12 +152,37 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertList(ConceptSearchParams.builder().name("Concept1").build(), 1);
     assertList(ConceptSearchParams.builder().name("Concepto").build(), 0);
     assertList(
-        ConceptSearchParams.builder().query("exa").vocabularyKey(vocabularyKeys[0]).build(), 2);
+        ConceptSearchParams.builder().query("exa").vocabularyKey(vocabularies[0].getKey()).build(),
+        2);
     assertList(
         ConceptSearchParams.builder().parentKey(concept1.getKey()).name("Concept3").build(), 1);
     assertList(ConceptSearchParams.builder().replacedByKey(concept2.getKey()).build(), 1);
     assertList(ConceptSearchParams.builder().hasParent(true).build(), 2);
     assertList(ConceptSearchParams.builder().hasReplacement(true).build(), 1);
+
+    // remove the hidden label. The release view shouldn't get the change
+    conceptMapper.deleteHiddenLabel(concept2.getKey(), hiddenLabel.getKey());
+
+    ConceptSearchParams searchParams = ConceptSearchParams.builder().query("misspelt").build();
+    assertEquals(0, conceptMapper.list(searchParams, DEFAULT_PAGE).size());
+    assertEquals(0, conceptMapper.count(searchParams));
+    assertEquals(
+        1,
+        conceptMapper
+            .listLatestRelease(searchParams, DEFAULT_PAGE, DEFAULT_VOCABULARY.toLowerCase())
+            .size());
+    assertEquals(
+        1, conceptMapper.countLatestRelease(searchParams, DEFAULT_VOCABULARY.toLowerCase()));
+
+    // test that the release view gets updated
+    conceptMapper.updateReleaseViews(DEFAULT_VOCABULARY.toLowerCase());
+    assertEquals(
+        0,
+        conceptMapper
+            .listLatestRelease(searchParams, DEFAULT_PAGE, DEFAULT_VOCABULARY.toLowerCase())
+            .size());
+    assertEquals(
+        0, conceptMapper.countLatestRelease(searchParams, DEFAULT_VOCABULARY.toLowerCase()));
   }
 
   @Test
@@ -202,21 +234,23 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals("Suggest111", result.get(0).getName());
     assertEquals(c1.getKey().intValue(), result.get(0).getKey());
 
+    // create release view to test it at the same time
+    conceptMapper.createLatestReleaseView(
+        DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
+
     // assert expected number of results
-    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey(), null).size());
-    assertEquals(2, conceptMapper.suggest("gge", c1.getVocabularyKey(), null).size());
-    assertEquals(1, conceptMapper.suggest("22", c1.getVocabularyKey(), null).size());
-    assertEquals(0, conceptMapper.suggest("zz", c1.getVocabularyKey(), null).size());
-    assertEquals(0, conceptMapper.suggest(null, c1.getVocabularyKey(), null).size());
-    assertEquals(2, conceptMapper.suggest("label", c1.getVocabularyKey(), null).size());
-    assertEquals(1, conceptMapper.suggest("labeleng", c1.getVocabularyKey(), null).size());
-    assertEquals(
-        0, conceptMapper.suggest("labeleng", c1.getVocabularyKey(), LanguageRegion.SPANISH).size());
-    assertEquals(
-        1, conceptMapper.suggest("labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH).size());
+    assertSuggest(2, "su", c1.getVocabularyKey(), null);
+    assertSuggest(2, "gge", c1.getVocabularyKey(), null);
+    assertSuggest(1, "22", c1.getVocabularyKey(), null);
+    assertSuggest(0, "zz", c1.getVocabularyKey(), null);
+    assertSuggest(0, null, c1.getVocabularyKey(), null);
+    assertSuggest(2, "label", c1.getVocabularyKey(), null);
+    assertSuggest(1, "labeleng", c1.getVocabularyKey(), null);
+    assertSuggest(0, "labeleng", c1.getVocabularyKey(), LanguageRegion.SPANISH);
+    assertSuggest(1, "labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH);
 
     Concept c3 = createNewEntity();
-    c3.setVocabularyKey(vocabularyKeys[1]);
+    c3.setVocabularyKey(vocabularies[1].getKey());
     c3.setName("Suggest333");
     conceptMapper.create(c3);
     assertNotNull(c3.getKey());
@@ -225,6 +259,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(1, conceptMapper.suggest("su", c3.getVocabularyKey(), null).size());
     assertEquals(1, conceptMapper.suggest("33", c3.getVocabularyKey(), null).size());
     assertEquals(0, conceptMapper.suggest("33", c1.getVocabularyKey(), null).size());
+  }
+
+  private void assertSuggest(int expectedSize, String query, long vocabKey, LanguageRegion lang) {
+    assertEquals(expectedSize, conceptMapper.suggest(query, vocabKey, lang).size());
+    assertEquals(
+        expectedSize,
+        conceptMapper.suggestLatestRelease(query, vocabKey, lang, DEFAULT_VOCABULARY).size());
   }
 
   @Test
@@ -490,7 +531,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   public void getVocabularyKeyTest() {
     Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
-    assertEquals(vocabularyKeys[0], conceptMapper.getVocabularyKey(concept1.getKey()).intValue());
+    assertEquals(
+        vocabularies[0].getKey(), conceptMapper.getVocabularyKey(concept1.getKey()).intValue());
   }
 
   @Test
@@ -633,13 +675,15 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
     List<Concept> conceptsFound =
         conceptMapper.list(
-            ConceptSearchParams.builder().vocabularyKey(vocabularyKeys[0]).build(), DEFAULT_PAGE);
+            ConceptSearchParams.builder().vocabularyKey(vocabularies[0].getKey()).build(),
+            DEFAULT_PAGE);
     assertEquals(2, conceptsFound.size());
 
-    conceptMapper.deleteAllConcepts(vocabularyKeys[0]);
+    conceptMapper.deleteAllConcepts(vocabularies[0].getKey());
     conceptsFound =
         conceptMapper.list(
-            ConceptSearchParams.builder().vocabularyKey(vocabularyKeys[0]).build(), DEFAULT_PAGE);
+            ConceptSearchParams.builder().vocabularyKey(vocabularies[0].getKey()).build(),
+            DEFAULT_PAGE);
     assertEquals(0, conceptsFound.size());
   }
 
@@ -789,9 +833,23 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(labels.size(), conceptMapper.countHiddenLabels(concept.getKey()));
   }
 
+  @Test
+  public void releaseViewTest() {
+    String vocabName = "life_stage_test";
+    assertFalse(conceptMapper.existsReleaseView(vocabName));
+    conceptMapper.createLatestReleaseView(vocabName, 1);
+    assertDoesNotThrow(() -> conceptMapper.updateReleaseViews(vocabName));
+    assertTrue(conceptMapper.existsReleaseView(vocabName));
+  }
+
   private void assertList(ConceptSearchParams searchParams, int expectedResult) {
     assertEquals(expectedResult, conceptMapper.list(searchParams, DEFAULT_PAGE).size());
     assertEquals(expectedResult, conceptMapper.count(searchParams));
+    assertEquals(
+        expectedResult,
+        conceptMapper.listLatestRelease(searchParams, DEFAULT_PAGE, DEFAULT_VOCABULARY).size());
+    assertEquals(
+        expectedResult, conceptMapper.countLatestRelease(searchParams, DEFAULT_VOCABULARY));
   }
 
   private void assertSimilarity(List<KeyNameResult> similarities, Concept concept) {
@@ -803,7 +861,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   @Override
   Concept createNewEntity() {
     Concept entity = new Concept();
-    entity.setVocabularyKey(vocabularyKeys[0]);
+    entity.setVocabularyKey(vocabularies[0].getKey());
     entity.setName(TestUtils.getRandomName());
     entity.setExternalDefinitions(
         new ArrayList<>(Collections.singletonList(URI.create("http://test.com"))));

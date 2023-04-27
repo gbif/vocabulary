@@ -130,4 +130,26 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Param("entityKey") long entityKey, @Nullable @Param("page") Pageable page);
 
   long countHiddenLabels(@Param("entityKey") long entityKey);
+
+  boolean existsReleaseView(@Param("vocabName") String vocabularyName);
+
+  void createLatestReleaseView(
+      @Param("vocabName") String vocabularyName, @Param("vocabKey") long vocabularyKey);
+
+  void updateReleaseViews(@Param("vocabName") String vocabularyName);
+
+  List<Concept> listLatestRelease(
+      @Nullable @Param("params") ConceptSearchParams params,
+      @Nullable @Param("page") Pageable page,
+      @Param("vocabName") String vocabularyName);
+
+  long countLatestRelease(
+      @Nullable @Param("params") ConceptSearchParams params,
+      @Param("vocabName") String vocabularyName);
+
+  List<KeyNameResult> suggestLatestRelease(
+      @Param("query") String query,
+      @Param("vocabularyKey") long vocabularyKey,
+      @Nullable @Param("lang") LanguageRegion language,
+      @Param("vocabName") String vocabularyName);
 }

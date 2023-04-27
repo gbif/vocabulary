@@ -1,0 +1,18 @@
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+  <changeSet id="10" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+        CREATE INDEX vocabulary_label_fulltext_search_idx ON vocabulary_label USING gin(fulltext_search);
+        CREATE INDEX concept_label_fulltext_search_idx ON concept_label USING gin(fulltext_search);
+        CREATE INDEX concept_alternative_label_fulltext_search_idx ON concept_alternative_label USING gin(fulltext_search);
+        CREATE INDEX concept_hidden_label_fulltext_search_idx ON concept_hidden_label USING gin(fulltext_search);
+        CREATE INDEX vocabulary_definition_fulltext_search_idx ON vocabulary_definition USING gin(fulltext_search);
+        CREATE INDEX concept_definition_fulltext_search_idx ON concept_definition USING gin(fulltext_search);
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>

@@ -74,24 +74,102 @@
     ON query @@ fulltext_search
     OR EXISTS(
       SELECT cd.key
-      FROM concept_definition cd
+      FROM concept_definition${table_suffix} cd
       WHERE cd.concept_key = c.key AND query @@ cd.fulltext_search
     )
     OR EXISTS(
       SELECT cl.key
-      FROM concept_label cl
+      FROM concept_label${table_suffix} cl
       WHERE cl.concept_key = c.key AND query @@ cl.fulltext_search
     )
     OR EXISTS(
       SELECT cal.key
-      FROM concept_alternative_label cal
+      FROM concept_alternative_label${table_suffix} cal
       WHERE cal.concept_key = c.key AND query @@ cal.fulltext_search
     )
     OR EXISTS(
       SELECT chl.key
-      FROM concept_hidden_label chl
+      FROM concept_hidden_label${table_suffix} chl
       WHERE chl.concept_key = c.key AND query @@ chl.fulltext_search
     )
+  </sql>
+
+  <sql id="LIST_COMMON">
+    <if test="params.parent != null">
+      INNER JOIN concept parent ON parent.key = c.parent_key
+    </if>
+    <where>
+      <if test="params.vocabularyKey != null">
+        c.vocabulary_key = #{params.vocabularyKey}
+      </if>
+      <if test="params.parentKey != null">
+        AND c.parent_key = #{params.parentKey}
+      </if>
+      <if test="params.replacedByKey != null">
+        AND c.replaced_by_key = #{params.replacedByKey}
+      </if>
+      <if test="params.name != null">
+        AND c.name = #{params.name}
+      </if>
+      <if test="params.deprecated != null">
+        AND c.deprecated IS <if test="params.deprecated">NOT</if> NULL
+      </if>
+      <if test="params.key != null">
+        AND c.key = #{params.key}
+      </if>
+      <if test="params.hasParent != null">
+        AND c.parent_key IS <if test="params.hasParent">NOT</if> NULL
+      </if>
+      <if test="params.hasReplacement != null">
+        AND c.replaced_by_key IS <if test="params.hasReplacement">NOT</if> NULL
+      </if>
+      <if test="params.parent != null">
+        AND parent.name = #{params.parent}
+      </if>
+      <if test="params.tags != null">
+        AND
+        <foreach item="item" collection="params.tags" open="(" separator=" AND " close=")">
+          EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE
+          t.name = #{item,jdbcType=VARCHAR})
+        </foreach>
+      </if>
+    </where>
+  </sql>
+
+  <sql id="SUGGEST">
+    SELECT DISTINCT ON(key) key, name
+    FROM (
+      (SELECT key, name
+      FROM concept${table_suffix}
+      WHERE vocabulary_key = #{vocabularyKey} AND
+      name ilike #{query}||'%' AND deprecated IS NULL
+      ORDER BY name LIMIT 20 )
+    UNION ALL
+      (SELECT key, name
+      FROM concept${table_suffix}
+      WHERE vocabulary_key = #{vocabularyKey} AND name ilike '%'||#{query}||'%' AND NOT name ilike
+      #{query}||'%' AND deprecated IS NULL
+      ORDER BY name LIMIT 20 )
+    UNION ALL
+      (SELECT DISTINCT c.key, c.name
+      FROM concept${table_suffix} c
+      JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike #{query}||'%' AND c.deprecated IS NULL
+      <if test="lang != null">
+        AND cl.language = #{lang}
+      </if>
+      LIMIT 20 )
+    UNION ALL
+      (SELECT DISTINCT c.key, c.name
+      FROM concept${table_suffix} c
+      JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike '%'||#{query}||'%' AND NOT cl.value ilike #{query}||'%'
+      AND c.deprecated IS NULL
+      <if test="lang != null">
+        AND cl.language = #{lang}
+      </if>
+      LIMIT 20 )
+    ) t1 LIMIT 20
   </sql>
 
   <!-- QUERIES FROM HERE -->
@@ -168,47 +246,10 @@
     <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c
     <if test="params.query != null">
+      <bind name="table_suffix" value="''"/>
       <include refid="FULL_TEXT"/>
     </if>
-    <if test="params.parent != null">
-      INNER JOIN concept parent ON parent.key = c.parent_key
-    </if>
-    <where>
-      <if test="params.vocabularyKey != null">
-        c.vocabulary_key = #{params.vocabularyKey}
-      </if>
-      <if test="params.parentKey != null">
-        AND c.parent_key = #{params.parentKey}
-      </if>
-      <if test="params.replacedByKey != null">
-        AND c.replaced_by_key = #{params.replacedByKey}
-      </if>
-      <if test="params.name != null">
-        AND c.name = #{params.name}
-      </if>
-      <if test="params.deprecated != null">
-        AND c.deprecated IS <if test="params.deprecated">NOT</if> NULL
-      </if>
-      <if test="params.key != null">
-        AND c.key = #{params.key}
-      </if>
-      <if test="params.hasParent != null">
-        AND c.parent_key IS <if test="params.hasParent">NOT</if> NULL
-      </if>
-      <if test="params.hasReplacement != null">
-        AND c.replaced_by_key IS <if test="params.hasReplacement">NOT</if> NULL
-      </if>
-      <if test="params.parent != null">
-        AND parent.name = #{params.parent}
-      </if>
-      <if test="params.tags != null">
-        AND
-        <foreach item="item" collection="params.tags" open="(" separator=" AND " close=")">
-          EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE
-          t.name = #{item,jdbcType=VARCHAR})
-        </foreach>
-      </if>
-    </where>
+    <include refid="LIST_COMMON"/>
     ORDER BY <if test="params.query != null">ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
@@ -218,83 +259,15 @@
   <select id="count" resultType="Long">
     SELECT COUNT(DISTINCT c.key) FROM concept c
     <if test="params.query != null">
+      <bind name="table_suffix" value="''"/>
       <include refid="FULL_TEXT"/>
     </if>
-    <if test="params.parent != null">
-      INNER JOIN concept parent ON parent.key = c.parent_key
-    </if>
-    <where>
-      <if test="params.vocabularyKey != null">
-        c.vocabulary_key = #{params.vocabularyKey}
-      </if>
-      <if test="params.parentKey != null">
-        AND c.parent_key = #{params.parentKey}
-      </if>
-      <if test="params.replacedByKey != null">
-        AND c.replaced_by_key = #{params.replacedByKey}
-      </if>
-      <if test="params.name != null">
-        AND c.name = #{params.name}
-      </if>
-      <if test="params.deprecated != null">
-        AND c.deprecated IS <if test="params.deprecated">NOT</if> NULL
-      </if>
-      <if test="params.key != null">
-        AND c.key = #{params.key}
-      </if>
-      <if test="params.hasParent != null">
-        AND c.parent_key IS <if test="params.hasParent">NOT</if> NULL
-      </if>
-      <if test="params.hasReplacement != null">
-        AND c.replaced_by_key IS <if test="params.hasReplacement">NOT</if> NULL
-      </if>
-      <if test="params.parent != null">
-        And parent.name = #{params.parent}
-      </if>
-      <if test="params.tags != null">
-        AND
-        <foreach item="item" collection="params.tags" open="(" separator=" AND " close=")">
-          EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE
-          t.name = #{item,jdbcType=VARCHAR})
-        </foreach>
-      </if>
-    </where>
+    <include refid="LIST_COMMON"/>
   </select>
 
   <select id="suggest" resultMap="KEY_NAME_RESULT_MAP">
-    SELECT DISTINCT ON(key) key, name
-    FROM (
-      (SELECT key, name
-      FROM concept
-      WHERE vocabulary_key = #{vocabularyKey} AND
-        name ilike #{query}||'%' AND deprecated IS NULL
-      ORDER BY name LIMIT 20 )
-    UNION ALL
-      (SELECT key, name
-      FROM concept
-      WHERE vocabulary_key = #{vocabularyKey} AND name ilike '%'||#{query}||'%' AND NOT name ilike
-      #{query}||'%' AND deprecated IS NULL
-      ORDER BY name LIMIT 20 )
-    UNION ALL
-      (SELECT DISTINCT c.key, c.name
-      FROM concept c
-      JOIN concept_label cl ON cl.concept_key = c.key
-      WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike #{query}||'%' AND c.deprecated IS NULL
-      <if test="lang != null">
-        AND cl.language = #{lang}
-      </if>
-      LIMIT 20 )
-    UNION ALL
-      (SELECT DISTINCT c.key, c.name
-      FROM concept c
-      JOIN concept_label cl ON cl.concept_key = c.key
-      WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike '%'||#{query}||'%' AND NOT cl.value ilike #{query}||'%'
-      AND c.deprecated IS NULL
-      <if test="lang != null">
-        AND cl.language = #{lang}
-      </if>
-      LIMIT 20 )
-    ) t1 LIMIT 20
+    <bind name="table_suffix" value="''"/>
+    <include refid="SUGGEST"/>
   </select>
 
   <update id="updateParent">
@@ -561,5 +534,87 @@
     JOIN vocabulary v ON v.key = c.vocabulary_key
     WHERE v.key = #{key,jdbcType=BIGINT}
   </delete>
+
+  <!-- latest release views -->
+  <select id="existsReleaseView" resultType="java.lang.Boolean">
+    SELECT EXISTS (SELECT FROM pg_matviews WHERE matviewname = 'concept_${vocabName}_latest_release_mv')
+  </select>
+
+  <insert id="createLatestReleaseView">
+    CREATE MATERIALIZED VIEW concept_${vocabName}_latest_release_mv AS
+    SELECT *
+    FROM concept c
+    WHERE c.vocabulary_key = ${vocabKey};
+
+    CREATE INDEX c_${vocabName}_latest_release_mv_fulltext_idx
+      ON concept_${vocabName}_latest_release_mv USING gin(fulltext_search);
+    CREATE UNIQUE INDEX IF NOT EXISTS c_${vocabName}_latest_release_mv_unique
+      ON concept_${vocabName}_latest_release_mv(name);
+
+    CREATE MATERIALIZED VIEW concept_label_${vocabName}_latest_release_mv AS
+    SELECT * FROM concept_label c WHERE c.concept_key IN (SELECT c2.key FROM concept c2 WHERE c2.vocabulary_key = ${vocabKey});
+    CREATE INDEX cl_${vocabName}_latest_release_mv_fulltext_search_idx
+      ON concept_label_${vocabName}_latest_release_mv USING gin(fulltext_search);
+    CREATE UNIQUE INDEX IF NOT EXISTS cl_${vocabName}_release_mv_unique
+      ON concept_label_${vocabName}_latest_release_mv(concept_key, language);
+
+    CREATE MATERIALIZED VIEW concept_alternative_label_${vocabName}_latest_release_mv AS
+    SELECT * FROM concept_alternative_label c WHERE c.concept_key IN (SELECT c2.key FROM concept c2 WHERE c2.vocabulary_key = ${vocabKey});
+    CREATE INDEX cal_${vocabName}_latest_release_mv_fulltext_search_idx
+      ON concept_alternative_label_${vocabName}_latest_release_mv USING gin(fulltext_search);
+    CREATE UNIQUE INDEX IF NOT EXISTS cal_${vocabName}_release_mv_unique
+      ON concept_alternative_label_${vocabName}_latest_release_mv(concept_key, language, value);
+
+    CREATE MATERIALIZED VIEW concept_hidden_label_${vocabName}_latest_release_mv AS
+    SELECT * FROM concept_hidden_label c WHERE c.concept_key IN (SELECT c2.key FROM concept c2 WHERE c2.vocabulary_key = ${vocabKey});
+    CREATE INDEX chl_${vocabName}_latest_release_mv_fulltext_search_idx
+      ON concept_hidden_label_${vocabName}_latest_release_mv USING gin(fulltext_search);
+    CREATE UNIQUE INDEX IF NOT EXISTS chl_${vocabName}_release_mv_unique
+      ON concept_hidden_label_${vocabName}_latest_release_mv(concept_key, value);
+
+    CREATE MATERIALIZED VIEW concept_definition_${vocabName}_latest_release_mv AS
+    SELECT * FROM concept_definition c WHERE c.concept_key IN (SELECT c2.key FROM concept c2 WHERE c2.vocabulary_key = ${vocabKey});
+    CREATE INDEX cd_${vocabName}_latest_release_mv_fulltext_search_idx
+      ON concept_definition_${vocabName}_latest_release_mv USING gin(fulltext_search);
+    CREATE UNIQUE INDEX IF NOT EXISTS cd_${vocabName}_release_mv_unique
+      ON concept_definition_${vocabName}_latest_release_mv(concept_key, language);
+  </insert>
+
+  <update id="updateReleaseViews">
+    REFRESH MATERIALIZED VIEW CONCURRENTLY concept_${vocabName}_latest_release_mv;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY concept_label_${vocabName}_latest_release_mv;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY concept_alternative_label_${vocabName}_latest_release_mv;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY concept_hidden_label_${vocabName}_latest_release_mv;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY concept_definition_${vocabName}_latest_release_mv;
+  </update>
+
+  <select id="listLatestRelease" resultType="Concept" resultMap="CONCEPT_MAP">
+    SELECT DISTINCT ON (<if test="params.query != null">ts_rank_cd(c.fulltext_search, query),</if> c.created, c.key)
+    <include refid="CONCEPT_READ_FIELDS"/>
+    FROM concept_${vocabName}_latest_release_mv c
+    <if test="params.query != null">
+      <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+      <include refid="FULL_TEXT"/>
+    </if>
+    <include refid="LIST_COMMON"/>
+    ORDER BY <if test="params.query != null">ts_rank_cd(c.fulltext_search, query) DESC,</if> c.created DESC, c.key
+    <if test="page != null">
+      LIMIT #{page.limit} OFFSET #{page.offset}
+    </if>
+  </select>
+
+  <select id="countLatestRelease" resultType="Long">
+    SELECT COUNT(DISTINCT c.key) FROM concept_${vocabName}_latest_release_mv c
+    <if test="params.query != null">
+      <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+      <include refid="FULL_TEXT"/>
+    </if>
+    <include refid="LIST_COMMON"/>
+  </select>
+
+  <select id="suggestLatestRelease" resultMap="KEY_NAME_RESULT_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="SUGGEST"/>
+  </select>
 
 </mapper>

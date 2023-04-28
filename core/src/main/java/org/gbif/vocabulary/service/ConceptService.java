@@ -149,4 +149,63 @@ public interface ConceptService extends BaseService<Concept> {
   void deleteHiddenLabel(long entityKey, long key);
 
   PagingResponse<HiddenLabel> listHiddenLabels(long entityKey, @Nullable Pageable page);
+
+  /**
+   * Checks if the views of the latest release of a vocabulary exist. They should always exist
+   * unless the vocabulary hasn't been released yet.
+   *
+   * @param vocabularyName vocabulary to check the views for
+   * @return true if the views exist, false otherwise
+   */
+  boolean existsLatestReleaseView(String vocabularyName);
+
+  /**
+   * Creates the views of the latest release of the vocabulary.
+   *
+   * @param vocabularyName vocabulary to create the views for
+   * @param vocabularyKey key of the vocabulary
+   */
+  void createLatestReleaseView(String vocabularyName, long vocabularyKey);
+
+  /**
+   * Updates the views of the latest release of the vocabulary.
+   *
+   * @param vocabularyName vocabulary whose views will be updated
+   */
+  void updateLatestReleaseView(String vocabularyName);
+
+  /**
+   * It works as {@link #list(ConceptSearchParams, Pageable)} but it queries the latest release of *
+   * the vocabulary instead of the actual data.
+   */
+  PagingResponse<Concept> listLatestRelease(
+      @Nullable ConceptSearchParams params, @Nullable Pageable page, String vocabularyName);
+
+  /**
+   * It works as {@link #suggest(String, long, LanguageRegion)} but it queries the latest release of
+   * the vocabulary instead of the actual data.
+   */
+  List<KeyNameResult> suggestLatestRelease(
+      String query,
+      long vocabularyKey,
+      @Nullable LanguageRegion languageRegion,
+      String vocabularyName);
+
+  /**
+   * It works as {@link #getByNameAndVocabulary(String, String)} but it queries the latest release
+   * of the vocabulary instead of the actual data.
+   */
+  Concept getByNameLatestRelease(@NotBlank String name, @NotBlank String vocabularyName);
+
+  /**
+   * It works as {@link #findParentsLatestRelease(long, String)} but it queries the latest release
+   * of the vocabulary instead of the actual data.
+   */
+  List<String> findParentsLatestRelease(long conceptKey, String vocabularyName);
+
+  /**
+   * It works as {@link #countChildrenLatestRelease(List, String)} but it queries the latest release
+   * of the vocabulary instead of the actual data.
+   */
+  List<ChildrenResult> countChildrenLatestRelease(List<Long> conceptParents, String vocabularyName);
 }

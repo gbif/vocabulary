@@ -152,4 +152,14 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Param("vocabularyKey") long vocabularyKey,
       @Nullable @Param("lang") LanguageRegion language,
       @Param("vocabName") String vocabularyName);
+
+  List<String> findParentsLatestRelease(
+      @Param("key") long conceptKey, @Param("vocabName") String vocabularyName);
+
+  List<ChildrenResult> countChildrenLatestRelease(
+      @Param("parentConcepts") List<Long> parentConcepts,
+      @Param("vocabName") String vocabularyName);
+
+  Concept getByNameLatestRelease(
+      @Param("name") String name, @Param("vocabName") String vocabularyName);
 }

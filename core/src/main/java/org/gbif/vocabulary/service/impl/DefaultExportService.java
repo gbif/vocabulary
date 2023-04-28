@@ -180,6 +180,13 @@ public class DefaultExportService implements ExportService {
     release.setComment(exportParams.getComment());
     vocabularyReleaseMapper.create(release);
 
+    // create or update the views
+    if (conceptService.existsLatestReleaseView(vocabulary.getName())) {
+      conceptService.updateLatestReleaseView(vocabulary.getName());
+    } else {
+      conceptService.createLatestReleaseView(vocabulary.getName(), vocabulary.getKey());
+    }
+
     return vocabularyReleaseMapper.get(release.getKey());
   }
 

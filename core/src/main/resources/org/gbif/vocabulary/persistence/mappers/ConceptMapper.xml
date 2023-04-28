@@ -172,6 +172,25 @@
     ) t1 LIMIT 20
   </sql>
 
+  <sql id="COUNT_CHILDREN">
+    SELECT c.parent_key as parentKey, c.name as childName FROM concept${table_suffix} c WHERE c.parent_key IN
+    <foreach collection="parentConcepts" item="key" separator="," open="(" close=")">
+      #{key}
+    </foreach>
+  </sql>
+
+  <sql id="FIND_PARENTS">
+    WITH RECURSIVE parents(key, name, parent_key, deprecated) AS (
+      SELECT root.key, root.name, root.parent_key, root.deprecated
+      FROM concept${table_suffix} root
+      WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NULL AND parent_key IS NOT NULL
+      UNION
+      SELECT c.key, c.name, c.parent_key, c.deprecated
+      FROM parents p, concept${table_suffix} c
+      WHERE p.parent_key = c.key )
+    SELECT name FROM parents WHERE key != #{key,jdbcType=BIGINT};
+  </sql>
+
   <!-- QUERIES FROM HERE -->
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
@@ -193,7 +212,8 @@
   <select id="getByNameAndVocabulary" resultMap="CONCEPT_MAP">
     SELECT
     <include refid="CONCEPT_READ_FIELDS"/>
-    FROM concept c INNER JOIN vocabulary v on v.key = c.vocabulary_key WHERE c.name = #{name,jdbcType=VARCHAR} and
+    FROM concept c INNER JOIN vocabulary v on v.key = c.vocabulary_key
+    WHERE c.name = #{name,jdbcType=VARCHAR} and
     v.name = #{vocabularyName,jdbcType=VARCHAR}
   </select>
 
@@ -310,15 +330,8 @@
   </select>
 
   <select id="findParents" resultType="String">
-    WITH RECURSIVE parents(key, name, parent_key, deprecated) AS (
-      SELECT root.key, root.name, root.parent_key, root.deprecated
-      FROM concept root
-      WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NULL AND parent_key IS NOT NULL
-    UNION
-      SELECT c.key, c.name, c.parent_key, c.deprecated
-      FROM parents p, concept c
-      WHERE p.parent_key = c.key )
-    SELECT name FROM parents WHERE key != #{key,jdbcType=BIGINT};
+    <bind name="table_suffix" value="''"/>
+    <include refid="FIND_PARENTS"/>
   </select>
 
   <select id="getVocabularyKey" resultType="Long">
@@ -331,10 +344,8 @@
   </select>
 
   <select id="countChildren" resultType="ChildrenResult">
-    SELECT c.parent_key as parentKey, c.name as childName FROM concept c WHERE c.parent_key IN
-    <foreach collection="parentConcepts" item="key" separator="," open="(" close=")">
-      #{key}
-    </foreach>
+    <bind name="table_suffix" value="''"/>
+    <include refid="COUNT_CHILDREN"/>
   </select>
 
   <!-- TAGS -->
@@ -615,6 +626,23 @@
   <select id="suggestLatestRelease" resultMap="KEY_NAME_RESULT_MAP">
     <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
     <include refid="SUGGEST"/>
+  </select>
+
+  <select id="countChildrenLatestRelease" resultType="ChildrenResult">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="COUNT_CHILDREN"/>
+  </select>
+
+  <select id="findParentsLatestRelease" resultType="String">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="FIND_PARENTS"/>
+  </select>
+
+  <select id="getByNameLatestRelease" resultMap="CONCEPT_MAP">
+    SELECT
+    <include refid="CONCEPT_READ_FIELDS"/>
+    FROM concept_${vocabName}_latest_release_mv c
+    WHERE c.name = #{name,jdbcType=VARCHAR}
   </select>
 
 </mapper>

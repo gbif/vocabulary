@@ -13,6 +13,8 @@
  */
 package org.gbif.vocabulary.restws.advices;
 
+import org.gbif.vocabulary.model.exception.EntityNotFoundException;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -42,6 +44,7 @@ public class GlobalControllerAdvice {
   private static final String DUPLICATED_ENTITY_ERROR = "Duplicated Entity";
   private static final String IO_ERROR = "IO error";
   private static final String UNSUPPORTED_OPERATION_ERROR = "Unsupported Operation";
+  private static final String NOT_FOUND_ERROR = "%s not found";
 
   @Autowired private ErrorAttributes errorAttributes;
 
@@ -55,6 +58,16 @@ public class GlobalControllerAdvice {
   @ExceptionHandler({IllegalArgumentException.class, ConstraintViolationException.class})
   public ResponseEntity<Object> handleInvalidFieldsExceptions(WebRequest request, Exception ex) {
     return buildResponse(request, HttpStatus.UNPROCESSABLE_ENTITY, INVALID_PARAM_ERROR);
+  }
+
+  @ExceptionHandler(EntityNotFoundException.class)
+  public ResponseEntity<Object> handleVocabularyNotFoundExceptions(
+      WebRequest request, EntityNotFoundException ex) {
+    return buildResponse(
+        request,
+        HttpStatus.NOT_FOUND,
+        String.format(NOT_FOUND_ERROR, ex.getEntityType()),
+        ex.getMessage());
   }
 
   @ExceptionHandler(DuplicateKeyException.class)

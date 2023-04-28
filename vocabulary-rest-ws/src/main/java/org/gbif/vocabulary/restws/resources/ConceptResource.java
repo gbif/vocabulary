@@ -27,6 +27,8 @@ import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.exception.EntityNotFoundException;
+import org.gbif.vocabulary.model.exception.EntityNotFoundException.EntityType;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -40,6 +42,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,6 +69,8 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
     produces = MediaType.APPLICATION_JSON_VALUE)
 public class ConceptResource {
 
+  private static final String LATEST_RELEASE_PATH = "latestRelease";
+
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
   private final TagService tagService;
@@ -84,9 +90,7 @@ public class ConceptResource {
   @GetMapping()
   public PagingResponse<ConceptView> listConcepts(
       @PathVariable("vocabularyName") String vocabularyName, ConceptListParams params) {
-
-    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Vocabulary vocabulary = getVocabularyWithCheck(vocabularyName);
 
     PagingResponse<Concept> conceptsPage =
         conceptService.list(
@@ -105,59 +109,9 @@ public class ConceptResource {
                 .build(),
             params.getPage());
 
-    Stream<ConceptView> viewStream = conceptsPage.getResults().stream().map(ConceptView::new);
-
-    // this could be simplified by keeping only 1 param but we leave the 2 of them for backwards
-    // compatibility
-    if (params.isIncludeChildrenCount() || params.isIncludeChildren()) {
-      // get the keys of all the concepts
-      List<Long> parentKeys =
-          conceptsPage.getResults().stream()
-              .map(AbstractVocabularyEntity::getKey)
-              .collect(Collectors.toList());
-
-      // get the children
-      List<ChildrenResult> children = new ArrayList<>();
-      if (!parentKeys.isEmpty()) {
-        children = conceptService.countChildren(parentKeys);
-      }
-
-      Map<Long, Set<ChildrenResult>> childrenByConcept =
-          children.stream()
-              .collect(Collectors.groupingBy(ChildrenResult::getParentKey, Collectors.toSet()));
-
-      // set it to the view
-      if (params.isIncludeChildrenCount()) {
-        viewStream =
-            viewStream.map(
-                v ->
-                    v.setChildrenCount(
-                        childrenByConcept
-                            .getOrDefault(v.getConcept().getKey(), Collections.emptySet())
-                            .size()));
-      }
-      if (params.isIncludeChildren()) {
-        viewStream =
-            viewStream.map(
-                v ->
-                    v.setChildren(
-                        childrenByConcept
-                            .getOrDefault(v.getConcept().getKey(), Collections.emptySet())
-                            .stream()
-                            .map(ChildrenResult::getChildName)
-                            .collect(Collectors.toList())));
-      }
-    }
-
-    // parents
-    if (params.isIncludeParents()) {
-      viewStream =
-          viewStream.map(
-              v ->
-                  v.getConcept().getParentKey() != null
-                      ? v.setParents(conceptService.findParents(v.getConcept().getKey()))
-                      : v);
-    }
+    Stream<ConceptView> viewStream =
+        createConceptViewStream(
+            conceptsPage, params, conceptService::countChildren, conceptService::findParents);
 
     // labels links
     viewStream =
@@ -176,26 +130,9 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @RequestParam(value = "includeParents", required = false) boolean includeParents,
       @RequestParam(value = "includeChildren", required = false) boolean includeChildren) {
-    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
-
-    if (concept == null) {
-      return null;
-    }
-
-    ConceptView conceptView = new ConceptView(concept);
-    if (includeParents && concept.getParentKey() != null) {
-      conceptView.setParents(conceptService.findParents(concept.getKey()));
-    }
-
-    if (includeChildren) {
-      // get the children
-      List<ChildrenResult> children =
-          conceptService.countChildren(Collections.singletonList(concept.getKey()));
-
-      // set it to the view
-      conceptView.setChildren(
-          children.stream().map(ChildrenResult::getChildName).collect(Collectors.toList()));
-    }
+    ConceptView conceptView =
+        createConceptView(
+            includeParents, includeChildren, getConceptWithCheck(conceptName, vocabularyName));
 
     return createLabelsLinks(conceptView, vocabularyName, conceptName);
   }
@@ -203,8 +140,7 @@ public class ConceptResource {
   @PostMapping
   public ConceptView create(
       @PathVariable("vocabularyName") String vocabularyName, @RequestBody Concept concept) {
-    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Vocabulary vocabulary = getVocabularyWithCheck(vocabularyName);
     concept.setVocabularyKey(vocabulary.getKey());
 
     long key = conceptService.create(concept);
@@ -217,8 +153,7 @@ public class ConceptResource {
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       @RequestBody Concept concept) {
-    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    Vocabulary vocabulary = getVocabularyWithCheck(vocabularyName);
     checkArgument(
         vocabulary.getKey().equals(concept.getVocabularyKey()),
         "Concept vocabulary doesn't match with the resource vocabulary in the URL");
@@ -236,10 +171,7 @@ public class ConceptResource {
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
       LanguageRegion locale) {
-    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
-
-    return conceptService.suggest(query, vocabulary.getKey(), locale);
+    return conceptService.suggest(query, getVocabularyWithCheck(vocabularyName).getKey(), locale);
   }
 
   @PutMapping("{name}/deprecate")
@@ -426,14 +358,6 @@ public class ConceptResource {
     conceptService.deleteHiddenLabel(concept.getKey(), key);
   }
 
-  private Concept getConceptWithCheck(String conceptName, String vocabularyName) {
-    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
-    checkArgument(
-        concept != null,
-        "Concept not found for name " + conceptName + " and vocabulary " + vocabularyName);
-    return concept;
-  }
-
   private ConceptView createLabelsLinks(
       ConceptView conceptView, String vocabularyName, String conceptName) {
     conceptView.setAlternativeLabelsLink(
@@ -445,5 +369,184 @@ public class ConceptResource {
             "%s/vocabularies/%s/concepts/%s/hiddenLabels",
             wsConfig.getApiUrl(), vocabularyName, conceptName));
     return conceptView;
+  }
+
+  @GetMapping(LATEST_RELEASE_PATH)
+  public PagingResponse<ConceptView> listConceptsLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName, ConceptListParams params) {
+    if (!conceptService.existsLatestReleaseView(vocabularyName)) {
+      throw new EntityNotFoundException(
+          EntityType.RELEASE,
+          "No release view found for "
+              + vocabularyName
+              + ". Please make sure the vocabulary has been released.");
+    }
+
+    PagingResponse<Concept> conceptsPage =
+        conceptService.listLatestRelease(
+            ConceptSearchParams.builder()
+                .query(params.getQ())
+                .name(params.getName())
+                .parentKey(params.getParentKey())
+                .parent(params.getParent())
+                .replacedByKey(params.getReplacedByKey())
+                .deprecated(params.getDeprecated())
+                .key(params.getKey())
+                .hasParent(params.getHasParent())
+                .hasReplacement(params.getHasReplacement())
+                .build(),
+            params.getPage(),
+            vocabularyName);
+
+    Stream<ConceptView> viewStream =
+        createConceptViewStream(
+            conceptsPage,
+            params,
+            v -> conceptService.countChildrenLatestRelease(v, vocabularyName),
+            v -> conceptService.findParentsLatestRelease(v, vocabularyName));
+
+    return new PagingResponse<>(
+        conceptsPage.getOffset(),
+        conceptsPage.getLimit(),
+        conceptsPage.getCount(),
+        viewStream.collect(Collectors.toList()));
+  }
+
+  @GetMapping(LATEST_RELEASE_PATH + "/{name}")
+  public ConceptView getFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestParam(value = "includeParents", required = false) boolean includeParents,
+      @RequestParam(value = "includeChildren", required = false) boolean includeChildren) {
+    if (!conceptService.existsLatestReleaseView(vocabularyName)) {
+      throw new EntityNotFoundException(
+          EntityType.RELEASE,
+          "No release view found for "
+              + vocabularyName
+              + ". Please make sure the vocabulary has been released.");
+    }
+
+    return createConceptView(
+        includeParents,
+        includeChildren,
+        conceptService.getByNameLatestRelease(conceptName, vocabularyName));
+  }
+
+  @GetMapping(LATEST_RELEASE_PATH + "/suggest")
+  public List<KeyNameResult> suggestLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @RequestParam(value = "q", required = false) String query,
+      LanguageRegion locale) {
+    return conceptService.suggestLatestRelease(
+        query, getVocabularyWithCheck(vocabularyName).getKey(), locale, vocabularyName);
+  }
+
+  @GetMapping(LATEST_RELEASE_PATH + "/{name}/hiddenLabels")
+  public PagingResponse<HiddenLabel> listHiddenLabelsLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      Pageable page) {
+    return conceptService.listHiddenLabels(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), page);
+  }
+
+  private ConceptView createConceptView(
+      boolean includeParents, boolean includeChildren, Concept concept) {
+    ConceptView conceptView = new ConceptView(concept);
+    if (includeParents && concept.getParentKey() != null) {
+      conceptView.setParents(conceptService.findParents(concept.getKey()));
+    }
+
+    if (includeChildren) {
+      // get the children
+      List<ChildrenResult> children =
+          conceptService.countChildren(Collections.singletonList(concept.getKey()));
+
+      // set it to the view
+      conceptView.setChildren(
+          children.stream().map(ChildrenResult::getChildName).collect(Collectors.toList()));
+    }
+    return conceptView;
+  }
+
+  public Vocabulary getVocabularyWithCheck(String vocabularyName) {
+    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    if (vocabulary == null) {
+      throw new EntityNotFoundException(
+          EntityType.VOCABULARY, "Vocabulary not found: " + vocabularyName);
+    }
+    return vocabulary;
+  }
+
+  private Concept getConceptWithCheck(String conceptName, String vocabularyName) {
+    Concept concept = conceptService.getByNameAndVocabulary(conceptName, vocabularyName);
+    if (concept == null) {
+      throw new EntityNotFoundException(
+          EntityType.CONCEPT,
+          "Concept " + conceptName + " not found in vocabulary " + vocabularyName);
+    }
+    return concept;
+  }
+
+  private Stream<ConceptView> createConceptViewStream(
+      PagingResponse<Concept> conceptsPage,
+      ConceptListParams params,
+      Function<List<Long>, List<ChildrenResult>> childrenFn,
+      LongFunction<List<String>> parentsFn) {
+    Stream<ConceptView> viewStream = conceptsPage.getResults().stream().map(ConceptView::new);
+
+    // this could be simplified by keeping only 1 param but we leave the 2 of them for backwards
+    // compatibility
+    if (params.isIncludeChildrenCount() || params.isIncludeChildren()) {
+      // get the keys of all the concepts
+      List<Long> parentKeys =
+          conceptsPage.getResults().stream()
+              .map(AbstractVocabularyEntity::getKey)
+              .collect(Collectors.toList());
+
+      // get the children
+      List<ChildrenResult> children = new ArrayList<>();
+      if (!parentKeys.isEmpty()) {
+        children = childrenFn.apply(parentKeys);
+      }
+
+      Map<Long, Set<ChildrenResult>> childrenByConcept =
+          children.stream()
+              .collect(Collectors.groupingBy(ChildrenResult::getParentKey, Collectors.toSet()));
+
+      // set it to the view
+      if (params.isIncludeChildrenCount()) {
+        viewStream =
+            viewStream.map(
+                v ->
+                    v.setChildrenCount(
+                        childrenByConcept
+                            .getOrDefault(v.getConcept().getKey(), Collections.emptySet())
+                            .size()));
+      }
+      if (params.isIncludeChildren()) {
+        viewStream =
+            viewStream.map(
+                v ->
+                    v.setChildren(
+                        childrenByConcept
+                            .getOrDefault(v.getConcept().getKey(), Collections.emptySet())
+                            .stream()
+                            .map(ChildrenResult::getChildName)
+                            .collect(Collectors.toList())));
+      }
+    }
+
+    // parents
+    if (params.isIncludeParents()) {
+      viewStream =
+          viewStream.map(
+              v ->
+                  v.getConcept().getParentKey() != null
+                      ? v.setParents(parentsFn.apply(v.getConcept().getKey()))
+                      : v);
+    }
+
+    return viewStream;
   }
 }

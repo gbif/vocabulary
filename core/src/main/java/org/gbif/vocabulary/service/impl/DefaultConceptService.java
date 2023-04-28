@@ -445,4 +445,71 @@ public class DefaultConceptService implements ConceptService {
         .map(Concept::getKey)
         .collect(Collectors.toList());
   }
+
+  @Override
+  public boolean existsLatestReleaseView(String vocabularyName) {
+    return conceptMapper.existsReleaseView(vocabularyName.toLowerCase());
+  }
+
+  @Override
+  public void createLatestReleaseView(String vocabularyName, long vocabularyKey) {
+    conceptMapper.createLatestReleaseView(vocabularyName, vocabularyKey);
+  }
+
+  @Override
+  public void updateLatestReleaseView(String vocabularyName) {
+    conceptMapper.updateReleaseViews(vocabularyName);
+  }
+
+  @Override
+  public PagingResponse<Concept> listLatestRelease(
+      ConceptSearchParams params, Pageable page, String vocabularyName) {
+    checkArgument(!Strings.isNullOrEmpty(vocabularyName));
+    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+
+    page = page != null ? page : new PagingRequest();
+    params = params != null ? params : ConceptSearchParams.empty();
+
+    vocabularyName = vocabularyName.toLowerCase();
+
+    return new PagingResponse<>(
+        page,
+        conceptMapper.countLatestRelease(params, vocabularyName),
+        conceptMapper.listLatestRelease(params, page, vocabularyName));
+  }
+
+  @Override
+  public List<KeyNameResult> suggestLatestRelease(
+      String query, long vocabularyKey, LanguageRegion languageRegion, String vocabularyName) {
+    checkArgument(!Strings.isNullOrEmpty(vocabularyName));
+    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+
+    query = query != null ? query : "";
+    return conceptMapper.suggestLatestRelease(
+        query, vocabularyKey, languageRegion, vocabularyName.toLowerCase());
+  }
+
+  @Override
+  public Concept getByNameLatestRelease(String name, String vocabularyName) {
+    checkArgument(!Strings.isNullOrEmpty(vocabularyName));
+    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+    return conceptMapper.getByNameLatestRelease(name, vocabularyName.toLowerCase());
+  }
+
+  @Override
+  public List<String> findParentsLatestRelease(long conceptKey, String vocabularyName) {
+    checkArgument(!Strings.isNullOrEmpty(vocabularyName));
+    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+    return conceptMapper.findParentsLatestRelease(conceptKey, vocabularyName.toLowerCase());
+  }
+
+  @Override
+  public List<ChildrenResult> countChildrenLatestRelease(
+      List<Long> conceptParents, String vocabularyName) {
+    checkArgument(!Strings.isNullOrEmpty(vocabularyName));
+    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+    Preconditions.checkArgument(
+        conceptParents != null && !conceptParents.isEmpty(), "concept parents are required");
+    return conceptMapper.countChildrenLatestRelease(conceptParents, vocabularyName.toLowerCase());
+  }
 }

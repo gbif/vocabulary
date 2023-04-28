@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -550,31 +551,60 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     // just created, doesn't have parent
     Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
+    // create release view to test it at the same time
+    conceptMapper.createLatestReleaseView(
+        DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
+
     assertTrue(conceptMapper.findParents(concept1.getKey()).isEmpty());
+    assertTrue(
+        conceptMapper
+            .findParentsLatestRelease(concept1.getKey(), DEFAULT_VOCABULARY.toLowerCase())
+            .isEmpty());
 
     // concept2 will have concept1 as parent
     Concept concept2 = createNewEntity();
     concept2.setParentKey(concept1.getKey());
     conceptMapper.create(concept2);
+    conceptMapper.updateReleaseViews(DEFAULT_VOCABULARY.toLowerCase());
+
     List<String> parents = conceptMapper.findParents(concept2.getKey());
     assertEquals(1, parents.size());
     assertEquals(concept1.getName(), parents.get(0));
+    List<String> parentsRelease =
+        conceptMapper.findParentsLatestRelease(concept2.getKey(), DEFAULT_VOCABULARY.toLowerCase());
+    assertEquals(1, parentsRelease.size());
+    assertEquals(concept1.getName(), parentsRelease.get(0));
 
     // concept3 will have concept2 as parent
     Concept concept3 = createNewEntity();
     concept3.setParentKey(concept2.getKey());
     conceptMapper.create(concept3);
+    conceptMapper.updateReleaseViews(DEFAULT_VOCABULARY.toLowerCase());
+
     parents = conceptMapper.findParents(concept3.getKey());
     assertEquals(2, parents.size());
     assertTrue(parents.contains(concept1.getName()));
     assertTrue(parents.contains(concept2.getName()));
+    parentsRelease =
+        conceptMapper.findParentsLatestRelease(concept3.getKey(), DEFAULT_VOCABULARY.toLowerCase());
+    assertEquals(2, parentsRelease.size());
+    assertTrue(parentsRelease.contains(concept1.getName()));
+    assertTrue(parentsRelease.contains(concept2.getName()));
   }
 
   @Test
   public void countChildrenTest() {
     Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
+    // create release view to test it at the same time
+    conceptMapper.createLatestReleaseView(
+        DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
+
     assertTrue(conceptMapper.findParents(concept1.getKey()).isEmpty());
+    assertTrue(
+        conceptMapper
+            .findParentsLatestRelease(concept1.getKey(), DEFAULT_VOCABULARY.toLowerCase())
+            .isEmpty());
 
     Concept concept2 = createNewEntity();
     concept2.setParentKey(concept1.getKey());
@@ -588,14 +618,28 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     concept4.setParentKey(concept3.getKey());
     conceptMapper.create(concept4);
 
+    conceptMapper.updateReleaseViews(DEFAULT_VOCABULARY.toLowerCase());
+
+    Consumer<List<ChildrenResult>> assertCounts =
+        counts -> {
+          assertEquals(3, counts.size());
+          assertTrue(counts.contains(new ChildrenResult(concept1.getKey(), concept2.getName())));
+          assertTrue(counts.contains(new ChildrenResult(concept1.getKey(), concept3.getName())));
+          assertTrue(counts.contains(new ChildrenResult(concept3.getKey(), concept4.getName())));
+        };
+
     List<ChildrenResult> counts =
         conceptMapper.countChildren(
             Arrays.asList(
                 concept1.getKey(), concept2.getKey(), concept3.getKey(), concept4.getKey()));
-    assertEquals(3, counts.size());
-    assertTrue(counts.contains(new ChildrenResult(concept1.getKey(), concept2.getName())));
-    assertTrue(counts.contains(new ChildrenResult(concept1.getKey(), concept3.getName())));
-    assertTrue(counts.contains(new ChildrenResult(concept3.getKey(), concept4.getName())));
+    assertCounts.accept(counts);
+
+    List<ChildrenResult> countsLatestRelease =
+        conceptMapper.countChildrenLatestRelease(
+            Arrays.asList(
+                concept1.getKey(), concept2.getKey(), concept3.getKey(), concept4.getKey()),
+            DEFAULT_VOCABULARY.toLowerCase());
+    assertCounts.accept(countsLatestRelease);
   }
 
   @Test
@@ -840,6 +884,18 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     conceptMapper.createLatestReleaseView(vocabName, 1);
     assertDoesNotThrow(() -> conceptMapper.updateReleaseViews(vocabName));
     assertTrue(conceptMapper.existsReleaseView(vocabName));
+  }
+
+  @Test
+  public void getByNameLatestReleaseTest() {
+    Concept concept1 = createNewEntity();
+    conceptMapper.create(concept1);
+    conceptMapper.createLatestReleaseView(
+        DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
+
+    Concept conceptDB =
+        conceptMapper.getByNameLatestRelease(concept1.getName(), DEFAULT_VOCABULARY);
+    assertEquals(concept1.getKey(), conceptDB.getKey());
   }
 
   private void assertList(ConceptSearchParams searchParams, int expectedResult) {

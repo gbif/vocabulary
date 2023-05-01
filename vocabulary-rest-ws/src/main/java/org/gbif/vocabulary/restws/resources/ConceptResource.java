@@ -61,6 +61,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
+import static org.gbif.vocabulary.restws.utils.Constants.LATEST_RELEASE_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 
 @RestController
@@ -68,8 +69,6 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
     value = VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH,
     produces = MediaType.APPLICATION_JSON_VALUE)
 public class ConceptResource {
-
-  private static final String LATEST_RELEASE_PATH = "latestRelease";
 
   private final ConceptService conceptService;
   private final VocabularyService vocabularyService;
@@ -439,15 +438,6 @@ public class ConceptResource {
       LanguageRegion locale) {
     return conceptService.suggestLatestRelease(
         query, getVocabularyWithCheck(vocabularyName).getKey(), locale, vocabularyName);
-  }
-
-  @GetMapping(LATEST_RELEASE_PATH + "/{name}/hiddenLabels")
-  public PagingResponse<HiddenLabel> listHiddenLabelsLatestRelease(
-      @PathVariable("vocabularyName") String vocabularyName,
-      @PathVariable("name") String conceptName,
-      Pageable page) {
-    return conceptService.listHiddenLabels(
-        getConceptWithCheck(conceptName, vocabularyName).getKey(), page);
   }
 
   private ConceptView createConceptView(

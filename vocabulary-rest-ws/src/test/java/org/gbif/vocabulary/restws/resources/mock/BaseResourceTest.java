@@ -94,16 +94,14 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
             put(getBasePath() + "/fake/deprecate")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(OBJECT_MAPPER.writeValueAsString(createDeprecateAction())))
-        .andExpect(status().isUnprocessableEntity());
+        .andExpect(status().isNotFound());
   }
 
   @WithMockUser(authorities = {UserRoles.VOCABULARY_ADMIN})
   @Test
   public void restoreDeprecatedEntityNotFoundNameTest() throws Exception {
     // mock not set, so the service returns null
-    mockMvc
-        .perform(delete(getBasePath() + "/fake/deprecate"))
-        .andExpect(status().isUnprocessableEntity());
+    mockMvc.perform(delete(getBasePath() + "/fake/deprecate")).andExpect(status().isNotFound());
   }
 
   @Test

@@ -25,6 +25,7 @@ import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.exception.EntityNotFoundException;
 import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
@@ -150,7 +151,6 @@ public class VocabularyResource {
       @RequestParam(value = "restoreDeprecatedConcepts", required = false)
           boolean restoreDeprecatedConcepts) {
     Vocabulary vocabulary = getVocabularyByName(vocabularyName);
-
     vocabularyService.restoreDeprecated(vocabulary.getKey(), restoreDeprecatedConcepts);
   }
 
@@ -318,7 +318,11 @@ public class VocabularyResource {
   @NotNull
   private Vocabulary getVocabularyByName(String vocabularyName) {
     Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
-    checkArgument(vocabulary != null, "Vocabulary not found for name " + vocabularyName);
+    if (vocabulary == null) {
+      throw new EntityNotFoundException(
+          EntityNotFoundException.EntityType.VOCABULARY,
+          "Vocabulary " + vocabularyName + " not found");
+    }
     return vocabulary;
   }
 }

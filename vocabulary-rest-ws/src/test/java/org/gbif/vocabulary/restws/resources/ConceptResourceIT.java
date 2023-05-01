@@ -18,6 +18,7 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptListParams;
 import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.client.ConceptClient;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
@@ -25,6 +26,7 @@ import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.service.ConceptService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,8 +63,12 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
   private static String otherVocabularyName;
   private static long otherVocabularyKey;
 
-  ConceptResourceIT(@LocalServerPort int localServerPort) {
+  private final ConceptService conceptService;
+
+  ConceptResourceIT(
+      @LocalServerPort int localServerPort, @Autowired ConceptService conceptService) {
     super(Concept.class, localServerPort);
+    this.conceptService = conceptService;
   }
 
   @BeforeAll
@@ -420,6 +426,35 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         conceptClient
             .listHiddenLabels(defaultVocabularyName, c1.getName(), new PagingRequest())
             .getResults()
+            .size());
+  }
+
+  @Test
+  public void releaseViewTest() {
+    Concept c1 = createEntity();
+    conceptClient.create(defaultVocabularyName, c1);
+    c1 = conceptClient.get(defaultVocabularyName, c1.getName(), false, false).getConcept();
+
+    conceptService.createLatestReleaseView(defaultVocabularyName, c1.getVocabularyKey());
+
+    assertEquals(
+        1,
+        conceptClient
+            .listConceptsLatestRelease(
+                defaultVocabularyName, ConceptListParams.builder().name(c1.getName()).build())
+            .getCount());
+
+    assertEquals(
+        c1,
+        conceptClient
+            .getFromLatestRelease(defaultVocabularyName, c1.getName(), false, false)
+            .getConcept());
+
+    assertEquals(
+        1,
+        conceptClient
+            .suggestLatestRelease(
+                defaultVocabularyName, ConceptClient.SuggestParams.of(null, c1.getName()))
             .size());
   }
 

@@ -78,7 +78,8 @@ public interface ConceptClient {
 
   @GetMapping(value = "suggest", produces = MediaType.APPLICATION_JSON_VALUE)
   List<KeyNameResult> suggest(
-      @PathVariable("vocabularyName") String vocabularyName, @RequestParam("q") String query);
+      @PathVariable("vocabularyName") String vocabularyName,
+      @SpringQueryMap SuggestParams suggestParams);
 
   @PutMapping(value = "{name}/deprecate", consumes = MediaType.APPLICATION_JSON_VALUE)
   void deprecate(
@@ -237,9 +238,32 @@ public interface ConceptClient {
       @PathVariable("name") String conceptName,
       @PathVariable("key") long key);
 
+  @GetMapping("latestRelease")
+  PagingResponse<ConceptView> listConceptsLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @SpringQueryMap ConceptListParams params);
+
+  @GetMapping("latestRelease/{name}")
+  ConceptView getFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @RequestParam(value = "includeParents", required = false) boolean includeParents,
+      @RequestParam(value = "includeChildren", required = false) boolean includeChildren);
+
+  @GetMapping("latestRelease/suggest")
+  List<KeyNameResult> suggestLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @SpringQueryMap SuggestParams suggestParams);
+
   @AllArgsConstructor(staticName = "of")
   class ListParams {
     List<LanguageRegion> lang;
     Pageable page;
+  }
+
+  @AllArgsConstructor(staticName = "of")
+  class SuggestParams {
+    LanguageRegion locale;
+    String q;
   }
 }

@@ -23,4 +23,5 @@ public class Constants {
   public static final String VOCABULARY_LANGUAGE_PATH = "vocabularyLanguage";
   public static final String VOCABULARY_RELEASES_PATH = "releases";
   public static final String TAGS_PATH = "vocabularyTags";
+  public static final String LATEST_RELEASE_PATH = "latestRelease";
 }

@@ -9,7 +9,7 @@
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
     <collection property="tags" column="key" select="listTags"/>
     <collection property="definition" column="key" select="listConceptDefinitions"/>
-    <collection property="label" column="key" select="listConceptLabels"/>
+    <collection property="label" column="{entityKey=key}" select="listConceptLabels"/>
   </resultMap>
 
   <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">

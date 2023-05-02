@@ -90,6 +90,10 @@
     <feign.version>10.11</feign.version>
     <opencsv.version>5.7.1</opencsv.version>
 
+    <!-- documentation -->
+    <springdoc-openapi-ui.version>1.5.8</springdoc-openapi-ui.version>
+    <swagger-annotations.version>2.2.0</swagger-annotations.version>
+
     <!-- version limited by gbif-api -->
     <guava.version>18.0</guava.version>
 
@@ -277,6 +281,18 @@
         <groupId>com.opencsv</groupId>
         <artifactId>opencsv</artifactId>
         <version>${opencsv.version}</version>
+      </dependency>
+
+      <!-- documentation -->
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-ui</artifactId>
+        <version>${springdoc-openapi-ui.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>${swagger-annotations.version}</version>
       </dependency>
 
       <!-- logging -->

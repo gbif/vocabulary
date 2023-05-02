@@ -61,6 +61,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.servers.Server;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,6 +72,21 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
+@OpenAPIDefinition(
+    info =
+        @Info(
+            title = "Vocabulary API",
+            version = "v1",
+            description =
+                "This API works against the GBIF Vocabulary server, which handles the vocabularies that are or will be used during the data interpretation."
+                    + "Internally we use a Java web service client for the consumption of these HTTP-based, RESTful web services. "
+                    + "It may be of interest to those coding against the API, and can be found in the "
+                    + "[vocabulary-rest-ws-client](https://github.com/gbif/vocabulary/tree/master/vocabulary-rest-ws-client) project.",
+            termsOfService = "https://www.gbif.org/terms"),
+    servers = {
+      @Server(url = "https://api.gbif.org/v1/", description = "Production"),
+      @Server(url = "https://api.gbif-uat.org/v1/", description = "User testing")
+    })
 @Slf4j
 @RestController
 @RequestMapping(value = VOCABULARIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)

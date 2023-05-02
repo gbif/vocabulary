@@ -887,6 +887,77 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   }
 
   @Test
+  public void releaseViewSubqueriesTest() {
+    String vocabName = "test";
+
+    Concept concept1 = createNewEntity();
+    concept1.setName("Concept1");
+    conceptMapper.create(concept1);
+
+    conceptMapper.addDefinition(
+        concept1.getKey(),
+        Definition.builder()
+            .value("test")
+            .language(LanguageRegion.ACHOLI)
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
+
+    conceptMapper.createLatestReleaseView(vocabName, 1);
+
+    // we add more definitions and labels without updating the release view to make sure the
+    // subqueries are done against the release materialized views
+    conceptMapper.addDefinition(
+        concept1.getKey(),
+        Definition.builder()
+            .value("test2")
+            .language(LanguageRegion.SPANISH)
+            .createdBy("test")
+            .modifiedBy("test")
+            .build());
+
+    conceptMapper.addLabel(
+        concept1.getKey(),
+        Label.builder().value("l1").language(LanguageRegion.ACHOLI).createdBy("test").build());
+
+    Concept c1Get = conceptMapper.getByNameLatestRelease(concept1.getName(), vocabName);
+    assertEquals(1, c1Get.getDefinition().size());
+    assertEquals(0, c1Get.getLabel().size());
+
+    List<Concept> conceptsList =
+        conceptMapper.listLatestRelease(
+            ConceptSearchParams.builder().name(concept1.getName()).build(),
+            DEFAULT_PAGE,
+            vocabName);
+    assertEquals(1, conceptsList.get(0).getDefinition().size());
+    assertEquals(0, conceptsList.get(0).getLabel().size());
+
+    List<KeyNameResult> suggestResult =
+        conceptMapper.suggestLatestRelease(
+            concept1.getName(), concept1.getVocabularyKey(), null, vocabName);
+    assertEquals(0, suggestResult.get(0).getLabels().size());
+
+    conceptMapper.updateReleaseViews(vocabName);
+
+    c1Get = conceptMapper.getByNameLatestRelease(concept1.getName(), vocabName);
+    assertEquals(2, c1Get.getDefinition().size());
+    assertEquals(1, c1Get.getLabel().size());
+
+    conceptsList =
+        conceptMapper.listLatestRelease(
+            ConceptSearchParams.builder().name(concept1.getName()).build(),
+            DEFAULT_PAGE,
+            vocabName);
+    assertEquals(2, conceptsList.get(0).getDefinition().size());
+    assertEquals(1, conceptsList.get(0).getLabel().size());
+
+    suggestResult =
+        conceptMapper.suggestLatestRelease(
+            concept1.getName(), concept1.getVocabularyKey(), null, vocabName);
+    assertEquals(1, suggestResult.get(0).getLabels().size());
+  }
+
+  @Test
   public void getByNameLatestReleaseTest() {
     Concept concept1 = createNewEntity();
     conceptMapper.create(concept1);
@@ -903,9 +974,12 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(expectedResult, conceptMapper.count(searchParams));
     assertEquals(
         expectedResult,
-        conceptMapper.listLatestRelease(searchParams, DEFAULT_PAGE, DEFAULT_VOCABULARY).size());
+        conceptMapper
+            .listLatestRelease(searchParams, DEFAULT_PAGE, DEFAULT_VOCABULARY.toLowerCase())
+            .size());
     assertEquals(
-        expectedResult, conceptMapper.countLatestRelease(searchParams, DEFAULT_VOCABULARY));
+        expectedResult,
+        conceptMapper.countLatestRelease(searchParams, DEFAULT_VOCABULARY.toLowerCase()));
   }
 
   private void assertSimilarity(List<KeyNameResult> similarities, Concept concept) {

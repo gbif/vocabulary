@@ -137,7 +137,7 @@
   </sql>
 
   <sql id="SUGGEST">
-    SELECT DISTINCT ON(key) key, name
+    SELECT DISTINCT ON(key) key, name <if test="_parameter.containsKey('vocabName')">, #{vocabName} vocabName</if>
     FROM (
       (SELECT key, name
       FROM concept${table_suffix}
@@ -189,6 +189,20 @@
       FROM parents p, concept${table_suffix} c
       WHERE p.parent_key = c.key )
     SELECT name FROM parents WHERE key != #{key,jdbcType=BIGINT};
+  </sql>
+
+  <sql id="LIST_CONCEPTS_DEFINITION">
+    SELECT key, language, value, created_by, created, modified_by, modified
+    FROM concept_definition${table_suffix}
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    ORDER BY key DESC
+  </sql>
+
+  <sql id="LIST_CONCEPTS_LABELS">
+    SELECT <include refid="LABEL_FIELDS"/>
+    FROM concept_label${table_suffix}
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    ORDER BY key DESC
   </sql>
 
   <!-- QUERIES FROM HERE -->
@@ -404,10 +418,8 @@
   </select>
 
   <select id="listConceptDefinitions" resultMap="DEFINITION_RESULT_MAP">
-    SELECT key, language, value, created_by, created, modified_by, modified
-    FROM concept_definition
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    ORDER BY key DESC
+    <bind name="table_suffix" value="''"/>
+    <include refid="LIST_CONCEPTS_DEFINITION"/>
   </select>
 
   <select id="getDefinition" resultMap="DEFINITION_RESULT_MAP">
@@ -448,10 +460,8 @@
   </select>
 
   <select id="listConceptLabels" resultMap="LABEL_RESULT_MAP">
-    SELECT <include refid="LABEL_FIELDS"/>
-    FROM concept_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    ORDER BY key DESC
+    <bind name="table_suffix" value="''"/>
+    <include refid="LIST_CONCEPTS_LABELS"/>
   </select>
 
   <!-- alternative labels -->
@@ -599,9 +609,9 @@
     REFRESH MATERIALIZED VIEW CONCURRENTLY concept_definition_${vocabName}_latest_release_mv;
   </update>
 
-  <select id="listLatestRelease" resultType="Concept" resultMap="CONCEPT_MAP">
+  <select id="listLatestRelease" resultType="Concept" resultMap="CONCEPT_MAP_RELEASE_VIEW">
     SELECT DISTINCT ON (<if test="params.query != null">ts_rank_cd(c.fulltext_search, query),</if> c.created, c.key)
-    <include refid="CONCEPT_READ_FIELDS"/>
+    <include refid="CONCEPT_READ_FIELDS"/>, #{vocabName} vocabName
     FROM concept_${vocabName}_latest_release_mv c
     <if test="params.query != null">
       <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
@@ -623,7 +633,7 @@
     <include refid="LIST_COMMON"/>
   </select>
 
-  <select id="suggestLatestRelease" resultMap="KEY_NAME_RESULT_MAP">
+  <select id="suggestLatestRelease" resultMap="KEY_NAME_RESULT_MAP_RELEASE_VIEW">
     <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
     <include refid="SUGGEST"/>
   </select>
@@ -638,11 +648,35 @@
     <include refid="FIND_PARENTS"/>
   </select>
 
-  <select id="getByNameLatestRelease" resultMap="CONCEPT_MAP">
+  <select id="getByNameLatestRelease" resultMap="CONCEPT_MAP_RELEASE_VIEW">
     SELECT
-    <include refid="CONCEPT_READ_FIELDS"/>
+    <include refid="CONCEPT_READ_FIELDS"/>, #{vocabName} vocabName
     FROM concept_${vocabName}_latest_release_mv c
     WHERE c.name = #{name,jdbcType=VARCHAR}
   </select>
+
+  <select id="listConceptDefinitionsLatestRelease" resultMap="DEFINITION_RESULT_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LIST_CONCEPTS_DEFINITION"/>
+  </select>
+
+  <select id="listConceptLabelsLatestRelease" resultMap="LABEL_RESULT_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LIST_CONCEPTS_LABELS"/>
+  </select>
+
+  <resultMap id="CONCEPT_MAP_RELEASE_VIEW" type="Concept" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="externalDefinitions" column="external_definition_urls" typeHandler="UriArrayTypeHandler"/>
+    <result property="sameAsUris" column="same_as_uris" typeHandler="UriArrayTypeHandler"/>
+    <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
+    <collection property="definition" column="{entityKey=key,vocabName=vocabName}" select="listConceptDefinitionsLatestRelease"/>
+    <collection property="label" column="{entityKey=key,vocabName=vocabName}" select="listConceptLabelsLatestRelease"/>
+  </resultMap>
+
+  <resultMap id="KEY_NAME_RESULT_MAP_RELEASE_VIEW" type="KeyNameResult" autoMapping="true">
+    <id property="key" column="key"/>
+    <collection property="labels" column="{entityKey=key,vocabName=vocabName}" select="listConceptLabelsLatestRelease"/>
+  </resultMap>
 
 </mapper>

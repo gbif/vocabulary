@@ -14,7 +14,7 @@
 
   <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">
     <id property="key" column="key"/>
-    <collection property="labels" column="key" select="listConceptLabels"/>
+    <collection property="labels" column="{entityKey=key,lang=lang}" select="listConceptLabels"/>
   </resultMap>
 
   <resultMap id="DEFINITION_RESULT_MAP" type="Definition" autoMapping="true">
@@ -137,7 +137,7 @@
   </sql>
 
   <sql id="SUGGEST">
-    SELECT DISTINCT ON(key) key, name <if test="_parameter.containsKey('vocabName')">, #{vocabName} vocabName</if>
+    SELECT DISTINCT ON(key) key, name, #{lang} lang <if test="_parameter.containsKey('vocabName')">, #{vocabName} vocabName</if>
     FROM (
       (SELECT key, name
       FROM concept${table_suffix}
@@ -202,6 +202,9 @@
     SELECT <include refid="LABEL_FIELDS"/>
     FROM concept_label${table_suffix}
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    <if test="lang != null">
+      AND language = #{lang}
+    </if>
     ORDER BY key DESC
   </sql>
 
@@ -676,7 +679,7 @@
 
   <resultMap id="KEY_NAME_RESULT_MAP_RELEASE_VIEW" type="KeyNameResult" autoMapping="true">
     <id property="key" column="key"/>
-    <collection property="labels" column="{entityKey=key,vocabName=vocabName}" select="listConceptLabelsLatestRelease"/>
+    <collection property="labels" column="{entityKey=key,vocabName=vocabName,lang=lang}" select="listConceptLabelsLatestRelease"/>
   </resultMap>
 
 </mapper>

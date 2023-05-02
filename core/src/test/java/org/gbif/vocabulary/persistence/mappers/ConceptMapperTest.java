@@ -249,6 +249,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertSuggest(1, "labeleng", c1.getVocabularyKey(), null);
     assertSuggest(0, "labeleng", c1.getVocabularyKey(), LanguageRegion.SPANISH);
     assertSuggest(1, "labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH);
+    assertSuggest(1, "labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH);
 
     Concept c3 = createNewEntity();
     c3.setVocabularyKey(vocabularies[1].getKey());
@@ -263,10 +264,21 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   }
 
   private void assertSuggest(int expectedSize, String query, long vocabKey, LanguageRegion lang) {
-    assertEquals(expectedSize, conceptMapper.suggest(query, vocabKey, lang).size());
-    assertEquals(
-        expectedSize,
-        conceptMapper.suggestLatestRelease(query, vocabKey, lang, DEFAULT_VOCABULARY).size());
+    List<KeyNameResult> result = conceptMapper.suggest(query, vocabKey, lang);
+    assertEquals(expectedSize, result.size());
+    List<KeyNameResult> resultRelease =
+        conceptMapper.suggestLatestRelease(query, vocabKey, lang, DEFAULT_VOCABULARY);
+    assertEquals(expectedSize, resultRelease.size());
+
+    if (lang != null) {
+      assertTrue(
+          result.stream()
+              .allMatch(
+                  r ->
+                      r.getLabels() == null
+                          || r.getLabels().isEmpty()
+                          || r.getLabels().stream().allMatch(l -> l.getLanguage() == lang)));
+    }
   }
 
   @Test

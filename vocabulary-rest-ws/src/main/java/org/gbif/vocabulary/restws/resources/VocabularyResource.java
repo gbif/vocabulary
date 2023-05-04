@@ -199,6 +199,7 @@ public class VocabularyResource {
                 .deployRepository(exportConfig.getDeployRepository())
                 .deployUser(exportConfig.getDeployUser())
                 .deployPassword(exportConfig.getDeployPassword())
+                .skipUpload(exportConfig.isSkipUpload())
                 .build());
 
     if (messagePublisher != null) {

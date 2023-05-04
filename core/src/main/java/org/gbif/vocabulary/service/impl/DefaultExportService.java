@@ -164,20 +164,23 @@ public class DefaultExportService implements ExportService {
     // check that the version is greater than the latest
     checkVersionNumber(exportParams.getVersion(), vocabulary.getKey());
 
-    // export the vocabulary first
-    Path vocabularyExport =
-        exportVocabulary(exportParams.getVocabularyName(), exportParams.getVersion());
-
-    // upload to nexus
-    String repositoryUrl = releasePersister.uploadToNexus(exportParams, vocabularyExport);
-
-    // we store the release in the DB
     VocabularyRelease release = new VocabularyRelease();
     release.setVersion(exportParams.getVersion());
     release.setCreatedBy(exportParams.getUser());
-    release.setExportUrl(repositoryUrl);
     release.setVocabularyKey(vocabulary.getKey());
     release.setComment(exportParams.getComment());
+
+    if (!exportParams.isSkipUpload()) {
+      // export the vocabulary first
+      Path vocabularyExport =
+          exportVocabulary(exportParams.getVocabularyName(), exportParams.getVersion());
+
+      // upload to nexus
+      String repositoryUrl = releasePersister.uploadToNexus(exportParams, vocabularyExport);
+      release.setExportUrl(repositoryUrl);
+    }
+
+    // we store the release in the DB
     vocabularyReleaseMapper.create(release);
 
     // create or update the views

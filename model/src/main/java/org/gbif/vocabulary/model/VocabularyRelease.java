@@ -28,7 +28,7 @@ public class VocabularyRelease implements LenientEquals<VocabularyRelease> {
   private Long key;
   private long vocabularyKey;
   @NotBlank private String version;
-  @NotBlank private String exportUrl;
+  private String exportUrl;
   LocalDateTime created;
   @NotBlank String createdBy;
   @NotBlank String comment;

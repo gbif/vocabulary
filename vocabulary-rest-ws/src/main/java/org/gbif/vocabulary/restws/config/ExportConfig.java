@@ -32,24 +32,27 @@ public class ExportConfig {
   private String deployUser;
   private String deployPassword;
   private String deployRepository;
+  private boolean skipUpload;
 
   static void validate(ExportConfig exportConfig, Errors errors) {
-    if (exportConfig.isReleaseEnabled()) {
+    if (exportConfig.isReleaseEnabled() && !exportConfig.isSkipUpload()) {
       if (Strings.isNullOrEmpty(exportConfig.getDeployUser())) {
         errors.rejectValue(
-            "deployUser", "export-config", "Deploy user is required if releases are enabled");
+            "deployUser",
+            "export-config",
+            "Deploy user is required if releases are enabled and we don't skip the repository upload");
       }
       if (Strings.isNullOrEmpty(exportConfig.getDeployPassword())) {
         errors.rejectValue(
             "deployPassword",
             "export-config",
-            "Deploy password is required if releases are enabled");
+            "Deploy password is required if releases are enabled and we don't skip the repository upload");
       }
       if (Strings.isNullOrEmpty(exportConfig.getDeployUser())) {
         errors.rejectValue(
             "deployRepository",
             "export-config",
-            "Deploy repository is required if releases are enabled");
+            "Deploy repository is required if releases are enabled and we don't skip the repository upload");
       }
     }
   }

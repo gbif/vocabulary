@@ -13,6 +13,7 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.TestUtils;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Definition;
@@ -757,19 +758,12 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .build();
     conceptMapper.addDefinition(concept.getKey(), definition);
 
-    List<Definition> definitions = conceptMapper.listDefinitions(concept.getKey(), null);
-    assertEquals(1, definitions.size());
+    conceptMapper.createLatestReleaseView(
+        DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
 
-    assertEquals(
-        1,
-        conceptMapper
-            .listDefinitions(concept.getKey(), Collections.singletonList(LanguageRegion.ENGLISH))
-            .size());
-    assertEquals(
-        0,
-        conceptMapper
-            .listDefinitions(concept.getKey(), Collections.singletonList(LanguageRegion.SPANISH))
-            .size());
+    assertListDefinitions(1, concept.getKey(), null);
+    assertListDefinitions(1, concept.getKey(), LanguageRegion.ENGLISH);
+    assertListDefinitions(0, concept.getKey(), LanguageRegion.SPANISH);
 
     definition = conceptMapper.getDefinition(concept.getKey(), definition.getKey());
     assertEquals("test", definition.getValue());
@@ -785,8 +779,18 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals("test2", definition.getValue());
 
     conceptMapper.deleteDefinition(concept.getKey(), definition.getKey());
-    definitions = conceptMapper.listDefinitions(concept.getKey(), null);
-    assertEquals(0, definitions.size());
+    conceptMapper.updateReleaseViews(DEFAULT_VOCABULARY.toLowerCase());
+    assertListDefinitions(0, concept.getKey(), null);
+  }
+
+  private void assertListDefinitions(int expectedSize, long conceptKey, LanguageRegion lang) {
+    List<LanguageRegion> langs = lang != null ? Collections.singletonList(lang) : null;
+    assertEquals(expectedSize, conceptMapper.listDefinitions(conceptKey, langs).size());
+    assertEquals(
+        expectedSize,
+        conceptMapper
+            .listDefinitionsLatestRelease(conceptKey, langs, DEFAULT_VOCABULARY.toLowerCase())
+            .size());
   }
 
   @Test
@@ -798,28 +802,40 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         Label.builder().language(LanguageRegion.ENGLISH).value("test").createdBy("test").build();
     conceptMapper.addLabel(concept.getKey(), label);
 
-    List<Label> labels = conceptMapper.listLabels(concept.getKey(), null);
-    assertEquals(1, labels.size());
-    label = labels.get(0);
-    assertEquals("test", label.getValue());
-    assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
-    assertEquals("test", label.getCreatedBy());
-    assertNotNull(label.getCreated());
+    conceptMapper.createLatestReleaseView(
+        DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
 
-    assertEquals(
-        1,
-        conceptMapper
-            .listLabels(concept.getKey(), Collections.singletonList(LanguageRegion.ENGLISH))
-            .size());
-    assertEquals(
-        0,
-        conceptMapper
-            .listLabels(concept.getKey(), Collections.singletonList(LanguageRegion.SPANISH))
-            .size());
+    Consumer<List<Label>> assertLabels =
+        labs -> {
+          assertEquals(1, labs.size());
+          Label lab = labs.get(0);
+          assertEquals("test", lab.getValue());
+          assertEquals(LanguageRegion.ENGLISH, lab.getLanguage());
+          assertEquals("test", lab.getCreatedBy());
+          assertNotNull(lab.getCreated());
+        };
+
+    assertLabels.accept(conceptMapper.listLabels(concept.getKey(), null));
+    assertLabels.accept(
+        conceptMapper.listLabelsLatestRelease(
+            concept.getKey(), null, DEFAULT_VOCABULARY.toLowerCase()));
+
+    assertListLabels(1, concept.getKey(), LanguageRegion.ENGLISH);
+    assertListLabels(0, concept.getKey(), LanguageRegion.SPANISH);
 
     conceptMapper.deleteLabel(concept.getKey(), label.getKey());
-    labels = conceptMapper.listLabels(concept.getKey(), null);
-    assertEquals(0, labels.size());
+    conceptMapper.updateReleaseViews(DEFAULT_VOCABULARY.toLowerCase());
+    assertListLabels(0, concept.getKey(), null);
+  }
+
+  private void assertListLabels(int expectedSize, long conceptKey, LanguageRegion lang) {
+    List<LanguageRegion> langs = lang != null ? Collections.singletonList(lang) : null;
+    assertEquals(expectedSize, conceptMapper.listLabels(conceptKey, langs).size());
+    assertEquals(
+        expectedSize,
+        conceptMapper
+            .listLabelsLatestRelease(conceptKey, langs, DEFAULT_VOCABULARY.toLowerCase())
+            .size());
   }
 
   @Test
@@ -830,37 +846,53 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Label label =
         Label.builder().language(LanguageRegion.ENGLISH).value("test").createdBy("test").build();
     conceptMapper.addAlternativeLabel(concept.getKey(), label);
+    conceptMapper.createLatestReleaseView(
+        DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
 
-    List<Label> labels = conceptMapper.listAlternativeLabels(concept.getKey(), null, DEFAULT_PAGE);
-    assertEquals(1, labels.size());
-    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey(), null));
-    label = labels.get(0);
-    assertEquals("test", label.getValue());
-    assertEquals(LanguageRegion.ENGLISH, label.getLanguage());
-    assertEquals("test", label.getCreatedBy());
-    assertNotNull(label.getCreated());
+    Consumer<List<Label>> assertLabels =
+        labs -> {
+          assertEquals(1, labs.size());
+          assertEquals(labs.size(), conceptMapper.countAlternativeLabels(concept.getKey(), null));
+          Label lab = labs.get(0);
+          assertEquals("test", lab.getValue());
+          assertEquals(LanguageRegion.ENGLISH, lab.getLanguage());
+          assertEquals("test", lab.getCreatedBy());
+          assertNotNull(lab.getCreated());
+        };
 
-    assertEquals(
-        1,
-        conceptMapper
-            .listAlternativeLabels(
-                concept.getKey(), Collections.singletonList(LanguageRegion.ENGLISH), DEFAULT_PAGE)
-            .size());
-    assertEquals(
-        0,
-        conceptMapper
-            .listAlternativeLabels(
-                concept.getKey(), Collections.singletonList(LanguageRegion.SPANISH), DEFAULT_PAGE)
-            .size());
+    assertLabels.accept(conceptMapper.listAlternativeLabels(concept.getKey(), null, DEFAULT_PAGE));
+    assertLabels.accept(
+        conceptMapper.listAlternativeLabelsLatestRelease(
+            concept.getKey(), null, DEFAULT_PAGE, DEFAULT_VOCABULARY.toLowerCase()));
 
-    labels = conceptMapper.listAlternativeLabels(concept.getKey(), null, PAGE_FN.apply(0, 0L));
-    assertEquals(0, labels.size());
-    assertEquals(1, conceptMapper.countAlternativeLabels(concept.getKey(), null));
+    assertListAlternativeLabels(1, concept.getKey(), LanguageRegion.ENGLISH, DEFAULT_PAGE);
+    assertListAlternativeLabels(0, concept.getKey(), LanguageRegion.SPANISH, DEFAULT_PAGE);
+    assertListAlternativeLabels(0, concept.getKey(), null, PAGE_FN.apply(0, 0L));
+    assertListAlternativeLabels(1, concept.getKey(), null, DEFAULT_PAGE);
 
     conceptMapper.deleteAlternativeLabel(concept.getKey(), label.getKey());
-    labels = conceptMapper.listAlternativeLabels(concept.getKey(), null, DEFAULT_PAGE);
-    assertEquals(0, labels.size());
-    assertEquals(labels.size(), conceptMapper.countAlternativeLabels(concept.getKey(), null));
+    conceptMapper.updateReleaseViews(DEFAULT_VOCABULARY.toLowerCase());
+
+    assertListAlternativeLabels(0, concept.getKey(), null, DEFAULT_PAGE);
+  }
+
+  private void assertListAlternativeLabels(
+      int expectedSize, long conceptKey, LanguageRegion lang, Pageable page) {
+    List<LanguageRegion> langs = lang != null ? Collections.singletonList(lang) : null;
+    assertEquals(expectedSize, conceptMapper.listAlternativeLabels(conceptKey, langs, page).size());
+    assertEquals(
+        expectedSize,
+        conceptMapper
+            .listAlternativeLabelsLatestRelease(
+                conceptKey, langs, page, DEFAULT_VOCABULARY.toLowerCase())
+            .size());
+    if (page.getLimit() > 0) {
+      assertEquals(expectedSize, conceptMapper.countAlternativeLabels(conceptKey, langs));
+      assertEquals(
+          expectedSize,
+          conceptMapper.countAlternativeLabelsLatestRelease(
+              conceptKey, langs, DEFAULT_VOCABULARY.toLowerCase()));
+    }
   }
 
   @Test
@@ -870,23 +902,45 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
     HiddenLabel label = HiddenLabel.builder().value("test").createdBy("test").build();
     conceptMapper.addHiddenLabel(concept.getKey(), label);
+    conceptMapper.createLatestReleaseView(
+        DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
 
-    List<HiddenLabel> labels = conceptMapper.listHiddenLabels(concept.getKey(), DEFAULT_PAGE);
-    assertEquals(1, labels.size());
-    assertEquals(labels.size(), conceptMapper.countHiddenLabels(concept.getKey()));
-    label = labels.get(0);
-    assertEquals("test", label.getValue());
-    assertEquals("test", label.getCreatedBy());
-    assertNotNull(label.getCreated());
+    Consumer<List<HiddenLabel>> assertLabels =
+        labs -> {
+          assertEquals(1, labs.size());
+          assertEquals(labs.size(), conceptMapper.countHiddenLabels(concept.getKey()));
+          HiddenLabel lab = labs.get(0);
+          assertEquals("test", lab.getValue());
+          assertEquals("test", lab.getCreatedBy());
+          assertNotNull(lab.getCreated());
+        };
 
-    labels = conceptMapper.listHiddenLabels(concept.getKey(), PAGE_FN.apply(0, 0L));
-    assertEquals(0, labels.size());
-    assertEquals(1, conceptMapper.countHiddenLabels(concept.getKey()));
+    assertLabels.accept(conceptMapper.listHiddenLabels(concept.getKey(), DEFAULT_PAGE));
+
+    assertListHiddenLabels(0, concept.getKey(), PAGE_FN.apply(0, 0L));
+    assertListHiddenLabels(1, concept.getKey(), DEFAULT_PAGE);
 
     conceptMapper.deleteHiddenLabel(concept.getKey(), label.getKey());
-    labels = conceptMapper.listHiddenLabels(concept.getKey(), DEFAULT_PAGE);
-    assertEquals(0, labels.size());
-    assertEquals(labels.size(), conceptMapper.countHiddenLabels(concept.getKey()));
+    conceptMapper.updateReleaseViews(DEFAULT_VOCABULARY.toLowerCase());
+
+    assertListHiddenLabels(0, concept.getKey(), DEFAULT_PAGE);
+  }
+
+  private void assertListHiddenLabels(int expectedSize, long conceptKey, Pageable page) {
+    assertEquals(expectedSize, conceptMapper.listHiddenLabels(conceptKey, page).size());
+    assertEquals(
+        expectedSize,
+        conceptMapper
+            .listHiddenLabelsLatestRelease(conceptKey, page, DEFAULT_VOCABULARY.toLowerCase())
+            .size());
+
+    if (page.getLimit() > 0) {
+      assertEquals(expectedSize, conceptMapper.countHiddenLabels(conceptKey));
+      assertEquals(
+          expectedSize,
+          conceptMapper.countHiddenLabelsLatestRelease(
+              conceptKey, DEFAULT_VOCABULARY.toLowerCase()));
+    }
   }
 
   @Test

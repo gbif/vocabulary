@@ -15,6 +15,7 @@ package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
@@ -162,4 +163,33 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   Concept getByNameLatestRelease(
       @Param("name") String name, @Param("vocabName") String vocabularyName);
+
+  List<Definition> listDefinitionsLatestRelease(
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
+      @Param("vocabName") String vocabularyName);
+
+  List<Label> listLabelsLatestRelease(
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
+      @Param("vocabName") String vocabularyName);
+
+  List<Label> listAlternativeLabelsLatestRelease(
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
+      @Nullable @Param("page") Pageable page,
+      @Param("vocabName") String vocabularyName);
+
+  long countAlternativeLabelsLatestRelease(
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
+      @Param("vocabName") String vocabularyName);
+
+  List<HiddenLabel> listHiddenLabelsLatestRelease(
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("page") Pageable page,
+      @Param("vocabName") String vocabularyName);
+
+  long countHiddenLabelsLatestRelease(
+      @Param("entityKey") long entityKey, @Param("vocabName") String vocabularyName);
 }

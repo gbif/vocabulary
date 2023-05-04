@@ -50,6 +50,8 @@ import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** IT for the {@link ConceptResource}. */
@@ -402,6 +404,9 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
             .listAlternativeLabels(defaultVocabularyName, c1.getName(), null, new PagingRequest())
             .getResults()
             .size());
+
+    ConceptView conceptView = conceptClient.get(defaultVocabularyName, c1.getName(), false, false);
+    assertNotNull(conceptView.getAlternativeLabelsLink());
   }
 
   @Test
@@ -427,13 +432,36 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
             .listHiddenLabels(defaultVocabularyName, c1.getName(), new PagingRequest())
             .getResults()
             .size());
+
+    ConceptView conceptView = conceptClient.get(defaultVocabularyName, c1.getName(), false, false);
+    assertNotNull(conceptView.getHiddenLabelsLink());
   }
 
   @Test
   public void releaseViewTest() {
     Concept c1 = createEntity();
     conceptClient.create(defaultVocabularyName, c1);
-    c1 = conceptClient.get(defaultVocabularyName, c1.getName(), false, false).getConcept();
+
+    Definition definition =
+        Definition.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+
+    Definition createdDefinition =
+        conceptClient.addDefinition(defaultVocabularyName, c1.getName(), definition);
+    definition.setKey(createdDefinition.getKey());
+
+    Label label = Label.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+    Long labelKey = conceptClient.addLabel(defaultVocabularyName, c1.getName(), label);
+    label.setKey(labelKey);
+
+    Label altLabel = Label.builder().language(LanguageRegion.ENGLISH).value("Label").build();
+    Long altLabelKey =
+        conceptClient.addAlternativeLabel(defaultVocabularyName, c1.getName(), altLabel);
+    altLabel.setKey(altLabelKey);
+
+    HiddenLabel hiddenLabel = HiddenLabel.builder().value("Label").build();
+    Long hiddenLabelKey =
+        conceptClient.addHiddenLabel(defaultVocabularyName, c1.getName(), hiddenLabel);
+    hiddenLabel.setKey(hiddenLabelKey);
 
     conceptService.createLatestReleaseView(defaultVocabularyName, c1.getVocabularyKey());
 
@@ -445,17 +473,47 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
             .getCount());
 
     assertEquals(
-        c1,
-        conceptClient
-            .getFromLatestRelease(defaultVocabularyName, c1.getName(), false, false)
-            .getConcept());
-
-    assertEquals(
         1,
         conceptClient
             .suggestLatestRelease(
                 defaultVocabularyName, ConceptClient.SuggestParams.of(null, c1.getName()))
             .size());
+
+    assertEquals(
+        1,
+        conceptClient
+            .listDefinitionsFromLatestRelease(
+                defaultVocabularyName, c1.getName(), new ArrayList<>())
+            .size());
+
+    assertEquals(
+        1,
+        conceptClient
+            .listLabelsFromLatestRelease(defaultVocabularyName, c1.getName(), new ArrayList<>())
+            .size());
+
+    assertEquals(
+        1,
+        conceptClient
+            .listAlternativeLabelsFromLatestRelease(
+                defaultVocabularyName, c1.getName(), new ArrayList<>(), new PagingRequest())
+            .getCount());
+
+    assertEquals(
+        1,
+        conceptClient
+            .listHiddenLabelsFromLatestRelease(
+                defaultVocabularyName, c1.getName(), new PagingRequest())
+            .getCount());
+
+    ConceptView conceptView =
+        conceptClient.getFromLatestRelease(defaultVocabularyName, c1.getName(), false, false);
+    assertNotNull(conceptView.getAlternativeLabelsLink());
+    assertNotNull(conceptView.getHiddenLabelsLink());
+    assertNotNull(conceptView.getConcept().getDefinition());
+    assertFalse(conceptView.getConcept().getDefinition().isEmpty());
+    assertNotNull(conceptView.getConcept().getLabel());
+    assertFalse(conceptView.getConcept().getLabel().isEmpty());
   }
 
   @Override

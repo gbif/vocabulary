@@ -30,7 +30,6 @@ import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.config.ExportConfig;
-import org.gbif.vocabulary.restws.config.WsConfig;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
 import org.gbif.vocabulary.tools.VocabularyDownloader;
@@ -96,18 +95,15 @@ public class VocabularyResource {
   private final ExportService exportService;
   private final ExportConfig exportConfig;
   private final MessagePublisher messagePublisher;
-  private final WsConfig wsConfig;
 
   VocabularyResource(
       VocabularyService vocabularyService,
       ExportService exportService,
       ExportConfig exportConfig,
-      WsConfig wsConfig,
       @Autowired(required = false) MessagePublisher messagePublisher) {
     this.vocabularyService = vocabularyService;
     this.exportService = exportService;
     this.exportConfig = exportConfig;
-    this.wsConfig = wsConfig;
     this.messagePublisher = messagePublisher;
   }
 

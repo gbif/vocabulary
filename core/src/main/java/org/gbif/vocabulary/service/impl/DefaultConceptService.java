@@ -512,4 +512,38 @@ public class DefaultConceptService implements ConceptService {
         conceptParents != null && !conceptParents.isEmpty(), "concept parents are required");
     return conceptMapper.countChildrenLatestRelease(conceptParents, vocabularyName.toLowerCase());
   }
+
+  @Override
+  public List<Definition> listDefinitionsLatestRelease(
+      long entityKey, List<LanguageRegion> languageRegions, String vocabularyName) {
+    return conceptMapper.listDefinitionsLatestRelease(entityKey, languageRegions, vocabularyName);
+  }
+
+  @Override
+  public List<Label> listLabelsLatestRelease(
+      long entityKey, List<LanguageRegion> languageRegions, String vocabularyName) {
+    return conceptMapper.listLabelsLatestRelease(entityKey, languageRegions, vocabularyName);
+  }
+
+  @Override
+  public PagingResponse<Label> listAlternativeLabelsLatestRelease(
+      long entityKey, List<LanguageRegion> languageRegions, Pageable page, String vocabularyName) {
+    page = page != null ? page : new PagingRequest();
+    return new PagingResponse<>(
+        page,
+        conceptMapper.countAlternativeLabelsLatestRelease(
+            entityKey, languageRegions, vocabularyName),
+        conceptMapper.listAlternativeLabelsLatestRelease(
+            entityKey, languageRegions, page, vocabularyName));
+  }
+
+  @Override
+  public PagingResponse<HiddenLabel> listHiddenLabelsLatestRelease(
+      long entityKey, Pageable page, String vocabularyName) {
+    page = page != null ? page : new PagingRequest();
+    return new PagingResponse<>(
+        page,
+        conceptMapper.countHiddenLabelsLatestRelease(entityKey, vocabularyName),
+        conceptMapper.listHiddenLabelsLatestRelease(entityKey, page, vocabularyName));
+  }
 }

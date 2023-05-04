@@ -16,6 +16,7 @@ package org.gbif.vocabulary.service;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.HiddenLabel;
 import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
@@ -208,4 +209,35 @@ public interface ConceptService extends BaseService<Concept> {
    * of the vocabulary instead of the actual data.
    */
   List<ChildrenResult> countChildrenLatestRelease(List<Long> conceptParents, String vocabularyName);
+
+  /**
+   * It works as {@link #listDefinitions(long, List)} but it queries the latest release * of the
+   * vocabulary instead of the actual data.
+   */
+  List<Definition> listDefinitionsLatestRelease(
+      long entityKey, @Nullable List<LanguageRegion> languageRegions, String vocabularyName);
+
+  /**
+   * It works as {@link #listLabels(long, List)} but it queries the latest release * of the
+   * vocabulary instead of the actual data.
+   */
+  List<Label> listLabelsLatestRelease(
+      long entityKey, @Nullable List<LanguageRegion> languageRegions, String vocabularyName);
+
+  /**
+   * It works as {@link #listAlternativeLabels(long, List, Pageable)} but it queries the latest
+   * release * of the vocabulary instead of the actual data.
+   */
+  PagingResponse<Label> listAlternativeLabelsLatestRelease(
+      long entityKey,
+      @Nullable List<LanguageRegion> languageRegions,
+      @Nullable Pageable page,
+      String vocabularyName);
+
+  /**
+   * It works as {@link #listHiddenLabels(long, Pageable)} but it queries the latest release * of
+   * the vocabulary instead of the actual data.
+   */
+  PagingResponse<HiddenLabel> listHiddenLabelsLatestRelease(
+      long entityKey, @Nullable Pageable page, String vocabularyName);
 }

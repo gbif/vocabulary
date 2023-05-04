@@ -208,6 +208,76 @@
     ORDER BY key DESC
   </sql>
 
+  <sql id="LIST_DEFINITIONS">
+    SELECT key, language, value, created_by, created, modified_by, modified
+    FROM concept_definition${table_suffix}
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    <if test="langs != null">
+      AND language IN
+      <foreach item="item" collection="langs" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    ORDER BY key DESC
+  </sql>
+
+  <sql id="LIST_LABELS">
+    SELECT <include refid="LABEL_FIELDS"/>
+    FROM concept_label${table_suffix}
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    <if test="langs != null">
+      AND language IN
+      <foreach item="item" collection="langs" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    ORDER BY key DESC
+  </sql>
+
+  <sql id="LIST_ALTERNATIVE_LABELS">
+    SELECT <include refid="LABEL_FIELDS"/>
+    FROM concept_alternative_label${table_suffix}
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    <if test="langs != null">
+      AND language IN
+      <foreach item="item" collection="langs" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    ORDER BY created DESC
+    <if test="page != null">
+      LIMIT #{page.limit} OFFSET #{page.offset}
+    </if>
+  </sql>
+
+  <sql id="LIST_HIDDEN_LABELS">
+    SELECT key, value, created_by, created
+    FROM concept_hidden_label${table_suffix}
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    ORDER BY created DESC
+    <if test="page != null">
+      LIMIT #{page.limit} OFFSET #{page.offset}
+    </if>
+  </sql>
+
+  <sql id="COUNT_ALTERNATIVE_LABELS">
+    SELECT COUNT(DISTINCT key)
+    FROM concept_alternative_label${table_suffix}
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    <if test="langs != null">
+      AND language IN
+      <foreach item="item" collection="langs" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+  </sql>
+
+  <sql id="COUNT_HIDDEN_LABELS">
+    SELECT COUNT(DISTINCT key)
+    FROM concept_hidden_label${table_suffix}
+    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+  </sql>
+
   <!-- QUERIES FROM HERE -->
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
@@ -408,16 +478,8 @@
   </delete>
 
   <select id="listDefinitions" resultMap="DEFINITION_RESULT_MAP">
-    SELECT key, language, value, created_by, created, modified_by, modified
-    FROM concept_definition
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
-      AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
-        #{item}
-      </foreach>
-    </if>
-    ORDER BY key DESC
+    <bind name="table_suffix" value="''"/>
+    <include refid="LIST_DEFINITIONS"/>
   </select>
 
   <select id="listConceptDefinitions" resultMap="DEFINITION_RESULT_MAP">
@@ -450,16 +512,8 @@
   </delete>
 
   <select id="listLabels" resultMap="LABEL_RESULT_MAP">
-    SELECT <include refid="LABEL_FIELDS"/>
-    FROM concept_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
-      AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
-        #{item}
-      </foreach>
-    </if>
-    ORDER BY key DESC
+    <bind name="table_suffix" value="''"/>
+    <include refid="LIST_LABELS"/>
   </select>
 
   <select id="listConceptLabels" resultMap="LABEL_RESULT_MAP">
@@ -482,31 +536,13 @@
   </delete>
 
   <select id="listAlternativeLabels" resultMap="LABEL_RESULT_MAP">
-    SELECT <include refid="LABEL_FIELDS"/>
-    FROM concept_alternative_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
-      AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
-        #{item}
-      </foreach>
-    </if>
-    ORDER BY created DESC
-    <if test="page != null">
-      LIMIT #{page.limit} OFFSET #{page.offset}
-    </if>
+    <bind name="table_suffix" value="''"/>
+    <include refid="LIST_ALTERNATIVE_LABELS"/>
   </select>
 
   <select id="countAlternativeLabels" resultType="Long">
-    SELECT COUNT(DISTINCT key)
-    FROM concept_alternative_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
-      AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
-        #{item}
-      </foreach>
-    </if>
+    <bind name="table_suffix" value="''"/>
+    <include refid="COUNT_ALTERNATIVE_LABELS"/>
   </select>
 
   <!-- hidden labels -->
@@ -523,19 +559,13 @@
   </delete>
 
   <select id="listHiddenLabels" resultMap="HIDDEN_LABEL_RESULT_MAP">
-    SELECT key, value, created_by, created
-    FROM concept_hidden_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    ORDER BY created DESC
-    <if test="page != null">
-      LIMIT #{page.limit} OFFSET #{page.offset}
-    </if>
+    <bind name="table_suffix" value="''"/>
+    <include refid="LIST_HIDDEN_LABELS"/>
   </select>
 
   <select id="countHiddenLabels" resultType="Long">
-    SELECT COUNT(DISTINCT key)
-    FROM concept_hidden_label
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
+    <bind name="table_suffix" value="''"/>
+    <include refid="COUNT_HIDDEN_LABELS"/>
   </select>
 
   <delete id="deleteAllLabels">
@@ -656,6 +686,36 @@
     <include refid="CONCEPT_READ_FIELDS"/>, #{vocabName} vocabName
     FROM concept_${vocabName}_latest_release_mv c
     WHERE c.name = #{name,jdbcType=VARCHAR}
+  </select>
+
+  <select id="listDefinitionsLatestRelease" resultMap="DEFINITION_RESULT_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LIST_DEFINITIONS"/>
+  </select>
+
+  <select id="listLabelsLatestRelease" resultMap="LABEL_RESULT_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LIST_LABELS"/>
+  </select>
+
+  <select id="listAlternativeLabelsLatestRelease" resultMap="LABEL_RESULT_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LIST_ALTERNATIVE_LABELS"/>
+  </select>
+
+  <select id="countAlternativeLabelsLatestRelease" resultType="Long">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="COUNT_ALTERNATIVE_LABELS"/>
+  </select>
+
+  <select id="listHiddenLabelsLatestRelease" resultMap="HIDDEN_LABEL_RESULT_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LIST_HIDDEN_LABELS"/>
+  </select>
+
+  <select id="countHiddenLabelsLatestRelease" resultType="Long">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="COUNT_HIDDEN_LABELS"/>
   </select>
 
   <select id="listConceptDefinitionsLatestRelease" resultMap="DEFINITION_RESULT_MAP">

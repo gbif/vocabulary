@@ -404,6 +404,13 @@ public class ConceptResource {
             v -> conceptService.countChildrenLatestRelease(v, vocabularyName),
             v -> conceptService.findParentsLatestRelease(v, vocabularyName));
 
+    // labels links
+    viewStream =
+        viewStream.map(
+            v ->
+                createLabelsLinks(
+                    v, vocabularyName, LATEST_RELEASE_PATH + "/" + v.getConcept().getName()));
+
     return new PagingResponse<>(
         conceptsPage.getOffset(),
         conceptsPage.getLimit(),
@@ -425,10 +432,50 @@ public class ConceptResource {
               + ". Please make sure the vocabulary has been released.");
     }
 
-    return createConceptView(
-        includeParents,
-        includeChildren,
-        conceptService.getByNameLatestRelease(conceptName, vocabularyName));
+    ConceptView conceptView =
+        createConceptView(
+            includeParents,
+            includeChildren,
+            conceptService.getByNameLatestRelease(conceptName, vocabularyName));
+
+    return createLabelsLinks(conceptView, vocabularyName, LATEST_RELEASE_PATH + "/" + conceptName);
+  }
+
+  @GetMapping(LATEST_RELEASE_PATH + "/{name}/definition")
+  public List<Definition> listDefinitionsFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      List<LanguageRegion> lang) {
+    return conceptService.listDefinitionsLatestRelease(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, vocabularyName);
+  }
+
+  @GetMapping(LATEST_RELEASE_PATH + "/{name}/label")
+  public List<Label> listLabelsFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      List<LanguageRegion> lang) {
+    return conceptService.listLabelsLatestRelease(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, vocabularyName);
+  }
+
+  @GetMapping(LATEST_RELEASE_PATH + "/{name}/alternativeLabels")
+  public PagingResponse<Label> listAlternativeLabelsFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      List<LanguageRegion> lang,
+      Pageable page) {
+    return conceptService.listAlternativeLabelsLatestRelease(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, page, vocabularyName);
+  }
+
+  @GetMapping(LATEST_RELEASE_PATH + "/{name}/hiddenLabels")
+  public PagingResponse<HiddenLabel> listHiddenLabelsFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      Pageable page) {
+    return conceptService.listHiddenLabelsLatestRelease(
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), page, vocabularyName);
   }
 
   @GetMapping(LATEST_RELEASE_PATH + "/suggest")

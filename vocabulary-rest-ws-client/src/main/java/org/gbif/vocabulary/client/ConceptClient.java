@@ -250,6 +250,55 @@ public interface ConceptClient {
       @RequestParam(value = "includeParents", required = false) boolean includeParents,
       @RequestParam(value = "includeChildren", required = false) boolean includeChildren);
 
+  @GetMapping("latestRelease/{name}/definition")
+  List<Definition> listDefinitionsFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @SpringQueryMap ListParams listParams);
+
+  default List<Definition> listDefinitionsFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      List<LanguageRegion> lang) {
+    return listDefinitionsFromLatestRelease(vocabularyName, conceptName, ListParams.of(lang, null));
+  }
+
+  @GetMapping("latestRelease/{name}/label")
+  List<Label> listLabelsFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @SpringQueryMap ListParams params);
+
+  default List<Label> listLabelsFromLatestRelease(
+      String vocabularyName, String conceptName, List<LanguageRegion> languageRegion) {
+    return listLabelsFromLatestRelease(
+        vocabularyName, conceptName, ListParams.of(languageRegion, null));
+  }
+
+  @GetMapping("latestRelease/{name}/alternativeLabels")
+  PagingResponse<Label> listAlternativeLabelsFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @SpringQueryMap ListParams params);
+
+  default PagingResponse<Label> listAlternativeLabelsFromLatestRelease(
+      String vocabularyName, String conceptName, List<LanguageRegion> lang, Pageable page) {
+    return listAlternativeLabelsFromLatestRelease(
+        vocabularyName, conceptName, ListParams.of(lang, page));
+  }
+
+  @GetMapping("latestRelease/{name}/hiddenLabels")
+  PagingResponse<HiddenLabel> listHiddenLabelsFromLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @PathVariable("name") String conceptName,
+      @SpringQueryMap ListParams params);
+
+  default PagingResponse<HiddenLabel> listHiddenLabelsFromLatestRelease(
+      String vocabularyName, String conceptName, Pageable page) {
+    return listHiddenLabelsFromLatestRelease(
+        vocabularyName, conceptName, ListParams.of(null, page));
+  }
+
   @GetMapping("latestRelease/suggest")
   List<KeyNameResult> suggestLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,

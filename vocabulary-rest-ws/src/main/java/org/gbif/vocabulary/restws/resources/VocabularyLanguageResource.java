@@ -35,7 +35,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(
     name = "Vocabulary Languages",
-    description = "Languages that can be used in the vocabularies and concepts.")
+    description = "Languages that can be used in the vocabularies and concepts.",
+    extensions =
+        @io.swagger.v3.oas.annotations.extensions.Extension(
+            name = "Order",
+            properties = @ExtensionProperty(name = "Order", value = "0400")))
 @RestController
 @RequestMapping(Constants.VOCABULARY_LANGUAGE_PATH)
 public class VocabularyLanguageResource {

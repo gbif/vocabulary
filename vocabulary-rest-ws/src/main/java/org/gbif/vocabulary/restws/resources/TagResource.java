@@ -39,7 +39,11 @@ import static org.gbif.vocabulary.restws.utils.Constants.TAGS_PATH;
 
 @io.swagger.v3.oas.annotations.tags.Tag(
     name = "Tags",
-    description = "Tags allow grouping concepts semantically.")
+    description = "Tags allow grouping concepts semantically.",
+    extensions =
+        @io.swagger.v3.oas.annotations.extensions.Extension(
+            name = "Order",
+            properties = @ExtensionProperty(name = "Order", value = "0300")))
 @RestController
 @RequestMapping(value = TAGS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
 public class TagResource {

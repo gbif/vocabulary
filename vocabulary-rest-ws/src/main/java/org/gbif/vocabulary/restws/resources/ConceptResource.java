@@ -81,7 +81,11 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
     description =
         "A concept is an entity that belongs to a vocabulary.\n\n"
             + "Concepts can also be deprecated and they can be nested. This API also allows to query the concepts from"
-            + "the latest release of a vocabulary.")
+            + "the latest release of a vocabulary.",
+    extensions =
+        @io.swagger.v3.oas.annotations.extensions.Extension(
+            name = "Order",
+            properties = @ExtensionProperty(name = "Order", value = "0200")))
 @RestController
 @RequestMapping(
     value = VOCABULARIES_PATH + "/{vocabularyName}/" + CONCEPTS_PATH,

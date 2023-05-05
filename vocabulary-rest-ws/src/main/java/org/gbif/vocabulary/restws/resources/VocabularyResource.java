@@ -105,7 +105,11 @@ import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PAT
     description =
         "A vocabulary is the entity that holds data about a controlled vocabulary and its concepts.\n\n"
             + "The vocabulary API provides CRUD and discovery services for vocabularies. "
-            + "It also allows to deprecate vocabularies that are being replaced by other vocabularies.")
+            + "It also allows to deprecate vocabularies that are being replaced by other vocabularies.",
+    extensions =
+        @io.swagger.v3.oas.annotations.extensions.Extension(
+            name = "Order",
+            properties = @ExtensionProperty(name = "Order", value = "0100")))
 @Slf4j
 @RestController
 @RequestMapping(value = VOCABULARIES_PATH, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -38,7 +38,7 @@ public class Docs {
 
   @Docs.VocabularyNameInConceptPathParameter
   @Docs.ConceptNamePathParameter
-  public @interface ConceptPathParameters{}
+  public @interface ConceptPathParameters {}
 
   @Target({ElementType.METHOD, ElementType.TYPE})
   @Retention(RetentionPolicy.RUNTIME)

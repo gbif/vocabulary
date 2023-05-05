@@ -18,7 +18,6 @@ import org.gbif.vocabulary.model.utils.LenientEquals;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.Builder;

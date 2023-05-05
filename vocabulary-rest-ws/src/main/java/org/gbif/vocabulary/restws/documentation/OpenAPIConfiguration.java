@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.restws.config;
+package org.gbif.vocabulary.restws.documentation;
 
 import java.util.Comparator;
 import java.util.Map;

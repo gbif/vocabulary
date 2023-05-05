@@ -18,6 +18,8 @@ import org.gbif.vocabulary.model.utils.LenientEquals;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import javax.validation.constraints.NotNull;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
@@ -28,7 +30,7 @@ import lombok.extern.jackson.Jacksonized;
 public class Definition implements ValueEntity, Auditable, LenientEquals<Definition> {
 
   private Long key;
-  private LanguageRegion language;
+  @NotNull private LanguageRegion language;
   private String value;
   private String createdBy;
   private LocalDateTime created;

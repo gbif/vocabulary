@@ -27,6 +27,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.extensions.Extension;
+import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(
+    name = "Vocabulary Languages",
+    description = "Languages that can be used in the vocabularies and concepts.")
 @RestController
 @RequestMapping(Constants.VOCABULARY_LANGUAGE_PATH)
 public class VocabularyLanguageResource {
@@ -36,6 +45,15 @@ public class VocabularyLanguageResource {
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper().registerModule(LANGUAGE_SERIALIZER_MODULE);
 
+  @Operation(
+      operationId = "listLanguages",
+      summary = "List all languages",
+      description = "Lists all current languages.",
+      extensions =
+          @Extension(
+              name = "Order",
+              properties = @ExtensionProperty(name = "Order", value = "0100")))
+  @ApiResponse(responseCode = "200", description = "Languages returned")
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   public String listLanguageRegions() throws JsonProcessingException {
     return OBJECT_MAPPER.writeValueAsString(LanguageRegion.values());

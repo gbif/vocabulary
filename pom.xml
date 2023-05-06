@@ -417,14 +417,6 @@
         <version>${mockito.version}</version>
         <scope>test</scope>
       </dependency>
-
-      <!-- documentation -->
-      <dependency>
-        <groupId>capital.scalable</groupId>
-        <artifactId>spring-auto-restdocs-core</artifactId>
-        <version>${spring.auto-rest-docs.version}</version>
-        <scope>test</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -522,27 +514,6 @@
               <excludes>
                 <exclude>**/*.java</exclude>
               </excludes>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>documentation</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>${maven-surefire-plugin.version}</version>
-            <configuration>
-              <excludes>
-                <exclude>**/*Test.java</exclude>
-                <exclude>**/*IT.java</exclude>
-              </excludes>
-              <includes>
-                <include>**/*TestDoc.java</include>
-              </includes>
             </configuration>
           </plugin>
         </plugins>

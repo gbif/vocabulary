@@ -38,11 +38,8 @@ spring:
 
 The DB scheme can be recreated by using the [Liquibase files](core/src/main/resources/liquibase).
 
-After that, you can run the project with this command and by using your IDE: 
+After that, you can run the project with this command and by using your IDE:
 
 ```
-java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-{your-version}.jar --spring.config.location=your_path/application.yml --spring.cloud.bootstrap.location=your_path/bootstrap.yml 
-``` 
-
-## API Documentation
-There is an API documentation available as [HTML files](vocabulary-rest-ws/src/docs/generated-docs). A preview is available [here](https://htmlpreview.github.io/?https://github.com/gbif/vocabulary/blob/master/vocabulary-rest-ws/src/docs/generated-docs/index.html). 
+java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-{your-version}.jar --spring.config.location=your_path/application.yml --spring.cloud.bootstrap.location=your_path/bootstrap.yml
+```

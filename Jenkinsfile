@@ -9,13 +9,10 @@ pipeline {
         timestamps()
     }
     parameters {
-        booleanParam(name: 'DOCUMENTATION',
-                defaultValue: false,
-                description: 'Generate API documentation')
         separator(name: "release_separator", sectionHeader: "Release Parameters")
         booleanParam(name: 'RELEASE',
                 defaultValue: false,
-                description: 'Do a Maven release (it also generates API documentation)')
+                description: 'Do a Maven release')
         string(name: 'RELEASE_VERSION', defaultValue: '', description: 'Release version (optional)')
         string(name: 'DEVELOPMENT_VERSION', defaultValue: '', description: 'Development version (optional)')
         booleanParam(name: 'DRY_RUN_RELEASE', defaultValue: false, description: 'Dry Run Maven release')
@@ -23,14 +20,13 @@ pipeline {
     stages {
         stage('Preconditions') {
             steps {
-                scmSkip(skipPattern: '.*(\\[maven-release-plugin\\] prepare release |Generated API documentation|Google Java Format).*')
+                scmSkip(skipPattern: '.*(\\[maven-release-plugin\\] prepare release |Google Java Format).*')
             }
         }
         stage('Package and unit tests') {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    not { expression { params.DOCUMENTATION } };
                 }
             }
             steps {
@@ -45,7 +41,6 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    not { expression { params.DOCUMENTATION } };
                 }
             }
             steps {
@@ -60,7 +55,6 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    not { expression { params.DOCUMENTATION } };
                 }
             }
             steps {
@@ -73,7 +67,6 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    not { expression { params.DOCUMENTATION } };
                     branch 'master';
                 }
             }
@@ -104,25 +97,6 @@ pipeline {
                 }
             }
         }
-        stage('Generate API documentation') {
-            when {
-                allOf {
-                    anyOf { expression { params.RELEASE }; expression { params.DOCUMENTATION }; };
-                    branch 'master';
-                }
-            }
-            steps {
-                sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
-                    git branch:'master', url:'https://github.com/gbif/vocabulary.git'
-                    sh '''
-                mvn clean package -Pdocumentation
-                git add *.html
-                git commit -m "Generated API documentation"
-                git push git@github.com:gbif/vocabulary.git master
-              '''
-                }
-            }
-        }
         stage('Deploy to DEV') {
             environment {
                 GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
@@ -133,7 +107,6 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    not { expression { params.DOCUMENTATION } };
                     branch 'master';
                 }
             }
@@ -167,6 +140,14 @@ pipeline {
                 ansible-playbook -vvv -i ${BUILD_HOSTS} services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=${GIT_CREDENTIALS}"
               """
                 }
+            }
+        },
+        stage('Build documentation') {
+            when {
+                branch 'master';
+            }
+            steps {
+                build job: "tech-docs-openapi", wait: true
             }
         }
     }

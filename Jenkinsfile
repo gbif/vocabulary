@@ -141,7 +141,7 @@ pipeline {
               """
                 }
             }
-        },
+        }
         stage('Build documentation') {
             when {
                 branch 'master';

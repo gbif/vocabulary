@@ -199,6 +199,7 @@ public class ConceptResource {
           schema = @Schema(implementation = String.class),
           in = ParameterIn.QUERY,
           explode = Explode.TRUE))
+  @Parameter(name = "params", hidden = true)
   @ListCommonDocs
   @GetMapping
   public PagingResponse<ConceptView> listConcepts(

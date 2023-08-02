@@ -174,6 +174,7 @@ public class VocabularyResource {
       })
   @CommonParameters.QParameter
   @Pageable.OffsetLimitParameters
+  @Parameter(name = "params", hidden = true)
   @Docs.DefaultSearchResponses
   @GetMapping
   public PagingResponse<Vocabulary> listVocabularies(VocabularyListParams params) {

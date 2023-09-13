@@ -171,7 +171,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       // matching by name
       Concept nameMatch = namesCache.get(transformedValue);
       if (nameMatch != null) {
-        log.info("value {} matched with concept {} by name", value, nameMatch.getName());
+        log.debug("value {} matched with concept {} by name", value, nameMatch.getName());
         return Optional.of(toLookupConcept(nameMatch));
       }
 
@@ -180,7 +180,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       if (labelMatch != null) {
         if (labelMatch.allMatches.size() == 1) {
           Concept conceptMatched = labelMatch.allMatches.iterator().next();
-          log.info("value {} matched with concept {} by label", value, conceptMatched.getName());
+          log.debug("value {} matched with concept {} by label", value, conceptMatched.getName());
           return Optional.of(toLookupConcept(conceptMatched));
         }
 
@@ -188,7 +188,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
         // or English as fallback
         Optional<Concept> langMatch = matchByLanguage(labelMatch, contextLang, value);
         if (langMatch.isPresent()) {
-          log.info(
+          log.debug(
               "value {} matched with concept {} by language {}",
               value,
               langMatch.get().getName(),
@@ -205,7 +205,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       // if no match we try with the hidden labels
       Concept hiddenMatch = hiddenLabelsCache.get(transformedValue);
       if (hiddenMatch != null) {
-        log.info("value {} matched with concept {} by hidden label", value, hiddenMatch);
+        log.debug("value {} matched with concept {} by hidden label", value, hiddenMatch);
         return Optional.of(toLookupConcept(hiddenMatch));
       }
     }
@@ -232,7 +232,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
 
     if (langMatches.size() == 1) {
       Concept conceptMatched = langMatches.iterator().next();
-      log.info(
+      log.debug(
           "Value {} matched with concept {} by using language {}", value, conceptMatched, lang);
       return Optional.of(conceptMatched);
     }
@@ -413,7 +413,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       }
 
       throw new IllegalArgumentException(
-          "Either the inputstream or the api url and the vocabulary name are required");
+          "Either the inputstream or the API URL and the vocabulary name are required");
     }
   }
 }

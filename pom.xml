@@ -99,7 +99,7 @@
 
     <!-- ZK -->
     <spring-cloud-zookeeper.version>2.2.5.RELEASE</spring-cloud-zookeeper.version>
-    <zookeeper.version>3.4.14</zookeeper.version>
+    <zookeeper.version>3.7.2</zookeeper.version>
 
     <!-- Hadoop -->
     <hadoop.version>2.6.0-cdh5.16.2</hadoop.version>

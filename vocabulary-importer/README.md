@@ -149,3 +149,21 @@ If there were issues during the import the tool creates a file called `errors_{t
 
 Most of the issues should be related with duplicates that cannot be imported. Some of the restrictions are documented in the [core module](https://github.com/gbif/vocabulary/blob/master/core/notes.md).
 
+### How to migrate a vocabulary across environments
+
+The importer tool can also be used to migrate vocabularies across environments. To do so we just need to set the `migration` flag and specify the target API
+where the vocabulary has to be copied to, e.g.:
+
+```
+java -jar vocabulary-importer/target/vocabulary-importer-0.53.jar \
+--vocabularyName LifeStage \
+--migration \
+--apiUrl https://api.gbif-dev.org/v1/ \
+--targetApiUrl https://api.gbif-uat.org/v1/ \
+--apiUser myusername \
+--targetApiUser myusername \
+--apiPassword \
+--targetApiPassword
+```
+
+Note that you will be prompted to enter 2 passwords for each of the users.

@@ -13,6 +13,7 @@
  */
 package org.gbif.vocabulary.importer;
 
+import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptListParams;
@@ -155,11 +156,14 @@ public class VocabularyImporter {
           continue;
         }
 
-        conceptData.definitions.forEach(d -> addDefinition(vocabName, conceptName, d, errors));
-        conceptData.labels.forEach(lab -> addLabel(vocabName, conceptName, lab, errors));
+        conceptData.definitions.forEach(
+            d -> addDefinition(vocabName, conceptName, d, conceptClient, errors));
+        conceptData.labels.forEach(
+            lab -> addLabel(vocabName, conceptName, lab, conceptClient, errors));
         conceptData.alternativeLabels.forEach(
-            lab -> addAlternativeLabel(vocabName, conceptName, lab, errors));
-        conceptData.tags.forEach(tag -> addTag(vocabName, conceptName, tag, errors));
+            lab -> addAlternativeLabel(vocabName, conceptName, lab, conceptClient, errors));
+        conceptData.tags.forEach(
+            tag -> addTag(vocabName, conceptName, Tag.of(tag), conceptClient, tagClient, errors));
       }
     }
 
@@ -183,6 +187,151 @@ public class VocabularyImporter {
     List<Error> errors = new ArrayList<>();
     parseHiddenLabels(csvDelimiter, vocabName, hiddenLabelsPath, errors, getConceptFn, charset);
     printErrorsToFile(errors);
+  }
+
+  public void migrateVocabulary(
+      String vocabularyName,
+      VocabularyClient targetVocabularyClient,
+      ConceptClient targetConceptClient,
+      TagClient targetTagClient) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(vocabularyName));
+
+    // list to keep the errors and then print them to a file
+    List<Error> errors = new ArrayList<>();
+
+    Vocabulary vocabulary = vocabularyClient.get(vocabularyName);
+    vocabulary.setKey(null);
+    targetVocabularyClient.create(vocabulary);
+
+    vocabulary
+        .getDefinition()
+        .forEach(
+            d -> {
+              d.setKey(null);
+              targetVocabularyClient.addDefinition(vocabularyName, d);
+            });
+
+    vocabulary
+        .getLabel()
+        .forEach(
+            l -> {
+              l.setKey(null);
+              targetVocabularyClient.addLabel(vocabularyName, l);
+            });
+
+    List<Concept> concepts = getVocabularyConcepts(vocabularyName);
+    concepts.stream()
+        .filter(c -> c.getParentKey() == null)
+        .forEach(
+            c -> {
+              Long oldKey = c.getKey();
+              Concept created =
+                  migrateConcept(vocabularyName, targetConceptClient, targetTagClient, c, errors);
+
+              migrateChildren(
+                  oldKey,
+                  created,
+                  concepts,
+                  vocabularyName,
+                  targetConceptClient,
+                  targetTagClient,
+                  errors);
+            });
+
+    printErrorsToFile(errors);
+  }
+
+  private void migrateChildren(
+      Long oldKey,
+      Concept createdConcept,
+      List<Concept> allConcepts,
+      String vocabularyName,
+      ConceptClient targetConceptClient,
+      TagClient targetTagClient,
+      List<Error> errors) {
+    List<Concept> children =
+        allConcepts.stream()
+            .filter(c -> oldKey.equals(c.getParentKey()))
+            .collect(Collectors.toList());
+
+    children.forEach(
+        child -> {
+          Long oldKeyChild = child.getKey();
+          child.setParentKey(createdConcept.getKey());
+          Concept createdChild =
+              migrateConcept(vocabularyName, targetConceptClient, targetTagClient, child, errors);
+          migrateChildren(
+              oldKeyChild,
+              createdChild,
+              allConcepts,
+              vocabularyName,
+              targetConceptClient,
+              targetTagClient,
+              errors);
+        });
+  }
+
+  private Concept migrateConcept(
+      String vocabularyName,
+      ConceptClient targetConceptClient,
+      TagClient targetTagClient,
+      Concept c,
+      List<Error> errors) {
+
+    c.setKey(null);
+    ConceptView created = targetConceptClient.create(vocabularyName, c);
+
+    c.getDefinition()
+        .forEach(d -> addDefinition(vocabularyName, c.getName(), d, targetConceptClient, errors));
+
+    c.getLabel()
+        .forEach(l -> addLabel(vocabularyName, c.getName(), l, targetConceptClient, errors));
+
+    c.getTags()
+        .forEach(
+            t ->
+                addTag(
+                    vocabularyName, c.getName(), t, targetConceptClient, targetTagClient, errors));
+
+    PagingRequest page = new PagingRequest(0, 100);
+    PagingResponse<Label> alternativeLables =
+        conceptClient.listAlternativeLabels(
+            vocabularyName, c.getName(), ConceptClient.ListParams.of(null, page));
+    while (!alternativeLables.getResults().isEmpty()) {
+      alternativeLables
+          .getResults()
+          .forEach(
+              al ->
+                  addAlternativeLabel(
+                      vocabularyName, c.getName(), al, targetConceptClient, errors));
+
+      alternativeLables =
+          conceptClient.listAlternativeLabels(
+              vocabularyName,
+              c.getName(),
+              ConceptClient.ListParams.of(
+                  null, new PagingRequest(page.getOffset() + page.getLimit(), page.getLimit())));
+    }
+
+    page = new PagingRequest(0, 100);
+    PagingResponse<HiddenLabel> hiddenLabels =
+        conceptClient.listHiddenLabels(vocabularyName, c.getName(), page);
+    while (!hiddenLabels.getResults().isEmpty()) {
+      hiddenLabels
+          .getResults()
+          .forEach(
+              hl ->
+                  addHiddenLabel(
+                      vocabularyName, errors, c.getName(), hl.getValue(), c, targetConceptClient));
+
+      hiddenLabels =
+          conceptClient.listHiddenLabels(
+              vocabularyName,
+              c.getName(),
+              new PagingRequest(page.getOffset() + page.getLimit(), page.getLimit()));
+    }
+
+    return created.getConcept();
   }
 
   private void parseHiddenLabels(
@@ -231,18 +380,26 @@ public class VocabularyImporter {
           continue;
         }
 
-        try {
-          conceptClient.addHiddenLabel(
-              vocabName, conceptName, HiddenLabel.builder().value(hiddenLabel).build());
-        } catch (Exception ex) {
-          errors.add(
-              Error.of(
-                  "Error adding hidden label " + hiddenLabel + " in concept " + concept.getName(),
-                  ex));
-          log.error(
-              "Couldn't add hidden label {} in concept {}", hiddenLabel, concept.getName(), ex);
-        }
+        addHiddenLabel(vocabName, errors, conceptName, hiddenLabel, concept, conceptClient);
       }
+    }
+  }
+
+  private void addHiddenLabel(
+      String vocabName,
+      List<Error> errors,
+      String conceptName,
+      String hiddenLabel,
+      Concept concept,
+      ConceptClient conceptClient) {
+    try {
+      conceptClient.addHiddenLabel(
+          vocabName, conceptName, HiddenLabel.builder().value(hiddenLabel).build());
+    } catch (Exception ex) {
+      errors.add(
+          Error.of(
+              "Error adding hidden label " + hiddenLabel + " in concept " + concept.getName(), ex));
+      log.error("Couldn't add hidden label {} in concept {}", hiddenLabel, concept.getName(), ex);
     }
   }
 
@@ -351,8 +508,13 @@ public class VocabularyImporter {
   }
 
   private void addDefinition(
-      String vocabName, String conceptName, Definition definition, List<Error> errors) {
+      String vocabName,
+      String conceptName,
+      Definition definition,
+      ConceptClient conceptClient,
+      List<Error> errors) {
     try {
+      definition.setKey(null);
       conceptClient.addDefinition(vocabName, conceptName, definition);
     } catch (Exception ex) {
       errors.add(
@@ -368,8 +530,14 @@ public class VocabularyImporter {
     }
   }
 
-  private void addLabel(String vocabName, String conceptName, Label label, List<Error> errors) {
+  private void addLabel(
+      String vocabName,
+      String conceptName,
+      Label label,
+      ConceptClient conceptClient,
+      List<Error> errors) {
     try {
+      label.setKey(null);
       conceptClient.addLabel(vocabName, conceptName, label);
     } catch (Exception ex) {
       errors.add(
@@ -386,8 +554,13 @@ public class VocabularyImporter {
   }
 
   private void addAlternativeLabel(
-      String vocabName, String conceptName, Label label, List<Error> errors) {
+      String vocabName,
+      String conceptName,
+      Label label,
+      ConceptClient conceptClient,
+      List<Error> errors) {
     try {
+      label.setKey(null);
       conceptClient.addAlternativeLabel(vocabName, conceptName, label);
     } catch (Exception ex) {
       errors.add(
@@ -403,22 +576,27 @@ public class VocabularyImporter {
     }
   }
 
-  private void addTag(String vocabName, String conceptName, String tagName, List<Error> errors) {
+  private void addTag(
+      String vocabName,
+      String conceptName,
+      Tag tag,
+      ConceptClient conceptClient,
+      TagClient tagClient,
+      List<Error> errors) {
     try {
-      Tag existingTag = tagClient.getTag(tagName);
+      Tag existingTag = tagClient.getTag(tag.getName());
       if (existingTag == null) {
-        Tag newTag = new Tag();
-        newTag.setName(tagName);
-        existingTag = tagClient.create(newTag);
+        tag.setKey(null);
+        existingTag = tagClient.create(tag);
       }
       conceptClient.addTag(vocabName, conceptName, new AddTagAction(existingTag.getName()));
     } catch (Exception ex) {
-      errors.add(Error.of("Error adding tag " + tagName + " to concept " + conceptName, ex));
-      log.error("Couldn't add tag {} to concept {}", tagName, conceptName, ex);
+      errors.add(Error.of("Error adding tag " + tag.getName() + " to concept " + conceptName, ex));
+      log.error("Couldn't add tag {} to concept {}", tag.getName(), conceptName, ex);
     }
   }
 
-  private Map<String, Concept> getVocabularyConcepts(String vocabularyName) {
+  private List<Concept> getVocabularyConcepts(String vocabularyName) {
     int offset = 0;
     int limit = 100;
 
@@ -432,9 +610,7 @@ public class VocabularyImporter {
       offset += limit;
     }
 
-    return conceptViews.stream()
-        .map(ConceptView::getConcept)
-        .collect(Collectors.toMap(Concept::getName, c -> c));
+    return conceptViews.stream().map(ConceptView::getConcept).collect(Collectors.toList());
   }
 
   @SneakyThrows

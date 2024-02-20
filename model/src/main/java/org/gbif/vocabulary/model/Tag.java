@@ -39,6 +39,12 @@ public class Tag implements Serializable, LenientEquals<Tag> {
   private LocalDateTime modified;
   private String modifiedBy;
 
+  public static Tag of(String name) {
+    Tag tag = new Tag();
+    tag.setName(name);
+    return tag;
+  }
+
   @Override
   public boolean lenientEquals(Tag other) {
     if (this == other) {

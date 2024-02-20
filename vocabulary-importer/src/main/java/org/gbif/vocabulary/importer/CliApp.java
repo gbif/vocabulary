@@ -73,46 +73,79 @@ public class CliApp {
     VocabularyImporter vocabularyImporter =
         new VocabularyImporter(vocabularyClient, conceptClient, tagClient);
 
-    Path hiddenLabelsPath = null;
-    if (cliArgs.getHiddenLabelsPath() != null) {
-      hiddenLabelsPath = Paths.get(cliArgs.getHiddenLabelsPath());
+    if (cliArgs.isMigration()) {
+      VocabularyClient targetVocabularyClient =
+          clientBuilder
+              .withUrl(cliArgs.getTargetApiUrl())
+              .withExponentialBackoffRetry(Duration.ofMillis(1000), 2, 4)
+              .withCredentials(cliArgs.getTargetApiUser(), cliArgs.getTargetApiPassword())
+              .withObjectMapper(objectMapper)
+              .build(VocabularyClient.class);
+      ConceptClient targetConceptClient =
+          clientBuilder
+              .withUrl(cliArgs.getTargetApiUrl())
+              .withExponentialBackoffRetry(Duration.ofMillis(1000), 2, 4)
+              .withCredentials(cliArgs.getTargetApiUser(), cliArgs.getTargetApiPassword())
+              .withObjectMapper(objectMapper)
+              .build(ConceptClient.class);
+      TagClient targetTagClient =
+          clientBuilder
+              .withUrl(cliArgs.getTargetApiUrl())
+              .withExponentialBackoffRetry(Duration.ofMillis(1000), 2, 4)
+              .withCredentials(cliArgs.getTargetApiUser(), cliArgs.getTargetApiPassword())
+              .withObjectMapper(objectMapper)
+              .build(TagClient.class);
 
-      if (!Files.exists(hiddenLabelsPath)) {
-        throw new IllegalArgumentException(
-            "Hidden labels path " + hiddenLabelsPath + " doesn't exist");
-      }
-    }
-
-    if (cliArgs.getCsvDelimiter() == null) {
-      throw new IllegalArgumentException("CSV delimiter is required");
-    }
-
-    if (cliArgs.importHiddenLabelsOnly) {
-      log.info("Calling the hidden labels importer");
-      vocabularyImporter.importHiddenLabels(
-          cliArgs.getCsvDelimiter().charAt(0),
+      log.info("Calling the importer to migrate the vocabulary");
+      vocabularyImporter.migrateVocabulary(
           cliArgs.getVocabularyName(),
-          hiddenLabelsPath,
-          parseEncoding(cliArgs.encoding));
+          targetVocabularyClient,
+          targetConceptClient,
+          targetTagClient);
+
+      log.info("Migration done");
     } else {
-      Path conceptsPath = Paths.get(cliArgs.getConceptsPath());
+      Path hiddenLabelsPath = null;
+      if (cliArgs.getHiddenLabelsPath() != null) {
+        hiddenLabelsPath = Paths.get(cliArgs.getHiddenLabelsPath());
 
-      if (!Files.exists(conceptsPath)) {
-        throw new IllegalArgumentException("Concepts path " + conceptsPath + " doesn't exist");
+        if (!Files.exists(hiddenLabelsPath)) {
+          throw new IllegalArgumentException(
+              "Hidden labels path " + hiddenLabelsPath + " doesn't exist");
+        }
       }
 
-      log.info("Calling the importer");
-      vocabularyImporter.importVocabulary(
-          cliArgs.getCsvDelimiter().charAt(0),
-          cliArgs.getListDelimiter(),
-          cliArgs.getVocabularyName(),
-          cliArgs.getVocabularyLabelEN(),
-          cliArgs.getVocabularyDefinitionEN(),
-          conceptsPath,
-          hiddenLabelsPath,
-          parseEncoding(cliArgs.encoding));
+      if (cliArgs.getCsvDelimiter() == null) {
+        throw new IllegalArgumentException("CSV delimiter is required");
+      }
+
+      if (cliArgs.importHiddenLabelsOnly) {
+        log.info("Calling the hidden labels importer");
+        vocabularyImporter.importHiddenLabels(
+            cliArgs.getCsvDelimiter().charAt(0),
+            cliArgs.getVocabularyName(),
+            hiddenLabelsPath,
+            parseEncoding(cliArgs.encoding));
+      } else {
+        Path conceptsPath = Paths.get(cliArgs.getConceptsPath());
+
+        if (!Files.exists(conceptsPath)) {
+          throw new IllegalArgumentException("Concepts path " + conceptsPath + " doesn't exist");
+        }
+
+        log.info("Calling the importer");
+        vocabularyImporter.importVocabulary(
+            cliArgs.getCsvDelimiter().charAt(0),
+            cliArgs.getListDelimiter(),
+            cliArgs.getVocabularyName(),
+            cliArgs.getVocabularyLabelEN(),
+            cliArgs.getVocabularyDefinitionEN(),
+            conceptsPath,
+            hiddenLabelsPath,
+            parseEncoding(cliArgs.encoding));
+      }
+      log.info("Import done");
     }
-    log.info("Import done");
   }
 
   private static Charset parseEncoding(String encoding) {
@@ -140,15 +173,31 @@ public class CliApp {
     private String apiUrl;
 
     @Parameter(
+        names = {"--targetApiUrl", "-ta"},
+        required = true)
+    private String targetApiUrl;
+
+    @Parameter(
         names = {"--apiUser", "-au"},
         required = true)
     private String apiUser;
+
+    @Parameter(
+        names = {"--targetApiUser", "-tau"},
+        required = true)
+    private String targetApiUser;
 
     @Parameter(
         names = {"--apiPassword", "-ap"},
         required = true,
         password = true)
     private String apiPassword;
+
+    @Parameter(
+        names = {"--targetApiPassword", "-tap"},
+        required = true,
+        password = true)
+    private String targetApiPassword;
 
     @Parameter(
         names = {"--vocabularyName", "-vn"},
@@ -172,5 +221,8 @@ public class CliApp {
 
     @Parameter(names = {"--importHiddenLabelsOnly", "-hlo"})
     private boolean importHiddenLabelsOnly;
+
+    @Parameter(names = {"--migration", "-mi"})
+    private boolean migration;
   }
 }

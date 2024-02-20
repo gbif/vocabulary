@@ -14,6 +14,7 @@
 package org.gbif.vocabulary.client;
 
 import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptListParams;
@@ -186,12 +187,7 @@ public interface ConceptClient {
   PagingResponse<HiddenLabel> listHiddenLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      @SpringQueryMap ListParams params);
-
-  default PagingResponse<HiddenLabel> listHiddenLabels(
-      String vocabularyName, String conceptName, Pageable page) {
-    return listHiddenLabels(vocabularyName, conceptName, ListParams.of(null, page));
-  }
+      @SpringQueryMap PagingRequest page);
 
   @PostMapping(
       value = "{name}/label",

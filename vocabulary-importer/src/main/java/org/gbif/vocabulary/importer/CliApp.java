@@ -173,8 +173,7 @@ public class CliApp {
     private String apiUrl;
 
     @Parameter(
-        names = {"--targetApiUrl", "-ta"},
-        required = true)
+        names = {"--targetApiUrl", "-ta"})
     private String targetApiUrl;
 
     @Parameter(
@@ -183,8 +182,7 @@ public class CliApp {
     private String apiUser;
 
     @Parameter(
-        names = {"--targetApiUser", "-tau"},
-        required = true)
+        names = {"--targetApiUser", "-tau"})
     private String targetApiUser;
 
     @Parameter(
@@ -195,7 +193,6 @@ public class CliApp {
 
     @Parameter(
         names = {"--targetApiPassword", "-tap"},
-        required = true,
         password = true)
     private String targetApiPassword;
 

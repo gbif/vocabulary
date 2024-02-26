@@ -310,7 +310,10 @@ public class VocabularyImporter {
               vocabularyName,
               c.getName(),
               ConceptClient.ListParams.of(
-                  null, new PagingRequest(page.getOffset() + page.getLimit(), page.getLimit())));
+                  null,
+                  new PagingRequest(
+                      alternativeLables.getOffset() + alternativeLables.getLimit(),
+                      alternativeLables.getLimit())));
     }
 
     page = new PagingRequest(0, 100);
@@ -328,7 +331,8 @@ public class VocabularyImporter {
           conceptClient.listHiddenLabels(
               vocabularyName,
               c.getName(),
-              new PagingRequest(page.getOffset() + page.getLimit(), page.getLimit()));
+              new PagingRequest(
+                  hiddenLabels.getOffset() + hiddenLabels.getLimit(), hiddenLabels.getLimit()));
     }
 
     return created.getConcept();

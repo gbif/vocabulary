@@ -135,7 +135,7 @@ public class CliApp {
 
         log.info("Calling the importer");
         vocabularyImporter.importVocabulary(
-            cliArgs.getCsvDelimiter().charAt(0),
+            parseDelimiter(cliArgs.getCsvDelimiter()),
             cliArgs.getListDelimiter(),
             cliArgs.getVocabularyName(),
             cliArgs.getVocabularyLabelEN(),
@@ -145,6 +145,14 @@ public class CliApp {
             parseEncoding(cliArgs.encoding));
       }
       log.info("Import done");
+    }
+  }
+
+  private static char parseDelimiter(String delimiter) {
+    if ("\\t".equals(delimiter)) {
+      return '\t';
+    } else {
+      return delimiter.charAt(0);
     }
   }
 
@@ -172,8 +180,7 @@ public class CliApp {
         required = true)
     private String apiUrl;
 
-    @Parameter(
-        names = {"--targetApiUrl", "-ta"})
+    @Parameter(names = {"--targetApiUrl", "-ta"})
     private String targetApiUrl;
 
     @Parameter(
@@ -181,8 +188,7 @@ public class CliApp {
         required = true)
     private String apiUser;
 
-    @Parameter(
-        names = {"--targetApiUser", "-tau"})
+    @Parameter(names = {"--targetApiUser", "-tau"})
     private String targetApiUser;
 
     @Parameter(

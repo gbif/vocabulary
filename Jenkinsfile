@@ -114,8 +114,8 @@ pipeline {
                 sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
                     sh '''
                 rm -rf *
-                git clone -b dev git@github.com:gbif/gbif-configuration.git
-                git clone -b dev git@github.com:gbif/c-deploy.git
+                git clone -b master git@github.com:gbif/gbif-configuration.git
+                git clone -b master git@github.com:gbif/c-deploy.git
                '''
 
                     createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")

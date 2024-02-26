@@ -67,7 +67,7 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    branch 'master';
+                    branch 'dev';
                 }
             }
             steps {
@@ -107,15 +107,15 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    branch 'master';
+                    branch 'dev';
                 }
             }
             steps {
                 sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
                     sh '''
                 rm -rf *
-                git clone -b master git@github.com:gbif/gbif-configuration.git
-                git clone -b master git@github.com:gbif/c-deploy.git
+                git clone -b dev git@github.com:gbif/gbif-configuration.git
+                git clone -b dev git@github.com:gbif/c-deploy.git
                '''
 
                     createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")
@@ -140,14 +140,6 @@ pipeline {
                 ansible-playbook -vvv -i ${BUILD_HOSTS} services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=${GIT_CREDENTIALS}"
               """
                 }
-            }
-        }
-        stage('Build documentation') {
-            when {
-                branch 'master';
-            }
-            steps {
-                build job: "tech-docs-openapi", wait: true
             }
         }
     }

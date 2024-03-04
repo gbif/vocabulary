@@ -10,7 +10,9 @@ The vocabulary concepts and labels have to be in CSV format - other separators a
 It's necessary to have the following 2 CSVs:
 * **Concepts**
 
-It contains the concepts of the vocabulary with its labels and alternative labels. At this moment, both EN and ES labels are accepted.
+It contains the concepts of the vocabulary with its labels and alternative labels. To indicate the language of a label,
+alternative label or definition, it has to be suffixed to the column name as "_{locale}", for example, alternativeLabels_es-es.
+The values for the locales can be found [here](../model/src/main/java/org/gbif/vocabulary/model/LanguageRegion.java).
 
 The columns of this file are (note that it uses a semicolon as separator):
 
@@ -63,7 +65,7 @@ java -jar vocabulary-importer/target/vocabulary-importer-0.53.jar \
 --apiPassword
 ```
 
-**NOTE**: the names of the columns of these files can be different than those but the order has to be the one specified above.
+**NOTE**: the columns of these files can be in any order but the column name has to match with the ones specified above(the case doesn't matter).
 
 ## How to import a vocabulary
 
@@ -117,10 +119,15 @@ This tool can be run via command line by sending these params:
 
 * *--importHiddenLabelsOnly, -hlo*
 
-    Flag to indicate the import of only hidden labels to exising concepts. When this option is used the concepts path
-    and the vocabulary label are not required.
+    Flag to indicate the import of only hidden labels to existing concepts. When this option is used the concepts path
+    and the vocabulary label and definition are not required.
+* *--importLabelsAndDefinitionsOnly", -ldo*
 
-For example:
+    Flag to indicate the import of only labels, alternative labels and definitions to existing concepts. None of these
+    columns are required so, for example, it can be used to import only definitions. When this option is used the vocabulary
+    label and definition are not required.
+
+Example of a migration:
 
 ```
 java -jar vocabulary-importer/target/vocabulary-importer-0.53.jar \
@@ -129,6 +136,19 @@ java -jar vocabulary-importer/target/vocabulary-importer-0.53.jar \
 --vocabularyDefinitionEN "A vocabulary to capture the broad stages that an organism passes through during its life cycle. This vocabulary was assembled based on the observed terms commonly used by the open data community, including those from citizen scientists." \
 --conceptsPath "/mydir/my_concepts.csv" \
 --hiddenLabelsPath "/mydir/my_hidden_labels.csv" \
+--csvDelimiter ";" \
+--apiUrl https://api.gbif-dev.org/v1/ \
+--apiUser myusername \
+--apiPassword
+```
+
+Example of an only-labels import :
+
+```
+java -jar vocabulary-importer/target/vocabulary-importer-0.53.jar \
+--vocabularyName LifeStage \
+--importLabelsAndDefinitionsOnly \
+--conceptsPath "/mydir/my_concepts.csv" \
 --csvDelimiter ";" \
 --apiUrl https://api.gbif-dev.org/v1/ \
 --apiUser myusername \

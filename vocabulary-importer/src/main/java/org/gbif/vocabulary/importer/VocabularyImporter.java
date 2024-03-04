@@ -37,11 +37,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -57,6 +59,16 @@ import com.opencsv.CSVReaderBuilder;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+
+import static org.gbif.vocabulary.importer.Fields.ALT_LABELS_PREFIX;
+import static org.gbif.vocabulary.importer.Fields.CONCEPT;
+import static org.gbif.vocabulary.importer.Fields.CONCEPT_FIELDS;
+import static org.gbif.vocabulary.importer.Fields.DEFINITION_PREFIX;
+import static org.gbif.vocabulary.importer.Fields.EXTERNAL_DEFINITIONS;
+import static org.gbif.vocabulary.importer.Fields.LABEL_PREFIX;
+import static org.gbif.vocabulary.importer.Fields.PARENT;
+import static org.gbif.vocabulary.importer.Fields.SAME_AS_URIS;
+import static org.gbif.vocabulary.importer.Fields.TAGS;
 
 @Slf4j
 public class VocabularyImporter {
@@ -112,8 +124,17 @@ public class VocabularyImporter {
     try (CSVReader csvReader =
         new CSVReaderBuilder(Files.newBufferedReader(conceptsPath, charset))
             .withCSVParser(csvParser)
-            .withSkipLines(1)
             .build()) {
+
+      // get headers indexes
+      Map<String, Integer> headersIndexes = new HashMap<>();
+      Map<LanguageRegion, Integer> labelsIndexes = new HashMap<>();
+      Map<LanguageRegion, Integer> alternativeLabelsIndexes = new HashMap<>();
+      Map<LanguageRegion, Integer> definitionsIndexes = new HashMap<>();
+      String[] headers = csvReader.readNextSilently();
+
+      parseHeaders(
+          headers, headersIndexes, labelsIndexes, alternativeLabelsIndexes, definitionsIndexes);
 
       String[] values;
       while ((values = csvReader.readNextSilently()) != null) {
@@ -121,7 +142,7 @@ public class VocabularyImporter {
           continue;
         }
 
-        String conceptName = values[0].trim();
+        String conceptName = values[headersIndexes.get(CONCEPT)].trim();
 
         if (Strings.isNullOrEmpty(conceptName)) {
           log.error("Empty concept in line: {}", csvReader.getLinesRead());
@@ -140,7 +161,16 @@ public class VocabularyImporter {
 
         // read fields
         ConceptData conceptData =
-            parseConceptFields(listDelimiter, errors, conceptsMap, values, concept);
+            parseConceptFields(
+                listDelimiter,
+                headersIndexes,
+                labelsIndexes,
+                alternativeLabelsIndexes,
+                definitionsIndexes,
+                errors,
+                conceptsMap,
+                values,
+                concept);
 
         // create concept
         try {
@@ -173,6 +203,34 @@ public class VocabularyImporter {
     printErrorsToFile(errors);
   }
 
+  private static void parseHeaders(
+      String[] headers,
+      Map<String, Integer> headersIndexes,
+      Map<LanguageRegion, Integer> labelsIndexes,
+      Map<LanguageRegion, Integer> alternativeLabelsIndexes,
+      Map<LanguageRegion, Integer> definitionsIndexes) {
+    for (int i = 0; i < headers.length; i++) {
+      if (CONCEPT_FIELDS.contains(headers[i].toUpperCase())) {
+        headersIndexes.put(headers[i].toUpperCase(), i);
+      } else if (headers[i].toUpperCase().startsWith(LABEL_PREFIX)) {
+        LanguageRegion lang = LanguageRegion.fromLocale(headers[i].split("_")[1]);
+        if (lang != LanguageRegion.UNKNOWN) {
+          labelsIndexes.put(lang, i);
+        }
+      } else if (headers[i].toUpperCase().startsWith(ALT_LABELS_PREFIX)) {
+        LanguageRegion lang = LanguageRegion.fromLocale(headers[i].split("_")[1]);
+        if (lang != LanguageRegion.UNKNOWN) {
+          alternativeLabelsIndexes.put(lang, i);
+        }
+      } else if (headers[i].toUpperCase().startsWith(DEFINITION_PREFIX)) {
+        LanguageRegion lang = LanguageRegion.fromLocale(headers[i].split("_")[1]);
+        if (lang != LanguageRegion.UNKNOWN) {
+          definitionsIndexes.put(lang, i);
+        }
+      }
+    }
+  }
+
   @SneakyThrows
   public void importHiddenLabels(
       Character csvDelimiter, String vocabName, Path hiddenLabelsPath, Charset charset) {
@@ -186,6 +244,59 @@ public class VocabularyImporter {
     // list to keep the errors and then print them to a file
     List<Error> errors = new ArrayList<>();
     parseHiddenLabels(csvDelimiter, vocabName, hiddenLabelsPath, errors, getConceptFn, charset);
+    printErrorsToFile(errors);
+  }
+
+  @SneakyThrows
+  public void importLabelsAndDefinitions(
+      Character csvDelimiter,
+      String listDelimiter,
+      String vocabName,
+      Path csvPath,
+      Charset charset) {
+
+    List<Error> errors = new ArrayList<>();
+    CSVParser csvParser = new CSVParserBuilder().withSeparator(csvDelimiter).build();
+    try (CSVReader csvReader =
+        new CSVReaderBuilder(Files.newBufferedReader(csvPath, charset))
+            .withCSVParser(csvParser)
+            .build()) {
+
+      // get headers indexes
+      Map<String, Integer> headersIndexes = new HashMap<>();
+      Map<LanguageRegion, Integer> labelsIndexes = new HashMap<>();
+      Map<LanguageRegion, Integer> alternativeLabelsIndexes = new HashMap<>();
+      Map<LanguageRegion, Integer> definitionsIndexes = new HashMap<>();
+      String[] headers = csvReader.readNextSilently();
+
+      parseHeaders(
+          headers, headersIndexes, labelsIndexes, alternativeLabelsIndexes, definitionsIndexes);
+
+      String[] values;
+      while ((values = csvReader.readNextSilently()) != null) {
+        if (values.length == 0) {
+          continue;
+        }
+
+        String conceptName = values[headersIndexes.get(CONCEPT)].trim();
+
+        ConceptView conceptView = conceptClient.get(vocabName, conceptName, false, false);
+        if (conceptView == null) {
+          log.error("Concept not found for name {}", conceptName);
+          errors.add(Error.of("Concept not found for name " + conceptName, null));
+          continue;
+        }
+
+        // add labels
+        parseLabels(labelsIndexes, values)
+            .forEach(l -> addLabel(vocabName, conceptName, l, conceptClient, errors));
+        parseAlternativeLabels(listDelimiter, alternativeLabelsIndexes, values)
+            .forEach(al -> addAlternativeLabel(vocabName, conceptName, al, conceptClient, errors));
+        parseDefinitions(definitionsIndexes, values)
+            .forEach(d -> addDefinition(vocabName, conceptName, d, conceptClient, errors));
+      }
+    }
+
     printErrorsToFile(errors);
   }
 
@@ -409,19 +520,22 @@ public class VocabularyImporter {
 
   private ConceptData parseConceptFields(
       String listDelimiter,
+      Map<String, Integer> headersIndexes,
+      Map<LanguageRegion, Integer> labelsIndexes,
+      Map<LanguageRegion, Integer> alternativeLabelsIndexes,
+      Map<LanguageRegion, Integer> definitionsIndexes,
       List<Error> errors,
       Map<String, Concept> conceptsMap,
       String[] values,
       Concept concept) {
 
-    List<Label> labels = new ArrayList<>();
-    List<Label> alternativeLabels = new ArrayList<>();
-    List<Definition> definitions = new ArrayList<>();
-    List<String> tags = new ArrayList<>();
+    ConceptData conceptData = new ConceptData();
+    conceptData.concept = concept;
 
     // parent
-    if (values.length > 1 && !Strings.isNullOrEmpty(values[1])) {
-      String parentName = values[1].trim();
+    if (headersIndexes.containsKey(PARENT)
+        && !Strings.isNullOrEmpty(values[headersIndexes.get(PARENT)])) {
+      String parentName = values[headersIndexes.get(PARENT)].trim();
       Concept parent = conceptsMap.get(parentName);
       if (parent != null) {
         concept.setParentKey(parent.getKey());
@@ -432,46 +546,27 @@ public class VocabularyImporter {
       }
     }
 
-    // add EN labels
-    if (values.length > 2 && !Strings.isNullOrEmpty(values[2])) {
-      labels.add(Label.builder().language(LanguageRegion.ENGLISH).value(values[2].trim()).build());
+    // add labels
+    if (!labelsIndexes.isEmpty()) {
+      conceptData.labels = parseLabels(labelsIndexes, values);
     }
 
-    // add EN alternative labels
-    if (values.length > 3 && !Strings.isNullOrEmpty(values[3])) {
-      Stream.of(values[3].split(listDelimiter))
-          .map(String::trim)
-          .forEach(
-              l ->
-                  alternativeLabels.add(
-                      Label.builder().language(LanguageRegion.ENGLISH).value(l).build()));
+    // add alternative labels
+    if (!alternativeLabelsIndexes.isEmpty()) {
+      conceptData.alternativeLabels =
+          parseAlternativeLabels(listDelimiter, alternativeLabelsIndexes, values);
     }
 
-    // add ES labels
-    if (values.length > 4 && !Strings.isNullOrEmpty(values[4])) {
-      labels.add(Label.builder().language(LanguageRegion.SPANISH).value(values[4].trim()).build());
-    }
-
-    // add ES alternative labels
-    if (values.length > 5 && !Strings.isNullOrEmpty(values[5])) {
-      Stream.of(values[5].split(listDelimiter))
-          .map(String::trim)
-          .forEach(
-              l ->
-                  alternativeLabels.add(
-                      Label.builder().language(LanguageRegion.SPANISH).value(l).build()));
-    }
-
-    // add EN definitions
-    if (values.length > 6 && !Strings.isNullOrEmpty(values[6])) {
-      definitions.add(
-          Definition.builder().language(LanguageRegion.ENGLISH).value(values[6].trim()).build());
+    // add definitions
+    if (!definitionsIndexes.isEmpty()) {
+      conceptData.definitions = parseDefinitions(definitionsIndexes, values);
     }
 
     // add sameAs URIs
-    if (values.length > 7 && !Strings.isNullOrEmpty(values[7])) {
+    if (headersIndexes.containsKey(SAME_AS_URIS)
+        && !Strings.isNullOrEmpty(values[headersIndexes.get(SAME_AS_URIS)])) {
       Set<URI> sameAsUris = new HashSet<>();
-      String[] urisValues = values[7].split(listDelimiter);
+      String[] urisValues = values[headersIndexes.get(SAME_AS_URIS)].split(listDelimiter);
       for (String uri : urisValues) {
         try {
           sameAsUris.add(URI.create(uri.trim()));
@@ -484,9 +579,10 @@ public class VocabularyImporter {
     }
 
     // add external definitions
-    if (values.length > 8 && !Strings.isNullOrEmpty(values[8])) {
+    if (headersIndexes.containsKey(EXTERNAL_DEFINITIONS)
+        && !Strings.isNullOrEmpty(values[headersIndexes.get(SAME_AS_URIS)])) {
       Set<URI> externalDefinitions = new HashSet<>();
-      String[] externalDefsValues = values[8].split(listDelimiter);
+      String[] externalDefsValues = values[headersIndexes.get(SAME_AS_URIS)].split(listDelimiter);
       for (String definition : externalDefsValues) {
         try {
           externalDefinitions.add(URI.create(definition.trim()));
@@ -499,16 +595,57 @@ public class VocabularyImporter {
     }
 
     // tags
-    if (values.length > 9 && !Strings.isNullOrEmpty(values[9])) {
-      String[] tagsValues = values[9].split(listDelimiter);
-      for (String tag : tagsValues) {
-        if (!Strings.isNullOrEmpty(tag)) {
-          tags.add(tag);
-        }
-      }
+    if (headersIndexes.containsKey(TAGS)
+        && !Strings.isNullOrEmpty(values[headersIndexes.get(TAGS)])) {
+      String[] tagsValues = values[headersIndexes.get(TAGS)].split(listDelimiter);
+      conceptData.tags =
+          Arrays.stream(tagsValues)
+              .filter(s -> !Strings.isNullOrEmpty(s))
+              .collect(Collectors.toList());
     }
 
-    return ConceptData.of(concept, definitions, labels, alternativeLabels, null, tags);
+    return conceptData;
+  }
+
+  private static List<Definition> parseDefinitions(
+      Map<LanguageRegion, Integer> definitionsIndexes, String[] values) {
+    List<Definition> definitions = new ArrayList<>();
+    definitionsIndexes.forEach(
+        (lang, index) ->
+            Optional.ofNullable(values[index])
+                .filter(s -> !s.isEmpty())
+                .ifPresent(
+                    s ->
+                        definitions.add(
+                            Definition.builder().language(lang).value(s.trim()).build())));
+    return definitions;
+  }
+
+  private static List<Label> parseAlternativeLabels(
+      String listDelimiter,
+      Map<LanguageRegion, Integer> alternativeLabelsIndexes,
+      String[] values) {
+    List<Label> alternativeLabels = new ArrayList<>();
+    alternativeLabelsIndexes.forEach(
+        (lang, index) ->
+            Stream.of(values[index].split(listDelimiter))
+                .filter(s -> !s.isEmpty())
+                .map(String::trim)
+                .forEach(
+                    l -> alternativeLabels.add(Label.builder().language(lang).value(l).build())));
+    return alternativeLabels;
+  }
+
+  private static List<Label> parseLabels(
+      Map<LanguageRegion, Integer> labelsIndexes, String[] values) {
+    List<Label> labels = new ArrayList<>();
+    labelsIndexes.forEach(
+        (lang, index) ->
+            Optional.ofNullable(values[index])
+                .filter(s -> !s.isEmpty())
+                .ifPresent(
+                    s -> labels.add(Label.builder().language(lang).value(s.trim()).build())));
+    return labels;
   }
 
   private void addDefinition(
@@ -643,13 +780,12 @@ public class VocabularyImporter {
     private final Exception exception;
   }
 
-  @AllArgsConstructor(staticName = "of")
   private static class ConceptData {
     private Concept concept;
-    private List<Definition> definitions;
-    private List<Label> labels;
-    private List<Label> alternativeLabels;
-    private List<HiddenLabel> hiddenLabels;
-    private List<String> tags;
+    private List<Definition> definitions = new ArrayList<>();
+    private List<Label> labels = new ArrayList<>();
+    private List<Label> alternativeLabels = new ArrayList<>();
+    private List<HiddenLabel> hiddenLabels = new ArrayList<>();
+    private List<String> tags = new ArrayList<>();
   }
 }

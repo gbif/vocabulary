@@ -122,17 +122,28 @@ public class CliApp {
       if (cliArgs.importHiddenLabelsOnly) {
         log.info("Calling the hidden labels importer");
         vocabularyImporter.importHiddenLabels(
-            cliArgs.getCsvDelimiter().charAt(0),
+            parseDelimiter(cliArgs.getCsvDelimiter()),
             cliArgs.getVocabularyName(),
             hiddenLabelsPath,
             parseEncoding(cliArgs.encoding));
+        return;
+      }
+
+      Path conceptsPath = Paths.get(cliArgs.getConceptsPath());
+
+      if (!Files.exists(conceptsPath)) {
+        throw new IllegalArgumentException("Concepts path " + conceptsPath + " doesn't exist");
+      }
+
+      if (cliArgs.importLabelsAndDefinitionsOnly) {
+        log.info("Calling the labels and definitions importer");
+        vocabularyImporter.importLabelsAndDefinitions(
+            parseDelimiter(cliArgs.getCsvDelimiter()),
+            cliArgs.getListDelimiter(),
+            cliArgs.getVocabularyName(),
+            conceptsPath,
+            parseEncoding(cliArgs.encoding));
       } else {
-        Path conceptsPath = Paths.get(cliArgs.getConceptsPath());
-
-        if (!Files.exists(conceptsPath)) {
-          throw new IllegalArgumentException("Concepts path " + conceptsPath + " doesn't exist");
-        }
-
         log.info("Calling the importer");
         vocabularyImporter.importVocabulary(
             parseDelimiter(cliArgs.getCsvDelimiter()),
@@ -224,6 +235,9 @@ public class CliApp {
 
     @Parameter(names = {"--importHiddenLabelsOnly", "-hlo"})
     private boolean importHiddenLabelsOnly;
+
+    @Parameter(names = {"--importLabelsAndDefinitionsOnly", "-ldo"})
+    private boolean importLabelsAndDefinitionsOnly;
 
     @Parameter(names = {"--migration", "-mi"})
     private boolean migration;

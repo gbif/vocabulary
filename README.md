@@ -1,8 +1,8 @@
 # Vocabulary
 
 [![Build Status](https://builds.gbif.org/job/vocabulary/job/master/badge/icon)](https://builds.gbif.org/job/vocabulary/job/master/)
-[![Quality Gate Status](https://sonar.gbif.org/api/project_badges/measure?project=org.gbif.vocabulary%3Avocabulary-parent&metric=alert_status)](https://sonar.gbif.org/dashboard?id=org.gbif.vocabulary%3Avocabulary-parent) 
-[![Coverage](https://sonar.gbif.org/api/project_badges/measure?project=org.gbif.vocabulary%3Avocabulary-parent&metric=coverage)](https://sonar.gbif.org/dashboard?id=org.gbif.vocabulary%3Avocabulary-parent)
+[![Quality Gate Status](https://sonar.gbif.org/api/project_badges/measure?project=org.gbif.vocabulary%3Avocabulary-parent&metric=alert_status&token=sqb_73699e1c05e321fd451545b47ae6b3fcbd06046b)](https://sonar.gbif.org/dashboard?id=org.gbif.vocabulary%3Avocabulary-parent)
+[![Coverage](https://sonar.gbif.org/api/project_badges/measure?project=org.gbif.vocabulary%3Avocabulary-parent&metric=coverage&token=sqb_73699e1c05e321fd451545b47ae6b3fcbd06046b)](https://sonar.gbif.org/dashboard?id=org.gbif.vocabulary%3Avocabulary-parent)
 
 A simple registry of controlled vocabularies used for terms found in GBIF mediated data.
 

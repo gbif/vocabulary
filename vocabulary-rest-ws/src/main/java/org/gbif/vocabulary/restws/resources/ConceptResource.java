@@ -273,9 +273,13 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @RequestParam(value = "includeParents", required = false) boolean includeParents,
       @RequestParam(value = "includeChildren", required = false) boolean includeChildren) {
-    ConceptView conceptView =
-        createConceptView(
-            includeParents, includeChildren, getConceptWithCheck(conceptName, vocabularyName));
+    Concept concept = getConceptWithCheck(conceptName, vocabularyName);
+
+    if (concept == null) {
+      return null;
+    }
+
+    ConceptView conceptView = createConceptView(includeParents, includeChildren, concept);
 
     return createLabelsLinks(conceptView, vocabularyName, conceptName);
   }
@@ -781,6 +785,10 @@ public class ConceptResource {
 
   private ConceptView createLabelsLinks(
       ConceptView conceptView, String vocabularyName, String conceptName) {
+    if (conceptView == null) {
+      return null;
+    }
+
     conceptView.setAlternativeLabelsLink(
         String.format(
             "%s/vocabularies/%s/concepts/%s/alternativeLabels",
@@ -872,11 +880,12 @@ public class ConceptResource {
               + ". Please make sure the vocabulary has been released.");
     }
 
-    ConceptView conceptView =
-        createConceptView(
-            includeParents,
-            includeChildren,
-            conceptService.getByNameLatestRelease(conceptName, vocabularyName));
+    Concept concept = conceptService.getByNameLatestRelease(conceptName, vocabularyName);
+    if (concept == null) {
+      return null;
+    }
+
+    ConceptView conceptView = createConceptView(includeParents, includeChildren, concept);
 
     return createLabelsLinks(conceptView, vocabularyName, LATEST_RELEASE_PATH + "/" + conceptName);
   }
@@ -993,6 +1002,10 @@ public class ConceptResource {
 
   private ConceptView createConceptView(
       boolean includeParents, boolean includeChildren, Concept concept) {
+    if (concept == null) {
+      return null;
+    }
+
     ConceptView conceptView = new ConceptView(concept);
     if (includeParents && concept.getParentKey() != null) {
       conceptView.setParents(conceptService.findParents(concept.getKey()));

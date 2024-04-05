@@ -161,6 +161,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertList(ConceptSearchParams.builder().replacedByKey(concept2.getKey()).build(), 1);
     assertList(ConceptSearchParams.builder().hasParent(true).build(), 2);
     assertList(ConceptSearchParams.builder().hasReplacement(true).build(), 1);
+    assertList(ConceptSearchParams.builder().hiddenLabel(hiddenLabel.getValue()).build(), 1);
 
     // remove the hidden label. The release view shouldn't get the change
     conceptMapper.deleteHiddenLabel(concept2.getKey(), hiddenLabel.getKey());

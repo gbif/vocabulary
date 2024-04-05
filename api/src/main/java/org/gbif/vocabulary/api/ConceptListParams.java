@@ -45,6 +45,7 @@ public class ConceptListParams extends ListParamsBase implements Serializable {
   boolean includeChildren;
   boolean includeParents;
   List<String> tags;
+  String hiddenLabel;
 
   public Pageable getPage() {
     return new PagingRequest(this.getOffset(), this.getLimit());

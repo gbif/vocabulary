@@ -220,6 +220,7 @@ public class ConceptResource {
                 .hasParent(params.getHasParent())
                 .hasReplacement(params.getHasReplacement())
                 .tags(params.getTags())
+                .hiddenLabel(params.getHiddenLabel())
                 .build(),
             params.getPage());
 

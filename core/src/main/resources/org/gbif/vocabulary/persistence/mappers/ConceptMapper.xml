@@ -98,6 +98,9 @@
     <if test="params.parent != null">
       INNER JOIN concept parent ON parent.key = c.parent_key
     </if>
+    <if test="params.hiddenLabel != null">
+      INNER JOIN concept_hidden_label chl ON chl.concept_key = c.key
+    </if>
     <where>
       <if test="params.vocabularyKey != null">
         c.vocabulary_key = #{params.vocabularyKey}
@@ -132,6 +135,9 @@
           EXISTS (SELECT * FROM tag t INNER JOIN concept_tag ct ON ct.concept_key = c.key AND t.key = ct.tag_key WHERE
           t.name = #{item,jdbcType=VARCHAR})
         </foreach>
+      </if>
+      <if test="params.hiddenLabel != null">
+        AND chl.value = #{params.hiddenLabel}
       </if>
     </where>
   </sql>

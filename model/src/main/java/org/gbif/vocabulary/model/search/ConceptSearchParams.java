@@ -35,6 +35,7 @@ public class ConceptSearchParams implements Serializable {
   private final Boolean hasParent;
   private final Boolean hasReplacement;
   private final List<String> tags;
+  private final String hiddenLabel;
 
   public static ConceptSearchParams empty() {
     return builder().build();

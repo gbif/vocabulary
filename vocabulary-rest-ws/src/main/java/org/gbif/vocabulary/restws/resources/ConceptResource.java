@@ -833,6 +833,7 @@ public class ConceptResource {
                 .key(params.getKey())
                 .hasParent(params.getHasParent())
                 .hasReplacement(params.getHasReplacement())
+                .hiddenLabel(params.getHiddenLabel())
                 .build(),
             params.getPage(),
             vocabularyName);

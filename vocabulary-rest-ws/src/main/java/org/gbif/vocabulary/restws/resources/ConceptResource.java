@@ -176,6 +176,12 @@ public class ConceptResource {
             description = "Should the search results include the parents of the concept?",
             schema = @Schema(implementation = Boolean.class),
             in = ParameterIn.QUERY,
+            explode = Explode.FALSE),
+        @Parameter(
+            name = "hiddenLabel",
+            description = "The hidden label to filter by",
+            schema = @Schema(implementation = String.class),
+            in = ParameterIn.QUERY,
             explode = Explode.FALSE)
       })
   @CommonParameters.QParameter

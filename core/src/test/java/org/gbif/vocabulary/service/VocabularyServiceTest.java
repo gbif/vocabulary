@@ -23,6 +23,8 @@ import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
 import javax.validation.ConstraintViolationException;
 
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -44,6 +46,9 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
 
   @MockBean(name = "conceptMapper")
   private ConceptMapper conceptMapper;
+
+  @MockBean(name = "vocabularyReleaseMapper")
+  private VocabularyReleaseMapper vocabularyReleaseMapper;
 
   @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
   @Test

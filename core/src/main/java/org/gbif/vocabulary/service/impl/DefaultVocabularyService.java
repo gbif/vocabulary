@@ -29,6 +29,7 @@ import org.gbif.vocabulary.model.utils.PostPersist;
 import org.gbif.vocabulary.model.utils.PrePersist;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 import org.gbif.vocabulary.service.VocabularyService;
 
 import java.util.List;
@@ -60,11 +61,16 @@ public class DefaultVocabularyService implements VocabularyService {
 
   private final VocabularyMapper vocabularyMapper;
   private final ConceptMapper conceptMapper;
+  private final VocabularyReleaseMapper vocabularyReleaseMapper;
 
   @Autowired
-  public DefaultVocabularyService(VocabularyMapper vocabularyMapper, ConceptMapper conceptMapper) {
+  public DefaultVocabularyService(
+      VocabularyMapper vocabularyMapper,
+      ConceptMapper conceptMapper,
+      VocabularyReleaseMapper vocabularyReleaseMapper) {
     this.vocabularyMapper = vocabularyMapper;
     this.conceptMapper = conceptMapper;
+    this.vocabularyReleaseMapper = vocabularyReleaseMapper;
   }
 
   @Override
@@ -242,6 +248,9 @@ public class DefaultVocabularyService implements VocabularyService {
   @Secured(UserRoles.VOCABULARY_ADMIN)
   @Override
   public void deleteVocabulary(long vocabularyKey) {
+    if (vocabularyReleaseMapper.count(vocabularyKey, null) > 0) {
+      throw new IllegalArgumentException("Can't delete a vocabulary that was already released");
+    }
     conceptMapper.deleteAllConcepts(vocabularyKey);
     vocabularyMapper.delete(vocabularyKey);
   }

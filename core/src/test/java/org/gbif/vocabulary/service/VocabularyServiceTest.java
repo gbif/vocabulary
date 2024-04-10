@@ -20,10 +20,9 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
 import javax.validation.ConstraintViolationException;
-
-import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

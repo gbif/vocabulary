@@ -16,6 +16,8 @@ package org.gbif.vocabulary.model.normalizers;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests the {@link StringNormalizer} . */
 public class StringNormalizerTest {
@@ -36,5 +38,14 @@ public class StringNormalizerTest {
     assertEquals(
         "IObDGHLTZo aeiouancuuuuALEO",
         StringNormalizer.replaceNonAsciiCharactersWithEquivalents("ƗØƀĐǤĦŁŦƵø àéîoüåñçǖǘǚǜǍĽĒŎ"));
+  }
+
+  @Test
+  public void validNameTest() {
+    assertTrue(StringNormalizer.isValidName("name"));
+    assertTrue(StringNormalizer.isValidName("Name"));
+    assertTrue(StringNormalizer.isValidName("NaMe1"));
+    assertTrue(StringNormalizer.isValidName("1NaMe1"));
+    assertFalse(StringNormalizer.isValidName("NaM_e1"));
   }
 }

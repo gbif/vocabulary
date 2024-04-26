@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StringNormalizer {
 
-  public static final Pattern NAME_FORMAT_PATTERN = Pattern.compile("^[A-Z0-9][a-zA-Z0-9]*$");
+  public static final Pattern NAME_FORMAT_PATTERN = Pattern.compile("^[A-Za-z0-9]*$");
   private static final String EMPTY = "";
   private static final Pattern NAME_PATTERN = Pattern.compile("[\\-_\\s]");
   private static final Pattern LABEL_PATTERN = Pattern.compile("[\\s]");

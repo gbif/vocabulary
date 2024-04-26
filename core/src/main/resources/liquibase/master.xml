@@ -15,5 +15,6 @@
   <include file="liquibase/009-remove-deleted-field.xml" />
   <include file="liquibase/010-labels_definitions_indexes.xml" />
   <include file="liquibase/011-optional-release-url.xml" />
+  <include file="liquibase/012-updated-constraint-names-format.xml" />
 
 </databaseChangeLog>

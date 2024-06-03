@@ -120,7 +120,7 @@ pipeline {
                     sh '''
                 rm -rf *
                 git clone -b master git@github.com:gbif/gbif-configuration.git
-                git clone -b master git@github.com:gbif/c-deploy.git
+                git clone -b dev2 git@github.com:gbif/c-deploy.git
                '''
 
                     createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")

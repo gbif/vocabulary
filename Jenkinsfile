@@ -2,7 +2,7 @@ pipeline {
     agent any
     tools {
         maven 'Maven3.2'
-        jdk 'OpenJDK8'
+        jdk 'OpenJDK11'
     }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -52,9 +52,6 @@ pipeline {
             }
         }
         stage('SonarQube analysis') {
-            tools {
-                jdk "OpenJDK11"
-            }
             when {
                 allOf {
                     not { expression { params.RELEASE } };

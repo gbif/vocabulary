@@ -25,8 +25,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
-
 public class LanguageRegionHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
   @Override
@@ -75,10 +73,9 @@ public class LanguageRegionHandlerMethodArgumentResolver implements HandlerMetho
 
   private boolean isList(MethodParameter parameter) {
     return List.class.equals(parameter.getParameterType())
-        && LanguageRegion.class
-            .getName()
-            .equals(
-                ((ParameterizedTypeImpl) parameter.getGenericParameterType())
-                    .getActualTypeArguments()[0].getTypeName());
+        && parameter
+            .getGenericParameterType()
+            .getTypeName()
+            .contains(LanguageRegion.class.getName());
   }
 }

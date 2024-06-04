@@ -120,9 +120,6 @@
     <mockito.version>3.4.0</mockito.version>
     <wiremock.version>2.21.0</wiremock.version>
 
-    <!-- documentation -->
-    <ascii-doctor-plugin.version>1.5.7</ascii-doctor-plugin.version>
-
     <!-- JaCoCo & Sonar-->
     <sonar.projectName>GBIF Vocabulary</sonar.projectName>
     <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>

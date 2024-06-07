@@ -72,9 +72,9 @@
     <main.basedir>${project.basedir}</main.basedir>
 
     <!-- gbif -->
-    <gbif-api.version>1.16.3</gbif-api.version>
+    <gbif-api.version>1.16.4</gbif-api.version>
     <gbif.common-mybatis.version>1.4-SNAPSHOT</gbif.common-mybatis.version>
-    <postal-service.version>1.1</postal-service.version>
+    <postal-service.version>1.8.0</postal-service.version>
     <gbif-cli.version>1.2-SNAPSHOT</gbif-cli.version>
     <gbif-common-ws.version>1.28-SNAPSHOT</gbif-common-ws.version>
 

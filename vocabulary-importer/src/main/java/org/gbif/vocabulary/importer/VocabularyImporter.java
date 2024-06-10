@@ -46,6 +46,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -566,7 +567,8 @@ public class VocabularyImporter {
     if (headersIndexes.containsKey(SAME_AS_URIS)
         && !Strings.isNullOrEmpty(values[headersIndexes.get(SAME_AS_URIS)])) {
       Set<URI> sameAsUris = new HashSet<>();
-      String[] urisValues = values[headersIndexes.get(SAME_AS_URIS)].split(listDelimiter);
+      String[] urisValues =
+          values[headersIndexes.get(SAME_AS_URIS)].split(Pattern.quote(listDelimiter));
       for (String uri : urisValues) {
         try {
           sameAsUris.add(URI.create(uri.trim()));
@@ -582,7 +584,7 @@ public class VocabularyImporter {
     if (headersIndexes.containsKey(EXTERNAL_DEFINITIONS)
         && !Strings.isNullOrEmpty(values[headersIndexes.get(SAME_AS_URIS)])) {
       Set<URI> externalDefinitions = new HashSet<>();
-      String[] externalDefsValues = values[headersIndexes.get(SAME_AS_URIS)].split(listDelimiter);
+      String[] externalDefsValues = values[headersIndexes.get(SAME_AS_URIS)].split(Pattern.quote(listDelimiter));
       for (String definition : externalDefsValues) {
         try {
           externalDefinitions.add(URI.create(definition.trim()));
@@ -597,7 +599,7 @@ public class VocabularyImporter {
     // tags
     if (headersIndexes.containsKey(TAGS)
         && !Strings.isNullOrEmpty(values[headersIndexes.get(TAGS)])) {
-      String[] tagsValues = values[headersIndexes.get(TAGS)].split(listDelimiter);
+      String[] tagsValues = values[headersIndexes.get(TAGS)].split(Pattern.quote(listDelimiter));
       conceptData.tags =
           Arrays.stream(tagsValues)
               .filter(s -> !Strings.isNullOrEmpty(s))
@@ -628,7 +630,7 @@ public class VocabularyImporter {
     List<Label> alternativeLabels = new ArrayList<>();
     alternativeLabelsIndexes.forEach(
         (lang, index) ->
-            Stream.of(values[index].split(listDelimiter))
+            Stream.of(values[index].split(Pattern.quote(listDelimiter)))
                 .filter(s -> !s.isEmpty())
                 .map(String::trim)
                 .forEach(

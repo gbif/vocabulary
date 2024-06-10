@@ -13,6 +13,7 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import org.gbif.api.annotation.Trim;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Tag;
@@ -97,7 +98,7 @@ public class TagResource {
   @Docs.DefaultUnsuccessfulReadResponses
   @Docs.DefaultUnsuccessfulWriteResponses
   @PostMapping
-  public Tag create(@RequestBody Tag tag) {
+  public Tag create(@RequestBody @Trim Tag tag) {
     int key = tagService.create(tag);
     return tagService.get(key);
   }
@@ -115,7 +116,7 @@ public class TagResource {
   @Docs.DefaultUnsuccessfulReadResponses
   @Docs.DefaultUnsuccessfulWriteResponses
   @PutMapping("{name}")
-  public Tag update(@PathVariable("name") String tagName, @RequestBody Tag tag) {
+  public Tag update(@PathVariable("name") String tagName, @RequestBody @Trim Tag tag) {
     Tag oldTag = tagService.getByName(tagName);
     checkArgument(oldTag != null, "Tag not found for name " + tagName);
     checkArgument(

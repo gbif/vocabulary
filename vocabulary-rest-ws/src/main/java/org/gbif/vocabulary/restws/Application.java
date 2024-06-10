@@ -63,7 +63,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
   RequestHeaderParamUpdateFilter.class
 })
 @ComponentScan(
-    basePackages = {"org.gbif.vocabulary.restws", "org.gbif.ws.remoteauth"},
+    basePackages = {
+      "org.gbif.vocabulary.restws",
+      "org.gbif.ws.remoteauth",
+      "org.gbif.ws.server.interceptor"
+    },
     excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE)})
 @EnableConfigurationProperties({
   ExportConfig.class,

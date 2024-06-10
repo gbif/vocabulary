@@ -28,5 +28,5 @@ public class Fields {
   static final String TAGS = "TAGS";
 
   static final List<String> CONCEPT_FIELDS =
-      Arrays.asList(CONCEPT, PARENT, SAME_AS_URIS, EXTERNAL_DEFINITIONS);
+      Arrays.asList(CONCEPT, PARENT, SAME_AS_URIS, EXTERNAL_DEFINITIONS, TAGS);
 }

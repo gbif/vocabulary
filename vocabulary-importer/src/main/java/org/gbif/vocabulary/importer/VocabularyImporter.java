@@ -584,7 +584,8 @@ public class VocabularyImporter {
     if (headersIndexes.containsKey(EXTERNAL_DEFINITIONS)
         && !Strings.isNullOrEmpty(values[headersIndexes.get(SAME_AS_URIS)])) {
       Set<URI> externalDefinitions = new HashSet<>();
-      String[] externalDefsValues = values[headersIndexes.get(SAME_AS_URIS)].split(Pattern.quote(listDelimiter));
+      String[] externalDefsValues =
+          values[headersIndexes.get(SAME_AS_URIS)].split(Pattern.quote(listDelimiter));
       for (String definition : externalDefsValues) {
         try {
           externalDefinitions.add(URI.create(definition.trim()));

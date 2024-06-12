@@ -803,6 +803,7 @@ public class ConceptResource {
       return null;
     }
 
+    conceptView.setVocabularyName(vocabularyName);
     conceptView.setAlternativeLabelsLink(
         String.format(
             "%s/vocabularies/%s/concepts/%s/alternativeLabels",

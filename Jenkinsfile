@@ -72,7 +72,10 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    branch 'dev';
+                    anyOf {
+                        branch 'dev';
+                        branch 'dev_jdk8'
+                    }
                 }
             }
             steps {

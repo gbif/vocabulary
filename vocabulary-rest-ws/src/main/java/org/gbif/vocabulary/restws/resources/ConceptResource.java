@@ -232,7 +232,11 @@ public class ConceptResource {
 
     Stream<ConceptView> viewStream =
         createConceptViewStream(
-            conceptsPage, params, conceptService::countChildren, conceptService::findParents);
+            conceptsPage,
+            params,
+            conceptService::countChildren,
+            conceptService::findParents,
+            vocabularyName);
 
     // labels links
     viewStream =
@@ -286,7 +290,8 @@ public class ConceptResource {
       return null;
     }
 
-    ConceptView conceptView = createConceptView(includeParents, includeChildren, concept);
+    ConceptView conceptView =
+        createConceptView(includeParents, includeChildren, concept, vocabularyName);
 
     return createLabelsLinks(conceptView, vocabularyName, conceptName);
   }
@@ -365,8 +370,10 @@ public class ConceptResource {
   public List<KeyNameResult> suggest(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
-      LanguageRegion locale) {
-    return conceptService.suggest(query, getVocabularyWithCheck(vocabularyName).getKey(), locale);
+      LanguageRegion locale,
+      LanguageRegion fallbackLocale) {
+    return conceptService.suggest(
+        query, getVocabularyWithCheck(vocabularyName).getKey(), locale, fallbackLocale);
   }
 
   @Operation(
@@ -849,7 +856,8 @@ public class ConceptResource {
             conceptsPage,
             params,
             v -> conceptService.countChildrenLatestRelease(v, vocabularyName),
-            v -> conceptService.findParentsLatestRelease(v, vocabularyName));
+            v -> conceptService.findParentsLatestRelease(v, vocabularyName),
+            vocabularyName);
 
     // labels links
     viewStream =
@@ -893,7 +901,8 @@ public class ConceptResource {
       return null;
     }
 
-    ConceptView conceptView = createConceptView(includeParents, includeChildren, concept);
+    ConceptView conceptView =
+        createConceptView(includeParents, includeChildren, concept, vocabularyName);
 
     return createLabelsLinks(conceptView, vocabularyName, LATEST_RELEASE_PATH + "/" + conceptName);
   }
@@ -916,9 +925,14 @@ public class ConceptResource {
   public List<KeyNameResult> suggestLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
-      LanguageRegion locale) {
+      LanguageRegion locale,
+      LanguageRegion fallbackLocale) {
     return conceptService.suggestLatestRelease(
-        query, getVocabularyWithCheck(vocabularyName).getKey(), locale, vocabularyName);
+        query,
+        getVocabularyWithCheck(vocabularyName).getKey(),
+        locale,
+        fallbackLocale,
+        vocabularyName);
   }
 
   @Operation(
@@ -1009,12 +1023,14 @@ public class ConceptResource {
   }
 
   private ConceptView createConceptView(
-      boolean includeParents, boolean includeChildren, Concept concept) {
+      boolean includeParents, boolean includeChildren, Concept concept, String vocabularyName) {
     if (concept == null) {
       return null;
     }
 
     ConceptView conceptView = new ConceptView(concept);
+    conceptView.setVocabularyName(vocabularyName);
+
     if (includeParents && concept.getParentKey() != null) {
       conceptView.setParents(conceptService.findParents(concept.getKey()));
     }
@@ -1054,8 +1070,12 @@ public class ConceptResource {
       PagingResponse<Concept> conceptsPage,
       ConceptListParams params,
       Function<List<Long>, List<ChildrenResult>> childrenFn,
-      LongFunction<List<String>> parentsFn) {
-    Stream<ConceptView> viewStream = conceptsPage.getResults().stream().map(ConceptView::new);
+      LongFunction<List<String>> parentsFn,
+      String vocabularyName) {
+    Stream<ConceptView> viewStream =
+        conceptsPage.getResults().stream()
+            .map(ConceptView::new)
+            .map(v -> v.setVocabularyName(vocabularyName));
 
     // this could be simplified by keeping only 1 param but we leave the 2 of them for backwards
     // compatibility

@@ -25,6 +25,7 @@ import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
 import java.sql.Connection;
@@ -840,6 +841,105 @@ public class ConceptServiceIT {
                 vocabularies[0].getName())
             .getCount()
             .longValue());
+  }
+
+  @Test
+  public void suggestTest() {
+    Concept c1 = createBasicConcept(vocabularies[0].getKey());
+    c1.setName("Suggest111");
+    long key1 = conceptService.create(c1);
+
+    conceptService.addLabel(
+        key1,
+        Label.builder()
+            .language(LanguageRegion.ENGLISH)
+            .value("labelenglish")
+            .createdBy("test")
+            .build());
+
+    conceptService.addLabel(
+        key1,
+        Label.builder()
+            .language(LanguageRegion.SPANISH)
+            .value("labelspanish")
+            .createdBy("test")
+            .build());
+
+    Concept c2 = createBasicConcept(vocabularies[0].getKey());
+    c2.setName("Suggest222");
+    c2.setParentKey(c1.getKey());
+    long key2 = conceptService.create(c2);
+
+    conceptService.addLabel(
+        key2,
+        Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
+
+    Concept c3 = createBasicConcept(vocabularies[0].getKey());
+    c3.setName("Suggest333");
+    c3.setParentKey(c2.getKey());
+    long key3 = conceptService.create(c3);
+
+    conceptService.addLabel(
+        key3,
+        Label.builder().language(LanguageRegion.SPANISH).value("Label3").createdBy("test").build());
+
+    List<KeyNameResult> results =
+        conceptService.suggest("suggest", c1.getVocabularyKey(), null, null);
+    assertEquals(3, results.size());
+
+    results = conceptService.suggest("suggest222", c1.getVocabularyKey(), null, null);
+    assertEquals(1, results.size());
+    KeyNameResult result = results.get(0);
+    assertEquals(1, result.getParents().size());
+    KeyNameResult.Parent parent = result.getParents().get(0);
+    assertEquals(2, parent.getLabels().size());
+
+    results =
+        conceptService.suggest("suggest222", c1.getVocabularyKey(), LanguageRegion.SPANISH, null);
+    assertEquals(1, results.size());
+    result = results.get(0);
+    assertEquals(0, result.getLabels().size());
+    assertEquals(1, result.getParents().size());
+    parent = result.getParents().get(0);
+    assertEquals(1, parent.getLabels().size());
+    assertEquals(LanguageRegion.SPANISH, parent.getLabels().get(0).getLanguage());
+
+    results =
+        conceptService.suggest(
+            "suggest222", c1.getVocabularyKey(), LanguageRegion.SPANISH, LanguageRegion.ENGLISH);
+    assertEquals(1, results.size());
+    result = results.get(0);
+    assertEquals(1, result.getLabels().size());
+    assertEquals(LanguageRegion.ENGLISH, result.getLabels().get(0).getLanguage());
+    assertEquals(1, result.getParents().size());
+    parent = result.getParents().get(0);
+    assertEquals(1, parent.getLabels().size());
+    assertEquals(LanguageRegion.SPANISH, parent.getLabels().get(0).getLanguage());
+
+    results = conceptService.suggest("suggest333", c1.getVocabularyKey(), null, null);
+    assertEquals(1, results.size());
+    result = results.get(0);
+    assertEquals(2, result.getParents().size());
+    assertEquals(1, result.getLabels().size());
+
+    results =
+        conceptService.suggest("suggest333", c1.getVocabularyKey(), LanguageRegion.SPANISH, null);
+    assertEquals(1, results.size());
+    result = results.get(0);
+    assertEquals(1, result.getLabels().size());
+    assertEquals(LanguageRegion.SPANISH, result.getLabels().get(0).getLanguage());
+    assertEquals(2, result.getParents().size());
+
+    results =
+        conceptService.suggest(
+            "suggest333", c1.getVocabularyKey(), LanguageRegion.SPANISH, LanguageRegion.ENGLISH);
+    assertEquals(1, results.size());
+    result = results.get(0);
+    assertEquals(1, result.getLabels().size());
+    assertEquals(LanguageRegion.SPANISH, result.getLabels().get(0).getLanguage());
+    assertEquals(2, result.getParents().size());
+    assertEquals(key2, result.getParents().get(0).getKey());
+    assertEquals(key1, result.getParents().get(1).getKey());
   }
 
   static class ContexInitializer

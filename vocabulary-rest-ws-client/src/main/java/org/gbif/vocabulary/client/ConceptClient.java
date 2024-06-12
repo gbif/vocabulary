@@ -309,6 +309,7 @@ public interface ConceptClient {
   @AllArgsConstructor(staticName = "of")
   class SuggestParams {
     LanguageRegion locale;
+    LanguageRegion fallbackLocale;
     String q;
   }
 }

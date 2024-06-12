@@ -25,6 +25,7 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.persistence.dto.SuggestDto;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -220,6 +221,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
     Concept c2 = createNewEntity();
     c2.setName("Suggest222");
+
     conceptMapper.create(c2);
     assertNotNull(c2.getKey());
 
@@ -233,7 +235,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         c2.getKey(), HiddenLabel.builder().value("lbel").createdBy("test").build());
 
     // check result values
-    List<KeyNameResult> result = conceptMapper.suggest("suggest1", c1.getVocabularyKey(), null);
+    List<SuggestDto> result = conceptMapper.suggest("suggest1", c1.getVocabularyKey(), null, null);
     assertEquals("Suggest111", result.get(0).getName());
     assertEquals(c1.getKey().intValue(), result.get(0).getKey());
 
@@ -242,16 +244,19 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         DEFAULT_VOCABULARY.toLowerCase(), vocabularies[0].getKey());
 
     // assert expected number of results
-    assertSuggest(2, "su", c1.getVocabularyKey(), null);
-    assertSuggest(2, "gge", c1.getVocabularyKey(), null);
-    assertSuggest(1, "22", c1.getVocabularyKey(), null);
-    assertSuggest(0, "zz", c1.getVocabularyKey(), null);
-    assertSuggest(0, null, c1.getVocabularyKey(), null);
-    assertSuggest(2, "label", c1.getVocabularyKey(), null);
-    assertSuggest(1, "labeleng", c1.getVocabularyKey(), null);
-    assertSuggest(0, "labeleng", c1.getVocabularyKey(), LanguageRegion.SPANISH);
-    assertSuggest(1, "labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH);
-    assertSuggest(1, "labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH);
+    assertSuggest(2, "su", c1.getVocabularyKey(), null, null);
+    assertSuggest(2, "gge", c1.getVocabularyKey(), null, null);
+    assertSuggest(1, "22", c1.getVocabularyKey(), null, null);
+    assertSuggest(0, "zz", c1.getVocabularyKey(), null, null);
+    assertSuggest(0, null, c1.getVocabularyKey(), null, null);
+    assertSuggest(2, "label", c1.getVocabularyKey(), null, null);
+    assertSuggest(1, "labeleng", c1.getVocabularyKey(), null, null);
+    assertSuggest(0, "labeleng", c1.getVocabularyKey(), LanguageRegion.SPANISH, null);
+    assertSuggest(1, "labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH, null);
+    // should get fallback lang
+    assertSuggest(2, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.ENGLISH);
+    assertSuggest(2, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.SPANISH);
+    assertSuggest(2, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.AFRIKAANS);
 
     Concept c3 = createNewEntity();
     c3.setVocabularyKey(vocabularies[1].getKey());
@@ -259,17 +264,22 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     conceptMapper.create(c3);
     assertNotNull(c3.getKey());
 
-    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey(), null).size());
-    assertEquals(1, conceptMapper.suggest("su", c3.getVocabularyKey(), null).size());
-    assertEquals(1, conceptMapper.suggest("33", c3.getVocabularyKey(), null).size());
-    assertEquals(0, conceptMapper.suggest("33", c1.getVocabularyKey(), null).size());
+    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey(), null, null).size());
+    assertEquals(1, conceptMapper.suggest("su", c3.getVocabularyKey(), null, null).size());
+    assertEquals(1, conceptMapper.suggest("33", c3.getVocabularyKey(), null, null).size());
+    assertEquals(0, conceptMapper.suggest("33", c1.getVocabularyKey(), null, null).size());
   }
 
-  private void assertSuggest(int expectedSize, String query, long vocabKey, LanguageRegion lang) {
-    List<KeyNameResult> result = conceptMapper.suggest(query, vocabKey, lang);
+  private void assertSuggest(
+      int expectedSize,
+      String query,
+      long vocabKey,
+      LanguageRegion lang,
+      LanguageRegion fallbackLang) {
+    List<SuggestDto> result = conceptMapper.suggest(query, vocabKey, lang, fallbackLang);
     assertEquals(expectedSize, result.size());
-    List<KeyNameResult> resultRelease =
-        conceptMapper.suggestLatestRelease(query, vocabKey, lang, DEFAULT_VOCABULARY);
+    List<SuggestDto> resultRelease =
+        conceptMapper.suggestLatestRelease(query, vocabKey, lang, fallbackLang, DEFAULT_VOCABULARY);
     assertEquals(expectedSize, resultRelease.size());
 
     if (lang != null) {
@@ -279,7 +289,10 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
                   r ->
                       r.getLabels() == null
                           || r.getLabels().isEmpty()
-                          || r.getLabels().stream().allMatch(l -> l.getLanguage() == lang)));
+                          || r.getLabels().stream()
+                              .allMatch(
+                                  l ->
+                                      l.getLanguage() == lang || l.getLanguage() == fallbackLang)));
     }
   }
 
@@ -999,9 +1012,9 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertEquals(1, conceptsList.get(0).getDefinition().size());
     assertEquals(0, conceptsList.get(0).getLabel().size());
 
-    List<KeyNameResult> suggestResult =
+    List<SuggestDto> suggestResult =
         conceptMapper.suggestLatestRelease(
-            concept1.getName(), concept1.getVocabularyKey(), null, vocabName);
+            concept1.getName(), concept1.getVocabularyKey(), null, null, vocabName);
     assertEquals(0, suggestResult.get(0).getLabels().size());
 
     conceptMapper.updateReleaseViews(vocabName);
@@ -1020,7 +1033,7 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
     suggestResult =
         conceptMapper.suggestLatestRelease(
-            concept1.getName(), concept1.getVocabularyKey(), null, vocabName);
+            concept1.getName(), concept1.getVocabularyKey(), null, null, vocabName);
     assertEquals(1, suggestResult.get(0).getLabels().size());
   }
 

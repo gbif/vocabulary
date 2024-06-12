@@ -15,6 +15,7 @@ package org.gbif.vocabulary.model.search;
 
 import org.gbif.vocabulary.model.Label;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
@@ -27,5 +28,14 @@ import lombok.Data;
 public class KeyNameResult {
   private long key;
   private String name;
-  private List<Label> labels;
+  private List<Label> labels = new ArrayList<>();
+  private List<Parent> parents = new ArrayList<>();
+
+  @Data
+  public static class Parent {
+    private long key;
+    private String name;
+    private int depth;
+    private List<Label> labels = new ArrayList<>();
+  }
 }

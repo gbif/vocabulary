@@ -60,10 +60,14 @@ public interface ConceptService extends BaseService<Concept> {
    * @param query suggestion
    * @param vocabularyKey key of the vocabulary
    * @param languageRegion locale to filter by
+   * @param fallbackLanguageRegion fallback locale to show in the response
    * @return a list of up to 20 suggested concepts
    */
   List<KeyNameResult> suggest(
-      String query, long vocabularyKey, @Nullable LanguageRegion languageRegion);
+      String query,
+      long vocabularyKey,
+      @Nullable LanguageRegion languageRegion,
+      @Nullable LanguageRegion fallbackLanguageRegion);
 
   /**
    * Deprecates a concept with a replacement.
@@ -183,13 +187,14 @@ public interface ConceptService extends BaseService<Concept> {
       @Nullable ConceptSearchParams params, @Nullable Pageable page, String vocabularyName);
 
   /**
-   * It works as {@link #suggest(String, long, LanguageRegion)} but it queries the latest release of
-   * the vocabulary instead of the actual data.
+   * It works as {@link #suggest(String, long, LanguageRegion, LanguageRegion)} but it queries the
+   * latest release of the vocabulary instead of the actual data.
    */
   List<KeyNameResult> suggestLatestRelease(
       String query,
       long vocabularyKey,
       @Nullable LanguageRegion languageRegion,
+      @Nullable LanguageRegion fallbackLanguageRegion,
       String vocabularyName);
 
   /**

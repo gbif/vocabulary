@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 public class ConceptView implements Serializable, EntityView<Concept> {
 
   @JsonUnwrapped private Concept concept;
+  private String vocabularyName;
   private List<String> parents;
   private Integer childrenCount;
   private List<String> children;
@@ -48,17 +49,9 @@ public class ConceptView implements Serializable, EntityView<Concept> {
     this.childrenCount = childrenCount;
   }
 
-  public Concept getConcept() {
-    return concept;
-  }
-
   public ConceptView setConcept(Concept concept) {
     this.concept = concept;
     return this;
-  }
-
-  public List<String> getParents() {
-    return parents;
   }
 
   public ConceptView setParents(List<String> parents) {
@@ -66,17 +59,9 @@ public class ConceptView implements Serializable, EntityView<Concept> {
     return this;
   }
 
-  public Integer getChildrenCount() {
-    return childrenCount;
-  }
-
   public ConceptView setChildrenCount(Integer childrenCount) {
     this.childrenCount = childrenCount;
     return this;
-  }
-
-  public List<String> getChildren() {
-    return children;
   }
 
   public ConceptView setChildren(List<String> children) {
@@ -91,6 +76,11 @@ public class ConceptView implements Serializable, EntityView<Concept> {
 
   public ConceptView setHiddenLabelsLink(String hiddenLabelsLink) {
     this.hiddenLabelsLink = hiddenLabelsLink;
+    return this;
+  }
+
+  public ConceptView setVocabularyName(String vocabularyName) {
+    this.vocabularyName = vocabularyName;
     return this;
   }
 

@@ -12,9 +12,10 @@
     <collection property="label" column="{entityKey=key}" select="listConceptLabels"/>
   </resultMap>
 
-  <resultMap id="KEY_NAME_RESULT_MAP" type="KeyNameResult" autoMapping="true">
+  <resultMap id="KEY_NAME_RESULT_MAP" type="SuggestDto" autoMapping="true">
     <id property="key" column="key"/>
-    <collection property="labels" column="{entityKey=key,lang=lang}" select="listConceptLabels"/>
+    <collection property="labels" column="{entityKey=key,lang=lang,fallbackLang=fallbackLang}" select="listConceptLabels"/>
+    <collection property="parentDtos" column="{key=key,lang=lang,fallbackLang=fallbackLang}" select="findParentsLabels"/>
   </resultMap>
 
   <resultMap id="DEFINITION_RESULT_MAP" type="Definition" autoMapping="true">
@@ -25,6 +26,11 @@
   <resultMap id="LABEL_RESULT_MAP" type="Label" autoMapping="true">
     <id property="key" column="key"/>
     <result property="language" column="language" typeHandler="LanguageRegionTypeHandler"/>
+  </resultMap>
+
+  <resultMap id="PARENT_RESULT_MAP" type="ParentDto" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="labelLanguage" column="labelLanguage" typeHandler="LanguageRegionTypeHandler"/>
   </resultMap>
 
   <resultMap id="HIDDEN_LABEL_RESULT_MAP" type="HiddenLabel" autoMapping="true">
@@ -143,7 +149,9 @@
   </sql>
 
   <sql id="SUGGEST">
-    SELECT DISTINCT ON(key) key, name, #{lang} lang <if test="_parameter.containsKey('vocabName')">, #{vocabName} vocabName</if>
+    SELECT DISTINCT ON(key) key, name, #{lang} lang
+      <if test="_parameter.containsKey('fallbackLang')">,#{fallbackLang} fallbackLang</if>
+      <if test="_parameter.containsKey('vocabName')">, #{vocabName} vocabName</if>
     FROM (
       (SELECT key, name
       FROM concept${table_suffix}
@@ -175,6 +183,16 @@
         AND cl.language = #{lang}
       </if>
       LIMIT 20 )
+    <if test="fallbackLang != null">
+      UNION ALL
+        (SELECT DISTINCT c.key, c.name
+        FROM concept${table_suffix} c
+        JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+        WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike #{query}||'%'
+        AND c.deprecated IS NULL
+        AND cl.language = #{fallbackLang}
+        LIMIT 20 )
+    </if>
     ) t1 LIMIT 20
   </sql>
 
@@ -197,6 +215,36 @@
     SELECT name FROM parents WHERE key != #{key,jdbcType=BIGINT};
   </sql>
 
+  <select id="findParentsLabels" resultMap="PARENT_RESULT_MAP">
+    <bind name="table_suffix" value="''"/>
+    <include refid="FIND_PARENTS_LABELS"/>
+  </select>
+
+  <sql id="FIND_PARENTS_LABELS">
+    WITH RECURSIVE parents(key, name, parent_key, deprecated) AS (
+    SELECT root.key, root.name, root.parent_key, root.deprecated, 0 AS depth
+    FROM concept${table_suffix} root
+    WHERE key = #{key,jdbcType=BIGINT} AND deprecated IS NULL AND parent_key IS NOT NULL
+    UNION
+    SELECT c.key, c.name, c.parent_key, c.deprecated, p.depth + 1
+    FROM parents p, concept${table_suffix} c
+    WHERE p.parent_key = c.key )
+    SELECT p.key, p.name, p.depth , cl.key AS labelKey, cl.language AS labelLanguage, cl.value AS labelValue
+    FROM parents p
+    LEFT JOIN concept_label${table_suffix} cl ON cl.concept_key = p.key
+      <if test="lang != null or fallbackLang != null">
+        AND (
+        <if test="lang != null">
+          cl.language = #{lang}
+        </if>
+        <if test="fallbackLang != null">
+          OR cl.language = #{fallbackLang}
+        </if>
+        )
+      </if>
+    WHERE p.key != #{key,jdbcType=BIGINT};
+  </sql>
+
   <sql id="LIST_CONCEPTS_DEFINITION">
     SELECT key, language, value, created_by, created, modified_by, modified
     FROM concept_definition${table_suffix}
@@ -207,10 +255,19 @@
   <sql id="LIST_CONCEPTS_LABELS">
     SELECT <include refid="LABEL_FIELDS"/>
     FROM concept_label${table_suffix}
-    WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    <if test="lang != null">
-      AND language = #{lang}
-    </if>
+    <where>
+      concept_key = #{entityKey,jdbcType=BIGINT}
+      <if test="lang != null or fallbackLang != null">
+        AND (
+        <if test="lang != null">
+          language = #{lang}
+        </if>
+        <if test="fallbackLang != null">
+          OR language = #{fallbackLang}
+        </if>
+        )
+      </if>
+    </where>
     ORDER BY key DESC
   </sql>
 
@@ -687,6 +744,11 @@
     <include refid="FIND_PARENTS"/>
   </select>
 
+  <select id="findParentsLabelsLatestRelease" resultMap="PARENT_RESULT_MAP">
+    <bind name="table_suffix" value="''"/>
+    <include refid="FIND_PARENTS_LABELS"/>
+  </select>
+
   <select id="getByNameLatestRelease" resultMap="CONCEPT_MAP_RELEASE_VIEW">
     SELECT
     <include refid="CONCEPT_READ_FIELDS"/>, #{vocabName} vocabName
@@ -743,9 +805,12 @@
     <collection property="label" column="{entityKey=key,vocabName=vocabName}" select="listConceptLabelsLatestRelease"/>
   </resultMap>
 
-  <resultMap id="KEY_NAME_RESULT_MAP_RELEASE_VIEW" type="KeyNameResult" autoMapping="true">
+  <resultMap id="KEY_NAME_RESULT_MAP_RELEASE_VIEW" type="SuggestDto" autoMapping="true">
     <id property="key" column="key"/>
-    <collection property="labels" column="{entityKey=key,vocabName=vocabName,lang=lang}" select="listConceptLabelsLatestRelease"/>
+    <collection property="labels" column="{entityKey=key,vocabName=vocabName,lang=lang,fallbackLang=fallbackLang}"
+                select="listConceptLabelsLatestRelease"/>
+    <collection property="parentDtos" column="{key=key,lang=lang,fallbackLang=fallbackLang}" select="findParentsLabelsLatestRelease"/>
   </resultMap>
+
 
 </mapper>

@@ -31,6 +31,8 @@ import javax.annotation.Nullable;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import org.gbif.vocabulary.persistence.dto.SuggestDto;
+
 /** Mapper for {@link Concept}. */
 @Mapper
 public interface ConceptMapper extends BaseMapper<Concept> {
@@ -53,10 +55,11 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   void updateParent(@Param("keys") List<Long> conceptKeys, @Param("parentKey") long parentKey);
 
-  List<KeyNameResult> suggest(
+  List<SuggestDto> suggest(
       @Param("query") String query,
       @Param("vocabularyKey") long vocabularyKey,
-      @Nullable @Param("lang") LanguageRegion language);
+      @Nullable @Param("lang") LanguageRegion language,
+      @Nullable @Param("fallbackLang") LanguageRegion fallbackLang);
 
   /**
    * Given a deprecated concept, it finds the current replacement, that's to say, the first
@@ -148,10 +151,11 @@ public interface ConceptMapper extends BaseMapper<Concept> {
       @Nullable @Param("params") ConceptSearchParams params,
       @Param("vocabName") String vocabularyName);
 
-  List<KeyNameResult> suggestLatestRelease(
+  List<SuggestDto> suggestLatestRelease(
       @Param("query") String query,
       @Param("vocabularyKey") long vocabularyKey,
-      @Nullable @Param("lang") LanguageRegion language,
+      @Nullable @Param("lang") LanguageRegion languageFilter,
+      @Nullable @Param("fallbackLang") LanguageRegion fallbackLang,
       @Param("vocabName") String vocabularyName);
 
   List<String> findParentsLatestRelease(

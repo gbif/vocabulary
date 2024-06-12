@@ -28,13 +28,17 @@ import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.utils.PostPersist;
 import org.gbif.vocabulary.model.utils.PrePersist;
+import org.gbif.vocabulary.persistence.dto.ParentDto;
+import org.gbif.vocabulary.persistence.dto.SuggestDto;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.ConceptService;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -174,9 +178,81 @@ public class DefaultConceptService implements ConceptService {
 
   @Override
   public List<KeyNameResult> suggest(
-      String query, long vocabularyKey, @Nullable LanguageRegion languageRegion) {
+      String query,
+      long vocabularyKey,
+      @Nullable LanguageRegion languageRegion,
+      @Nullable LanguageRegion fallbackLanguageRegion) {
     query = query != null ? query : "";
-    return conceptMapper.suggest(query, vocabularyKey, languageRegion);
+    List<SuggestDto> dtos =
+        conceptMapper.suggest(query, vocabularyKey, languageRegion, fallbackLanguageRegion);
+
+    return convertSuggestResults(languageRegion, fallbackLanguageRegion, dtos);
+  }
+
+  private static List<KeyNameResult> convertSuggestResults(
+      LanguageRegion languageRegion, LanguageRegion fallbackLanguageRegion, List<SuggestDto> dtos) {
+    return dtos.stream()
+        .map(
+            dto -> {
+              KeyNameResult keyNameResult = new KeyNameResult();
+              keyNameResult.setKey(dto.getKey());
+              keyNameResult.setName(dto.getName());
+              keyNameResult.setLabels(dto.getLabels());
+
+              Function<List<Label>, List<Label>> filterLabels =
+                  labels -> {
+                    if (languageRegion != null && fallbackLanguageRegion != null) {
+                      // keep only the ones of the language requested if they exist
+                      List<Label> langLabels =
+                          labels.stream()
+                              .filter(l -> l.getLanguage().equals(languageRegion))
+                              .collect(Collectors.toList());
+
+                      if (!langLabels.isEmpty()) {
+                        return langLabels;
+                      }
+                    }
+                    return labels;
+                  };
+
+              keyNameResult.setLabels(filterLabels.apply(dto.getLabels()));
+
+              keyNameResult.setParents(
+                  dto.getParentDtos().stream()
+                      .collect(
+                          Collectors.toMap(
+                              ParentDto::getKey,
+                              p -> {
+                                KeyNameResult.Parent parent = new KeyNameResult.Parent();
+                                parent.setKey(p.getKey());
+                                parent.setName(p.getName());
+                                parent.setDepth(p.getDepth());
+                                Label label =
+                                    Label.builder()
+                                        .key(p.getLabelKey())
+                                        .value(p.getLabelValue())
+                                        .language(p.getLabelLanguage())
+                                        .build();
+                                parent.getLabels().add(label);
+                                return parent;
+                              },
+                              (p1, p2) -> {
+                                p1.getLabels().addAll(p2.getLabels());
+                                return p1;
+                              }))
+                      .values()
+                      .stream()
+                      .map(
+                          p -> {
+                            p.setLabels(filterLabels.apply(p.getLabels()));
+                            return p;
+                          })
+                      .sorted(Comparator.comparing(KeyNameResult.Parent::getDepth))
+                      .collect(Collectors.toList()));
+
+              return keyNameResult;
+            })
+        .collect(Collectors.toList());
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})
@@ -480,13 +556,24 @@ public class DefaultConceptService implements ConceptService {
 
   @Override
   public List<KeyNameResult> suggestLatestRelease(
-      String query, long vocabularyKey, LanguageRegion languageRegion, String vocabularyName) {
+      String query,
+      long vocabularyKey,
+      LanguageRegion languageRegion,
+      LanguageRegion fallbackLanguageRegion,
+      String vocabularyName) {
     checkArgument(!Strings.isNullOrEmpty(vocabularyName));
     checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
 
     query = query != null ? query : "";
-    return conceptMapper.suggestLatestRelease(
-        query, vocabularyKey, languageRegion, vocabularyName.toLowerCase());
+    List<SuggestDto> dtos =
+        conceptMapper.suggestLatestRelease(
+            query,
+            vocabularyKey,
+            languageRegion,
+            fallbackLanguageRegion,
+            vocabularyName.toLowerCase());
+
+    return convertSuggestResults(languageRegion, fallbackLanguageRegion, dtos);
   }
 
   @Override

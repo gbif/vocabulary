@@ -23,6 +23,7 @@ import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.exception.EntityNotFoundException;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
@@ -506,7 +507,7 @@ public class DefaultConceptService implements ConceptService {
   public PagingResponse<Concept> listLatestRelease(
       ConceptSearchParams params, Pageable page, String vocabularyName) {
     checkArgument(!Strings.isNullOrEmpty(vocabularyName));
-    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+    checkReleaseExists(vocabularyName);
 
     page = page != null ? page : new PagingRequest();
     params = params != null ? params : ConceptSearchParams.empty();
@@ -528,7 +529,7 @@ public class DefaultConceptService implements ConceptService {
       String vocabularyName,
       Integer limit) {
     checkArgument(!Strings.isNullOrEmpty(vocabularyName));
-    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+    checkReleaseExists(vocabularyName);
 
     query = query != null ? query : "";
     limit = limit != null ? Math.max(limit, DEFAULT_SUGGEST_LIMIT) : DEFAULT_SUGGEST_LIMIT;
@@ -547,14 +548,14 @@ public class DefaultConceptService implements ConceptService {
   @Override
   public Concept getByNameLatestRelease(String name, String vocabularyName) {
     checkArgument(!Strings.isNullOrEmpty(vocabularyName));
-    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+    checkReleaseExists(vocabularyName);
     return conceptMapper.getByNameLatestRelease(name, vocabularyName.toLowerCase());
   }
 
   @Override
   public List<String> findParentsLatestRelease(long conceptKey, String vocabularyName) {
     checkArgument(!Strings.isNullOrEmpty(vocabularyName));
-    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+    checkReleaseExists(vocabularyName);
     return conceptMapper.findParentsLatestRelease(conceptKey, vocabularyName.toLowerCase());
   }
 
@@ -562,7 +563,7 @@ public class DefaultConceptService implements ConceptService {
   public List<ChildrenResult> countChildrenLatestRelease(
       List<Long> conceptParents, String vocabularyName) {
     checkArgument(!Strings.isNullOrEmpty(vocabularyName));
-    checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
+    checkReleaseExists(vocabularyName);
     Preconditions.checkArgument(
         conceptParents != null && !conceptParents.isEmpty(), "concept parents are required");
     return conceptMapper.countChildrenLatestRelease(conceptParents, vocabularyName.toLowerCase());
@@ -600,5 +601,15 @@ public class DefaultConceptService implements ConceptService {
         page,
         conceptMapper.countHiddenLabelsLatestRelease(entityKey, vocabularyName),
         conceptMapper.listHiddenLabelsLatestRelease(entityKey, page, vocabularyName));
+  }
+
+  private void checkReleaseExists(String vocabularyName) {
+    if (!existsLatestReleaseView(vocabularyName)) {
+      throw new EntityNotFoundException(
+          EntityNotFoundException.EntityType.RELEASE,
+          "No release view found for "
+              + vocabularyName
+              + ". Please make sure the vocabulary has been released.");
+    }
   }
 }

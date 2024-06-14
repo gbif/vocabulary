@@ -150,91 +150,120 @@
   </sql>
 
   <sql id="SUGGEST">
-    SELECT DISTINCT ON(key) key, name, label, labelLang
+    SELECT * FROM (
+    SELECT DISTINCT ON(key) key, name, label, labelLang, score
       <if test="_parameter.containsKey('lang')">,#{lang} langParam</if>
       <if test="_parameter.containsKey('fallbackLang')">,#{fallbackLang} fallbackLangParam</if>
       <if test="_parameter.containsKey('vocabName')">, #{vocabName} vocabName</if>
     FROM (
     (
-      SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang
-      FROM concept${table_suffix} c
-      INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
-      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
-      AND cl.value ilike #{query}||'%' <if test="lang != null">AND cl.language = #{lang}</if>
-      ORDER BY cl.value
-      LIMIT #{limit}
+      <include refid="SUGGEST_LANG_Q">
+        <property name="q" value="= unaccent(trim(#{query}))"/>
+        <property name="score" value="100"/>
+      </include>
     )
     <if test="lang != null and fallbackLang != null">
       UNION ALL
       (
-        SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang
-        FROM concept${table_suffix} c
-        INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
-        WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
-        AND cl.value ilike #{query}||'%' AND cl.language = #{fallbackLang}
-        AND NOT EXISTS (
-        SELECT * FROM concept_label cl2 WHERE cl2.concept_key = c.key AND cl2.language = #{lang}
-        )
-        ORDER BY cl.value
-        LIMIT #{limit}
+        <include refid="SUGGEST_FALLBACK_Q">
+          <property name="q" value="= unaccent(trim(#{query}))"/>
+          <property name="score" value="90"/>
+        </include>
       )
     </if>
     UNION ALL
     (
-      SELECT c.key AS key, c.name AS name, NULL AS label, NULL AS labelLang
-      FROM concept${table_suffix} c
-      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
-      AND c.name ilike #{query}||'%'
-      <if test="lang != null">
-        AND NOT EXISTS (
-          SELECT * FROM concept_label cl WHERE cl.concept_key = c.key
-          AND cl.language IN (#{lang}<if test="fallbackLang != null">,#{fallbackLang}</if>)
-        )
-      </if>
-      ORDER BY c.name
-      LIMIT #{limit}
+      <include refid="SUGGEST_NAME_Q">
+        <property name="q" value="= unaccent(trim(#{query}))"/>
+        <property name="score" value="80"/>
+      </include>
     )
     UNION ALL
     (
-      SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang
-      FROM concept${table_suffix} c
-      INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
-      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
-      AND cl.value ilike '%'||#{query}||'%' <if test="lang != null">AND cl.language = #{lang}</if>
-      ORDER BY cl.value
-      LIMIT #{limit}
+      <include refid="SUGGEST_LANG_Q">
+        <property name="q" value="ilike unaccent(trim(#{query}))||'%'"/>
+        <property name="score" value="70"/>
+      </include>
     )
     <if test="lang != null and fallbackLang != null">
       UNION ALL
       (
-        SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang
-        FROM concept${table_suffix} c
-        INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
-        WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
-        AND cl.value ilike '%'||#{query}||'%' AND cl.language = #{fallbackLang}
-        AND NOT EXISTS (
-        SELECT * FROM concept_label cl2 WHERE cl2.concept_key = c.key AND cl2.language = #{lang}
-        )
-        ORDER BY cl.value
-        LIMIT #{limit}
+        <include refid="SUGGEST_FALLBACK_Q">
+          <property name="q" value="ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="score" value="60"/>
+        </include>
       )
     </if>
     UNION ALL
     (
-      SELECT c.key AS key, c.name AS name, NULL AS label, NULL AS labelLang
-      FROM concept${table_suffix} c
-      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
-      AND c.name ilike '%'||#{query}||'%'
-      <if test="lang != null">
-        AND NOT EXISTS (
-        SELECT * FROM concept_label cl WHERE cl.concept_key = c.key
-        AND cl.language IN (#{lang}<if test="fallbackLang != null">,#{fallbackLang}</if>)
-        )
-      </if>
-      ORDER BY c.name
-     LIMIT #{limit}
+      <include refid="SUGGEST_NAME_Q">
+        <property name="q" value="ilike unaccent(trim(#{query}))||'%'"/>
+        <property name="score" value="50"/>
+      </include>
+    )
+    UNION ALL
+    (
+      <include refid="SUGGEST_LANG_Q">
+        <property name="q" value="ilike '%'||unaccent(trim(#{query}))||'%'"/>
+        <property name="score" value="40"/>
+      </include>
+    )
+    <if test="lang != null and fallbackLang != null">
+      UNION ALL
+      (
+        <include refid="SUGGEST_FALLBACK_Q">
+          <property name="q" value="ilike '%'||unaccent(trim(#{query}))||'%'"/>
+          <property name="score" value="30"/>
+        </include>
+      )
+    </if>
+    UNION ALL
+    (
+      <include refid="SUGGEST_NAME_Q">
+        <property name="q" value="ilike '%'||unaccent(trim(#{query}))||'%'"/>
+        <property name="score" value="20"/>
+      </include>
      )
     ) t1 LIMIT #{limit}
+    ) t2 ORDER BY score DESC
+  </sql>
+
+  <sql id="SUGGEST_LANG_Q">
+    SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang, ${score} AS score
+    FROM concept${table_suffix} c
+    INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+    WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+    AND cl.value ${q} <if test="lang != null">AND cl.language = #{lang}</if>
+    ORDER BY cl.value
+    LIMIT #{limit}
+  </sql>
+
+  <sql id="SUGGEST_FALLBACK_Q">
+    SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang, ${score} AS score
+    FROM concept${table_suffix} c
+    INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+    WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+    AND cl.value ${q} AND cl.language = #{fallbackLang}
+    AND NOT EXISTS (
+    SELECT * FROM concept_label cl2 WHERE cl2.concept_key = c.key AND cl2.language = #{lang}
+    )
+    ORDER BY cl.value
+    LIMIT #{limit}
+  </sql>
+
+  <sql id="SUGGEST_NAME_Q">
+    SELECT c.key AS key, c.name AS name, NULL AS label, NULL AS labelLang, ${score} AS score
+    FROM concept${table_suffix} c
+    WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+    AND c.name ${q}
+    <if test="lang != null">
+      AND NOT EXISTS (
+      SELECT * FROM concept_label cl WHERE cl.concept_key = c.key
+      AND cl.language IN (#{lang}<if test="fallbackLang != null">,#{fallbackLang}</if>)
+      )
+    </if>
+    ORDER BY c.name
+    LIMIT #{limit}
   </sql>
 
   <sql id="COUNT_CHILDREN">

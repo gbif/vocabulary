@@ -26,9 +26,6 @@ public class KeyNameResultTest {
 
     KeyNameResult knr2 = new KeyNameResult();
     knr2.setName(knr1.getName());
-
-    Assertions.assertNotEquals(knr1, knr2);
-
     Assertions.assertEquals(knr1, knr2);
   }
 }

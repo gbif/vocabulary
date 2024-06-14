@@ -24,9 +24,11 @@ import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.model.utils.PostPersist;
 import org.gbif.vocabulary.model.utils.PrePersist;
+import org.gbif.vocabulary.persistence.dto.SuggestDto;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
@@ -59,6 +61,7 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeNa
 @Validated
 public class DefaultVocabularyService implements VocabularyService {
 
+  private static final int DEFAULT_SUGGEST_LIMIT = 20;
   private final VocabularyMapper vocabularyMapper;
   private final ConceptMapper conceptMapper;
   private final VocabularyReleaseMapper vocabularyReleaseMapper;
@@ -202,9 +205,26 @@ public class DefaultVocabularyService implements VocabularyService {
   }
 
   @Override
-  public List<KeyNameResult> suggest(String query, @Nullable LanguageRegion languageRegion) {
+  public List<SuggestResult> suggest(
+      String query,
+      @Nullable LanguageRegion languageRegion,
+      @Nullable LanguageRegion fallbackLanguageRegion,
+      Integer limit) {
     query = query != null ? query : "";
-    return vocabularyMapper.suggest(query, languageRegion);
+    limit = limit != null ? limit : DEFAULT_SUGGEST_LIMIT;
+    List<SuggestDto> dtos =
+        vocabularyMapper.suggest(query, languageRegion, fallbackLanguageRegion, limit);
+
+    return dtos.stream()
+        .map(
+            dto -> {
+              SuggestResult suggestResult = new SuggestResult();
+              suggestResult.setName(dto.getName());
+              suggestResult.setLabel(dto.getLabel());
+              suggestResult.setLabelLanguage(dto.getLabelLang());
+              return suggestResult;
+            })
+        .collect(Collectors.toList());
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN, UserRoles.VOCABULARY_EDITOR})

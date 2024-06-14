@@ -29,7 +29,7 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.exception.EntityNotFoundException;
 import org.gbif.vocabulary.model.export.ExportParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.restws.documentation.Docs;
@@ -260,9 +260,12 @@ public class VocabularyResource {
   @Docs.LocaleParameter
   @Docs.DefaultSearchResponses
   @GetMapping("suggest")
-  public List<KeyNameResult> suggest(
-      @RequestParam(value = "q", required = false) String query, LanguageRegion locale) {
-    return vocabularyService.suggest(query, locale);
+  public List<SuggestResult> suggest(
+      @RequestParam(value = "q", required = false) String query,
+      LanguageRegion locale,
+      LanguageRegion fallbackLocale,
+      @RequestParam(value = "limit", required = false) Integer limit) {
+    return vocabularyService.suggest(query, locale, fallbackLocale, limit);
   }
 
   @Operation(

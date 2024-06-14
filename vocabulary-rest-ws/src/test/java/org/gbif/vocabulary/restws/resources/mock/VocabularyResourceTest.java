@@ -21,7 +21,7 @@ import org.gbif.vocabulary.api.VocabularyReleaseParams;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
-import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.restws.resources.VocabularyResource;
 import org.gbif.vocabulary.service.ExportService;
@@ -155,8 +155,8 @@ public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
   @Test
   public void suggestTest() throws Exception {
-    List<KeyNameResult> suggestions = createSuggestions();
-    when(vocabularyService.suggest(anyString(), any())).thenReturn(suggestions);
+    List<SuggestResult> suggestions = createSuggestions();
+    when(vocabularyService.suggest(anyString(), any(), any(), any())).thenReturn(suggestions);
     suggestTest(suggestions);
   }
 

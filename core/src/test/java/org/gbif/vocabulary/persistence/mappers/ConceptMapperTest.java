@@ -65,6 +65,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ContextConfiguration(initializers = {ConceptMapperTest.ContextInitializer.class})
 public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
+  private static final int DEFAULT_SUGGEST_LIMIT = 20;
   private static final String DEFAULT_VOCABULARY = "Default";
 
   private static final Vocabulary[] vocabularies = new Vocabulary[2];
@@ -214,11 +215,6 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
             .createdBy("test")
             .build());
 
-    conceptMapper.addHiddenLabel(
-        c1.getKey(), HiddenLabel.builder().value("lab,l").createdBy("test").build());
-    conceptMapper.addHiddenLabel(
-        c1.getKey(), HiddenLabel.builder().value("lbel").createdBy("test").build());
-
     Concept c2 = createNewEntity();
     c2.setName("Suggest222");
 
@@ -229,15 +225,14 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         c2.getKey(),
         Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
 
-    conceptMapper.addHiddenLabel(
-        c2.getKey(), HiddenLabel.builder().value("lab,l").createdBy("test").build());
-    conceptMapper.addHiddenLabel(
-        c2.getKey(), HiddenLabel.builder().value("lbel").createdBy("test").build());
-
     // check result values
-    List<SuggestDto> result = conceptMapper.suggest("suggest1", c1.getVocabularyKey(), null, null);
+    List<SuggestDto> result =
+        conceptMapper.suggest("suggest1", c1.getVocabularyKey(), null, null, DEFAULT_SUGGEST_LIMIT);
     assertEquals("Suggest111", result.get(0).getName());
     assertEquals(c1.getKey().intValue(), result.get(0).getKey());
+
+    result = conceptMapper.suggest("su", c1.getVocabularyKey(), null, null, 1);
+    assertEquals(1, result.size());
 
     // create release view to test it at the same time
     conceptMapper.createLatestReleaseView(
@@ -254,8 +249,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertSuggest(0, "labeleng", c1.getVocabularyKey(), LanguageRegion.SPANISH, null);
     assertSuggest(1, "labeleng", c1.getVocabularyKey(), LanguageRegion.ENGLISH, null);
     // should get fallback lang
-    assertSuggest(2, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.ENGLISH);
-    assertSuggest(2, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.SPANISH);
+    assertSuggest(0, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.ENGLISH);
+    assertSuggest(1, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.SPANISH);
     assertSuggest(2, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.AFRIKAANS);
 
     Concept c3 = createNewEntity();
@@ -264,10 +259,26 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     conceptMapper.create(c3);
     assertNotNull(c3.getKey());
 
-    assertEquals(2, conceptMapper.suggest("su", c1.getVocabularyKey(), null, null).size());
-    assertEquals(1, conceptMapper.suggest("su", c3.getVocabularyKey(), null, null).size());
-    assertEquals(1, conceptMapper.suggest("33", c3.getVocabularyKey(), null, null).size());
-    assertEquals(0, conceptMapper.suggest("33", c1.getVocabularyKey(), null, null).size());
+    assertEquals(
+        2,
+        conceptMapper
+            .suggest("su", c1.getVocabularyKey(), null, null, DEFAULT_SUGGEST_LIMIT)
+            .size());
+    assertEquals(
+        1,
+        conceptMapper
+            .suggest("su", c3.getVocabularyKey(), null, null, DEFAULT_SUGGEST_LIMIT)
+            .size());
+    assertEquals(
+        1,
+        conceptMapper
+            .suggest("33", c3.getVocabularyKey(), null, null, DEFAULT_SUGGEST_LIMIT)
+            .size());
+    assertEquals(
+        0,
+        conceptMapper
+            .suggest("33", c1.getVocabularyKey(), null, null, DEFAULT_SUGGEST_LIMIT)
+            .size());
   }
 
   private void assertSuggest(
@@ -276,10 +287,12 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
       long vocabKey,
       LanguageRegion lang,
       LanguageRegion fallbackLang) {
-    List<SuggestDto> result = conceptMapper.suggest(query, vocabKey, lang, fallbackLang);
+    List<SuggestDto> result =
+        conceptMapper.suggest(query, vocabKey, lang, fallbackLang, DEFAULT_SUGGEST_LIMIT);
     assertEquals(expectedSize, result.size());
     List<SuggestDto> resultRelease =
-        conceptMapper.suggestLatestRelease(query, vocabKey, lang, fallbackLang, DEFAULT_VOCABULARY);
+        conceptMapper.suggestLatestRelease(
+            query, vocabKey, lang, fallbackLang, DEFAULT_VOCABULARY, DEFAULT_SUGGEST_LIMIT);
     assertEquals(expectedSize, resultRelease.size());
 
     if (lang != null) {
@@ -287,12 +300,9 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
           result.stream()
               .allMatch(
                   r ->
-                      r.getLabels() == null
-                          || r.getLabels().isEmpty()
-                          || r.getLabels().stream()
-                              .allMatch(
-                                  l ->
-                                      l.getLanguage() == lang || l.getLanguage() == fallbackLang)));
+                      r.getLabelLang() == null
+                          || r.getLabelLang() == lang
+                          || (fallbackLang != null && r.getLabelLang() == fallbackLang)));
     }
   }
 
@@ -1014,8 +1024,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
     List<SuggestDto> suggestResult =
         conceptMapper.suggestLatestRelease(
-            concept1.getName(), concept1.getVocabularyKey(), null, null, vocabName);
-    assertEquals(0, suggestResult.get(0).getLabels().size());
+            concept1.getName(),
+            concept1.getVocabularyKey(),
+            null,
+            null,
+            vocabName,
+            DEFAULT_SUGGEST_LIMIT);
+    assertNull(suggestResult.get(0).getLabel());
 
     conceptMapper.updateReleaseViews(vocabName);
 
@@ -1033,8 +1048,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
     suggestResult =
         conceptMapper.suggestLatestRelease(
-            concept1.getName(), concept1.getVocabularyKey(), null, null, vocabName);
-    assertEquals(1, suggestResult.get(0).getLabels().size());
+            concept1.getName(),
+            concept1.getVocabularyKey(),
+            null,
+            null,
+            vocabName,
+            DEFAULT_SUGGEST_LIMIT);
+    assertNull(suggestResult.get(0).getLabel());
   }
 
   @Test

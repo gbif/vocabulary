@@ -311,5 +311,6 @@ public interface ConceptClient {
     LanguageRegion locale;
     LanguageRegion fallbackLocale;
     String q;
+    Integer limit;
   }
 }

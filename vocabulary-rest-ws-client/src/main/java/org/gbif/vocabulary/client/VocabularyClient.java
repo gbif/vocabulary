@@ -66,7 +66,7 @@ public interface VocabularyClient {
   }
 
   @GetMapping(value = "suggest", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<KeyNameResult> suggest(@RequestParam("q") String query);
+  List<KeyNameResult> suggest(@SpringQueryMap SuggestParams suggestParams);
 
   @PutMapping(
       value = "{name}/deprecate",
@@ -171,5 +171,13 @@ public interface VocabularyClient {
   @AllArgsConstructor(staticName = "of")
   class ListParams {
     List<LanguageRegion> lang;
+  }
+
+  @AllArgsConstructor(staticName = "of")
+  class SuggestParams {
+    LanguageRegion locale;
+    LanguageRegion fallbackLocale;
+    String q;
+    Integer limit;
   }
 }

@@ -22,6 +22,7 @@ import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.persistence.dto.SuggestDto;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ContextConfiguration(initializers = {VocabularyMapperTest.ContextInitializer.class})
 public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
 
+  private static final int DEFAULT_SUGGEST_LIMIT = 20;
   private final VocabularyMapper vocabularyMapper;
   private final ConceptMapper conceptMapper;
   private final VocabularyReleaseMapper vocabularyReleaseMapper;
@@ -229,20 +231,47 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
         Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
 
     // check result values
-    List<KeyNameResult> result = vocabularyMapper.suggest("suggest1", null);
+    List<SuggestDto> result =
+        vocabularyMapper.suggest("suggest1", null, null, DEFAULT_SUGGEST_LIMIT);
     assertEquals("Suggest111", result.get(0).getName());
-    assertEquals(v1.getKey().intValue(), result.get(0).getKey());
+    assertEquals(v1.getKey(), result.get(0).getKey());
 
     // assert expected number of results
-    assertEquals(2, vocabularyMapper.suggest("su", null).size());
-    assertEquals(2, vocabularyMapper.suggest("gge", null).size());
-    assertEquals(1, vocabularyMapper.suggest("22", null).size());
-    assertEquals(0, vocabularyMapper.suggest("zz", null).size());
-    assertEquals(0, vocabularyMapper.suggest(null, null).size());
-    assertEquals(2, vocabularyMapper.suggest("label", null).size());
-    assertEquals(1, vocabularyMapper.suggest("labeleng", null).size());
-    assertEquals(0, vocabularyMapper.suggest("labeleng", LanguageRegion.SPANISH).size());
-    assertEquals(1, vocabularyMapper.suggest("labeleng", LanguageRegion.ENGLISH).size());
+    assertEquals(2, vocabularyMapper.suggest("su", null, null, DEFAULT_SUGGEST_LIMIT).size());
+    assertEquals(2, vocabularyMapper.suggest("gge", null, null, DEFAULT_SUGGEST_LIMIT).size());
+    assertEquals(1, vocabularyMapper.suggest("22", null, null, DEFAULT_SUGGEST_LIMIT).size());
+    assertEquals(0, vocabularyMapper.suggest("zz", null, null, DEFAULT_SUGGEST_LIMIT).size());
+    assertEquals(0, vocabularyMapper.suggest(null, null, null, DEFAULT_SUGGEST_LIMIT).size());
+    assertEquals(2, vocabularyMapper.suggest("label", null, null, DEFAULT_SUGGEST_LIMIT).size());
+    assertEquals(1, vocabularyMapper.suggest("labeleng", null, null, DEFAULT_SUGGEST_LIMIT).size());
+    assertEquals(
+        0,
+        vocabularyMapper
+            .suggest("labeleng", LanguageRegion.SPANISH, null, DEFAULT_SUGGEST_LIMIT)
+            .size());
+    assertEquals(
+        1,
+        vocabularyMapper
+            .suggest("label", LanguageRegion.SPANISH, null, DEFAULT_SUGGEST_LIMIT)
+            .size());
+    assertEquals(
+        1,
+        vocabularyMapper
+            .suggest("labeleng", LanguageRegion.ENGLISH, null, DEFAULT_SUGGEST_LIMIT)
+            .size());
+
+    List<SuggestDto> dtos =
+        vocabularyMapper.suggest(
+            "label", LanguageRegion.SPANISH, LanguageRegion.ENGLISH, DEFAULT_SUGGEST_LIMIT);
+    assertEquals(2, dtos.size());
+    dtos.forEach(
+        dto -> {
+          if (dto.getName().equals(v2.getName())) {
+            assertEquals(LanguageRegion.ENGLISH, dto.getLabelLang());
+          } else {
+            assertEquals(LanguageRegion.SPANISH, dto.getLabelLang());
+          }
+        });
   }
 
   @Test

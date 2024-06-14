@@ -18,6 +18,7 @@ import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.persistence.dto.SuggestDto;
 
 import java.util.List;
 
@@ -40,8 +41,11 @@ public interface VocabularyMapper extends BaseMapper<Vocabulary> {
 
   Long getKeyByName(@Param("name") String name);
 
-  List<KeyNameResult> suggest(
-      @Param("query") String query, @Nullable @Param("lang") LanguageRegion language);
+  List<SuggestDto> suggest(
+      @Param("query") String query,
+      @Nullable @Param("lang") LanguageRegion language,
+      @Nullable @Param("fallbackLang") LanguageRegion fallbackLang,
+      @Param("limit") int limit);
 
   /**
    * Searches for a similar vocabulary whose name or any of its labels are the same as the ones

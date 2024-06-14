@@ -32,7 +32,7 @@ import org.gbif.vocabulary.model.exception.EntityNotFoundException;
 import org.gbif.vocabulary.model.exception.EntityNotFoundException.EntityType;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.restws.config.WsConfig;
 import org.gbif.vocabulary.restws.documentation.Docs;
 import org.gbif.vocabulary.service.ConceptService;
@@ -367,13 +367,17 @@ public class ConceptResource {
   @Docs.DefaultSearchResponses
   @Docs.VocabularyNameInConceptPathParameter
   @GetMapping("suggest")
-  public List<KeyNameResult> suggest(
+  public List<SuggestResult> suggest(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
       LanguageRegion locale,
-      LanguageRegion fallbackLocale) {
+      LanguageRegion fallbackLocale,
+      @RequestParam(value = "limit", required = false) Integer limit) {
+    if (fallbackLocale != null && locale == null) {
+      throw new IllegalArgumentException("Locale is required if the fallback locale is set");
+    }
     return conceptService.suggest(
-        query, getVocabularyWithCheck(vocabularyName).getKey(), locale, fallbackLocale);
+        query, getVocabularyWithCheck(vocabularyName).getKey(), locale, fallbackLocale, limit);
   }
 
   @Operation(
@@ -923,17 +927,19 @@ public class ConceptResource {
   @Docs.DefaultSearchResponses
   @Docs.VocabularyNameInConceptPathParameter
   @GetMapping(LATEST_RELEASE_PATH + "/suggest")
-  public List<KeyNameResult> suggestLatestRelease(
+  public List<SuggestResult> suggestLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
       LanguageRegion locale,
-      LanguageRegion fallbackLocale) {
+      LanguageRegion fallbackLocale,
+      @RequestParam(value = "limit", required = false) Integer limit) {
     return conceptService.suggestLatestRelease(
         query,
         getVocabularyWithCheck(vocabularyName).getKey(),
         locale,
         fallbackLocale,
-        vocabularyName);
+        vocabularyName,
+        limit);
   }
 
   @Operation(

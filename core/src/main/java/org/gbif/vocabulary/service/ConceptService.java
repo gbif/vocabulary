@@ -23,7 +23,7 @@ import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.SuggestResult;
 
 import java.util.List;
 
@@ -61,13 +61,15 @@ public interface ConceptService extends BaseService<Concept> {
    * @param vocabularyKey key of the vocabulary
    * @param languageRegion locale to filter by
    * @param fallbackLanguageRegion fallback locale to show in the response
+   * @param limit to limit the results, up to 20
    * @return a list of up to 20 suggested concepts
    */
-  List<KeyNameResult> suggest(
+  List<SuggestResult> suggest(
       String query,
       long vocabularyKey,
       @Nullable LanguageRegion languageRegion,
-      @Nullable LanguageRegion fallbackLanguageRegion);
+      @Nullable LanguageRegion fallbackLanguageRegion,
+      @Nullable Integer limit);
 
   /**
    * Deprecates a concept with a replacement.
@@ -187,15 +189,16 @@ public interface ConceptService extends BaseService<Concept> {
       @Nullable ConceptSearchParams params, @Nullable Pageable page, String vocabularyName);
 
   /**
-   * It works as {@link #suggest(String, long, LanguageRegion, LanguageRegion)} but it queries the
-   * latest release of the vocabulary instead of the actual data.
+   * It works as {@link #suggest(String, long, LanguageRegion, LanguageRegion, Integer)} but it
+   * queries the latest release of the vocabulary instead of the actual data.
    */
-  List<KeyNameResult> suggestLatestRelease(
+  List<SuggestResult> suggestLatestRelease(
       String query,
       long vocabularyKey,
       @Nullable LanguageRegion languageRegion,
       @Nullable LanguageRegion fallbackLanguageRegion,
-      String vocabularyName);
+      String vocabularyName,
+      Integer limit);
 
   /**
    * It works as {@link #getByNameAndVocabulary(String, String)} but it queries the latest release

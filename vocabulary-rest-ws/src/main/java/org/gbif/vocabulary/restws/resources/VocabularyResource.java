@@ -382,6 +382,9 @@ public class VocabularyResource {
 
     VocabularyRelease release = releaseVocabularyVersion(vocabularyName, params);
 
+    // clear cache
+    LatestReleaseCache.conceptSuggestLatestReleaseCache.remove(vocabularyName);
+
     return ResponseEntity.created(
             URI.create(httpServletRequest.getRequestURL() + "/" + release.getVersion()))
         .body(release);

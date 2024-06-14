@@ -185,7 +185,7 @@ public class DefaultConceptService implements ConceptService {
       @Nullable LanguageRegion fallbackLanguageRegion,
       Integer limit) {
     query = query != null ? query : "";
-    limit = limit != null ? limit : DEFAULT_SUGGEST_LIMIT;
+    limit = limit != null ? Math.max(limit, DEFAULT_SUGGEST_LIMIT) : DEFAULT_SUGGEST_LIMIT;
     List<SuggestDto> dtos =
         conceptMapper.suggest(query, vocabularyKey, languageRegion, fallbackLanguageRegion, limit);
     return convertSuggestResults(dtos);
@@ -531,7 +531,7 @@ public class DefaultConceptService implements ConceptService {
     checkArgument(conceptMapper.existsReleaseView(vocabularyName.toLowerCase()));
 
     query = query != null ? query : "";
-    limit = limit != null ? limit : DEFAULT_SUGGEST_LIMIT;
+    limit = limit != null ? Math.max(limit, DEFAULT_SUGGEST_LIMIT) : DEFAULT_SUGGEST_LIMIT;
     List<SuggestDto> dtos =
         conceptMapper.suggestLatestRelease(
             query,

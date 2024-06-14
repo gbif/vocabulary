@@ -211,7 +211,7 @@ public class DefaultVocabularyService implements VocabularyService {
       @Nullable LanguageRegion fallbackLanguageRegion,
       Integer limit) {
     query = query != null ? query : "";
-    limit = limit != null ? limit : DEFAULT_SUGGEST_LIMIT;
+    limit = limit != null ? Math.max(limit, DEFAULT_SUGGEST_LIMIT) : DEFAULT_SUGGEST_LIMIT;
     List<SuggestDto> dtos =
         vocabularyMapper.suggest(query, languageRegion, fallbackLanguageRegion, limit);
 

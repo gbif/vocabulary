@@ -13,16 +13,12 @@
  */
 package org.gbif.vocabulary.service.impl;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Definition;
-import org.gbif.vocabulary.model.HiddenLabel;
-import org.gbif.vocabulary.model.Label;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Tag;
-import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.*;
 import org.gbif.vocabulary.model.exception.EntityNotFoundException;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
@@ -35,34 +31,26 @@ import org.gbif.vocabulary.persistence.dto.SuggestDto;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.ConceptService;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.NAME_FORMAT_PATTERN;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.isValidName;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.*;
 
 /** Default implementation for {@link ConceptService}. */
 @Service
@@ -186,7 +174,7 @@ public class DefaultConceptService implements ConceptService {
       @Nullable LanguageRegion fallbackLanguageRegion,
       Integer limit) {
     query = query != null ? query : "";
-    limit = limit != null ? Math.max(limit, DEFAULT_SUGGEST_LIMIT) : DEFAULT_SUGGEST_LIMIT;
+    limit = limit != null ? Math.min(limit, DEFAULT_SUGGEST_LIMIT) : DEFAULT_SUGGEST_LIMIT;
     List<SuggestDto> dtos =
         conceptMapper.suggest(query, vocabularyKey, languageRegion, fallbackLanguageRegion, limit);
     return convertSuggestResults(dtos);
@@ -532,7 +520,7 @@ public class DefaultConceptService implements ConceptService {
     checkReleaseExists(vocabularyName);
 
     query = query != null ? query : "";
-    limit = limit != null ? Math.max(limit, DEFAULT_SUGGEST_LIMIT) : DEFAULT_SUGGEST_LIMIT;
+    limit = limit != null ? Math.min(limit, DEFAULT_SUGGEST_LIMIT) : DEFAULT_SUGGEST_LIMIT;
     List<SuggestDto> dtos =
         conceptMapper.suggestLatestRelease(
             query,

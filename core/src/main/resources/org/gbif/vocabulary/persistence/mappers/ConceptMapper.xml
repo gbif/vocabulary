@@ -158,7 +158,7 @@
     FROM (
     (
       <include refid="SUGGEST_LANG_Q">
-        <property name="q" value="= unaccent(trim(#{query}))"/>
+        <property name="q" value="cl.value = unaccent(trim(#{query}))"/>
         <property name="score" value="100"/>
       </include>
     )
@@ -166,7 +166,7 @@
       UNION ALL
       (
         <include refid="SUGGEST_FALLBACK_Q">
-          <property name="q" value="= unaccent(trim(#{query}))"/>
+          <property name="q" value="cl.value = unaccent(trim(#{query}))"/>
           <property name="score" value="90"/>
         </include>
       )
@@ -174,14 +174,14 @@
     UNION ALL
     (
       <include refid="SUGGEST_NAME_Q">
-        <property name="q" value="= unaccent(trim(#{query}))"/>
+        <property name="q" value="c.name = unaccent(trim(#{query}))"/>
         <property name="score" value="80"/>
       </include>
     )
     UNION ALL
     (
       <include refid="SUGGEST_LANG_Q">
-        <property name="q" value="ilike unaccent(trim(#{query}))||'%'"/>
+        <property name="q" value="cl.value ilike unaccent(trim(#{query}))||'%'"/>
         <property name="score" value="70"/>
       </include>
     )
@@ -189,7 +189,7 @@
       UNION ALL
       (
         <include refid="SUGGEST_FALLBACK_Q">
-          <property name="q" value="ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="q" value="cl.value ilike unaccent(trim(#{query}))||'%'"/>
           <property name="score" value="60"/>
         </include>
       )
@@ -197,14 +197,14 @@
     UNION ALL
     (
       <include refid="SUGGEST_NAME_Q">
-        <property name="q" value="ilike unaccent(trim(#{query}))||'%'"/>
+        <property name="q" value="c.name ilike unaccent(trim(#{query}))||'%'"/>
         <property name="score" value="50"/>
       </include>
     )
     UNION ALL
     (
       <include refid="SUGGEST_LANG_Q">
-        <property name="q" value="ilike '%'||unaccent(trim(#{query}))||'%'"/>
+        <property name="q" value="cl.value ilike '%'||unaccent(trim(#{query}))||'%' AND NOT cl.value ilike unaccent(trim(#{query}))||'%'"/>
         <property name="score" value="40"/>
       </include>
     )
@@ -212,7 +212,7 @@
       UNION ALL
       (
         <include refid="SUGGEST_FALLBACK_Q">
-          <property name="q" value="ilike '%'||unaccent(trim(#{query}))||'%'"/>
+          <property name="q" value="cl.value ilike '%'||unaccent(trim(#{query}))||'%' AND NOT cl.value ilike unaccent(trim(#{query}))||'%'"/>
           <property name="score" value="30"/>
         </include>
       )
@@ -220,7 +220,7 @@
     UNION ALL
     (
       <include refid="SUGGEST_NAME_Q">
-        <property name="q" value="ilike '%'||unaccent(trim(#{query}))||'%'"/>
+        <property name="q" value="c.name ilike '%'||unaccent(trim(#{query}))||'%' AND NOT c.name ilike unaccent(trim(#{query}))||'%'"/>
         <property name="score" value="20"/>
       </include>
      )
@@ -233,7 +233,7 @@
     FROM concept${table_suffix} c
     INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
     WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
-    AND cl.value ${q} <if test="lang != null">AND cl.language = #{lang}</if>
+    AND ${q} <if test="lang != null">AND cl.language = #{lang}</if>
     ORDER BY cl.value
     LIMIT #{limit}
   </sql>
@@ -243,7 +243,7 @@
     FROM concept${table_suffix} c
     INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
     WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
-    AND cl.value ${q} AND cl.language = #{fallbackLang}
+    AND ${q} AND cl.language = #{fallbackLang}
     AND NOT EXISTS (
     SELECT * FROM concept_label cl2 WHERE cl2.concept_key = c.key AND cl2.language = #{lang}
     )
@@ -255,7 +255,7 @@
     SELECT c.key AS key, c.name AS name, NULL AS label, NULL AS labelLang, ${score} AS score
     FROM concept${table_suffix} c
     WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
-    AND c.name ${q}
+    AND ${q}
     <if test="lang != null">
       AND NOT EXISTS (
       SELECT * FROM concept_label cl WHERE cl.concept_key = c.key

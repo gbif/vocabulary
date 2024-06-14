@@ -224,8 +224,8 @@
         <property name="score" value="20"/>
       </include>
      )
-    ) t1 LIMIT #{limit}
-    ) t2 ORDER BY score DESC
+    ) t1
+    ) t2 ORDER BY score DESC, name LIMIT #{limit}
   </sql>
 
   <sql id="SUGGEST_LANG_Q">
@@ -234,8 +234,6 @@
     INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
     WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
     AND ${q} <if test="lang != null">AND cl.language = #{lang}</if>
-    ORDER BY cl.value
-    LIMIT #{limit}
   </sql>
 
   <sql id="SUGGEST_FALLBACK_Q">
@@ -247,8 +245,6 @@
     AND NOT EXISTS (
     SELECT * FROM concept_label cl2 WHERE cl2.concept_key = c.key AND cl2.language = #{lang}
     )
-    ORDER BY cl.value
-    LIMIT #{limit}
   </sql>
 
   <sql id="SUGGEST_NAME_Q">
@@ -262,8 +258,6 @@
       AND cl.language IN (#{lang}<if test="fallbackLang != null">,#{fallbackLang}</if>)
       )
     </if>
-    ORDER BY c.name
-    LIMIT #{limit}
   </sql>
 
   <sql id="COUNT_CHILDREN">

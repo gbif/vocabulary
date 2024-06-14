@@ -13,21 +13,18 @@
  */
 package org.gbif.vocabulary.restws.documentation;
 
-import org.gbif.vocabulary.model.LanguageRegion;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.Explode;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.gbif.api.documentation.CommonParameters;
+import org.gbif.vocabulary.model.LanguageRegion;
+
+import java.lang.annotation.*;
 
 public class Docs {
 
@@ -135,4 +132,24 @@ public class Docs {
     @ApiResponse(responseCode = "400", description = "Invalid search query provided")
   })
   public @interface DefaultSearchResponses {}
+
+  @Parameters(
+      value = {
+        @Parameter(
+            name = "fallbackLocale",
+            description =
+                "The locale to fall back when there are no results in the locale specified.",
+            schema = @Schema(implementation = LanguageRegion.class),
+            in = ParameterIn.QUERY,
+            explode = Explode.FALSE),
+        @Parameter(
+            name = "limit",
+            description = "The number of results returned. The maximum allowed is 20.",
+            schema = @Schema(implementation = Integer.class),
+            in = ParameterIn.QUERY,
+            explode = Explode.FALSE)
+      })
+  @CommonParameters.QParameter
+  @LocaleParameter
+  public @interface SuggestParameters {}
 }

@@ -13,61 +13,7 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import org.gbif.api.documentation.CommonParameters;
-import org.gbif.api.model.common.paging.Pageable;
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.common.messaging.api.MessagePublisher;
-import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
-import org.gbif.vocabulary.api.DeprecateVocabularyAction;
-import org.gbif.vocabulary.api.VocabularyListParams;
-import org.gbif.vocabulary.api.VocabularyReleaseParams;
-import org.gbif.vocabulary.model.Definition;
-import org.gbif.vocabulary.model.Label;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.VocabularyRelease;
-import org.gbif.vocabulary.model.exception.EntityNotFoundException;
-import org.gbif.vocabulary.model.export.ExportParams;
-import org.gbif.vocabulary.model.search.SuggestResult;
-import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.restws.config.ExportConfig;
-import org.gbif.vocabulary.restws.documentation.Docs;
-import org.gbif.vocabulary.service.ExportService;
-import org.gbif.vocabulary.service.VocabularyService;
-import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.enums.Explode;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.extensions.Extension;
@@ -79,6 +25,41 @@ import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.gbif.api.documentation.CommonParameters;
+import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.common.messaging.api.MessagePublisher;
+import org.gbif.common.messaging.api.messages.VocabularyReleasedMessage;
+import org.gbif.vocabulary.api.DeprecateVocabularyAction;
+import org.gbif.vocabulary.api.VocabularyListParams;
+import org.gbif.vocabulary.api.VocabularyReleaseParams;
+import org.gbif.vocabulary.model.*;
+import org.gbif.vocabulary.model.exception.EntityNotFoundException;
+import org.gbif.vocabulary.model.export.ExportParams;
+import org.gbif.vocabulary.model.search.SuggestResult;
+import org.gbif.vocabulary.model.search.VocabularySearchParams;
+import org.gbif.vocabulary.restws.config.ExportConfig;
+import org.gbif.vocabulary.restws.documentation.Docs;
+import org.gbif.vocabulary.service.ExportService;
+import org.gbif.vocabulary.service.VocabularyService;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
@@ -256,8 +237,7 @@ public class VocabularyResource {
           @Extension(
               name = "Order",
               properties = @ExtensionProperty(name = "Order", value = "0203")))
-  @CommonParameters.QParameter
-  @Docs.LocaleParameter
+  @Docs.SuggestParameters
   @Docs.DefaultSearchResponses
   @GetMapping("suggest")
   public List<SuggestResult> suggest(

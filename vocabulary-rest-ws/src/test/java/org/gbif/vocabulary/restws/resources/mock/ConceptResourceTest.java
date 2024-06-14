@@ -22,7 +22,7 @@ import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.restws.resources.ConceptResource;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.VocabularyService;
@@ -199,8 +199,9 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
   @Test
   public void suggestTest() throws Exception {
     mockVocabulary();
-    List<KeyNameResult> suggestions = createSuggestions();
-    when(conceptService.suggest(anyString(), anyLong(), any(), any())).thenReturn(suggestions);
+    List<SuggestResult> suggestions = createSuggestions();
+    when(conceptService.suggest(anyString(), anyLong(), any(), any(), any()))
+        .thenReturn(suggestions);
     suggestTest(suggestions);
   }
 

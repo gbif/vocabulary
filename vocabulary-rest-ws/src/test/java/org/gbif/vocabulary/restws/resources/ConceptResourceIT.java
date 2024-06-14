@@ -476,7 +476,8 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         1,
         conceptClient
             .suggestLatestRelease(
-                defaultVocabularyName, ConceptClient.SuggestParams.of(null, null, c1.getName()))
+                defaultVocabularyName,
+                ConceptClient.SuggestParams.of(null, null, c1.getName(), null))
             .size());
 
     assertEquals(

@@ -12,10 +12,10 @@
     <collection property="label" column="{entityKey=key}" select="listConceptLabels"/>
   </resultMap>
 
-  <resultMap id="KEY_NAME_RESULT_MAP" type="SuggestDto" autoMapping="true">
+  <resultMap id="SUGGEST_RESULT_MAP" type="SuggestDto" autoMapping="true">
     <id property="key" column="key"/>
-    <collection property="labels" column="{entityKey=key,lang=lang,fallbackLang=fallbackLang}" select="listConceptLabels"/>
-    <collection property="parentDtos" column="{key=key,lang=lang,fallbackLang=fallbackLang}" select="findParentsLabels"/>
+    <collection property="parentDtos" column="{key=key,lang=langParam,fallbackLang=fallbackLangParam}"
+                select="findParentsLabels"/>
   </resultMap>
 
   <resultMap id="DEFINITION_RESULT_MAP" type="Definition" autoMapping="true">
@@ -31,6 +31,7 @@
   <resultMap id="PARENT_RESULT_MAP" type="ParentDto" autoMapping="true">
     <id property="key" column="key"/>
     <result property="labelLanguage" column="labelLanguage" typeHandler="LanguageRegionTypeHandler"/>
+    <result property="fallbackLabelLanguage" column="fallbackLabelLanguage" typeHandler="LanguageRegionTypeHandler"/>
   </resultMap>
 
   <resultMap id="HIDDEN_LABEL_RESULT_MAP" type="HiddenLabel" autoMapping="true">
@@ -149,51 +150,91 @@
   </sql>
 
   <sql id="SUGGEST">
-    SELECT DISTINCT ON(key) key, name, #{lang} lang
-      <if test="_parameter.containsKey('fallbackLang')">,#{fallbackLang} fallbackLang</if>
+    SELECT DISTINCT ON(key) key, name, label, labelLang
+      <if test="_parameter.containsKey('lang')">,#{lang} langParam</if>
+      <if test="_parameter.containsKey('fallbackLang')">,#{fallbackLang} fallbackLangParam</if>
       <if test="_parameter.containsKey('vocabName')">, #{vocabName} vocabName</if>
     FROM (
-      (SELECT key, name
-      FROM concept${table_suffix}
-      WHERE vocabulary_key = #{vocabularyKey} AND
-      name ilike #{query}||'%' AND deprecated IS NULL
-      ORDER BY name LIMIT 20 )
-    UNION ALL
-      (SELECT key, name
-      FROM concept${table_suffix}
-      WHERE vocabulary_key = #{vocabularyKey} AND name ilike '%'||#{query}||'%' AND NOT name ilike
-      #{query}||'%' AND deprecated IS NULL
-      ORDER BY name LIMIT 20 )
-    UNION ALL
-      (SELECT DISTINCT c.key, c.name
+    (
+      SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang
       FROM concept${table_suffix} c
-      JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
-      WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike #{query}||'%' AND c.deprecated IS NULL
-      <if test="lang != null">
-        AND cl.language = #{lang}
-      </if>
-      LIMIT 20 )
-    UNION ALL
-      (SELECT DISTINCT c.key, c.name
-      FROM concept${table_suffix} c
-      JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
-      WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike '%'||#{query}||'%' AND NOT cl.value ilike #{query}||'%'
-      AND c.deprecated IS NULL
-      <if test="lang != null">
-        AND cl.language = #{lang}
-      </if>
-      LIMIT 20 )
-    <if test="fallbackLang != null">
+      INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND cl.value ilike #{query}||'%' <if test="lang != null">AND cl.language = #{lang}</if>
+      ORDER BY cl.value
+      LIMIT #{limit}
+    )
+    <if test="lang != null and fallbackLang != null">
       UNION ALL
-        (SELECT DISTINCT c.key, c.name
+      (
+        SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang
         FROM concept${table_suffix} c
-        JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
-        WHERE c.vocabulary_key = #{vocabularyKey} AND cl.value ilike #{query}||'%'
-        AND c.deprecated IS NULL
-        AND cl.language = #{fallbackLang}
-        LIMIT 20 )
+        INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+        WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+        AND cl.value ilike #{query}||'%' AND cl.language = #{fallbackLang}
+        AND NOT EXISTS (
+        SELECT * FROM concept_label cl2 WHERE cl2.concept_key = c.key AND cl2.language = #{lang}
+        )
+        ORDER BY cl.value
+        LIMIT #{limit}
+      )
     </if>
-    ) t1 LIMIT 20
+    UNION ALL
+    (
+      SELECT c.key AS key, c.name AS name, NULL AS label, NULL AS labelLang
+      FROM concept${table_suffix} c
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND c.name ilike #{query}||'%'
+      <if test="lang != null">
+        AND NOT EXISTS (
+          SELECT * FROM concept_label cl WHERE cl.concept_key = c.key
+          AND cl.language IN (#{lang}<if test="fallbackLang != null">,#{fallbackLang}</if>)
+        )
+      </if>
+      ORDER BY c.name
+      LIMIT #{limit}
+    )
+    UNION ALL
+    (
+      SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang
+      FROM concept${table_suffix} c
+      INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND cl.value ilike '%'||#{query}||'%' <if test="lang != null">AND cl.language = #{lang}</if>
+      ORDER BY cl.value
+      LIMIT #{limit}
+    )
+    <if test="lang != null and fallbackLang != null">
+      UNION ALL
+      (
+        SELECT c.key AS key, c.name AS name, cl.value AS label, cl.language AS labelLang
+        FROM concept${table_suffix} c
+        INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+        WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+        AND cl.value ilike '%'||#{query}||'%' AND cl.language = #{fallbackLang}
+        AND NOT EXISTS (
+        SELECT * FROM concept_label cl2 WHERE cl2.concept_key = c.key AND cl2.language = #{lang}
+        )
+        ORDER BY cl.value
+        LIMIT #{limit}
+      )
+    </if>
+    UNION ALL
+    (
+      SELECT c.key AS key, c.name AS name, NULL AS label, NULL AS labelLang
+      FROM concept${table_suffix} c
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND c.name ilike '%'||#{query}||'%'
+      <if test="lang != null">
+        AND NOT EXISTS (
+        SELECT * FROM concept_label cl WHERE cl.concept_key = c.key
+        AND cl.language IN (#{lang}<if test="fallbackLang != null">,#{fallbackLang}</if>)
+        )
+      </if>
+      ORDER BY c.name
+     LIMIT #{limit}
+     )
+    ) t1 LIMIT #{limit}
   </sql>
 
   <sql id="COUNT_CHILDREN">
@@ -229,19 +270,16 @@
     SELECT c.key, c.name, c.parent_key, c.deprecated, p.depth + 1
     FROM parents p, concept${table_suffix} c
     WHERE p.parent_key = c.key )
-    SELECT p.key, p.name, p.depth , cl.key AS labelKey, cl.language AS labelLanguage, cl.value AS labelValue
+    SELECT p.key, p.name, p.depth
+      <if test="lang != null">, cl.value AS label, cl.language AS labelLanguage</if>
+      <if test="fallbackLang != null">, clf.value AS fallbackLabel, clf.language AS fallbackLabelLanguage</if>
     FROM parents p
-    LEFT JOIN concept_label${table_suffix} cl ON cl.concept_key = p.key
-      <if test="lang != null or fallbackLang != null">
-        AND (
-        <if test="lang != null">
-          cl.language = #{lang}
-        </if>
-        <if test="fallbackLang != null">
-          OR cl.language = #{fallbackLang}
-        </if>
-        )
-      </if>
+    <if test="lang != null">
+      LEFT JOIN concept_label${table_suffix} cl ON cl.concept_key = p.key AND cl.language = #{lang}
+    </if>
+    <if test="fallbackLang != null">
+      LEFT JOIN concept_label${table_suffix} clf ON clf.concept_key = p.key AND clf.language = #{fallbackLang}
+    </if>
     WHERE p.key != #{key,jdbcType=BIGINT};
   </sql>
 
@@ -257,16 +295,6 @@
     FROM concept_label${table_suffix}
     <where>
       concept_key = #{entityKey,jdbcType=BIGINT}
-      <if test="lang != null or fallbackLang != null">
-        AND (
-        <if test="lang != null">
-          language = #{lang}
-        </if>
-        <if test="fallbackLang != null">
-          OR language = #{fallbackLang}
-        </if>
-        )
-      </if>
     </where>
     ORDER BY key DESC
   </sql>
@@ -435,7 +463,7 @@
     <include refid="LIST_COMMON"/>
   </select>
 
-  <select id="suggest" resultMap="KEY_NAME_RESULT_MAP">
+  <select id="suggest" resultMap="SUGGEST_RESULT_MAP">
     <bind name="table_suffix" value="''"/>
     <include refid="SUGGEST"/>
   </select>
@@ -729,7 +757,7 @@
     <include refid="LIST_COMMON"/>
   </select>
 
-  <select id="suggestLatestRelease" resultMap="KEY_NAME_RESULT_MAP_RELEASE_VIEW">
+  <select id="suggestLatestRelease" resultMap="SUGGEST_RESULT_MAP_RELEASE_VIEW">
     <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
     <include refid="SUGGEST"/>
   </select>
@@ -805,11 +833,10 @@
     <collection property="label" column="{entityKey=key,vocabName=vocabName}" select="listConceptLabelsLatestRelease"/>
   </resultMap>
 
-  <resultMap id="KEY_NAME_RESULT_MAP_RELEASE_VIEW" type="SuggestDto" autoMapping="true">
+  <resultMap id="SUGGEST_RESULT_MAP_RELEASE_VIEW" type="SuggestDto" autoMapping="true">
     <id property="key" column="key"/>
-    <collection property="labels" column="{entityKey=key,vocabName=vocabName,lang=lang,fallbackLang=fallbackLang}"
-                select="listConceptLabelsLatestRelease"/>
-    <collection property="parentDtos" column="{key=key,lang=lang,fallbackLang=fallbackLang}" select="findParentsLabelsLatestRelease"/>
+    <collection property="parentDtos" column="{key=key,lang=langParam,fallbackLang=fallbackLangParam}"
+                select="findParentsLabelsLatestRelease"/>
   </resultMap>
 
 

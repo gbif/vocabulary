@@ -9,7 +9,8 @@ public class ParentDto {
   long key;
   String name;
   int depth;
-  Long labelKey;
+  String label;
   LanguageRegion labelLanguage;
-  String labelValue;
+  String fallbackLabel;
+  LanguageRegion fallbackLabelLanguage;
 }

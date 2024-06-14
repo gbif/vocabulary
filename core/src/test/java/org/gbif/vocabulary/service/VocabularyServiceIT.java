@@ -19,6 +19,7 @@ import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
 import java.sql.Connection;
@@ -314,6 +315,70 @@ public class VocabularyServiceIT {
     labelList = vocabularyService.listLabels(v1Key, null);
     assertEquals(1, labelList.size());
     assertEquals(labelKey2, labelList.get(0).getKey());
+  }
+
+  @Test
+  public void suggestTest() {
+    // create entities for the test
+    Vocabulary v1 = createBasicVocabulary();
+    v1.setName("Suggest111");
+
+    vocabularyService.create(v1);
+
+    vocabularyService.addLabel(
+        v1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.SPANISH)
+            .value("labelspanish")
+            .createdBy("test")
+            .build());
+
+    vocabularyService.addLabel(
+        v1.getKey(),
+        Label.builder()
+            .language(LanguageRegion.ENGLISH)
+            .value("labelenglish")
+            .createdBy("test")
+            .build());
+
+    Vocabulary v2 = createBasicVocabulary();
+    v2.setName("Suggest222");
+    vocabularyService.create(v2);
+    assertNotNull(v2.getKey());
+
+    vocabularyService.addLabel(
+        v2.getKey(),
+        Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
+
+    List<SuggestResult> result = vocabularyService.suggest("suggest1", null, null, null);
+    assertEquals("Suggest111", result.get(0).getName());
+    assertEquals(v1.getName(), result.get(0).getName());
+
+    // assert expected number of results
+    assertEquals(2, vocabularyService.suggest("su", null, null, null).size());
+    assertEquals(2, vocabularyService.suggest("gge", null, null, null).size());
+    assertEquals(1, vocabularyService.suggest("22", null, null, null).size());
+    assertEquals(0, vocabularyService.suggest("zz", null, null, null).size());
+    assertEquals(2, vocabularyService.suggest(null, null, null, null).size());
+    assertEquals(2, vocabularyService.suggest("label", null, null, null).size());
+    assertEquals(1, vocabularyService.suggest("labeleng", null, null, null).size());
+    assertEquals(
+        0, vocabularyService.suggest("labeleng", LanguageRegion.SPANISH, null, null).size());
+    assertEquals(1, vocabularyService.suggest("label", LanguageRegion.SPANISH, null, null).size());
+    assertEquals(
+        1, vocabularyService.suggest("labeleng", LanguageRegion.ENGLISH, null, null).size());
+
+    result =
+        vocabularyService.suggest("label", LanguageRegion.SPANISH, LanguageRegion.ENGLISH, null);
+    assertEquals(2, result.size());
+    result.forEach(
+        dto -> {
+          if (dto.getName().equals(v2.getName())) {
+            assertEquals(LanguageRegion.ENGLISH, dto.getLabelLanguage());
+          } else {
+            assertEquals(LanguageRegion.SPANISH, dto.getLabelLanguage());
+          }
+        });
   }
 
   static class ContexInitializer

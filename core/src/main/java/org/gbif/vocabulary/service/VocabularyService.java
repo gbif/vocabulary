@@ -18,6 +18,7 @@ import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
 import java.util.List;
@@ -52,9 +53,15 @@ public interface VocabularyService extends BaseService<Vocabulary> {
    *
    * @param query suggestion
    * @param languageRegion locale to filter by
+   * @param fallbackLanguageRegion fallback locale to show in the response
+   * @param limit to limit the results, up to 20
    * @return a list of up to 20 suggested vocabularies
    */
-  List<KeyNameResult> suggest(String query, @Nullable LanguageRegion languageRegion);
+  List<SuggestResult> suggest(
+      String query,
+      @Nullable LanguageRegion languageRegion,
+      @Nullable LanguageRegion fallbackLanguageRegion,
+      @Nullable Integer limit);
 
   /**
    * Deprecates a vocabulary with a replacement.

@@ -22,6 +22,8 @@ import org.gbif.vocabulary.model.search.KeyNameResult;
 import java.util.Arrays;
 import java.util.List;
 
+import org.gbif.vocabulary.model.search.SuggestResult;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +129,7 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     return vocabulary;
   }
 
-  void suggestTest(List<KeyNameResult> suggestions) throws Exception {
+  void suggestTest(List<SuggestResult> suggestions) throws Exception {
     MvcResult mvcResult =
         mockMvc
             .perform(get(getBasePath() + "/suggest?q=foo"))
@@ -141,14 +143,12 @@ abstract class BaseResourceTest<T extends VocabularyEntity> {
     assertEquals(suggestions.size(), resultList.size());
   }
 
-  List<KeyNameResult> createSuggestions() {
-    KeyNameResult keyNameResult1 = new KeyNameResult();
-    keyNameResult1.setKey(1);
-    keyNameResult1.setName("n1");
-    KeyNameResult keyNameResult2 = new KeyNameResult();
-    keyNameResult2.setKey(2);
-    keyNameResult2.setName("n2");
-    return ImmutableList.of(keyNameResult1, keyNameResult2);
+  List<SuggestResult> createSuggestions() {
+    SuggestResult result1 = new SuggestResult();
+    result1.setName("n1");
+    SuggestResult result2 = new SuggestResult();
+    result2.setName("n2");
+    return ImmutableList.of(result1, result2);
   }
 
   abstract String getBasePath();

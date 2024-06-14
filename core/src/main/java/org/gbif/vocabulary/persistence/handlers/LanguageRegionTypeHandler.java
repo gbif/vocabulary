@@ -24,6 +24,8 @@ import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedTypes;
 import org.apache.ibatis.type.TypeHandler;
 
+import com.google.common.base.Strings;
+
 @MappedTypes({LanguageRegion.class})
 public class LanguageRegionTypeHandler implements TypeHandler<LanguageRegion> {
 
@@ -36,16 +38,24 @@ public class LanguageRegionTypeHandler implements TypeHandler<LanguageRegion> {
 
   @Override
   public LanguageRegion getResult(ResultSet rs, String columnName) throws SQLException {
-    return LanguageRegion.fromLocale(rs.getString(columnName));
+    return convertResult(rs.getString(columnName));
   }
 
   @Override
   public LanguageRegion getResult(ResultSet rs, int columnIndex) throws SQLException {
-    return LanguageRegion.fromLocale(rs.getString(columnIndex));
+    return convertResult(rs.getString(columnIndex));
   }
 
   @Override
   public LanguageRegion getResult(CallableStatement cs, int columnIndex) throws SQLException {
-    return LanguageRegion.fromLocale(cs.getString(columnIndex));
+    return convertResult(cs.getString(columnIndex));
+  }
+
+  private LanguageRegion convertResult(String value) {
+    if (Strings.isNullOrEmpty(value)) {
+      return null;
+    }
+
+    return LanguageRegion.fromLocale(value);
   }
 }

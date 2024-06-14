@@ -835,14 +835,6 @@ public class ConceptResource {
   @GetMapping(LATEST_RELEASE_PATH)
   public PagingResponse<ConceptView> listConceptsLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName, ConceptListParams params) {
-    if (!conceptService.existsLatestReleaseView(vocabularyName)) {
-      throw new EntityNotFoundException(
-          EntityType.RELEASE,
-          "No release view found for "
-              + vocabularyName
-              + ". Please make sure the vocabulary has been released.");
-    }
-
     PagingResponse<Concept> conceptsPage =
         conceptService.listLatestRelease(
             ConceptSearchParams.builder()
@@ -897,14 +889,6 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @RequestParam(value = "includeParents", required = false) boolean includeParents,
       @RequestParam(value = "includeChildren", required = false) boolean includeChildren) {
-    if (!conceptService.existsLatestReleaseView(vocabularyName)) {
-      throw new EntityNotFoundException(
-          EntityType.RELEASE,
-          "No release view found for "
-              + vocabularyName
-              + ". Please make sure the vocabulary has been released.");
-    }
-
     Concept concept = conceptService.getByNameLatestRelease(conceptName, vocabularyName);
     if (concept == null) {
       return null;

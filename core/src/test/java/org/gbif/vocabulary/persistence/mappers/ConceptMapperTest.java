@@ -225,6 +225,14 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         c2.getKey(),
         Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
 
+    conceptMapper.addLabel(
+            c2.getKey(),
+            Label.builder()
+                    .language(LanguageRegion.PORTUGUESE)
+                    .value("tílDE")
+                    .createdBy("test")
+                    .build());
+
     // check result values
     List<SuggestDto> result =
         conceptMapper.suggest("suggest1", c1.getVocabularyKey(), null, null, DEFAULT_SUGGEST_LIMIT);
@@ -258,7 +266,21 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         c2.getKey(),
         conceptMapper
             .suggest("Label", c1.getVocabularyKey(), LanguageRegion.ENGLISH, null, 1)
-            .get(0).getKey());
+            .get(0)
+            .getKey());
+
+    assertEquals(
+        c2.getKey(),
+        conceptMapper
+            .suggest("TILDE", c1.getVocabularyKey(), LanguageRegion.PORTUGUESE, null, 1)
+            .get(0)
+            .getKey());
+    assertEquals(
+        c2.getKey(),
+        conceptMapper
+            .suggest("Tílde", c1.getVocabularyKey(), LanguageRegion.PORTUGUESE, null, 1)
+            .get(0)
+            .getKey());
 
     Concept c3 = createNewEntity();
     c3.setVocabularyKey(vocabularies[1].getKey());

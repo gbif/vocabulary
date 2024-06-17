@@ -167,7 +167,7 @@
       (
         <include refid="SUGGEST_FALLBACK_Q">
           <property name="q" value="cl.value = unaccent(trim(#{query}))"/>
-          <property name="score" value="90"/>
+          <property name="score" value="100"/>
         </include>
       )
     </if>
@@ -175,7 +175,7 @@
     (
       <include refid="SUGGEST_NAME_Q">
         <property name="q" value="c.name = unaccent(trim(#{query}))"/>
-        <property name="score" value="80"/>
+        <property name="score" value="100"/>
       </include>
     )
     UNION ALL
@@ -190,7 +190,7 @@
       (
         <include refid="SUGGEST_FALLBACK_Q">
           <property name="q" value="cl.value ilike unaccent(trim(#{query}))||'%'"/>
-          <property name="score" value="60"/>
+          <property name="score" value="70"/>
         </include>
       )
     </if>
@@ -198,14 +198,14 @@
     (
       <include refid="SUGGEST_NAME_Q">
         <property name="q" value="c.name ilike unaccent(trim(#{query}))||'%'"/>
-        <property name="score" value="50"/>
+        <property name="score" value="70"/>
       </include>
     )
     UNION ALL
     (
       <include refid="SUGGEST_LANG_Q">
         <property name="q" value="cl.value ilike '%'||unaccent(trim(#{query}))||'%' AND NOT cl.value ilike unaccent(trim(#{query}))||'%'"/>
-        <property name="score" value="40"/>
+        <property name="score" value="50"/>
       </include>
     )
     <if test="lang != null and fallbackLang != null">
@@ -213,7 +213,7 @@
       (
         <include refid="SUGGEST_FALLBACK_Q">
           <property name="q" value="cl.value ilike '%'||unaccent(trim(#{query}))||'%' AND NOT cl.value ilike unaccent(trim(#{query}))||'%'"/>
-          <property name="score" value="30"/>
+          <property name="score" value="50"/>
         </include>
       )
     </if>
@@ -221,7 +221,7 @@
     (
       <include refid="SUGGEST_NAME_Q">
         <property name="q" value="c.name ilike '%'||unaccent(trim(#{query}))||'%' AND NOT c.name ilike unaccent(trim(#{query}))||'%'"/>
-        <property name="score" value="20"/>
+        <property name="score" value="50"/>
       </include>
      )
     ) t1

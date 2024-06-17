@@ -253,6 +253,13 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     assertSuggest(1, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.SPANISH);
     assertSuggest(2, "su", c1.getVocabularyKey(), LanguageRegion.ARPITAN, LanguageRegion.AFRIKAANS);
 
+    // test order
+    assertEquals(
+        c2.getKey(),
+        conceptMapper
+            .suggest("Label", c1.getVocabularyKey(), LanguageRegion.ENGLISH, null, 1)
+            .get(0).getKey());
+
     Concept c3 = createNewEntity();
     c3.setVocabularyKey(vocabularies[1].getKey());
     c3.setName("Suggest333");

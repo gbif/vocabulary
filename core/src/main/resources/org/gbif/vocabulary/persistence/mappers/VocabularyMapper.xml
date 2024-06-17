@@ -192,91 +192,119 @@
   </select>
 
   <select id="suggest" resultMap="SUGGEST_RESULT_MAP">
-    SELECT DISTINCT ON(key) key, name, label, labelLang
+    SELECT * FROM (
+    SELECT DISTINCT ON(key) key, name, label, labelLang, score
     FROM (
       (
-        SELECT v.key, v.name, vl.value AS label, vl.language AS labelLang
-        FROM vocabulary v
-        JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
-        WHERE vl.value ilike #{query}||'%' AND v.deprecated IS NULL
-        <if test="lang != null">
-          AND vl.language = #{lang}
-        </if>
-        ORDER BY vl.value
-        LIMIT #{limit}
+        <include refid="SUGGEST_LANG_Q">
+          <property name="q" value="vl.value = unaccent(trim(#{query}))"/>
+          <property name="score" value="100"/>
+        </include>
       )
     <if test="lang != null and fallbackLang != null">
       UNION ALL
       (
-        SELECT v.key, v.name, vl.value AS label, vl.language AS labelLang
-        FROM vocabulary v
-        JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
-        WHERE vl.value ilike #{query}||'%' AND v.deprecated IS NULL AND vl.language = #{fallbackLang}
-        AND NOT EXISTS (
-          SELECT * FROM vocabulary_label vl2 WHERE vl2.vocabulary_key = v.key AND vl2.language = #{lang}
-        )
-        ORDER BY vl.value
-        LIMIT #{limit}
+        <include refid="SUGGEST_FALLBACK_Q">
+          <property name="q" value="vl.value = unaccent(trim(#{query}))"/>
+          <property name="score" value="100"/>
+        </include>
       )
     </if>
       UNION ALL
       (
-        SELECT v.key AS key, v.name AS name, NULL AS label, NULL AS labelLang
-        FROM vocabulary v
-        WHERE v.deprecated IS NULL
-        AND v.name ilike #{query}||'%'
-        <if test="lang != null">
-          AND NOT EXISTS (
-          SELECT * FROM vocabulary_label vl WHERE vl.vocabulary_key = v.key
-          AND vl.language IN (#{lang}<if test="fallbackLang != null">,#{fallbackLang}</if>)
-          )
-        </if>
-        ORDER BY v.name
-        LIMIT #{limit}
+        <include refid="SUGGEST_NAME_Q">
+          <property name="q" value="v.name = unaccent(trim(#{query}))"/>
+          <property name="score" value="100"/>
+        </include>
       )
       UNION ALL
       (
-        SELECT v.key, v.name, vl.value AS label, vl.language AS labelLang
-        FROM vocabulary v
-        JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
-        WHERE vl.value ilike '%'||#{query}||'%' AND v.deprecated IS NULL
-        <if test="lang != null">
-          AND vl.language = #{lang}
-        </if>
-        ORDER BY vl.value
-        LIMIT #{limit}
+        <include refid="SUGGEST_LANG_Q">
+          <property name="q" value="vl.value ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="score" value="70"/>
+        </include>
       )
       <if test="lang != null and fallbackLang != null">
         UNION ALL
         (
-          SELECT v.key, v.name, vl.value AS label, vl.language AS labelLang
-          FROM vocabulary v
-          JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
-          WHERE vl.value ilike '%'||#{query}||'%' AND v.deprecated IS NULL AND vl.language = #{fallbackLang}
-          AND NOT EXISTS (
-          SELECT * FROM vocabulary_label vl2 WHERE vl2.vocabulary_key = v.key AND vl2.language = #{lang}
-          )
-          ORDER BY vl.value
-          LIMIT #{limit}
+          <include refid="SUGGEST_FALLBACK_Q">
+            <property name="q" value="vl.value ilike unaccent(trim(#{query}))||'%'"/>
+            <property name="score" value="70"/>
+          </include>
         )
       </if>
       UNION ALL
       (
-        SELECT v.key AS key, v.name AS name, NULL AS label, NULL AS labelLang
-        FROM vocabulary v
-        WHERE v.deprecated IS NULL
-        AND v.name ilike '%'||#{query}||'%'
-        <if test="lang != null">
-          AND NOT EXISTS (
-          SELECT * FROM vocabulary_label vl WHERE vl.vocabulary_key = v.key
-          AND vl.language IN (#{lang}<if test="fallbackLang != null">,#{fallbackLang}</if>)
-          )
-        </if>
-        ORDER BY v.name
-        LIMIT #{limit}
+        <include refid="SUGGEST_NAME_Q">
+          <property name="q" value="v.name ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="score" value="70"/>
+        </include>
         )
-    ) t1 LIMIT #{limit}
+      UNION ALL
+      (
+        <include refid="SUGGEST_LANG_Q">
+          <property name="q" value="vl.value ilike '%'||unaccent(trim(#{query}))||'%' AND NOT vl.value ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="score" value="50"/>
+        </include>
+      )
+      <if test="lang != null and fallbackLang != null">
+        UNION ALL
+        (
+        <include refid="SUGGEST_FALLBACK_Q">
+          <property name="q" value="vl.value ilike '%'||unaccent(trim(#{query}))||'%' AND NOT vl.value ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="score" value="50"/>
+        </include>
+        )
+      </if>
+      UNION ALL
+      (
+        <include refid="SUGGEST_NAME_Q">
+          <property name="q" value="v.name ilike '%'||unaccent(trim(#{query}))||'%' AND NOT v.name ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="score" value="50"/>
+        </include>
+      )
+    ) t1
+    ) t2 ORDER BY score DESC, name LIMIT #{limit}
   </select>
+
+  <sql id="SUGGEST_LANG_Q">
+    SELECT v.key, v.name, vl.value AS label, vl.language AS labelLang, ${score} AS score
+    FROM vocabulary v
+    JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
+    WHERE ${q} AND v.deprecated IS NULL
+    <if test="lang != null">
+      AND vl.language = #{lang}
+    </if>
+    ORDER BY vl.value
+    LIMIT #{limit}
+  </sql>
+
+  <sql id="SUGGEST_FALLBACK_Q">
+    SELECT v.key, v.name, vl.value AS label, vl.language AS labelLang, ${score} AS score
+    FROM vocabulary v
+    JOIN vocabulary_label vl ON vl.vocabulary_key = v.key
+    WHERE ${q} AND v.deprecated IS NULL AND vl.language = #{fallbackLang}
+    AND NOT EXISTS (
+    SELECT * FROM vocabulary_label vl2 WHERE vl2.vocabulary_key = v.key AND vl2.language = #{lang}
+    )
+    ORDER BY vl.value
+    LIMIT #{limit}
+  </sql>
+
+  <sql id="SUGGEST_NAME_Q">
+    SELECT v.key AS key, v.name AS name, NULL AS label, NULL AS labelLang, ${score} AS score
+    FROM vocabulary v
+    WHERE v.deprecated IS NULL
+    AND ${q}
+    <if test="lang != null">
+      AND NOT EXISTS (
+      SELECT * FROM vocabulary_label vl WHERE vl.vocabulary_key = v.key
+      AND vl.language IN (#{lang}<if test="fallbackLang != null">,#{fallbackLang}</if>)
+      )
+    </if>
+    ORDER BY v.name
+    LIMIT #{limit}
+  </sql>
 
   <select id="findSimilarities" resultType="KeyNameResult">
     SELECT DISTINCT ON(key) key, name

@@ -14,21 +14,10 @@
 package org.gbif.vocabulary.persistence.mappers;
 
 import org.gbif.vocabulary.TestUtils;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Definition;
-import org.gbif.vocabulary.model.Label;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.VocabularyRelease;
+import org.gbif.vocabulary.model.*;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
 import org.gbif.vocabulary.persistence.dto.SuggestDto;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -37,6 +26,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.testcontainers.containers.PostgreSQLContainer;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
 import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
@@ -272,6 +266,11 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
             assertEquals(LanguageRegion.SPANISH, dto.getLabelLang());
           }
         });
+
+    // test order
+    assertEquals(
+        v2.getKey(),
+        vocabularyMapper.suggest("Label", LanguageRegion.ENGLISH, null, 1).get(0).getKey());
   }
 
   @Test

@@ -1,0 +1,19 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+  <changeSet id="13" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+        CREATE OR REPLACE FUNCTION normalize_suggest(query text)
+        RETURNS text AS
+        $func$
+          BEGIN
+            RETURN lower(unaccent(trim(query)));
+          END
+        $func$ LANGUAGE plpgsql;
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>

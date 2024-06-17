@@ -224,6 +224,14 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
         v2.getKey(),
         Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
 
+    vocabularyMapper.addLabel(
+        v2.getKey(),
+        Label.builder()
+            .language(LanguageRegion.PORTUGUESE)
+            .value("tílDE")
+            .createdBy("test")
+            .build());
+
     // check result values
     List<SuggestDto> result =
         vocabularyMapper.suggest("suggest1", null, null, DEFAULT_SUGGEST_LIMIT);
@@ -271,6 +279,14 @@ public class VocabularyMapperTest extends BaseMapperTest<Vocabulary> {
     assertEquals(
         v2.getKey(),
         vocabularyMapper.suggest("Label", LanguageRegion.ENGLISH, null, 1).get(0).getKey());
+
+    assertEquals(
+        v2.getKey(),
+        vocabularyMapper.suggest("TILDE", LanguageRegion.PORTUGUESE, null, 1).get(0).getKey());
+
+    assertEquals(
+        v2.getKey(),
+        vocabularyMapper.suggest("Tílde", LanguageRegion.PORTUGUESE, null, 1).get(0).getKey());
   }
 
   @Test

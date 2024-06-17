@@ -197,7 +197,7 @@
     FROM (
       (
         <include refid="SUGGEST_LANG_Q">
-          <property name="q" value="vl.value = unaccent(trim(#{query}))"/>
+          <property name="q" value="normalize_suggest(vl.value) = normalize_suggest(#{query})"/>
           <property name="score" value="100"/>
         </include>
       )
@@ -213,14 +213,14 @@
       UNION ALL
       (
         <include refid="SUGGEST_NAME_Q">
-          <property name="q" value="v.name = unaccent(trim(#{query}))"/>
+          <property name="q" value="normalize_suggest(v.name) = normalize_suggest(#{query})"/>
           <property name="score" value="100"/>
         </include>
       )
       UNION ALL
       (
         <include refid="SUGGEST_LANG_Q">
-          <property name="q" value="vl.value ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="q" value="normalize_suggest(vl.value) ilike normalize_suggest(#{query})||'%'"/>
           <property name="score" value="70"/>
         </include>
       )
@@ -228,7 +228,7 @@
         UNION ALL
         (
           <include refid="SUGGEST_FALLBACK_Q">
-            <property name="q" value="vl.value ilike unaccent(trim(#{query}))||'%'"/>
+            <property name="q" value="normalize_suggest(vl.value) ilike normalize_suggest(#{query})||'%'"/>
             <property name="score" value="70"/>
           </include>
         )
@@ -236,14 +236,15 @@
       UNION ALL
       (
         <include refid="SUGGEST_NAME_Q">
-          <property name="q" value="v.name ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="q" value="normalize_suggest(v.name) ilike normalize_suggest(#{query})||'%'"/>
           <property name="score" value="70"/>
         </include>
         )
       UNION ALL
       (
         <include refid="SUGGEST_LANG_Q">
-          <property name="q" value="vl.value ilike '%'||unaccent(trim(#{query}))||'%' AND NOT vl.value ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="q" value="normalize_suggest(vl.value) ilike '%'||normalize_suggest(#{query})||'%'
+                                    AND NOT normalize_suggest(vl.value) ilike normalize_suggest(#{query})||'%'"/>
           <property name="score" value="50"/>
         </include>
       )
@@ -251,7 +252,8 @@
         UNION ALL
         (
         <include refid="SUGGEST_FALLBACK_Q">
-          <property name="q" value="vl.value ilike '%'||unaccent(trim(#{query}))||'%' AND NOT vl.value ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="q" value="normalize_suggest(vl.value) ilike '%'||normalize_suggest(#{query})||'%'
+                                    AND NOT normalize_suggest(vl.value) ilike normalize_suggest(#{query})||'%'"/>
           <property name="score" value="50"/>
         </include>
         )
@@ -259,7 +261,8 @@
       UNION ALL
       (
         <include refid="SUGGEST_NAME_Q">
-          <property name="q" value="v.name ilike '%'||unaccent(trim(#{query}))||'%' AND NOT v.name ilike unaccent(trim(#{query}))||'%'"/>
+          <property name="q" value="normalize_suggest(v.name) ilike '%'||normalize_suggest(#{query})||'%'
+                          AND NOT normalize_suggest(v.name) ilike normalize_suggest(#{query})||'%'"/>
           <property name="score" value="50"/>
         </include>
       )

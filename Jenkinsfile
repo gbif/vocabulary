@@ -71,7 +71,7 @@ pipeline {
                     not { expression { params.RELEASE } };
                     anyOf {
                         branch 'dev';
-                        branch 'suggest_fallback'
+                        branch 'dev_jdk8'
                     }
                 }
             }
@@ -112,7 +112,7 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    branch 'suggest_fallback';
+                    branch 'dev_jdk8';
                 }
             }
             steps {

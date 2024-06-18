@@ -226,12 +226,12 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
         Label.builder().language(LanguageRegion.ENGLISH).value("Label").createdBy("test").build());
 
     conceptMapper.addLabel(
-            c2.getKey(),
-            Label.builder()
-                    .language(LanguageRegion.PORTUGUESE)
-                    .value("tílDE")
-                    .createdBy("test")
-                    .build());
+        c2.getKey(),
+        Label.builder()
+            .language(LanguageRegion.PORTUGUESE)
+            .value("tílDE")
+            .createdBy("test")
+            .build());
 
     // check result values
     List<SuggestDto> result =

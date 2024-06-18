@@ -100,7 +100,7 @@
     <swagger-annotations.version>2.2.0</swagger-annotations.version>
 
     <!-- version limited by gbif-api -->
-    <guava.version>27.0-jre</guava.version>
+    <guava.version>32.0.0-jre</guava.version>
 
     <!-- ZK -->
     <spring-cloud-zookeeper.version>2.2.5.RELEASE</spring-cloud-zookeeper.version>

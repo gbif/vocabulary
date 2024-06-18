@@ -13,6 +13,11 @@
  */
 package org.gbif.vocabulary.restws.documentation;
 
+import org.gbif.api.documentation.CommonParameters;
+import org.gbif.vocabulary.model.LanguageRegion;
+
+import java.lang.annotation.*;
+
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.Explode;
@@ -21,10 +26,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.gbif.api.documentation.CommonParameters;
-import org.gbif.vocabulary.model.LanguageRegion;
-
-import java.lang.annotation.*;
 
 public class Docs {
 

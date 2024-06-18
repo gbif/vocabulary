@@ -13,16 +13,6 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.enums.Explode;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.extensions.Extension;
-import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.assertj.core.util.Strings;
 import org.gbif.api.documentation.CommonParameters;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -41,8 +31,6 @@ import org.gbif.vocabulary.restws.documentation.Docs;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.TagService;
 import org.gbif.vocabulary.service.VocabularyService;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -50,6 +38,20 @@ import java.util.function.LongFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.assertj.core.util.Strings;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.Explode;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.extensions.Extension;
+import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.restws.resources.LatestReleaseCache.conceptSuggestLatestReleaseCache;

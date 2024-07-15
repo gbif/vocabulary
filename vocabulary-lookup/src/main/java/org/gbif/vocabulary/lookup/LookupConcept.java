@@ -13,12 +13,10 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.Concept;
-
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.gbif.vocabulary.model.Concept;
 
 @Data
 @AllArgsConstructor(staticName = "of")
@@ -26,4 +24,5 @@ public class LookupConcept {
 
   private Concept concept;
   private List<String> parents;
+  private List<String> tags;
 }

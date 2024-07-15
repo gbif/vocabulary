@@ -525,8 +525,7 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
         conceptClient
             .lookup(
                 defaultVocabularyName,
-                c1.getName().toUpperCase(),
-                ConceptClient.LookupParams.of(null))
+                ConceptClient.LookupParams.of(c1.getName().toUpperCase(), null))
             .size());
   }
 

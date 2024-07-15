@@ -75,7 +75,7 @@
     <gbif-common-ws.version>1.21</gbif-common-ws.version>
 
     <!-- DB -->
-    <postgresql-testcontainers.version>1.16.0</postgresql-testcontainers.version>
+    <postgresql-testcontainers.version>1.19.8</postgresql-testcontainers.version>
     <mybatis.spring.boot.starter>2.1.0</mybatis.spring.boot.starter>
     <postgresql.version>42.2.23</postgresql.version>
 

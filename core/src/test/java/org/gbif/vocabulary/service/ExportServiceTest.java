@@ -13,19 +13,15 @@
  */
 package org.gbif.vocabulary.service;
 
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Definition;
-import org.gbif.vocabulary.model.HiddenLabel;
-import org.gbif.vocabulary.model.Label;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.UserRoles;
-import org.gbif.vocabulary.model.Vocabulary;
-import org.gbif.vocabulary.model.export.Export;
-import org.gbif.vocabulary.model.export.VocabularyExportView;
-import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -33,22 +29,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.Vocabulary;
+import org.gbif.vocabulary.model.export.Export;
+import org.gbif.vocabulary.model.export.VocabularyExportView;
+import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
 
 /** Tests the {@link ExportService}. */
 public class ExportServiceTest extends MockServiceBaseTest {
@@ -88,6 +86,15 @@ public class ExportServiceTest extends MockServiceBaseTest {
     assertEquals(export.getVocabularyExport().getVocabulary().getName(), vocabularyName);
     assertEquals(3, export.getConceptExports().size());
     assertNotNull(export.getMetadata().getCreatedDate());
+
+    export
+        .getConceptExports()
+        .forEach(
+            c -> {
+              if (c.getConcept().getName().equals("c1")) {
+                assertEquals(2, c.getTags().size());
+              }
+            });
   }
 
   private void mockVocabulary(String vocabularyName) {
@@ -100,6 +107,14 @@ public class ExportServiceTest extends MockServiceBaseTest {
     c1.setName("c1");
     c1.setVocabularyKey(vocabulary.getKey());
     c1.setCreated(LocalDateTime.now());
+
+    // tags
+    Tag tag1 = new Tag();
+    tag1.setName("tag1");
+    c1.getTags().add(tag1);
+    Tag tag2 = new Tag();
+    tag2.setName("tag2");
+    c1.getTags().add(tag2);
 
     // labels
     List<Label> c1Labels = new ArrayList<>();

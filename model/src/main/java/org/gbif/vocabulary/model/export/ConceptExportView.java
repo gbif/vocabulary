@@ -34,4 +34,5 @@ public class ConceptExportView {
   private Map<LanguageRegion, String> label = new EnumMap<>(LanguageRegion.class);
   private Map<LanguageRegion, Set<String>> alternativeLabels = new EnumMap<>(LanguageRegion.class);
   private Set<String> hiddenLabels = new HashSet<>();
+  private Set<String> tags = new HashSet<>();
 }

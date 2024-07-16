@@ -36,7 +36,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.cache2k.Cache;
 import org.cache2k.Cache2kBuilder;
-import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.export.ConceptExportView;
 import org.gbif.vocabulary.model.export.Export;
@@ -352,11 +351,16 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
 
   private LookupConcept toLookupConcept(ConceptExportView conceptExportView) {
     // find parents
-    List<String> parents = new ArrayList<>();
+    List<LookupConcept.Parent> parents = new ArrayList<>();
     Long parentKey = conceptExportView.getConcept().getParentKey();
     while (parentKey != null) {
       ConceptExportView parent = conceptsByKeyCache.get(parentKey);
-      parents.add(parent.getConcept().getName());
+
+      if (parent == null) {
+        break;
+      }
+
+      parents.add(LookupConcept.Parent.from(parent));
 
       if (parentKey.equals(parent.getConcept().getParentKey())) {
         // this should never happen but we protect against it

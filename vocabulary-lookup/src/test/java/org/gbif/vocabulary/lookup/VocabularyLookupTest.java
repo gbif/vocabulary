@@ -52,7 +52,7 @@ public class VocabularyLookupTest {
     assertTrue(concept.isPresent());
     assertEquals("February", concept.get().getConcept().getName());
     assertEquals(1, concept.get().getParents().size());
-    assertTrue(concept.get().getParents().contains("January"));
+    assertTrue(concept.get().getParents().stream().anyMatch(p -> p.getName().equals("January")));
 
     concept = vocabulary.lookup("Fev");
     assertTrue(concept.isPresent());
@@ -73,7 +73,8 @@ public class VocabularyLookupTest {
     concept = vocabulary.lookup("march");
     assertTrue(concept.isPresent());
     assertEquals(2, concept.get().getParents().size());
-    assertEquals(Arrays.asList("February", "January"), concept.get().getParents());
+    assertEquals("February", concept.get().getParents().get(0).getName());
+    assertEquals("January", concept.get().getParents().get(1).getName());
   }
 
   @Test

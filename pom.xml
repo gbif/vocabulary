@@ -94,6 +94,7 @@
     <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
     <feign.version>10.11</feign.version>
     <opencsv.version>5.7.1</opencsv.version>
+    <kotlin.version>1.4.20</kotlin.version>
 
     <!-- documentation -->
     <springdoc-openapi-ui.version>1.5.8</springdoc-openapi-ui.version>
@@ -379,6 +380,18 @@
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-common</artifactId>
         <version>${hadoop.version}</version>
+      </dependency>
+
+      <!-- needed for the cli -->
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib-common</artifactId>
+        <version>${kotlin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib</artifactId>
+        <version>${kotlin.version}</version>
       </dependency>
 
       <!-- tests -->

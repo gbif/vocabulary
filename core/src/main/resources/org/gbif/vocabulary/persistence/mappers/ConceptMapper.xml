@@ -766,7 +766,7 @@
     FROM tag t
     INNER JOIN concept_tag ct ON ct.tag_key = t.key
     INNER JOIN concept c ON c.key = ct.concept_key
-    WHERE c.vocabulary_key = ${vocabKey}
+    WHERE c.vocabulary_key = ${vocabKey};
     CREATE UNIQUE INDEX IF NOT EXISTS tag_${vocabName}_release_mv_unique
     ON tag_${vocabName}_latest_release_mv(name);
 
@@ -774,7 +774,7 @@
     SELECT ct.*
     FROM concept_tag ct
     INNER JOIN concept c ON c.key = ct.concept_key
-    WHERE c.vocabulary_key = ${vocabKey}
+    WHERE c.vocabulary_key = ${vocabKey};
     CREATE UNIQUE INDEX IF NOT EXISTS ct_${vocabName}_release_mv_unique
     ON concept_tag_${vocabName}_latest_release_mv(concept_key, tag_key);
   </insert>

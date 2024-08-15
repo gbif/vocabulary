@@ -763,7 +763,7 @@
       ON concept_definition_${vocabName}_latest_release_mv(concept_key, language);
 
     CREATE MATERIALIZED VIEW IF NOT EXISTS tag_${vocabName}_latest_release_mv AS
-    SELECT t.*
+    SELECT DISTINCT ON (t.key) t.*
     FROM tag t
     INNER JOIN concept_tag ct ON ct.tag_key = t.key
     INNER JOIN concept c ON c.key = ct.concept_key

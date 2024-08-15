@@ -553,10 +553,21 @@
   </select>
 
   <!-- TAGS -->
-  <select id="listTags" resultMap="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_MAP">
+  <sql id="LIST_TAGS">
     SELECT
     <include refid="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_READ_FIELDS"/>
-    FROM tag t INNER JOIN concept_tag ct ON ct.tag_key = t.key WHERE ct.concept_key = #{key,jdbcType=BIGINT}
+    FROM tag${table_suffix} t INNER JOIN concept_tag${table_suffix} ct ON ct.tag_key = t.key
+    WHERE ct.concept_key = #{key,jdbcType=BIGINT}
+  </sql>
+
+  <select id="listTags" resultMap="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_MAP">
+    <bind name="table_suffix" value="''"/>
+    <include refid="LIST_TAGS"/>
+  </select>
+
+  <select id="listTagsLatestRelease" resultMap="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LIST_TAGS"/>
   </select>
 
   <insert id="addTag">
@@ -749,6 +760,23 @@
       ON concept_definition_${vocabName}_latest_release_mv USING gin(fulltext_search);
     CREATE UNIQUE INDEX IF NOT EXISTS cd_${vocabName}_release_mv_unique
       ON concept_definition_${vocabName}_latest_release_mv(concept_key, language);
+
+    CREATE MATERIALIZED VIEW tag_${vocabName}_latest_release_mv AS
+    SELECT t.*
+    FROM tag t
+    INNER JOIN concept_tag ct ON ct.tag_key = t.key
+    INNER JOIN concept c ON c.key = ct.concept_key
+    WHERE c.vocabulary_key = ${vocabKey}
+    CREATE UNIQUE INDEX IF NOT EXISTS tag_${vocabName}_release_mv_unique
+    ON tag_${vocabName}_latest_release_mv(name);
+
+    CREATE MATERIALIZED VIEW concept_tag_${vocabName}_latest_release_mv AS
+    SELECT ct.*
+    FROM concept_tag ct
+    INNER JOIN concept c ON c.key = ct.concept_key
+    WHERE c.vocabulary_key = ${vocabKey}
+    CREATE UNIQUE INDEX IF NOT EXISTS ct_${vocabName}_release_mv_unique
+    ON concept_tag_${vocabName}_latest_release_mv(concept_key, tag_key);
   </insert>
 
   <update id="updateReleaseViews">
@@ -757,6 +785,8 @@
     REFRESH MATERIALIZED VIEW CONCURRENTLY concept_alternative_label_${vocabName}_latest_release_mv;
     REFRESH MATERIALIZED VIEW CONCURRENTLY concept_hidden_label_${vocabName}_latest_release_mv;
     REFRESH MATERIALIZED VIEW CONCURRENTLY concept_definition_${vocabName}_latest_release_mv;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY tag_${vocabName}_latest_release_mv;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY concept_tag_${vocabName}_latest_release_mv;
   </update>
 
   <select id="listLatestRelease" resultType="Concept" resultMap="CONCEPT_MAP_RELEASE_VIEW">
@@ -857,6 +887,7 @@
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
     <collection property="definition" column="{entityKey=key,vocabName=vocabName}" select="listConceptDefinitionsLatestRelease"/>
     <collection property="label" column="{entityKey=key,vocabName=vocabName}" select="listConceptLabelsLatestRelease"/>
+    <collection property="tags" column="{key=key,vocabName=vocabName}" select="listTagsLatestRelease"/>
   </resultMap>
 
   <resultMap id="SUGGEST_RESULT_MAP_RELEASE_VIEW" type="SuggestDto" autoMapping="true">

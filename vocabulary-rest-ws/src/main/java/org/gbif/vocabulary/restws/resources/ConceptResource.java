@@ -266,11 +266,6 @@ public class ConceptResource {
       @RequestParam(value = "includeParents", required = false) boolean includeParents,
       @RequestParam(value = "includeChildren", required = false) boolean includeChildren) {
     Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-
-    if (concept == null) {
-      return null;
-    }
-
     ConceptView conceptView =
         createConceptView(includeParents, includeChildren, concept, vocabularyName);
 

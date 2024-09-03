@@ -13,22 +13,22 @@
  */
 package org.gbif.vocabulary.importer;
 
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.AddTagAction;
-import org.gbif.vocabulary.api.ConceptListParams;
-import org.gbif.vocabulary.api.ConceptView;
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.TagClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Definition;
-import org.gbif.vocabulary.model.HiddenLabel;
-import org.gbif.vocabulary.model.Label;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Tag;
-import org.gbif.vocabulary.model.Vocabulary;
+import static org.gbif.vocabulary.importer.Fields.ALT_LABELS_PREFIX;
+import static org.gbif.vocabulary.importer.Fields.CONCEPT;
+import static org.gbif.vocabulary.importer.Fields.CONCEPT_FIELDS;
+import static org.gbif.vocabulary.importer.Fields.DEFINITION_PREFIX;
+import static org.gbif.vocabulary.importer.Fields.EXTERNAL_DEFINITIONS;
+import static org.gbif.vocabulary.importer.Fields.LABEL_PREFIX;
+import static org.gbif.vocabulary.importer.Fields.PARENT;
+import static org.gbif.vocabulary.importer.Fields.SAME_AS_URIS;
+import static org.gbif.vocabulary.importer.Fields.TAGS;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URI;
@@ -49,27 +49,24 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.gbif.vocabulary.importer.Fields.ALT_LABELS_PREFIX;
-import static org.gbif.vocabulary.importer.Fields.CONCEPT;
-import static org.gbif.vocabulary.importer.Fields.CONCEPT_FIELDS;
-import static org.gbif.vocabulary.importer.Fields.DEFINITION_PREFIX;
-import static org.gbif.vocabulary.importer.Fields.EXTERNAL_DEFINITIONS;
-import static org.gbif.vocabulary.importer.Fields.LABEL_PREFIX;
-import static org.gbif.vocabulary.importer.Fields.PARENT;
-import static org.gbif.vocabulary.importer.Fields.SAME_AS_URIS;
-import static org.gbif.vocabulary.importer.Fields.TAGS;
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.AddTagAction;
+import org.gbif.vocabulary.api.ConceptListParams;
+import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.TagClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.Vocabulary;
 
 @Slf4j
 public class VocabularyImporter {
@@ -405,10 +402,11 @@ public class VocabularyImporter {
                 addTag(
                     vocabularyName, c.getName(), t, targetConceptClient, targetTagClient, errors));
 
-    PagingRequest page = new PagingRequest(0, 100);
+    long offset = 0;
+    int limit = 100;
     PagingResponse<Label> alternativeLables =
         conceptClient.listAlternativeLabels(
-            vocabularyName, c.getName(), ConceptClient.ListParams.of(null, page));
+            vocabularyName, c.getName(), ConceptClient.ListParams.of(null, offset, limit));
     while (!alternativeLables.getResults().isEmpty()) {
       alternativeLables
           .getResults()
@@ -417,20 +415,17 @@ public class VocabularyImporter {
                   addAlternativeLabel(
                       vocabularyName, c.getName(), al, targetConceptClient, errors));
 
+      offset += limit;
       alternativeLables =
           conceptClient.listAlternativeLabels(
-              vocabularyName,
-              c.getName(),
-              ConceptClient.ListParams.of(
-                  null,
-                  new PagingRequest(
-                      alternativeLables.getOffset() + alternativeLables.getLimit(),
-                      alternativeLables.getLimit())));
+              vocabularyName, c.getName(), ConceptClient.ListParams.of(null, offset, limit));
     }
 
-    page = new PagingRequest(0, 100);
+    offset = 0;
+    limit = 100;
     PagingResponse<HiddenLabel> hiddenLabels =
-        conceptClient.listHiddenLabels(vocabularyName, c.getName(), page);
+        conceptClient.listHiddenLabels(
+            vocabularyName, c.getName(), new PagingRequest(offset, limit));
     while (!hiddenLabels.getResults().isEmpty()) {
       hiddenLabels
           .getResults()
@@ -439,12 +434,10 @@ public class VocabularyImporter {
                   addHiddenLabel(
                       vocabularyName, errors, c.getName(), hl.getValue(), c, targetConceptClient));
 
+      offset += limit;
       hiddenLabels =
           conceptClient.listHiddenLabels(
-              vocabularyName,
-              c.getName(),
-              new PagingRequest(
-                  hiddenLabels.getOffset() + hiddenLabels.getLimit(), hiddenLabels.getLimit()));
+              vocabularyName, c.getName(), new PagingRequest(offset, limit));
     }
 
     return created.getConcept();

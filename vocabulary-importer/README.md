@@ -125,7 +125,7 @@ This tool can be run via command line by sending these params:
     columns are required so, for example, it can be used to import only definitions. When this option is used the vocabulary
     label and definition are not required.
 
-Example of a migration:
+Example of an import:
 
 ```
 java -jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \

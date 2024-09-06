@@ -5,3 +5,6 @@ spring:
 logging:
   level:
     liquibase: warn
+
+ws:
+  apiUrl: https://test.com

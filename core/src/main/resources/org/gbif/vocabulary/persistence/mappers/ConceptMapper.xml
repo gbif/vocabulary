@@ -897,5 +897,49 @@
                 select="findParentsLabelsLatestRelease"/>
   </resultMap>
 
+  <!-- lookup -->
+  <resultMap id="LOOKUP_RESULT_MAP" type="LookupDto" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="labelLang" column="label_lang" typeHandler="LanguageRegionTypeHandler"/>
+    <result property="altLabelLang" column="alt_label_lang" typeHandler="LanguageRegionTypeHandler"/>
+  </resultMap>
+
+  <select id="lookup" resultMap="LOOKUP_RESULT_MAP">
+    <bind name="table_suffix" value="''"/>
+    <include refid="LOOKUP_COMMON"/>
+  </select>
+
+  <select id="lookupLatestRelease" resultMap="LOOKUP_RESULT_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LOOKUP_COMMON"/>
+  </select>
+
+  <sql id="LOOKUP_COMMON">
+    SELECT DISTINCT ON (key) matches.*
+    FROM (
+      SELECT c.key, c.name, null AS label, null AS label_lang, null AS alt_label, null AS alt_label_lang, null AS hidden_label
+      FROM concept${table_suffix} c
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND normalize_name(c.name) = normalize_name(#{value,jdbcType=VARCHAR})
+    UNION ALL
+      SELECT c.key, c.name, cl.value  AS label, cl."language" AS label_lang, null AS alt_label, null AS alt_label_lang, null AS hidden_label
+      FROM concept${table_suffix} c
+      INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND cl.normalized_value = normalize_label(#{value,jdbcType=VARCHAR})
+    UNION ALL
+      SELECT c.key, c.name, null AS label, null AS label_lang, cal.value AS alt_label, cal."language" AS alt_label_lang, null AS hidden_label
+      FROM concept${table_suffix} c
+      INNER JOIN concept_alternative_label${table_suffix} cal ON cal.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND cal.normalized_value = normalize_label(#{value,jdbcType=VARCHAR})
+    UNION ALL
+      SELECT c.key, c.name, null AS label, null AS label_lang, null AS alt_label, null AS alt_label_lang, chl.value AS hidden_label
+      FROM concept${table_suffix} c
+      INNER JOIN concept_hidden_label${table_suffix} chl ON chl.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND chl.normalized_value = normalize_label(#{value,jdbcType=VARCHAR})
+    ) AS matches
+  </sql>
 
 </mapper>

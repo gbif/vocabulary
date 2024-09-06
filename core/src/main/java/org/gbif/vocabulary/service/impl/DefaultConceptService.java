@@ -13,47 +13,49 @@
  */
 package org.gbif.vocabulary.service.impl;
 
-import org.gbif.api.model.common.paging.Pageable;
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.*;
-import org.gbif.vocabulary.model.exception.EntityNotFoundException;
-import org.gbif.vocabulary.model.search.ChildrenResult;
-import org.gbif.vocabulary.model.search.ConceptSearchParams;
-import org.gbif.vocabulary.model.search.KeyNameResult;
-import org.gbif.vocabulary.model.search.SuggestResult;
-import org.gbif.vocabulary.model.utils.PostPersist;
-import org.gbif.vocabulary.model.utils.PrePersist;
-import org.gbif.vocabulary.persistence.dto.ParentDto;
-import org.gbif.vocabulary.persistence.dto.SuggestDto;
-import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
-import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-import org.gbif.vocabulary.service.ConceptService;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.*;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.groups.Default;
-
+import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.*;
+import org.gbif.vocabulary.model.exception.EntityNotFoundException;
+import org.gbif.vocabulary.model.normalizers.StringNormalizer;
+import org.gbif.vocabulary.model.search.ChildrenResult;
+import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.LookupResult;
+import org.gbif.vocabulary.model.search.SuggestResult;
+import org.gbif.vocabulary.model.utils.PathUtils;
+import org.gbif.vocabulary.model.utils.PostPersist;
+import org.gbif.vocabulary.model.utils.PrePersist;
+import org.gbif.vocabulary.persistence.dto.LookupDto;
+import org.gbif.vocabulary.persistence.dto.ParentDto;
+import org.gbif.vocabulary.persistence.dto.SuggestDto;
+import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
+import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+import org.gbif.vocabulary.service.ConceptService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.*;
 
 /** Default implementation for {@link ConceptService}. */
 @Service
@@ -61,13 +63,19 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.*;
 public class DefaultConceptService implements ConceptService {
 
   private static final int DEFAULT_SUGGEST_LIMIT = 20;
+  private static final String CONCEPT_LINK = "%s/vocabularies/%s/concepts/%s";
   private final ConceptMapper conceptMapper;
   private final VocabularyMapper vocabularyMapper;
+  private final String apiUrl;
 
   @Autowired
-  public DefaultConceptService(ConceptMapper conceptMapper, VocabularyMapper vocabularyMapper) {
+  public DefaultConceptService(
+      ConceptMapper conceptMapper,
+      VocabularyMapper vocabularyMapper,
+      @Value("${ws.apiUrl}") String apiUrl) {
     this.conceptMapper = conceptMapper;
     this.vocabularyMapper = vocabularyMapper;
+    this.apiUrl = apiUrl;
   }
 
   @Override
@@ -403,7 +411,10 @@ public class DefaultConceptService implements ConceptService {
     long vocabularyKey = conceptMapper.getVocabularyKey(entityKey);
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            normalizeLabel(label.getValue()), label.getLanguage(), vocabularyKey, entityKey);
+            replaceNonAsciiCharactersWithEquivalents(normalizeLabel(label.getValue())),
+            label.getLanguage(),
+            vocabularyKey,
+            entityKey);
     if (!similarities.isEmpty()) {
       throw new IllegalArgumentException(
           "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);
@@ -446,7 +457,10 @@ public class DefaultConceptService implements ConceptService {
     long vocabularyKey = conceptMapper.getVocabularyKey(entityKey);
     List<KeyNameResult> similarities =
         conceptMapper.findSimilarities(
-            normalizeName(label.getValue()), null, vocabularyKey, entityKey);
+            replaceNonAsciiCharactersWithEquivalents(normalizeName(label.getValue())),
+            null,
+            vocabularyKey,
+            entityKey);
     if (!similarities.isEmpty()) {
       throw new IllegalArgumentException(
           "Cannot create entity because it conflicts with other entities, e.g.: " + similarities);
@@ -563,18 +577,21 @@ public class DefaultConceptService implements ConceptService {
   @Override
   public List<Definition> listDefinitionsLatestRelease(
       long entityKey, List<LanguageRegion> languageRegions, String vocabularyName) {
+    checkReleaseExists(vocabularyName);
     return conceptMapper.listDefinitionsLatestRelease(entityKey, languageRegions, vocabularyName);
   }
 
   @Override
   public List<Label> listLabelsLatestRelease(
       long entityKey, List<LanguageRegion> languageRegions, String vocabularyName) {
+    checkReleaseExists(vocabularyName);
     return conceptMapper.listLabelsLatestRelease(entityKey, languageRegions, vocabularyName);
   }
 
   @Override
   public PagingResponse<Label> listAlternativeLabelsLatestRelease(
       long entityKey, List<LanguageRegion> languageRegions, Pageable page, String vocabularyName) {
+    checkReleaseExists(vocabularyName);
     page = page != null ? page : new PagingRequest();
     return new PagingResponse<>(
         page,
@@ -587,11 +604,85 @@ public class DefaultConceptService implements ConceptService {
   @Override
   public PagingResponse<HiddenLabel> listHiddenLabelsLatestRelease(
       long entityKey, Pageable page, String vocabularyName) {
+    checkReleaseExists(vocabularyName);
     page = page != null ? page : new PagingRequest();
     return new PagingResponse<>(
         page,
         conceptMapper.countHiddenLabelsLatestRelease(entityKey, vocabularyName),
         conceptMapper.listHiddenLabelsLatestRelease(entityKey, page, vocabularyName));
+  }
+
+  @Override
+  public List<LookupResult> lookup(
+      String value, String vocabularyName, @Nullable LanguageRegion languageRegion) {
+    return lookupInternal(value, vocabularyName, languageRegion, false);
+  }
+
+  @Override
+  public List<LookupResult> lookupLatestRelease(
+      String value, String vocabularyName, LanguageRegion languageRegion) {
+    checkReleaseExists(vocabularyName);
+    return lookupInternal(value, vocabularyName, languageRegion, true);
+  }
+
+  private List<LookupResult> lookupInternal(
+      String value, String vocabularyName, LanguageRegion languageRegion, boolean latestRelease) {
+    checkArgument(!Strings.isNullOrEmpty(value));
+
+    Long vocabularyKey = vocabularyMapper.getKeyByName(vocabularyName);
+    Objects.requireNonNull(vocabularyKey);
+
+    String normalizedValue = StringNormalizer.replaceNonAsciiCharactersWithEquivalents(value);
+    List<LookupDto> dtos = new ArrayList<>();
+    if (latestRelease) {
+      dtos = conceptMapper.lookupLatestRelease(normalizedValue, vocabularyKey, vocabularyName);
+    } else {
+      dtos = conceptMapper.lookup(normalizedValue, vocabularyKey);
+    }
+
+    if (!dtos.isEmpty() && languageRegion != null) {
+      List<LookupDto> dtosByLang =
+          dtos.stream()
+              .filter(
+                  d -> d.getLabelLang() == languageRegion || d.getAltLabelLang() == languageRegion)
+              .collect(Collectors.toList());
+
+      if (dtosByLang.isEmpty()) {
+        // we use English as fallback
+        dtosByLang =
+            dtos.stream()
+                .filter(
+                    d ->
+                        (d.getLabelLang() == null && d.getAltLabelLang() == null)
+                            || d.getLabelLang() == LanguageRegion.ENGLISH
+                            || d.getAltLabelLang() == LanguageRegion.ENGLISH)
+                .collect(Collectors.toList());
+      }
+
+      dtos = dtosByLang;
+    }
+
+    return dtos.stream()
+        .map(
+            d -> {
+              LookupResult lookupResult = new LookupResult();
+              lookupResult.setConceptName(d.getName());
+              lookupResult.setMatchedLabel(d.getLabel());
+              lookupResult.setMatchedLabelLanguage(d.getLabelLang());
+              lookupResult.setMatchedAlternativeLabel(d.getAltLabel());
+              lookupResult.setMatchedAlternativeLabelLanguage(d.getAltLabelLang());
+              lookupResult.setMatchedHiddenLabel(d.getHiddenLabel());
+              lookupResult.setConceptLink(
+                  String.format(
+                      CONCEPT_LINK,
+                      apiUrl,
+                      vocabularyName,
+                      latestRelease
+                          ? PathUtils.LATEST_RELEASE_PATH + "/" + d.getName()
+                          : d.getName()));
+              return lookupResult;
+            })
+        .collect(Collectors.toList());
   }
 
   private void checkReleaseExists(String vocabularyName) {

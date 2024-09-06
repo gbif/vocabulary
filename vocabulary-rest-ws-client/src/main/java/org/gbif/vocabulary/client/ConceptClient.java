@@ -29,6 +29,7 @@ import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.KeyNameResult;
+import org.gbif.vocabulary.model.search.LookupResult;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -298,6 +299,18 @@ public interface ConceptClient {
   List<KeyNameResult> suggestLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @SpringQueryMap SuggestParams suggestParams);
+
+  @GetMapping(value = "lookup", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<LookupResult> lookup(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @RequestParam("value") String value,
+      @SpringQueryMap LanguageRegion lang);
+
+  @GetMapping(value = "latestRelease/lookup", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<LookupResult> lookupInLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @RequestParam("value") String value,
+      @SpringQueryMap LanguageRegion lang);
 
   @AllArgsConstructor(staticName = "of")
   class ListParams {

@@ -13,6 +13,27 @@
  */
 package org.gbif.vocabulary.service;
 
+import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
+import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+import static org.gbif.vocabulary.TestUtils.assertDeprecated;
+import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
+import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
+import static org.gbif.vocabulary.TestUtils.createBasicConcept;
+import static org.gbif.vocabulary.TestUtils.createBasicVocabulary;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import javax.sql.DataSource;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.PostgresDBExtension;
@@ -25,17 +46,9 @@ import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.LookupResult;
 import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import javax.sql.DataSource;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,21 +65,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
-import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
-import static org.gbif.vocabulary.TestUtils.assertDeprecated;
-import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
-import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
-import static org.gbif.vocabulary.TestUtils.createBasicConcept;
-import static org.gbif.vocabulary.TestUtils.createBasicVocabulary;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Integration tests for the {@link ConceptService}. */
 @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)
@@ -958,6 +956,103 @@ public class ConceptServiceIT {
                 assertEquals(LanguageRegion.ENGLISH, p.getLabelLanguage());
               }
             });
+  }
+
+  @Test
+  public void lookupTest() {
+    Concept c1 = createBasicConcept(vocabularies[0].getKey());
+    conceptService.create(c1);
+    Concept c2 = createBasicConcept(vocabularies[0].getKey());
+    conceptService.create(c2);
+
+    List<LookupResult> results =
+        conceptService.lookup(c1.getName().toUpperCase(), vocabularies[0].getName(), null);
+    assertEquals(1, results.size());
+    assertEquals(c1.getName(), results.get(0).getConceptName());
+    assertNull(results.get(0).getMatchedLabel());
+    assertNull(results.get(0).getMatchedLabelLanguage());
+    assertNull(results.get(0).getMatchedAlternativeLabel());
+    assertNull(results.get(0).getMatchedAlternativeLabelLanguage());
+    assertNull(results.get(0).getMatchedHiddenLabel());
+
+    results =
+        conceptService.lookup(
+            c1.getName().toUpperCase(), vocabularies[0].getName(), LanguageRegion.ACHOLI);
+    assertEquals(1, results.size());
+    assertEquals(c1.getName(), results.get(0).getConceptName());
+
+    conceptService.addLabel(
+        c1.getKey(),
+        Label.builder()
+            .value("concept1")
+            .language(LanguageRegion.ENGLISH)
+            .createdBy("test")
+            .build());
+    results = conceptService.lookup("Concept1", vocabularies[0].getName(), null);
+    assertEquals(1, results.size());
+    assertEquals(c1.getName(), results.get(0).getConceptName());
+    assertEquals("concept1", results.get(0).getMatchedLabel());
+    assertEquals(LanguageRegion.ENGLISH, results.get(0).getMatchedLabelLanguage());
+    assertNull(results.get(0).getMatchedAlternativeLabel());
+    assertNull(results.get(0).getMatchedAlternativeLabelLanguage());
+    assertNull(results.get(0).getMatchedHiddenLabel());
+
+    conceptService.addAlternativeLabel(
+        c2.getKey(),
+        Label.builder()
+            .value("alternative 2")
+            .language(LanguageRegion.ENGLISH)
+            .createdBy("test")
+            .build());
+    results = conceptService.lookup("ALternátive2", vocabularies[0].getName(), null);
+    assertEquals(1, results.size());
+    assertEquals(c2.getName(), results.get(0).getConceptName());
+    assertNull(results.get(0).getMatchedLabel());
+    assertNull(results.get(0).getMatchedLabelLanguage());
+    assertEquals("alternative 2", results.get(0).getMatchedAlternativeLabel());
+    assertEquals(LanguageRegion.ENGLISH, results.get(0).getMatchedAlternativeLabelLanguage());
+    assertNull(results.get(0).getMatchedHiddenLabel());
+
+    conceptService.addHiddenLabel(
+        c1.getKey(), HiddenLabel.builder().value("first").createdBy("test").build());
+    results = conceptService.lookup("first", vocabularies[0].getName(), null);
+    assertEquals(1, results.size());
+    assertEquals(c1.getName(), results.get(0).getConceptName());
+    assertNull(results.get(0).getMatchedLabel());
+    assertNull(results.get(0).getMatchedLabelLanguage());
+    assertNull(results.get(0).getMatchedAlternativeLabel());
+    assertNull(results.get(0).getMatchedAlternativeLabelLanguage());
+    assertEquals("first", results.get(0).getMatchedHiddenLabel());
+
+    conceptService.addLabel(
+        c2.getKey(),
+        Label.builder()
+            .value("concept1")
+            .language(LanguageRegion.SPANISH)
+            .createdBy("test")
+            .build());
+    results = conceptService.lookup("Concept1", vocabularies[0].getName(), null);
+    assertEquals(2, results.size());
+
+    results = conceptService.lookup("Concept1", vocabularies[0].getName(), LanguageRegion.SPANISH);
+    assertEquals(1, results.size());
+    assertEquals(c2.getName(), results.get(0).getConceptName());
+    assertEquals("concept1", results.get(0).getMatchedLabel());
+    assertEquals(LanguageRegion.SPANISH, results.get(0).getMatchedLabelLanguage());
+
+    results = conceptService.lookup("Concept1", vocabularies[0].getName(), LanguageRegion.ENGLISH);
+    assertEquals(1, results.size());
+    assertEquals(c1.getName(), results.get(0).getConceptName());
+    assertEquals("concept1", results.get(0).getMatchedLabel());
+    assertEquals(LanguageRegion.ENGLISH, results.get(0).getMatchedLabelLanguage());
+
+    // fallback to English
+    results =
+        conceptService.lookup("Concept1", vocabularies[0].getName(), LanguageRegion.PORTUGUESE);
+    assertEquals(1, results.size());
+    assertEquals(c1.getName(), results.get(0).getConceptName());
+    assertEquals("concept1", results.get(0).getMatchedLabel());
+    assertEquals(LanguageRegion.ENGLISH, results.get(0).getMatchedLabelLanguage());
   }
 
   static class ContexInitializer

@@ -65,8 +65,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
-import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARY_RELEASES_PATH;
+import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARY_RELEASES_PATH;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @OpenAPIDefinition(

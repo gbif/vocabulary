@@ -36,7 +36,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARIES_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;

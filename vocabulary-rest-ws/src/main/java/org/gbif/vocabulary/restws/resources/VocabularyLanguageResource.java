@@ -15,7 +15,7 @@ package org.gbif.vocabulary.restws.resources;
 
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.LanguageRegion.LanguageRegionAllFieldsSerializer;
-import org.gbif.vocabulary.restws.utils.Constants;
+import org.gbif.vocabulary.model.utils.PathUtils;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +41,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
             name = "Order",
             properties = @ExtensionProperty(name = "Order", value = "0400")))
 @RestController
-@RequestMapping(Constants.VOCABULARY_LANGUAGE_PATH)
+@RequestMapping(PathUtils.VOCABULARY_LANGUAGE_PATH)
 public class VocabularyLanguageResource {
 
   private static final SimpleModule LANGUAGE_SERIALIZER_MODULE =

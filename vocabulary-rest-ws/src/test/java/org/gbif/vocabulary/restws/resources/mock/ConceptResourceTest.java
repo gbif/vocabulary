@@ -44,8 +44,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
 
-import static org.gbif.vocabulary.restws.utils.Constants.CONCEPTS_PATH;
-import static org.gbif.vocabulary.restws.utils.Constants.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.model.utils.PathUtils.CONCEPTS_PATH;
+import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARIES_PATH;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;

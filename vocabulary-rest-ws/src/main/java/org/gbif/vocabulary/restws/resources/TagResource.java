@@ -36,7 +36,7 @@ import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.gbif.vocabulary.restws.utils.Constants.TAGS_PATH;
+import static org.gbif.vocabulary.model.utils.PathUtils.TAGS_PATH;
 
 @io.swagger.v3.oas.annotations.tags.Tag(
     name = "Tags",

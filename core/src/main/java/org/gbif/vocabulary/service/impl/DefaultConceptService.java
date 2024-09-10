@@ -20,6 +20,7 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.*;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -627,7 +628,9 @@ public class DefaultConceptService implements ConceptService {
 
   private List<LookupResult> lookupInternal(
       String value, String vocabularyName, LanguageRegion languageRegion, boolean latestRelease) {
-    checkArgument(!Strings.isNullOrEmpty(value));
+    if (Strings.isNullOrEmpty(value)) {
+      return Collections.emptyList();
+    }
 
     Long vocabularyKey = vocabularyMapper.getKeyByName(vocabularyName);
     Objects.requireNonNull(vocabularyKey);

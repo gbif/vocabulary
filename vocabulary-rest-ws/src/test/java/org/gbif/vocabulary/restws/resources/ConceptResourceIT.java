@@ -13,9 +13,9 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.gbif.vocabulary.model.utils.PathUtils.CONCEPTS_PATH;
 import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -523,7 +523,10 @@ public class ConceptResourceIT extends BaseResourceIT<Concept> {
     assertEquals(
         1,
         conceptClient
-            .lookup(defaultVocabularyName, c1.getName().toUpperCase(), LanguageRegion.ENGLISH)
+            .lookup(
+                defaultVocabularyName,
+                c1.getName().toUpperCase(),
+                ConceptClient.LookupParams.of(null))
             .size());
   }
 

@@ -304,13 +304,13 @@ public interface ConceptClient {
   List<LookupResult> lookup(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam("q") String q,
-      @SpringQueryMap LanguageRegion lang);
+      @SpringQueryMap LookupParams lookupParams);
 
   @GetMapping(value = "latestRelease/lookup", produces = MediaType.APPLICATION_JSON_VALUE)
   List<LookupResult> lookupInLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam("q") String q,
-      @SpringQueryMap LanguageRegion lang);
+      @SpringQueryMap LookupParams lookupParams);
 
   @AllArgsConstructor(staticName = "of")
   class ListParams {
@@ -325,5 +325,10 @@ public interface ConceptClient {
     LanguageRegion fallbackLocale;
     String q;
     Integer limit;
+  }
+
+  @AllArgsConstructor(staticName = "of")
+  class LookupParams {
+    LanguageRegion lang;
   }
 }

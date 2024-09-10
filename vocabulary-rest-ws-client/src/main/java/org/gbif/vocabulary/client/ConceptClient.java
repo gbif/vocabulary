@@ -303,13 +303,13 @@ public interface ConceptClient {
   @GetMapping(value = "lookup", produces = MediaType.APPLICATION_JSON_VALUE)
   List<LookupResult> lookup(
       @PathVariable("vocabularyName") String vocabularyName,
-      @RequestParam("value") String value,
+      @RequestParam("q") String q,
       @SpringQueryMap LanguageRegion lang);
 
   @GetMapping(value = "latestRelease/lookup", produces = MediaType.APPLICATION_JSON_VALUE)
   List<LookupResult> lookupInLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
-      @RequestParam("value") String value,
+      @RequestParam("q") String q,
       @SpringQueryMap LanguageRegion lang);
 
   @AllArgsConstructor(staticName = "of")

@@ -14,8 +14,8 @@
 package org.gbif.vocabulary.restws.resources;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.gbif.vocabulary.restws.resources.LatestReleaseCache.conceptSuggestLatestReleaseCache;
 import static org.gbif.vocabulary.model.utils.PathUtils.*;
+import static org.gbif.vocabulary.restws.resources.LatestReleaseCache.conceptSuggestLatestReleaseCache;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -1011,7 +1011,7 @@ public class ConceptResource {
   @Parameters(
       value = {
         @Parameter(
-            name = "value",
+            name = "q",
             description = "Value to do the lookup against to",
             schema = @Schema(implementation = String.class),
             in = ParameterIn.QUERY),
@@ -1025,10 +1025,10 @@ public class ConceptResource {
   @GetMapping("lookup")
   public List<LookupResult> lookup(
       @PathVariable("vocabularyName") String vocabularyName,
-      @RequestParam("value") String value,
+      @RequestParam("q") String q,
       LanguageRegion lang) {
     getVocabularyWithCheck(vocabularyName);
-    return conceptService.lookup(value, vocabularyName, lang);
+    return conceptService.lookup(q, vocabularyName, lang);
   }
 
   @Operation(
@@ -1043,7 +1043,7 @@ public class ConceptResource {
   @Parameters(
       value = {
         @Parameter(
-            name = "value",
+            name = "q",
             description = "Value to do the lookup against to",
             schema = @Schema(implementation = String.class),
             in = ParameterIn.QUERY),
@@ -1057,10 +1057,10 @@ public class ConceptResource {
   @GetMapping(LATEST_RELEASE_PATH + "/lookup")
   public List<LookupResult> lookupInLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
-      @RequestParam("value") String value,
+      @RequestParam("q") String q,
       LanguageRegion lang) {
     getVocabularyWithCheck(vocabularyName);
-    return conceptService.lookupLatestRelease(value, vocabularyName, lang);
+    return conceptService.lookupLatestRelease(q, vocabularyName, lang);
   }
 
   private ConceptView createConceptView(

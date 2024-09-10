@@ -975,6 +975,9 @@ public class ConceptServiceIT {
     assertNull(results.get(0).getMatchedAlternativeLabelLanguage());
     assertNull(results.get(0).getMatchedHiddenLabel());
 
+    assertTrue(
+        conceptService.lookup("", vocabularies[0].getName(), LanguageRegion.ACHOLI).isEmpty());
+
     results =
         conceptService.lookup(
             c1.getName().toUpperCase(), vocabularies[0].getName(), LanguageRegion.ACHOLI);

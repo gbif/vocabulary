@@ -13,12 +13,14 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.export.ConceptExportView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor(staticName = "of")

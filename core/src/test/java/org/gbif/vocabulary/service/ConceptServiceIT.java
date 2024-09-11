@@ -13,27 +13,6 @@
  */
 package org.gbif.vocabulary.service;
 
-import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
-import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
-import static org.gbif.vocabulary.TestUtils.assertDeprecated;
-import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
-import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
-import static org.gbif.vocabulary.TestUtils.createBasicConcept;
-import static org.gbif.vocabulary.TestUtils.createBasicVocabulary;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import javax.sql.DataSource;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.PostgresDBExtension;
@@ -49,6 +28,15 @@ import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.LookupResult;
 import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,6 +53,21 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import static org.gbif.vocabulary.TestUtils.DEFAULT_PAGE;
+import static org.gbif.vocabulary.TestUtils.DEPRECATED_BY;
+import static org.gbif.vocabulary.TestUtils.assertDeprecated;
+import static org.gbif.vocabulary.TestUtils.assertDeprecatedWithReplacement;
+import static org.gbif.vocabulary.TestUtils.assertNotDeprecated;
+import static org.gbif.vocabulary.TestUtils.createBasicConcept;
+import static org.gbif.vocabulary.TestUtils.createBasicVocabulary;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Integration tests for the {@link ConceptService}. */
 @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)

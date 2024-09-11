@@ -553,10 +553,21 @@
   </select>
 
   <!-- TAGS -->
-  <select id="listTags" resultMap="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_MAP">
+  <sql id="LIST_TAGS">
     SELECT
     <include refid="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_READ_FIELDS"/>
-    FROM tag t INNER JOIN concept_tag ct ON ct.tag_key = t.key WHERE ct.concept_key = #{key,jdbcType=BIGINT}
+    FROM tag${table_suffix} t INNER JOIN concept_tag${table_suffix} ct ON ct.tag_key = t.key
+    WHERE ct.concept_key = #{key,jdbcType=BIGINT}
+  </sql>
+
+  <select id="listTags" resultMap="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_MAP">
+    <bind name="table_suffix" value="''"/>
+    <include refid="LIST_TAGS"/>
+  </select>
+
+  <select id="listTagsLatestRelease" resultMap="org.gbif.vocabulary.persistence.mappers.TagMapper.TAG_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LIST_TAGS"/>
   </select>
 
   <insert id="addTag">
@@ -709,46 +720,64 @@
   <!-- latest release views -->
   <select id="existsReleaseView" resultType="java.lang.Boolean">
     SELECT EXISTS (SELECT FROM pg_matviews WHERE matviewname = 'concept_${vocabName}_latest_release_mv')
+      AND EXISTS (SELECT FROM pg_matviews WHERE matviewname = 'tag_${vocabName}_latest_release_mv')
   </select>
 
   <insert id="createLatestReleaseView">
-    CREATE MATERIALIZED VIEW concept_${vocabName}_latest_release_mv AS
+    CREATE MATERIALIZED VIEW IF NOT EXISTS concept_${vocabName}_latest_release_mv AS
     SELECT *
     FROM concept c
     WHERE c.vocabulary_key = ${vocabKey};
 
-    CREATE INDEX c_${vocabName}_latest_release_mv_fulltext_idx
+    CREATE INDEX IF NOT EXISTS c_${vocabName}_latest_release_mv_fulltext_idx
       ON concept_${vocabName}_latest_release_mv USING gin(fulltext_search);
     CREATE UNIQUE INDEX IF NOT EXISTS c_${vocabName}_latest_release_mv_unique
       ON concept_${vocabName}_latest_release_mv(name);
 
-    CREATE MATERIALIZED VIEW concept_label_${vocabName}_latest_release_mv AS
+    CREATE MATERIALIZED VIEW IF NOT EXISTS concept_label_${vocabName}_latest_release_mv AS
     SELECT * FROM concept_label c WHERE c.concept_key IN (SELECT c2.key FROM concept c2 WHERE c2.vocabulary_key = ${vocabKey});
-    CREATE INDEX cl_${vocabName}_latest_release_mv_fulltext_search_idx
+    CREATE INDEX IF NOT EXISTS cl_${vocabName}_latest_release_mv_fulltext_search_idx
       ON concept_label_${vocabName}_latest_release_mv USING gin(fulltext_search);
     CREATE UNIQUE INDEX IF NOT EXISTS cl_${vocabName}_release_mv_unique
       ON concept_label_${vocabName}_latest_release_mv(concept_key, language);
 
-    CREATE MATERIALIZED VIEW concept_alternative_label_${vocabName}_latest_release_mv AS
+    CREATE MATERIALIZED VIEW IF NOT EXISTS concept_alternative_label_${vocabName}_latest_release_mv AS
     SELECT * FROM concept_alternative_label c WHERE c.concept_key IN (SELECT c2.key FROM concept c2 WHERE c2.vocabulary_key = ${vocabKey});
-    CREATE INDEX cal_${vocabName}_latest_release_mv_fulltext_search_idx
+    CREATE INDEX IF NOT EXISTS cal_${vocabName}_latest_release_mv_fulltext_search_idx
       ON concept_alternative_label_${vocabName}_latest_release_mv USING gin(fulltext_search);
     CREATE UNIQUE INDEX IF NOT EXISTS cal_${vocabName}_release_mv_unique
       ON concept_alternative_label_${vocabName}_latest_release_mv(concept_key, language, value);
 
-    CREATE MATERIALIZED VIEW concept_hidden_label_${vocabName}_latest_release_mv AS
+    CREATE MATERIALIZED VIEW IF NOT EXISTS concept_hidden_label_${vocabName}_latest_release_mv AS
     SELECT * FROM concept_hidden_label c WHERE c.concept_key IN (SELECT c2.key FROM concept c2 WHERE c2.vocabulary_key = ${vocabKey});
-    CREATE INDEX chl_${vocabName}_latest_release_mv_fulltext_search_idx
+    CREATE INDEX IF NOT EXISTS chl_${vocabName}_latest_release_mv_fulltext_search_idx
       ON concept_hidden_label_${vocabName}_latest_release_mv USING gin(fulltext_search);
     CREATE UNIQUE INDEX IF NOT EXISTS chl_${vocabName}_release_mv_unique
       ON concept_hidden_label_${vocabName}_latest_release_mv(concept_key, value);
 
-    CREATE MATERIALIZED VIEW concept_definition_${vocabName}_latest_release_mv AS
+    CREATE MATERIALIZED VIEW IF NOT EXISTS concept_definition_${vocabName}_latest_release_mv AS
     SELECT * FROM concept_definition c WHERE c.concept_key IN (SELECT c2.key FROM concept c2 WHERE c2.vocabulary_key = ${vocabKey});
-    CREATE INDEX cd_${vocabName}_latest_release_mv_fulltext_search_idx
+    CREATE INDEX IF NOT EXISTS cd_${vocabName}_latest_release_mv_fulltext_search_idx
       ON concept_definition_${vocabName}_latest_release_mv USING gin(fulltext_search);
     CREATE UNIQUE INDEX IF NOT EXISTS cd_${vocabName}_release_mv_unique
       ON concept_definition_${vocabName}_latest_release_mv(concept_key, language);
+
+    CREATE MATERIALIZED VIEW IF NOT EXISTS tag_${vocabName}_latest_release_mv AS
+    SELECT DISTINCT ON (t.key) t.*
+    FROM tag t
+    INNER JOIN concept_tag ct ON ct.tag_key = t.key
+    INNER JOIN concept c ON c.key = ct.concept_key
+    WHERE c.vocabulary_key = ${vocabKey};
+    CREATE UNIQUE INDEX IF NOT EXISTS tag_${vocabName}_release_mv_unique
+    ON tag_${vocabName}_latest_release_mv(name);
+
+    CREATE MATERIALIZED VIEW IF NOT EXISTS concept_tag_${vocabName}_latest_release_mv AS
+    SELECT ct.*
+    FROM concept_tag ct
+    INNER JOIN concept c ON c.key = ct.concept_key
+    WHERE c.vocabulary_key = ${vocabKey};
+    CREATE UNIQUE INDEX IF NOT EXISTS ct_${vocabName}_release_mv_unique
+    ON concept_tag_${vocabName}_latest_release_mv(concept_key, tag_key);
   </insert>
 
   <update id="updateReleaseViews">
@@ -757,6 +786,8 @@
     REFRESH MATERIALIZED VIEW CONCURRENTLY concept_alternative_label_${vocabName}_latest_release_mv;
     REFRESH MATERIALIZED VIEW CONCURRENTLY concept_hidden_label_${vocabName}_latest_release_mv;
     REFRESH MATERIALIZED VIEW CONCURRENTLY concept_definition_${vocabName}_latest_release_mv;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY tag_${vocabName}_latest_release_mv;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY concept_tag_${vocabName}_latest_release_mv;
   </update>
 
   <select id="listLatestRelease" resultType="Concept" resultMap="CONCEPT_MAP_RELEASE_VIEW">
@@ -857,6 +888,7 @@
     <result property="editorialNotes" column="editorial_notes" typeHandler="StringArrayTypeHandler"/>
     <collection property="definition" column="{entityKey=key,vocabName=vocabName}" select="listConceptDefinitionsLatestRelease"/>
     <collection property="label" column="{entityKey=key,vocabName=vocabName}" select="listConceptLabelsLatestRelease"/>
+    <collection property="tags" column="{key=key,vocabName=vocabName}" select="listTagsLatestRelease"/>
   </resultMap>
 
   <resultMap id="SUGGEST_RESULT_MAP_RELEASE_VIEW" type="SuggestDto" autoMapping="true">
@@ -865,5 +897,49 @@
                 select="findParentsLabelsLatestRelease"/>
   </resultMap>
 
+  <!-- lookup -->
+  <resultMap id="LOOKUP_RESULT_MAP" type="LookupDto" autoMapping="true">
+    <id property="key" column="key"/>
+    <result property="labelLang" column="label_lang" typeHandler="LanguageRegionTypeHandler"/>
+    <result property="altLabelLang" column="alt_label_lang" typeHandler="LanguageRegionTypeHandler"/>
+  </resultMap>
+
+  <select id="lookup" resultMap="LOOKUP_RESULT_MAP">
+    <bind name="table_suffix" value="''"/>
+    <include refid="LOOKUP_COMMON"/>
+  </select>
+
+  <select id="lookupLatestRelease" resultMap="LOOKUP_RESULT_MAP">
+    <bind name="table_suffix" value="'_' + _parameter.vocabName + '_latest_release_mv'"/>
+    <include refid="LOOKUP_COMMON"/>
+  </select>
+
+  <sql id="LOOKUP_COMMON">
+    SELECT DISTINCT ON (key) matches.*
+    FROM (
+      SELECT c.key, c.name, null AS label, null AS label_lang, null AS alt_label, null AS alt_label_lang, null AS hidden_label
+      FROM concept${table_suffix} c
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND normalize_name(c.name) = normalize_name(#{value,jdbcType=VARCHAR})
+    UNION ALL
+      SELECT c.key, c.name, cl.value  AS label, cl."language" AS label_lang, null AS alt_label, null AS alt_label_lang, null AS hidden_label
+      FROM concept${table_suffix} c
+      INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND cl.normalized_value = normalize_label(#{value,jdbcType=VARCHAR})
+    UNION ALL
+      SELECT c.key, c.name, null AS label, null AS label_lang, cal.value AS alt_label, cal."language" AS alt_label_lang, null AS hidden_label
+      FROM concept${table_suffix} c
+      INNER JOIN concept_alternative_label${table_suffix} cal ON cal.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND cal.normalized_value = normalize_label(#{value,jdbcType=VARCHAR})
+    UNION ALL
+      SELECT c.key, c.name, null AS label, null AS label_lang, null AS alt_label, null AS alt_label_lang, chl.value AS hidden_label
+      FROM concept${table_suffix} c
+      INNER JOIN concept_hidden_label${table_suffix} chl ON chl.concept_key = c.key
+      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      AND chl.normalized_value = normalize_label(#{value,jdbcType=VARCHAR})
+    ) AS matches
+  </sql>
 
 </mapper>

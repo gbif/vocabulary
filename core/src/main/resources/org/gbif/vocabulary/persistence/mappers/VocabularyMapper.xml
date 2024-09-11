@@ -96,7 +96,7 @@
     WHERE v.name = #{name,jdbcType=VARCHAR}
   </select>
 
-  <select id="getKeyByName" resultMap="VOCABULARY_MAP">
+  <select id="getKeyByName" resultType="java.lang.Long">
     SELECT v.key
     FROM vocabulary v
     WHERE v.name = #{name,jdbcType=VARCHAR}

@@ -13,6 +13,26 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.gbif.vocabulary.model.utils.PathUtils.*;
+import static org.gbif.vocabulary.restws.resources.LatestReleaseCache.conceptSuggestLatestReleaseCache;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.Explode;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.extensions.Extension;
+import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.LongFunction;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.assertj.core.util.Strings;
 import org.gbif.api.documentation.CommonParameters;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -25,37 +45,15 @@ import org.gbif.vocabulary.model.exception.EntityNotFoundException;
 import org.gbif.vocabulary.model.exception.EntityNotFoundException.EntityType;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.search.LookupResult;
 import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.restws.config.WsConfig;
 import org.gbif.vocabulary.restws.documentation.Docs;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.TagService;
 import org.gbif.vocabulary.service.VocabularyService;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.LongFunction;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.assertj.core.util.Strings;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.enums.Explode;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.extensions.Extension;
-import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static org.gbif.vocabulary.restws.resources.LatestReleaseCache.conceptSuggestLatestReleaseCache;
-import static org.gbif.vocabulary.restws.utils.Constants.*;
 
 @io.swagger.v3.oas.annotations.tags.Tag(
     name = "Concepts",
@@ -266,11 +264,6 @@ public class ConceptResource {
       @RequestParam(value = "includeParents", required = false) boolean includeParents,
       @RequestParam(value = "includeChildren", required = false) boolean includeChildren) {
     Concept concept = getConceptWithCheck(conceptName, vocabularyName);
-
-    if (concept == null) {
-      return null;
-    }
-
     ConceptView conceptView =
         createConceptView(includeParents, includeChildren, concept, vocabularyName);
 
@@ -1005,6 +998,69 @@ public class ConceptResource {
       Pageable page) {
     return conceptService.listHiddenLabelsLatestRelease(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), page, vocabularyName);
+  }
+
+  @Operation(
+      operationId = "lookup",
+      summary = "Concept lookup",
+      description = "Lookup a concept given a specific value and an optional language.",
+      extensions =
+          @Extension(
+              name = "Order",
+              properties = @ExtensionProperty(name = "Order", value = "0900")))
+  @Parameters(
+      value = {
+        @Parameter(
+            name = "q",
+            description = "Value to do the lookup against to",
+            schema = @Schema(implementation = String.class),
+            in = ParameterIn.QUERY),
+        @Parameter(
+            name = "lang",
+            description = "Lang to discriminate the lookup",
+            schema = @Schema(implementation = LanguageRegion.class),
+            in = ParameterIn.QUERY)
+      })
+  @Docs.DefaultSearchResponses
+  @GetMapping("lookup")
+  public List<LookupResult> lookup(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @RequestParam("q") String q,
+      LanguageRegion lang) {
+    getVocabularyWithCheck(vocabularyName);
+    return conceptService.lookup(q, vocabularyName, lang);
+  }
+
+  @Operation(
+      operationId = "lookupLatestRelease",
+      summary = "Concept lookup in the latest release",
+      description =
+          "Lookup a concept in the latest release of the vocabulary given a specific value and an optional language.",
+      extensions =
+          @Extension(
+              name = "Order",
+              properties = @ExtensionProperty(name = "Order", value = "0900")))
+  @Parameters(
+      value = {
+        @Parameter(
+            name = "q",
+            description = "Value to do the lookup against to",
+            schema = @Schema(implementation = String.class),
+            in = ParameterIn.QUERY),
+        @Parameter(
+            name = "lang",
+            description = "Lang to discriminate the lookup",
+            schema = @Schema(implementation = LanguageRegion.class),
+            in = ParameterIn.QUERY)
+      })
+  @Docs.DefaultSearchResponses
+  @GetMapping(LATEST_RELEASE_PATH + "/lookup")
+  public List<LookupResult> lookupInLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @RequestParam("q") String q,
+      LanguageRegion lang) {
+    getVocabularyWithCheck(vocabularyName);
+    return conceptService.lookupLatestRelease(q, vocabularyName, lang);
   }
 
   private ConceptView createConceptView(

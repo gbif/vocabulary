@@ -13,6 +13,8 @@
  */
 package org.gbif.vocabulary.client;
 
+import java.util.List;
+import lombok.AllArgsConstructor;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -27,9 +29,7 @@ import org.gbif.vocabulary.model.Label;
 import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.util.List;
-
+import org.gbif.vocabulary.model.search.LookupResult;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,8 +40,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import lombok.AllArgsConstructor;
 
 @RequestMapping("vocabularies/{vocabularyName}/concepts")
 public interface ConceptClient {
@@ -105,7 +103,7 @@ public interface ConceptClient {
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       List<LanguageRegion> lang) {
-    return listDefinitions(vocabularyName, conceptName, ListParams.of(lang, null));
+    return listDefinitions(vocabularyName, conceptName, ListParams.of(lang, null, null));
   }
 
   @GetMapping(value = "{name}/definition/{key}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -169,7 +167,7 @@ public interface ConceptClient {
 
   default List<Label> listLabels(
       String vocabularyName, String conceptName, List<LanguageRegion> languageRegion) {
-    return listLabels(vocabularyName, conceptName, ListParams.of(languageRegion, null));
+    return listLabels(vocabularyName, conceptName, ListParams.of(languageRegion, null, null));
   }
 
   @GetMapping(value = "{name}/alternativeLabels", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -180,7 +178,8 @@ public interface ConceptClient {
 
   default PagingResponse<Label> listAlternativeLabels(
       String vocabularyName, String conceptName, List<LanguageRegion> lang, Pageable page) {
-    return listAlternativeLabels(vocabularyName, conceptName, ListParams.of(lang, page));
+    return listAlternativeLabels(
+        vocabularyName, conceptName, ListParams.of(lang, page.getOffset(), page.getLimit()));
   }
 
   @GetMapping(value = "{name}/hiddenLabels", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -256,7 +255,8 @@ public interface ConceptClient {
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
       List<LanguageRegion> lang) {
-    return listDefinitionsFromLatestRelease(vocabularyName, conceptName, ListParams.of(lang, null));
+    return listDefinitionsFromLatestRelease(
+        vocabularyName, conceptName, ListParams.of(lang, null, null));
   }
 
   @GetMapping("latestRelease/{name}/label")
@@ -268,7 +268,7 @@ public interface ConceptClient {
   default List<Label> listLabelsFromLatestRelease(
       String vocabularyName, String conceptName, List<LanguageRegion> languageRegion) {
     return listLabelsFromLatestRelease(
-        vocabularyName, conceptName, ListParams.of(languageRegion, null));
+        vocabularyName, conceptName, ListParams.of(languageRegion, null, null));
   }
 
   @GetMapping("latestRelease/{name}/alternativeLabels")
@@ -280,7 +280,7 @@ public interface ConceptClient {
   default PagingResponse<Label> listAlternativeLabelsFromLatestRelease(
       String vocabularyName, String conceptName, List<LanguageRegion> lang, Pageable page) {
     return listAlternativeLabelsFromLatestRelease(
-        vocabularyName, conceptName, ListParams.of(lang, page));
+        vocabularyName, conceptName, ListParams.of(lang, page.getOffset(), page.getLimit()));
   }
 
   @GetMapping("latestRelease/{name}/hiddenLabels")
@@ -292,7 +292,7 @@ public interface ConceptClient {
   default PagingResponse<HiddenLabel> listHiddenLabelsFromLatestRelease(
       String vocabularyName, String conceptName, Pageable page) {
     return listHiddenLabelsFromLatestRelease(
-        vocabularyName, conceptName, ListParams.of(null, page));
+        vocabularyName, conceptName, ListParams.of(null, page.getOffset(), page.getLimit()));
   }
 
   @GetMapping("latestRelease/suggest")
@@ -300,10 +300,23 @@ public interface ConceptClient {
       @PathVariable("vocabularyName") String vocabularyName,
       @SpringQueryMap SuggestParams suggestParams);
 
+  @GetMapping(value = "lookup", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<LookupResult> lookup(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @RequestParam("q") String q,
+      @SpringQueryMap LookupParams lookupParams);
+
+  @GetMapping(value = "latestRelease/lookup", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<LookupResult> lookupInLatestRelease(
+      @PathVariable("vocabularyName") String vocabularyName,
+      @RequestParam("q") String q,
+      @SpringQueryMap LookupParams lookupParams);
+
   @AllArgsConstructor(staticName = "of")
   class ListParams {
     List<LanguageRegion> lang;
-    Pageable page;
+    Long offset;
+    Integer limit;
   }
 
   @AllArgsConstructor(staticName = "of")
@@ -312,5 +325,10 @@ public interface ConceptClient {
     LanguageRegion fallbackLocale;
     String q;
     Integer limit;
+  }
+
+  @AllArgsConstructor(staticName = "of")
+  class LookupParams {
+    LanguageRegion lang;
   }
 }

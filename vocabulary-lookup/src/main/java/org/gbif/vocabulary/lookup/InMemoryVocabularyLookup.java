@@ -13,12 +13,13 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.export.ConceptExportView;
-import org.gbif.vocabulary.model.export.Export;
-import org.gbif.vocabulary.tools.VocabularyDownloader;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,20 +32,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-
-import org.cache2k.Cache;
-import org.cache2k.Cache2kBuilder;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
+import org.cache2k.Cache;
+import org.cache2k.Cache2kBuilder;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.export.ConceptExportView;
+import org.gbif.vocabulary.model.export.Export;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
 
 /**
  * Class that allows to load a vocabulary export in memory to do fast lookups by concept labels.
@@ -93,17 +88,17 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
           .registerModule(new JavaTimeModule())
           .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-  private final Cache<String, Concept> namesCache;
+  private final Cache<String, ConceptExportView> namesCache;
   private final Cache<String, LabelMatch> labelsCache;
-  private final Cache<String, Concept> hiddenLabelsCache;
-  private final Cache<Long, Concept> conceptsByKeyCache;
+  private final Cache<String, ConceptExportView> hiddenLabelsCache;
+  private final Cache<Long, ConceptExportView> conceptsByKeyCache;
   private final Function<String, String> prefilter;
 
   private InMemoryVocabularyLookup(InputStream in, Function<String, String> prefilter) {
     Objects.requireNonNull(in);
     this.prefilter = prefilter;
     namesCache =
-        Cache2kBuilder.of(String.class, Concept.class)
+        Cache2kBuilder.of(String.class, ConceptExportView.class)
             .eternal(true)
             .entryCapacity(Long.MAX_VALUE)
             .build();
@@ -112,12 +107,12 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
             .entryCapacity(Long.MAX_VALUE)
             .build();
     hiddenLabelsCache =
-        Cache2kBuilder.of(String.class, Concept.class)
+        Cache2kBuilder.of(String.class, ConceptExportView.class)
             .eternal(true)
             .entryCapacity(Long.MAX_VALUE)
             .build();
     conceptsByKeyCache =
-        Cache2kBuilder.of(Long.class, Concept.class)
+        Cache2kBuilder.of(Long.class, ConceptExportView.class)
             .eternal(true)
             .entryCapacity(Long.MAX_VALUE)
             .build();
@@ -169,9 +164,10 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       String transformedValue = t.apply(normalizedValue);
 
       // matching by name
-      Concept nameMatch = namesCache.get(transformedValue);
+      ConceptExportView nameMatch = namesCache.get(transformedValue);
       if (nameMatch != null) {
-        log.debug("value {} matched with concept {} by name", value, nameMatch.getName());
+        log.debug(
+            "value {} matched with concept {} by name", value, nameMatch.getConcept().getName());
         return Optional.of(toLookupConcept(nameMatch));
       }
 
@@ -179,19 +175,22 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       LabelMatch labelMatch = labelsCache.get(transformedValue);
       if (labelMatch != null) {
         if (labelMatch.allMatches.size() == 1) {
-          Concept conceptMatched = labelMatch.allMatches.iterator().next();
-          log.debug("value {} matched with concept {} by label", value, conceptMatched.getName());
+          ConceptExportView conceptMatched = labelMatch.allMatches.iterator().next();
+          log.debug(
+              "value {} matched with concept {} by label",
+              value,
+              conceptMatched.getConcept().getName());
           return Optional.of(toLookupConcept(conceptMatched));
         }
 
         // several candidates found. We try to match by using the language received as discriminator
         // or English as fallback
-        Optional<Concept> langMatch = matchByLanguage(labelMatch, contextLang, value);
+        Optional<ConceptExportView> langMatch = matchByLanguage(labelMatch, contextLang, value);
         if (langMatch.isPresent()) {
           log.debug(
               "value {} matched with concept {} by language {}",
               value,
-              langMatch.get().getName(),
+              langMatch.get().getConcept().getName(),
               contextLang);
           return Optional.of(toLookupConcept(langMatch.get()));
         }
@@ -203,9 +202,12 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       }
 
       // if no match we try with the hidden labels
-      Concept hiddenMatch = hiddenLabelsCache.get(transformedValue);
+      ConceptExportView hiddenMatch = hiddenLabelsCache.get(transformedValue);
       if (hiddenMatch != null) {
-        log.debug("value {} matched with concept {} by hidden label", value, hiddenMatch);
+        log.debug(
+            "value {} matched with concept {} by hidden label",
+            value,
+            hiddenMatch.getConcept().getName());
         return Optional.of(toLookupConcept(hiddenMatch));
       }
     }
@@ -214,8 +216,9 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
     return Optional.empty();
   }
 
-  private Optional<Concept> matchByLanguage(LabelMatch match, LanguageRegion lang, String value) {
-    Set<Concept> langMatches = null;
+  private Optional<ConceptExportView> matchByLanguage(
+      LabelMatch match, LanguageRegion lang, String value) {
+    Set<ConceptExportView> langMatches = null;
     if (lang != null) {
       langMatches = match.matchesByLanguage.get(lang);
     }
@@ -231,7 +234,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
     }
 
     if (langMatches.size() == 1) {
-      Concept conceptMatched = langMatches.iterator().next();
+      ConceptExportView conceptMatched = langMatches.iterator().next();
       log.debug(
           "Value {} matched with concept {} by using language {}", value, conceptMatched, lang);
       return Optional.of(conceptMatched);
@@ -262,32 +265,28 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
 
     for (ConceptExportView conceptExport : export.getConceptExports()) {
       // add to the cache concepts
-      conceptsByKeyCache.put(conceptExport.getConcept().getKey(), conceptExport.getConcept());
+      conceptsByKeyCache.put(conceptExport.getConcept().getKey(), conceptExport);
 
       // add name to the cache
-      addNameToCache(conceptExport.getConcept());
+      addNameToCache(conceptExport);
 
       // add labels to the cache
-      conceptExport
-          .getLabel()
-          .forEach((key, value) -> addLabelToCache(value, conceptExport.getConcept(), key));
+      conceptExport.getLabel().forEach((key, value) -> addLabelToCache(value, conceptExport, key));
 
       // add alternative labels to the cache
       conceptExport
           .getAlternativeLabels()
-          .forEach((key, value) -> addLabelsToCache(value, conceptExport.getConcept(), key));
+          .forEach((key, value) -> addLabelsToCache(value, conceptExport, key));
 
       // add hidden labels to the cache
-      conceptExport
-          .getHiddenLabels()
-          .forEach(label -> addHiddenLabelToCache(label, conceptExport.getConcept()));
+      conceptExport.getHiddenLabels().forEach(label -> addHiddenLabelToCache(label, conceptExport));
     }
   }
 
-  private void addNameToCache(Concept concept) {
+  private void addNameToCache(ConceptExportView concept) {
     String normalizedValue =
-        replaceNonAsciiCharactersWithEquivalents(normalizeName(concept.getName()));
-    Concept existing = namesCache.peekAndPut(normalizedValue, concept);
+        replaceNonAsciiCharactersWithEquivalents(normalizeName(concept.getConcept().getName()));
+    ConceptExportView existing = namesCache.peekAndPut(normalizedValue, concept);
 
     if (existing != null) {
       log.warn(
@@ -297,11 +296,12 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
     }
   }
 
-  private void addLabelsToCache(Set<String> values, Concept concept, LanguageRegion language) {
+  private void addLabelsToCache(
+      Set<String> values, ConceptExportView concept, LanguageRegion language) {
     values.forEach(v -> addLabelToCache(v, concept, language));
   }
 
-  private void addLabelToCache(String value, Concept concept, LanguageRegion language) {
+  private void addLabelToCache(String value, ConceptExportView concept, LanguageRegion language) {
     if (prefilter != null) {
       value = prefilter.apply(value);
     }
@@ -330,15 +330,16 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
     }
   }
 
-  private void addHiddenLabelToCache(String hiddenLabel, Concept concept) {
+  private void addHiddenLabelToCache(String hiddenLabel, ConceptExportView concept) {
     if (prefilter != null) {
       hiddenLabel = prefilter.apply(hiddenLabel);
     }
 
     String normalizedValue = replaceNonAsciiCharactersWithEquivalents(normalizeLabel(hiddenLabel));
-    Concept existing = hiddenLabelsCache.peekAndPut(normalizedValue, concept);
+    ConceptExportView existing = hiddenLabelsCache.peekAndPut(normalizedValue, concept);
 
-    if (existing != null && !existing.getName().equals(concept.getName())) {
+    if (existing != null
+        && !existing.getConcept().getName().equals(concept.getConcept().getName())) {
       log.warn(
           "Incorrect vocabulary: different concepts cannot have the same hidden label. "
               + "The concept hidden label: {} in the concept: {} is also present in: {}",
@@ -348,28 +349,35 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
     }
   }
 
-  private LookupConcept toLookupConcept(Concept concept) {
+  private LookupConcept toLookupConcept(ConceptExportView conceptExportView) {
     // find parents
-    List<String> parents = new ArrayList<>();
-    Long parentKey = concept.getParentKey();
+    List<LookupConcept.Parent> parents = new ArrayList<>();
+    Long parentKey = conceptExportView.getConcept().getParentKey();
     while (parentKey != null) {
-      Concept parent = conceptsByKeyCache.get(parentKey);
-      parents.add(parent.getName());
+      ConceptExportView parent = conceptsByKeyCache.get(parentKey);
 
-      if (parentKey.equals(parent.getParentKey())) {
+      if (parent == null) {
+        break;
+      }
+
+      parents.add(LookupConcept.Parent.from(parent));
+
+      if (parentKey.equals(parent.getConcept().getParentKey())) {
         // this should never happen but we protect against it
         break;
       }
 
-      parentKey = parent.getParentKey();
+      parentKey = parent.getConcept().getParentKey();
     }
 
-    return LookupConcept.of(concept, parents);
+    return LookupConcept.of(
+        conceptExportView.getConcept(), parents, new ArrayList<>(conceptExportView.getTags()));
   }
 
   private static class LabelMatch {
-    Set<Concept> allMatches = new HashSet<>();
-    Map<LanguageRegion, Set<Concept>> matchesByLanguage = new EnumMap<>(LanguageRegion.class);
+    Set<ConceptExportView> allMatches = new HashSet<>();
+    Map<LanguageRegion, Set<ConceptExportView>> matchesByLanguage =
+        new EnumMap<>(LanguageRegion.class);
   }
 
   public static InMemoryVocabularyLookupBuilder newBuilder() {

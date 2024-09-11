@@ -13,17 +13,35 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import org.gbif.vocabulary.model.Concept;
-
+import java.util.ArrayList;
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.export.ConceptExportView;
 
 @Data
 @AllArgsConstructor(staticName = "of")
 public class LookupConcept {
 
   private Concept concept;
-  private List<String> parents;
+  private List<Parent> parents;
+  private List<String> tags;
+
+  @Data
+  @AllArgsConstructor(staticName = "of")
+  public static class Parent {
+    private Long key;
+    private Long parentKey;
+    private String name;
+    private List<String> tags;
+
+    public static Parent from(ConceptExportView conceptExportView) {
+      return Parent.of(
+          conceptExportView.getConcept().getKey(),
+          conceptExportView.getConcept().getParentKey(),
+          conceptExportView.getConcept().getName(),
+          new ArrayList<>(conceptExportView.getTags()));
+    }
+  }
 }

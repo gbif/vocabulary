@@ -66,21 +66,21 @@ $func$
   END
 $func$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION normalize_name(name text)
-  RETURNS text AS
-$func$
-  BEGIN
-    RETURN lower(regexp_replace(name, '(_|-|\s)', '', 'g'));
-  END
-$func$ LANGUAGE plpgsql;
+  CREATE OR REPLACE FUNCTION normalize_name(name text)
+    RETURNS text AS
+  $func$
+    BEGIN
+      RETURN lower(regexp_replace(name, '(_|-|\s)', '', 'g'));
+    END
+  $func$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION normalize_label(label text)
-  RETURNS text AS
-$func$
-  BEGIN
-    RETURN lower(regexp_replace(label, '(\s)', '', 'g'));
-  END
-$func$ LANGUAGE plpgsql;
+  CREATE OR REPLACE FUNCTION normalize_label(label text)
+    RETURNS text AS
+  $func$
+    BEGIN
+      RETURN lower(regexp_replace(label, '(\s)', '', 'g'));
+    END
+  $func$ LANGUAGE plpgsql;
 
 CREATE TABLE vocabulary(
   key bigserial NOT NULL PRIMARY KEY,

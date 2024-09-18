@@ -13,8 +13,6 @@
  */
 package org.gbif.vocabulary.client;
 
-import lombok.Getter;
-
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -45,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @RequestMapping("vocabularies/{vocabularyName}/concepts")
 public interface ConceptClient {

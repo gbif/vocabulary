@@ -13,6 +13,9 @@
  */
 package org.gbif.vocabulary.client;
 
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.DeprecateVocabularyAction;
@@ -24,9 +27,6 @@ import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.search.KeyNameResult;
-
-import java.util.List;
-
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,8 +37,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import lombok.AllArgsConstructor;
 
 @RequestMapping("vocabularies")
 public interface VocabularyClient {
@@ -169,11 +167,13 @@ public interface VocabularyClient {
   void deleteLabel(@PathVariable("name") String vocabularyName, @PathVariable("key") long key);
 
   @AllArgsConstructor(staticName = "of")
+  @Getter
   class ListParams {
     List<LanguageRegion> lang;
   }
 
   @AllArgsConstructor(staticName = "of")
+  @Getter
   class SuggestParams {
     LanguageRegion locale;
     LanguageRegion fallbackLocale;

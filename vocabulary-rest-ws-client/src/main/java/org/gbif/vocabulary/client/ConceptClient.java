@@ -13,6 +13,8 @@
  */
 package org.gbif.vocabulary.client;
 
+import lombok.Getter;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -314,6 +316,7 @@ public interface ConceptClient {
       @SpringQueryMap LookupParams lookupParams);
 
   @AllArgsConstructor(staticName = "of")
+  @Getter
   class ListParams {
     List<LanguageRegion> lang;
     Long offset;
@@ -321,6 +324,7 @@ public interface ConceptClient {
   }
 
   @AllArgsConstructor(staticName = "of")
+  @Getter
   class SuggestParams {
     LanguageRegion locale;
     LanguageRegion fallbackLocale;
@@ -329,6 +333,7 @@ public interface ConceptClient {
   }
 
   @AllArgsConstructor(staticName = "of")
+  @Getter
   class LookupParams {
     String q;
     LanguageRegion lang;

@@ -13,14 +13,11 @@
  */
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.utils.LenientEquals;
-
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Objects;
-
 import javax.validation.constraints.NotBlank;
-
 import lombok.Data;
+import org.gbif.vocabulary.model.utils.LenientEquals;
 
 @Data
 public class VocabularyRelease implements LenientEquals<VocabularyRelease> {
@@ -29,7 +26,7 @@ public class VocabularyRelease implements LenientEquals<VocabularyRelease> {
   private long vocabularyKey;
   @NotBlank private String version;
   private String exportUrl;
-  LocalDateTime created;
+  ZonedDateTime created;
   @NotBlank String createdBy;
   @NotBlank String comment;
 

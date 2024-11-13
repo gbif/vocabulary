@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -52,7 +53,7 @@ public class LocalDateTimeTypeHandler extends BaseTypeHandler<LocalDateTime> {
 
   private static LocalDateTime getLocalDateTime(Timestamp timestamp) {
     if (timestamp != null) {
-      return timestamp.toLocalDateTime();
+      return LocalDateTime.ofInstant(timestamp.toInstant(), ZoneId.of("UTC"));
     }
     return null;
   }

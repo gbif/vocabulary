@@ -13,6 +13,14 @@
  */
 package org.gbif.vocabulary.restws;
 
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
 import org.gbif.common.messaging.ConnectionParameters;
 import org.gbif.common.messaging.DefaultMessagePublisher;
 import org.gbif.common.messaging.api.MessagePublisher;
@@ -29,14 +37,11 @@ import org.gbif.ws.remoteauth.RestTemplateRemoteAuthClient;
 import org.gbif.ws.server.filter.HttpServletRequestWrapperFilter;
 import org.gbif.ws.server.filter.RequestHeaderParamUpdateFilter;
 import org.gbif.ws.server.provider.PageableHandlerMethodArgumentResolver;
-
-import java.io.IOException;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -162,5 +167,25 @@ public class Application {
         ApplicationContext applicationContext, RemoteAuthClient remoteAuthClient) {
       super(applicationContext, remoteAuthClient);
     }
+  }
+
+  @Bean
+  public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
+
+    return builder -> {
+
+      // formatter
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+      DateTimeFormatter dateTimeFormatter =
+          DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault());
+
+      // deserializers
+      builder.deserializers(new LocalDateDeserializer(dateFormatter));
+      builder.deserializers(new LocalDateTimeDeserializer(dateTimeFormatter));
+
+      // serializers
+      builder.serializers(new LocalDateSerializer(dateFormatter));
+      builder.serializers(new LocalDateTimeSerializer(dateTimeFormatter));
+    };
   }
 }

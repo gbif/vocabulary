@@ -13,15 +13,14 @@
  */
 package org.gbif.vocabulary.model;
 
-import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.net.URI;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import org.junit.jupiter.api.Test;
 
 /** Tests {@link Vocabulary}. */
 public class VocabularyTest {
@@ -37,8 +36,8 @@ public class VocabularyTest {
             Definition.builder().language(LanguageRegion.ENGLISH).value("def").build()));
     v1.setEditorialNotes(Arrays.asList("n1", "n2"));
     v1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
-    v1.setCreated(LocalDateTime.now());
-    v1.setDeprecated(LocalDateTime.now());
+    v1.setCreated(ZonedDateTime.now());
+    v1.setDeprecated(ZonedDateTime.now());
 
     Vocabulary v2 = new Vocabulary();
     v2.setKey(v1.getKey());
@@ -52,7 +51,7 @@ public class VocabularyTest {
 
     assertTrue(v1.lenientEquals(v2));
 
-    v1.setModified(LocalDateTime.now());
+    v1.setModified(ZonedDateTime.now());
     assertTrue(v1.lenientEquals(v2));
     assertNotEquals(v1, v2);
   }

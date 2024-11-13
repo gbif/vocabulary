@@ -13,13 +13,13 @@
  */
 package org.gbif.vocabulary.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public interface LabelEntity extends ValueEntity {
 
-  LocalDateTime getCreated();
+  ZonedDateTime getCreated();
 
-  void setCreated(LocalDateTime created);
+  void setCreated(ZonedDateTime created);
 
   String getCreatedBy();
 

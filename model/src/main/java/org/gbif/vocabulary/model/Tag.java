@@ -13,16 +13,13 @@
  */
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.utils.LenientEquals;
-
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Objects;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
-
 import lombok.Data;
+import org.gbif.vocabulary.model.utils.LenientEquals;
 
 @Data
 public class Tag implements Serializable, LenientEquals<Tag> {
@@ -34,9 +31,9 @@ public class Tag implements Serializable, LenientEquals<Tag> {
   @Pattern(regexp = "^#[A-Z0-9]{6}$")
   private String color;
 
-  private LocalDateTime created;
+  private ZonedDateTime created;
   private String createdBy;
-  private LocalDateTime modified;
+  private ZonedDateTime modified;
   private String modifiedBy;
 
   public static Tag of(String name) {

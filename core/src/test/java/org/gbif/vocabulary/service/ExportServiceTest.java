@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -106,7 +106,7 @@ public class ExportServiceTest extends MockServiceBaseTest {
     c1.setKey(1L);
     c1.setName("c1");
     c1.setVocabularyKey(vocabulary.getKey());
-    c1.setCreated(LocalDateTime.now());
+    c1.setCreated(ZonedDateTime.now());
 
     // tags
     Tag tag1 = new Tag();

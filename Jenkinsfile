@@ -70,7 +70,7 @@ pipeline {
                 allOf {
                     not { expression { params.RELEASE } };
                     anyOf {
-                        branch 'dev';
+                        branch '#152_zonedDateTime';
                         branch 'dev_jdk8'
                     }
                 }
@@ -157,7 +157,7 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    branch 'dev';
+                    branch '#152_zonedDateTime';
                 }
             }
             steps {

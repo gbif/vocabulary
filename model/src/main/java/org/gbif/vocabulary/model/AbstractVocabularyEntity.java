@@ -14,12 +14,10 @@
 package org.gbif.vocabulary.model;
 
 import java.net.URI;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.validation.constraints.NotBlank;
-
 import lombok.Data;
 
 /**
@@ -36,12 +34,12 @@ public abstract class AbstractVocabularyEntity implements VocabularyEntity {
 
   // deprecation fields
   Long replacedByKey;
-  LocalDateTime deprecated;
+  ZonedDateTime deprecated;
   String deprecatedBy;
 
   // audit fields
-  LocalDateTime created;
+  ZonedDateTime created;
   String createdBy;
-  LocalDateTime modified;
+  ZonedDateTime modified;
   String modifiedBy;
 }

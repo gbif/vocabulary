@@ -17,10 +17,18 @@ import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLa
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
 import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -85,7 +93,9 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
 
   private static final ObjectMapper OBJECT_MAPPER =
       new ObjectMapper()
-          .registerModule(new JavaTimeModule())
+          .registerModule(
+              new JavaTimeModule()
+                  .addDeserializer(ZonedDateTime.class, new ZonedDateTimeDeserializer()))
           .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
   private final Cache<String, ConceptExportView> namesCache;
@@ -422,6 +432,23 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
 
       throw new IllegalArgumentException(
           "Either the inputstream or the API URL and the vocabulary name are required");
+    }
+  }
+
+  private static class ZonedDateTimeDeserializer extends JsonDeserializer<ZonedDateTime> {
+
+    private LocalDateTimeDeserializer localDateTimeDeserializer =
+        new LocalDateTimeDeserializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+    @Override
+    public ZonedDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+
+      // try first with timezone, otherwise without it
+      try {
+        return ZonedDateTime.parse(p.getText(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+      } catch (Exception ex) {
+        return localDateTimeDeserializer.deserialize(p, ctxt).atZone(ZoneOffset.UTC);
+      }
     }
   }
 }

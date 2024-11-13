@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -121,7 +121,7 @@ public class DefaultExportService implements ExportService {
 
       // write metadata
       ExportMetadata metadata = new ExportMetadata();
-      metadata.setCreatedDate(LocalDateTime.now());
+      metadata.setCreatedDate(ZonedDateTime.now());
       if (!Strings.isNullOrEmpty(version)) {
         metadata.setVersion(version);
       }

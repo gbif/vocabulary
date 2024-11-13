@@ -13,16 +13,13 @@
  */
 package org.gbif.vocabulary.model;
 
-import org.gbif.vocabulary.model.utils.LenientEquals;
-
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Objects;
-
 import javax.validation.constraints.NotNull;
-
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
+import org.gbif.vocabulary.model.utils.LenientEquals;
 
 @Data
 @Builder
@@ -33,9 +30,9 @@ public class Definition implements ValueEntity, Auditable, LenientEquals<Definit
   @NotNull private LanguageRegion language;
   private String value;
   private String createdBy;
-  private LocalDateTime created;
+  private ZonedDateTime created;
   private String modifiedBy;
-  private LocalDateTime modified;
+  private ZonedDateTime modified;
 
   @Override
   public boolean lenientEquals(Definition other) {

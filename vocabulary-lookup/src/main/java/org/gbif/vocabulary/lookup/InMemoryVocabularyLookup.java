@@ -26,7 +26,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -437,7 +437,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
 
   private static class ZonedDateTimeDeserializer extends JsonDeserializer<ZonedDateTime> {
 
-    private LocalDateTimeDeserializer localDateTimeDeserializer =
+    private final LocalDateTimeDeserializer localDateTimeDeserializer =
         new LocalDateTimeDeserializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
     @Override
@@ -447,7 +447,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       try {
         return ZonedDateTime.parse(p.getText(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
       } catch (Exception ex) {
-        return localDateTimeDeserializer.deserialize(p, ctxt).atZone(ZoneOffset.UTC);
+        return localDateTimeDeserializer.deserialize(p, ctxt).atZone(ZoneId.systemDefault());
       }
     }
   }

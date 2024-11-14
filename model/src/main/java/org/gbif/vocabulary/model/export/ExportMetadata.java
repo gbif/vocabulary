@@ -15,6 +15,7 @@ package org.gbif.vocabulary.model.export;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
 

@@ -13,15 +13,14 @@
  */
 package org.gbif.vocabulary.model;
 
-import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.net.URI;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import org.junit.jupiter.api.Test;
 
 /** Tests {@link Concept}. */
 public class ConceptTest {
@@ -40,8 +39,8 @@ public class ConceptTest {
     c1.setSameAsUris(Collections.singletonList(URI.create("http://test.com")));
     c1.setEditorialNotes(Arrays.asList("n1", "n2"));
     c1.setExternalDefinitions(Collections.singletonList(URI.create("http://test.com")));
-    c1.setCreated(LocalDateTime.now());
-    c1.setDeprecated(LocalDateTime.now());
+    c1.setCreated(ZonedDateTime.now());
+    c1.setDeprecated(ZonedDateTime.now());
 
     Concept c2 = new Concept();
     c2.setKey(c1.getKey());
@@ -58,7 +57,7 @@ public class ConceptTest {
 
     assertTrue(c1.lenientEquals(c2));
 
-    c1.setModified(LocalDateTime.now());
+    c1.setModified(ZonedDateTime.now());
     assertTrue(c1.lenientEquals(c2));
     assertNotEquals(c1, c2);
   }

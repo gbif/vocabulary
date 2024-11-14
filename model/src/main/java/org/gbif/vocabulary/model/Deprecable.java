@@ -13,7 +13,7 @@
  */
 package org.gbif.vocabulary.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /** Defines the minimum fields an entity must have to be deprecable. */
 public interface Deprecable {
@@ -23,9 +23,9 @@ public interface Deprecable {
 
   void setReplacedByKey(Long replacedByKey);
 
-  LocalDateTime getDeprecated();
+  ZonedDateTime getDeprecated();
 
-  void setDeprecated(LocalDateTime deprecated);
+  void setDeprecated(ZonedDateTime deprecated);
 
   String getDeprecatedBy();
 

@@ -14,8 +14,7 @@
 package org.gbif.vocabulary.model.export;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-
+import java.time.ZonedDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +22,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ExportMetadata implements Serializable {
-  private LocalDateTime createdDate;
+  private ZonedDateTime createdDate;
   private String version;
 }

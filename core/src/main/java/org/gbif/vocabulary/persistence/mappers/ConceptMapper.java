@@ -13,10 +13,6 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
-import java.util.List;
-import javax.annotation.Nullable;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Definition;
@@ -29,6 +25,13 @@ import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.persistence.dto.LookupDto;
 import org.gbif.vocabulary.persistence.dto.SuggestDto;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /** Mapper for {@link Concept}. */
 @Mapper

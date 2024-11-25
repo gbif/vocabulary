@@ -1,8 +1,8 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven3.2'
-        jdk 'OpenJDK8'
+        maven 'Maven 3.8.5'
+        jdk 'OpenJDK11'
     }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -52,9 +52,6 @@ pipeline {
             }
         }
         stage('SonarQube analysis') {
-            tools {
-                jdk "OpenJDK11"
-            }
             when {
                 allOf {
                     not { expression { params.RELEASE } };
@@ -123,7 +120,7 @@ pipeline {
                     sh '''
                 rm -rf *
                 git clone -b master git@github.com:gbif/gbif-configuration.git
-                git clone -b master git@github.com:gbif/c-deploy.git
+                git clone -b dev2 git@github.com:gbif/c-deploy.git
                '''
 
                     createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")
@@ -168,7 +165,7 @@ pipeline {
                     sh '''
                 rm -rf *
                 git clone -b master git@github.com:gbif/gbif-configuration.git
-                git clone -b master git@github.com:gbif/c-deploy.git
+                git clone -b dev2 git@github.com:gbif/c-deploy.git
                '''
 
                     createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev2/services.yml")

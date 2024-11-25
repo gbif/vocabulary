@@ -13,6 +13,19 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import static org.gbif.vocabulary.model.utils.PathUtils.CONCEPTS_PATH;
+import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
@@ -27,13 +40,6 @@ import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.service.ConceptService;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,14 +51,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
-
-import static org.gbif.vocabulary.model.utils.PathUtils.CONCEPTS_PATH;
-import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARIES_PATH;
-import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** IT for the {@link ConceptResource}. */
 @ContextConfiguration(initializers = {ConceptResourceIT.ContextInitializer.class})

@@ -5,13 +5,13 @@
   <parent>
     <groupId>org.gbif</groupId>
     <artifactId>motherpom</artifactId>
-    <version>56</version>
+    <version>59-SNAPSHOT</version>
   </parent>
 
   <groupId>org.gbif.vocabulary</groupId>
   <artifactId>vocabulary-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.14-SNAPSHOT</version>
+  <version>1.0.10-SNAPSHOT</version>
 
   <modules>
     <module>core</module>
@@ -63,43 +63,49 @@
   </distributionManagement>
 
   <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <java.version>11</java.version>
+
     <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
-    <spring-cloud-openfeign.version>2.2.6.RELEASE</spring-cloud-openfeign.version>
+    <spring-cloud-openfeign.version>2.2.10.RELEASE</spring-cloud-openfeign.version>
     <main.basedir>${project.basedir}</main.basedir>
 
     <!-- gbif -->
-    <gbif-api.version>1.16.3</gbif-api.version>
-    <gbif.common-mybatis.version>1.1</gbif.common-mybatis.version>
-    <postal-service.version>1.1</postal-service.version>
-    <gbif-cli.version>1.1</gbif-cli.version>
-    <gbif-common-ws.version>1.21</gbif-common-ws.version>
+    <gbif-api.version>2.0.0</gbif-api.version>
+    <gbif.common-mybatis.version>1.4</gbif.common-mybatis.version>
+    <postal-service.version>1.8.0</postal-service.version>
+    <gbif-cli.version>2.0.0</gbif-cli.version>
+    <gbif-common-ws.version>2.0.3</gbif-common-ws.version>
 
     <!-- DB -->
     <postgresql-testcontainers.version>1.19.8</postgresql-testcontainers.version>
-    <mybatis.spring.boot.starter>2.1.0</mybatis.spring.boot.starter>
+    <mybatis-spring-boot-starter.version>2.3.2</mybatis-spring-boot-starter.version>
     <postgresql.version>42.2.23</postgresql.version>
+    <mybatis-spring-boot-starter-test.version>2.0.0</mybatis-spring-boot-starter-test.version>
 
     <!-- utils -->
     <javax-validation.version>2.0.1.Final</javax-validation.version>
-    <okhttp.version>4.2.2</okhttp.version>
+    <okhttp.version>4.9.1</okhttp.version>
     <cache2k.version>2.0.0.Final</cache2k.version>
-    <lombok.version>1.18.20</lombok.version>
-    <metainf-services.version>1.8</metainf-services.version>
+    <lombok.version>1.18.28</lombok.version>
+    <metainf-services.version>1.11</metainf-services.version>
     <jcommander.version>1.60</jcommander.version>
     <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
     <feign.version>10.11</feign.version>
     <opencsv.version>5.7.1</opencsv.version>
+    <kotlin.version>1.4.20</kotlin.version>
 
     <!-- documentation -->
     <springdoc-openapi-ui.version>1.5.8</springdoc-openapi-ui.version>
     <swagger-annotations.version>2.2.0</swagger-annotations.version>
 
     <!-- version limited by gbif-api -->
-    <guava.version>18.0</guava.version>
+    <guava.version>27.0-jre</guava.version>
 
     <!-- ZK -->
     <spring-cloud-zookeeper.version>2.2.5.RELEASE</spring-cloud-zookeeper.version>
-    <zookeeper.version>3.4.14</zookeeper.version>
+    <zookeeper.version>3.8.1</zookeeper.version>
 
     <!-- Hadoop -->
     <hadoop.version>2.6.0-cdh5.16.2</hadoop.version>
@@ -114,10 +120,6 @@
     <!-- testing -->
     <mockito.version>3.4.0</mockito.version>
     <wiremock.version>2.21.0</wiremock.version>
-
-    <!-- documentation -->
-    <spring.auto-rest-docs.version>2.0.4</spring.auto-rest-docs.version>
-    <ascii-doctor-plugin.version>1.5.7</ascii-doctor-plugin.version>
 
     <!-- JaCoCo & Sonar-->
     <sonar.projectName>GBIF Vocabulary</sonar.projectName>
@@ -216,7 +218,7 @@
       <dependency>
         <groupId>org.mybatis.spring.boot</groupId>
         <artifactId>mybatis-spring-boot-starter</artifactId>
-        <version>${mybatis.spring.boot.starter}</version>
+        <version>${mybatis-spring-boot-starter.version}</version>
       </dependency>
       <!-- DB -->
       <dependency>
@@ -380,11 +382,23 @@
         <version>${hadoop.version}</version>
       </dependency>
 
+      <!-- needed for the cli -->
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib-common</artifactId>
+        <version>${kotlin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib</artifactId>
+        <version>${kotlin.version}</version>
+      </dependency>
+
       <!-- tests -->
       <dependency>
         <groupId>org.mybatis.spring.boot</groupId>
         <artifactId>mybatis-spring-boot-starter-test</artifactId>
-        <version>${mybatis.spring.boot.starter}</version>
+        <version>${mybatis-spring-boot-starter-test.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>

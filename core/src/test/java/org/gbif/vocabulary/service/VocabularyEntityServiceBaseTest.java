@@ -13,23 +13,20 @@
  */
 package org.gbif.vocabulary.service;
 
-import org.gbif.vocabulary.model.UserRoles;
-import org.gbif.vocabulary.model.VocabularyEntity;
-import org.gbif.vocabulary.persistence.mappers.BaseMapper;
-
-import java.time.ZonedDateTime;
-
-import javax.validation.ConstraintViolationException;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.BeanUtils;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.test.context.support.WithMockUser;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
+
+import java.time.ZonedDateTime;
+import javax.validation.ConstraintViolationException;
+import org.gbif.vocabulary.model.UserRoles;
+import org.gbif.vocabulary.model.VocabularyEntity;
+import org.gbif.vocabulary.persistence.mappers.BaseMapper;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeanUtils;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithMockUser;
 
 /**
  * Base class to test a {@link BaseService} that can be reused for all the implemenations.

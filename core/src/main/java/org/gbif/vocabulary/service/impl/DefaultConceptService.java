@@ -13,6 +13,24 @@
  */
 package org.gbif.vocabulary.service.impl;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.*;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.groups.Default;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -33,34 +51,12 @@ import org.gbif.vocabulary.persistence.dto.SuggestDto;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.service.ConceptService;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.Default;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.*;
 
 /** Default implementation for {@link ConceptService}. */
 @Service

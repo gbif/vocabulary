@@ -13,22 +13,22 @@
  */
 package org.gbif.vocabulary.importer;
 
-import org.gbif.api.model.common.paging.PagingRequest;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.api.AddTagAction;
-import org.gbif.vocabulary.api.ConceptListParams;
-import org.gbif.vocabulary.api.ConceptView;
-import org.gbif.vocabulary.client.ConceptClient;
-import org.gbif.vocabulary.client.TagClient;
-import org.gbif.vocabulary.client.VocabularyClient;
-import org.gbif.vocabulary.model.Concept;
-import org.gbif.vocabulary.model.Definition;
-import org.gbif.vocabulary.model.HiddenLabel;
-import org.gbif.vocabulary.model.Label;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.Tag;
-import org.gbif.vocabulary.model.Vocabulary;
+import static org.gbif.vocabulary.importer.Fields.ALT_LABELS_PREFIX;
+import static org.gbif.vocabulary.importer.Fields.CONCEPT;
+import static org.gbif.vocabulary.importer.Fields.CONCEPT_FIELDS;
+import static org.gbif.vocabulary.importer.Fields.DEFINITION_PREFIX;
+import static org.gbif.vocabulary.importer.Fields.EXTERNAL_DEFINITIONS;
+import static org.gbif.vocabulary.importer.Fields.LABEL_PREFIX;
+import static org.gbif.vocabulary.importer.Fields.PARENT;
+import static org.gbif.vocabulary.importer.Fields.SAME_AS_URIS;
+import static org.gbif.vocabulary.importer.Fields.TAGS;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.URI;
@@ -49,27 +49,24 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
-
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
-import static org.gbif.vocabulary.importer.Fields.ALT_LABELS_PREFIX;
-import static org.gbif.vocabulary.importer.Fields.CONCEPT;
-import static org.gbif.vocabulary.importer.Fields.CONCEPT_FIELDS;
-import static org.gbif.vocabulary.importer.Fields.DEFINITION_PREFIX;
-import static org.gbif.vocabulary.importer.Fields.EXTERNAL_DEFINITIONS;
-import static org.gbif.vocabulary.importer.Fields.LABEL_PREFIX;
-import static org.gbif.vocabulary.importer.Fields.PARENT;
-import static org.gbif.vocabulary.importer.Fields.SAME_AS_URIS;
-import static org.gbif.vocabulary.importer.Fields.TAGS;
+import org.gbif.api.model.common.paging.PagingRequest;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.api.AddTagAction;
+import org.gbif.vocabulary.api.ConceptListParams;
+import org.gbif.vocabulary.api.ConceptView;
+import org.gbif.vocabulary.client.ConceptClient;
+import org.gbif.vocabulary.client.TagClient;
+import org.gbif.vocabulary.client.VocabularyClient;
+import org.gbif.vocabulary.model.Concept;
+import org.gbif.vocabulary.model.Definition;
+import org.gbif.vocabulary.model.HiddenLabel;
+import org.gbif.vocabulary.model.Label;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.Tag;
+import org.gbif.vocabulary.model.Vocabulary;
 
 @Slf4j
 public class VocabularyImporter {

@@ -13,13 +13,16 @@
  */
 package org.gbif.vocabulary.model;
 
+import org.gbif.vocabulary.model.utils.LenientEquals;
+
 import java.time.ZonedDateTime;
 import java.util.Objects;
+
 import javax.validation.constraints.NotNull;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
-import org.gbif.vocabulary.model.utils.LenientEquals;
 
 @Data
 @Builder

@@ -13,17 +13,11 @@
  */
 package org.gbif.vocabulary.lookup;
 
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
-import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
+import org.gbif.vocabulary.model.LanguageRegion;
+import org.gbif.vocabulary.model.export.ConceptExportView;
+import org.gbif.vocabulary.model.export.Export;
+import org.gbif.vocabulary.tools.VocabularyDownloader;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZoneId;
@@ -40,14 +34,24 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+
 import org.cache2k.Cache;
 import org.cache2k.Cache2kBuilder;
-import org.gbif.vocabulary.model.LanguageRegion;
-import org.gbif.vocabulary.model.export.ConceptExportView;
-import org.gbif.vocabulary.model.export.Export;
-import org.gbif.vocabulary.tools.VocabularyDownloader;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeLabel;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.normalizeName;
+import static org.gbif.vocabulary.model.normalizers.StringNormalizer.replaceNonAsciiCharactersWithEquivalents;
 
 /**
  * Class that allows to load a vocabulary export in memory to do fast lookups by concept labels.

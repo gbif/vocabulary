@@ -13,10 +13,6 @@
  */
 package org.gbif.vocabulary.client;
 
-
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -32,6 +28,9 @@ import org.gbif.vocabulary.model.LanguageRegion;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.search.KeyNameResult;
 import org.gbif.vocabulary.model.search.LookupResult;
+
+import java.util.List;
+
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -42,6 +41,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @RequestMapping("vocabularies/{vocabularyName}/concepts")
 public interface ConceptClient {

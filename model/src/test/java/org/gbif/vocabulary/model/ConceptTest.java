@@ -13,14 +13,15 @@
  */
 package org.gbif.vocabulary.model;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests {@link Concept}. */
 public class ConceptTest {

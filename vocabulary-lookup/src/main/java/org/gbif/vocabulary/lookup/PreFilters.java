@@ -27,6 +27,7 @@ public final class PreFilters {
   private static final Pattern NON_ALPHANUMERIC_PATTERN = Pattern.compile("[^A-Za-z0-9]");
   private static final Pattern NON_LETTERS_PATTERN = Pattern.compile("[^A-Za-z]");
   private static final Pattern NUMBERS_PATTERN = Pattern.compile("[0-9]");
+  private static final Pattern POSITIVE_NUMBERS_PATTERN = Pattern.compile("[1-9]");
   private static final Pattern NUMERIC_PREFIX_PATTERN = Pattern.compile("^[0-9]+");
   private static final Pattern SIGNED_DECIMAL_NUMBERS_PREFIX_PATTERN =
       Pattern.compile("^[+-]?[0-9]+([.,][0-9]+)*|^[+-]?[0-9]*[.,][0-9]+");
@@ -39,6 +40,10 @@ public final class PreFilters {
   /** Removes all numeric chars. */
   public static final UnaryOperator<String> REMOVE_NUMERIC =
       s -> NUMBERS_PATTERN.matcher(s).replaceAll(EMPTY);
+
+  /** Removes all positive numeric chars. */
+  public static final UnaryOperator<String> REMOVE_POSITIVE_NUMERIC =
+      s -> POSITIVE_NUMBERS_PATTERN.matcher(s).replaceAll(EMPTY);
 
   /** Removes all the characters that are not letters. */
   public static final UnaryOperator<String> REMOVE_NON_LETTER =

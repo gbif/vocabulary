@@ -1,3 +1,5 @@
+@Library('gbif-common-jenkins-pipelines') _
+
 pipeline {
     agent any
     tools {
@@ -90,7 +92,7 @@ pipeline {
                 }
             }
             environment {
-                RELEASE_ARGS = createReleaseArgs()
+                RELEASE_ARGS = createReleaseArgs(params.RELEASE_VERSION, params.DEVELOPMENT_VERSION, params.DRY_RUN_RELEASE)
             }
             steps {
                 configFileProvider(
@@ -200,17 +202,3 @@ void createHostsFile() {
   """.stripIndent()
 }
 
-def createReleaseArgs() {
-    def args = ""
-    if (params.RELEASE_VERSION != '') {
-        args += "-DreleaseVersion=${params.RELEASE_VERSION} "
-    }
-    if (params.DEVELOPMENT_VERSION != '') {
-        args += "-DdevelopmentVersion=${params.DEVELOPMENT_VERSION} "
-    }
-    if (params.DRY_RUN_RELEASE) {
-        args += "-DdryRun=true"
-    }
-
-    return args
-}

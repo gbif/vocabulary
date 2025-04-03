@@ -341,7 +341,7 @@ public class DefaultExportService implements ExportService {
     PagingResponse<HiddenLabel> responseHidden = null;
     do {
       responseHidden =
-          conceptService.listHiddenLabels(concept.getKey(), new PagingRequest(offset, limit));
+          conceptService.listHiddenLabels(concept.getKey(), null, new PagingRequest(offset, limit));
 
       responseHidden
           .getResults()

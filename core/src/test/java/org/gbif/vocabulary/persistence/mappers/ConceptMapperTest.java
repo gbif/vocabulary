@@ -961,14 +961,20 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
     Consumer<List<HiddenLabel>> assertLabels =
         labs -> {
           assertEquals(1, labs.size());
-          assertEquals(labs.size(), conceptMapper.countHiddenLabels(concept.getKey()));
+          assertEquals(labs.size(), conceptMapper.countHiddenLabels(concept.getKey(), null));
           HiddenLabel lab = labs.get(0);
           assertEquals("test", lab.getValue());
           assertEquals("test", lab.getCreatedBy());
           assertNotNull(lab.getCreated());
         };
 
-    assertLabels.accept(conceptMapper.listHiddenLabels(concept.getKey(), DEFAULT_PAGE));
+    assertLabels.accept(conceptMapper.listHiddenLabels(concept.getKey(), null, DEFAULT_PAGE));
+
+    // Test with query parameter
+    assertEquals(1, conceptMapper.listHiddenLabels(concept.getKey(), "test", DEFAULT_PAGE).size());
+    assertEquals(0, conceptMapper.listHiddenLabels(concept.getKey(), "nonexistent", DEFAULT_PAGE).size());
+    assertEquals(1, conceptMapper.countHiddenLabels(concept.getKey(), "test"));
+    assertEquals(0, conceptMapper.countHiddenLabels(concept.getKey(), "nonexistent"));
 
     assertListHiddenLabels(0, concept.getKey(), PAGE_FN.apply(0, 0L));
     assertListHiddenLabels(1, concept.getKey(), DEFAULT_PAGE);
@@ -980,19 +986,19 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
   }
 
   private void assertListHiddenLabels(int expectedSize, long conceptKey, Pageable page) {
-    assertEquals(expectedSize, conceptMapper.listHiddenLabels(conceptKey, page).size());
+    assertEquals(expectedSize, conceptMapper.listHiddenLabels(conceptKey, null, page).size());
     assertEquals(
         expectedSize,
         conceptMapper
-            .listHiddenLabelsLatestRelease(conceptKey, page, DEFAULT_VOCABULARY.toLowerCase())
+            .listHiddenLabelsLatestRelease(conceptKey, null, page, DEFAULT_VOCABULARY.toLowerCase())
             .size());
 
     if (page.getLimit() > 0) {
-      assertEquals(expectedSize, conceptMapper.countHiddenLabels(conceptKey));
+      assertEquals(expectedSize, conceptMapper.countHiddenLabels(conceptKey, null));
       assertEquals(
           expectedSize,
           conceptMapper.countHiddenLabelsLatestRelease(
-              conceptKey, DEFAULT_VOCABULARY.toLowerCase()));
+              conceptKey, null, DEFAULT_VOCABULARY.toLowerCase()));
     }
   }
 

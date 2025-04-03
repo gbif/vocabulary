@@ -631,11 +631,19 @@ public class ConceptResource {
   @Operation(
       operationId = "listConceptHiddenLabels",
       summary = "List all the hidden labels of the concept",
-      description = "Lists all hidden labels of the concept.",
+      description = "Lists all hidden labels of the concept. Optionally filters by search term.",
       extensions =
           @Extension(
               name = "Order",
               properties = @ExtensionProperty(name = "Order", value = "0700")))
+  @Parameters(
+      value = {
+        @Parameter(
+            name = "q",
+            description = "Search term to filter hidden labels",
+            schema = @Schema(implementation = String.class),
+            in = ParameterIn.QUERY)
+      })
   @Pageable.OffsetLimitParameters
   @Docs.ConceptPathParameters
   @Docs.DefaultSearchResponses
@@ -643,9 +651,10 @@ public class ConceptResource {
   public PagingResponse<HiddenLabel> listHiddenLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
+      @RequestParam(value = "q", required = false) String query,
       Pageable page) {
     return conceptService.listHiddenLabels(
-        getConceptWithCheck(conceptName, vocabularyName).getKey(), page);
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), query, page);
   }
 
   @Operation(
@@ -998,9 +1007,10 @@ public class ConceptResource {
   public PagingResponse<HiddenLabel> listHiddenLabelsFromLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
+      @RequestParam(value = "q", required = false) String query,
       Pageable page) {
     return conceptService.listHiddenLabelsLatestRelease(
-        getConceptWithCheck(conceptName, vocabularyName).getKey(), page, vocabularyName);
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), query, page, vocabularyName);
   }
 
   @Operation(

@@ -170,19 +170,19 @@ public class ExportServiceTest extends MockServiceBaseTest {
                 c1AlternativeLabels.size(),
                 (long) c1AlternativeLabels.size(),
                 c1AlternativeLabels));
-    when(conceptService.listHiddenLabels(c1.getKey(), new PagingRequest(0, 1000)))
+    when(conceptService.listHiddenLabels(c1.getKey(), null, new PagingRequest(0, 1000)))
         .thenReturn(
             new PagingResponse<>(
                 0L, c1HiddenLabels.size(), (long) c1HiddenLabels.size(), c1HiddenLabels));
     when(conceptService.listLabels(c2.getKey(), null)).thenReturn(c2Labels);
     when(conceptService.listAlternativeLabels(c2.getKey(), null, new PagingRequest(0, 1000)))
         .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
-    when(conceptService.listHiddenLabels(c2.getKey(), new PagingRequest(0, 1000)))
+    when(conceptService.listHiddenLabels(c2.getKey(), null, new PagingRequest(0, 1000)))
         .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
     when(conceptService.listLabels(c3.getKey(), null)).thenReturn(c3Labels);
     when(conceptService.listAlternativeLabels(c3.getKey(), null, new PagingRequest(0, 1000)))
         .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
-    when(conceptService.listHiddenLabels(c3.getKey(), new PagingRequest(0, 1000)))
+    when(conceptService.listHiddenLabels(c3.getKey(), null, new PagingRequest(0, 1000)))
         .thenReturn(new PagingResponse<>(0L, 0, 0L, new ArrayList<>()));
   }
 

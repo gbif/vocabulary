@@ -132,9 +132,13 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   void deleteHiddenLabel(@Param("entityKey") long entityKey, @Param("key") long key);
 
   List<HiddenLabel> listHiddenLabels(
-      @Param("entityKey") long entityKey, @Nullable @Param("page") Pageable page);
+      @Param("entityKey") long entityKey, 
+      @Nullable @Param("query") String query,
+      @Nullable @Param("page") Pageable page);
 
-  long countHiddenLabels(@Param("entityKey") long entityKey);
+  long countHiddenLabels(
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("query") String query);
 
   boolean existsReleaseView(@Param("vocabName") String vocabularyName);
 
@@ -193,11 +197,14 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   List<HiddenLabel> listHiddenLabelsLatestRelease(
       @Param("entityKey") long entityKey,
+      @Nullable @Param("query") String query,
       @Nullable @Param("page") Pageable page,
       @Param("vocabName") String vocabularyName);
 
   long countHiddenLabelsLatestRelease(
-      @Param("entityKey") long entityKey, @Param("vocabName") String vocabularyName);
+      @Param("entityKey") long entityKey,
+      @Nullable @Param("query") String query,
+      @Param("vocabName") String vocabularyName);
 
   List<LookupDto> lookup(@Param("value") String value, @Param("vocabularyKey") long vocabularyKey);
 

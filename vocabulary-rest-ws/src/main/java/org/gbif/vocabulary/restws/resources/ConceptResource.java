@@ -27,6 +27,7 @@ import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.*;
 import org.gbif.vocabulary.model.exception.EntityNotFoundException;
 import org.gbif.vocabulary.model.exception.EntityNotFoundException.EntityType;
+import org.gbif.vocabulary.model.normalizers.StringNormalizer;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.LookupResult;
@@ -659,6 +660,7 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @RequestParam(value = "q", required = false) String query,
       Pageable page) {
+    query = StringNormalizer.replaceNonAsciiCharactersWithEquivalents(query);
     return conceptService.listHiddenLabels(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), query, page);
   }
@@ -1016,6 +1018,7 @@ public class ConceptResource {
       @PathVariable("name") String conceptName,
       @RequestParam(value = "q", required = false) String query,
       Pageable page) {
+    query = StringNormalizer.replaceNonAsciiCharactersWithEquivalents(query);
     return conceptService.listHiddenLabelsLatestRelease(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), query, page, vocabularyName);
   }

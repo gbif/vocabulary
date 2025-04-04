@@ -13,6 +13,10 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.gbif.api.documentation.CommonParameters;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -90,6 +94,8 @@ public class ConceptResource {
     this.wsConfig = wsConfig;
   }
 
+  @Target({ElementType.METHOD, ElementType.TYPE})
+  @Retention(RetentionPolicy.RUNTIME)
   @Parameters(
       value = {
         @Parameter(
@@ -812,6 +818,7 @@ public class ConceptResource {
           @Extension(
               name = "Order",
               properties = @ExtensionProperty(name = "Order", value = "0800")))
+  @Parameter(name = "params", hidden = true)
   @ListCommonDocs
   @GetMapping(LATEST_RELEASE_PATH)
   public PagingResponse<ConceptView> listConceptsLatestRelease(

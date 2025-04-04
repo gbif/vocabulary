@@ -372,7 +372,7 @@
     FROM concept_hidden_label${table_suffix}
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
     <if test="query != null">
-      AND normalized_value LIKE '%' || #{query,jdbcType=VARCHAR} || '%'
+      AND normalized_value LIKE CONCAT('%', normalize_label(#{query,jdbcType=VARCHAR}), '%')
     </if>
     ORDER BY created DESC
     <if test="page != null">
@@ -397,7 +397,7 @@
     FROM concept_hidden_label${table_suffix}
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
     <if test="query != null">
-      AND normalized_value LIKE '%' || #{query,jdbcType=VARCHAR} || '%'
+      AND normalized_value LIKE CONCAT('%', normalize_label(#{query,jdbcType=VARCHAR}), '%')
     </if>
   </sql>
 

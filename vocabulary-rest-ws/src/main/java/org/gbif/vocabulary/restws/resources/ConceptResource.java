@@ -13,10 +13,6 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import org.gbif.api.documentation.CommonParameters;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -38,6 +34,10 @@ import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.TagService;
 import org.gbif.vocabulary.service.VocabularyService;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.LongFunction;

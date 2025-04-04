@@ -257,10 +257,7 @@ public interface ConceptService extends BaseService<Concept> {
    * of the vocabulary instead of the actual data.
    */
   PagingResponse<HiddenLabel> listHiddenLabelsLatestRelease(
-      long entityKey, 
-      @Nullable String query,
-      @Nullable Pageable page, 
-      String vocabularyName);
+      long entityKey, @Nullable String query, @Nullable Pageable page, String vocabularyName);
 
   /**
    * Lookups concepts that match the given value.

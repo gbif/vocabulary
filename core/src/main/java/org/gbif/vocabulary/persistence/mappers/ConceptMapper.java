@@ -132,13 +132,12 @@ public interface ConceptMapper extends BaseMapper<Concept> {
   void deleteHiddenLabel(@Param("entityKey") long entityKey, @Param("key") long key);
 
   List<HiddenLabel> listHiddenLabels(
-      @Param("entityKey") long entityKey, 
+      @Param("entityKey") long entityKey,
       @Nullable @Param("query") String query,
       @Nullable @Param("page") Pageable page);
 
   long countHiddenLabels(
-      @Param("entityKey") long entityKey,
-      @Nullable @Param("query") String query);
+      @Param("entityKey") long entityKey, @Nullable @Param("query") String query);
 
   boolean existsReleaseView(@Param("vocabName") String vocabularyName);
 

@@ -972,7 +972,8 @@ public class ConceptMapperTest extends BaseMapperTest<Concept> {
 
     // Test with query parameter
     assertEquals(1, conceptMapper.listHiddenLabels(concept.getKey(), "test", DEFAULT_PAGE).size());
-    assertEquals(0, conceptMapper.listHiddenLabels(concept.getKey(), "nonexistent", DEFAULT_PAGE).size());
+    assertEquals(
+        0, conceptMapper.listHiddenLabels(concept.getKey(), "nonexistent", DEFAULT_PAGE).size());
     assertEquals(1, conceptMapper.countHiddenLabels(concept.getKey(), "test"));
     assertEquals(0, conceptMapper.countHiddenLabels(concept.getKey(), "nonexistent"));
 

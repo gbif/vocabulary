@@ -483,8 +483,10 @@ public class DefaultConceptService implements ConceptService {
   public PagingResponse<HiddenLabel> listHiddenLabels(
       long entityKey, @Nullable String query, @Nullable Pageable page) {
     page = page != null ? page : new PagingRequest();
-    String normalizedQuery = query != null ? 
-        StringNormalizer.replaceNonAsciiCharactersWithEquivalents(normalizeLabel(query)) : null;
+    String normalizedQuery =
+        query != null
+            ? StringNormalizer.replaceNonAsciiCharactersWithEquivalents(normalizeLabel(query))
+            : null;
     return new PagingResponse<>(
         page,
         conceptMapper.countHiddenLabels(entityKey, normalizedQuery),
@@ -496,12 +498,15 @@ public class DefaultConceptService implements ConceptService {
       long entityKey, @Nullable String query, @Nullable Pageable page, String vocabularyName) {
     checkReleaseExists(vocabularyName);
     page = page != null ? page : new PagingRequest();
-    String normalizedQuery = query != null ? 
-        StringNormalizer.replaceNonAsciiCharactersWithEquivalents(normalizeLabel(query)) : null;
+    String normalizedQuery =
+        query != null
+            ? StringNormalizer.replaceNonAsciiCharactersWithEquivalents(normalizeLabel(query))
+            : null;
     return new PagingResponse<>(
         page,
         conceptMapper.countHiddenLabelsLatestRelease(entityKey, normalizedQuery, vocabularyName),
-        conceptMapper.listHiddenLabelsLatestRelease(entityKey, normalizedQuery, page, vocabularyName));
+        conceptMapper.listHiddenLabelsLatestRelease(
+            entityKey, normalizedQuery, page, vocabularyName));
   }
 
   /** Returns the keys of all the children of the given concept. */

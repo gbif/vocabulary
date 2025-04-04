@@ -781,7 +781,8 @@ public class ConceptServiceIT {
     assertTrue(labelKey > 0);
 
     // list labels
-    PagingResponse<HiddenLabel> labelList = conceptService.listHiddenLabels(c1Key, null, DEFAULT_PAGE);
+    PagingResponse<HiddenLabel> labelList =
+        conceptService.listHiddenLabels(c1Key, null, DEFAULT_PAGE);
     assertEquals(1, labelList.getResults().size());
     assertEquals(labelKey, labelList.getResults().get(0).getKey());
     assertTrue(label.lenientEquals(labelList.getResults().get(0)));

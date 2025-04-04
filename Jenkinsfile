@@ -103,7 +103,7 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to DEV2') {
+        stage('Deploy to DEV') {
             environment {
                 GIT_CREDENTIALS = credentials('4b740850-d7e0-4ab2-9eee-ecd1607e1e02')
                 SERVICE_VOCABULARY = "${env.WORKSPACE}/service-vocabulary.yml"
@@ -121,10 +121,10 @@ pipeline {
                     sh '''
                 rm -rf *
                 git clone -b master git@github.com:gbif/gbif-configuration.git
-                git clone -b dev2 git@github.com:gbif/c-deploy.git
+                git clone -b dev git@github.com:gbif/c-deploy.git
                '''
 
-                    createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev2/services.yml")
+                    createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")
                     createHostsFile()
 
                     sh """
@@ -133,12 +133,12 @@ pipeline {
                 mkdir group_vars
 
                 # Configuration and services files are concatenated into a single file, that will contain the Ansible variables
-                cat ../../gbif-configuration/environments/dev2/configuration.yml \
-                    ../../gbif-configuration/environments/dev2/monitoring.yml \
+                cat ../../gbif-configuration/environments/dev/configuration.yml \
+                    ../../gbif-configuration/environments/dev/monitoring.yml \
                     ${SERVICE_VOCABULARY} >> group_vars/${BUILD_ID}
 
                 # The default Ansible inventory file 'hosts' is concatenated with the input HOSTS file
-                cat ../../gbif-configuration/environments/dev2/hosts \
+                cat ../../gbif-configuration/environments/dev/hosts \
                     ${HOSTS_VOCABULARY} >> ${BUILD_HOSTS}
 
                 # Executes the Ansible playbook

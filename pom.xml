@@ -110,7 +110,7 @@
     <curator-framework.version>5.5.0-disable-connectstr-updates</curator-framework.version>
 
     <!-- Hadoop -->
-    <hadoop.version>2.6.0-cdh5.16.2</hadoop.version>
+    <hadoop.version>3.4.0</hadoop.version>
     <hadoop-core.version>2.6.0-mr1-cdh5.16.2</hadoop-core.version>
 
     <!-- logging -->

@@ -55,7 +55,8 @@ The tool allows to import only the hidden labels to existing concepts of a vocab
 CSV that it's described in the section above. This is an example:
 
 ```
-java -jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \
+java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
+-jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \
 --vocabularyName LifeStage \
 --importHiddenLabelsOnly \
 --hiddenLabelsPath "/mydir/my_hidden_labels.csv" \
@@ -128,7 +129,8 @@ This tool can be run via command line by sending these params:
 Example of an import:
 
 ```
-java -jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \
+java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
+-jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \
 --vocabularyName LifeStage \
 --vocabularyLabelEN "Life Stage" \
 --vocabularyDefinitionEN "A vocabulary to capture the broad stages that an organism passes through during its life cycle. This vocabulary was assembled based on the observed terms commonly used by the open data community, including those from citizen scientists." \
@@ -143,7 +145,8 @@ java -jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \
 Example of an only-labels import :
 
 ```
-java -jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \
+java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
+-jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \
 --vocabularyName LifeStage \
 --importLabelsAndDefinitionsOnly \
 --conceptsPath "/mydir/my_concepts.csv" \
@@ -173,7 +176,8 @@ The importer tool can also be used to migrate vocabularies across environments. 
 where the vocabulary has to be copied to, e.g.:
 
 ```
-java -jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \
+java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
+-jar vocabulary-importer/target/vocabulary-importer-1.0.3.jar \
 --vocabularyName LifeStage \
 --migration \
 --apiUrl https://api.gbif-dev.org/v1/ \

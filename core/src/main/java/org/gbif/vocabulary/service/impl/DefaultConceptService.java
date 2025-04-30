@@ -480,12 +480,33 @@ public class DefaultConceptService implements ConceptService {
   }
 
   @Override
-  public PagingResponse<HiddenLabel> listHiddenLabels(long entityKey, @Nullable Pageable page) {
+  public PagingResponse<HiddenLabel> listHiddenLabels(
+      long entityKey, @Nullable String query, @Nullable Pageable page) {
     page = page != null ? page : new PagingRequest();
+    String normalizedQuery =
+        query != null
+            ? StringNormalizer.replaceNonAsciiCharactersWithEquivalents(normalizeLabel(query))
+            : null;
     return new PagingResponse<>(
         page,
-        conceptMapper.countHiddenLabels(entityKey),
-        conceptMapper.listHiddenLabels(entityKey, page));
+        conceptMapper.countHiddenLabels(entityKey, normalizedQuery),
+        conceptMapper.listHiddenLabels(entityKey, normalizedQuery, page));
+  }
+
+  @Override
+  public PagingResponse<HiddenLabel> listHiddenLabelsLatestRelease(
+      long entityKey, @Nullable String query, @Nullable Pageable page, String vocabularyName) {
+    checkReleaseExists(vocabularyName);
+    page = page != null ? page : new PagingRequest();
+    String normalizedQuery =
+        query != null
+            ? StringNormalizer.replaceNonAsciiCharactersWithEquivalents(normalizeLabel(query))
+            : null;
+    return new PagingResponse<>(
+        page,
+        conceptMapper.countHiddenLabelsLatestRelease(entityKey, normalizedQuery, vocabularyName),
+        conceptMapper.listHiddenLabelsLatestRelease(
+            entityKey, normalizedQuery, page, vocabularyName));
   }
 
   /** Returns the keys of all the children of the given concept. */
@@ -604,17 +625,6 @@ public class DefaultConceptService implements ConceptService {
             entityKey, languageRegions, vocabularyName),
         conceptMapper.listAlternativeLabelsLatestRelease(
             entityKey, languageRegions, page, vocabularyName));
-  }
-
-  @Override
-  public PagingResponse<HiddenLabel> listHiddenLabelsLatestRelease(
-      long entityKey, Pageable page, String vocabularyName) {
-    checkReleaseExists(vocabularyName);
-    page = page != null ? page : new PagingRequest();
-    return new PagingResponse<>(
-        page,
-        conceptMapper.countHiddenLabelsLatestRelease(entityKey, vocabularyName),
-        conceptMapper.listHiddenLabelsLatestRelease(entityKey, page, vocabularyName));
   }
 
   @Override

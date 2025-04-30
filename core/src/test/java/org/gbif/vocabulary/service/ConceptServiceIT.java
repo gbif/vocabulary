@@ -781,20 +781,33 @@ public class ConceptServiceIT {
     assertTrue(labelKey > 0);
 
     // list labels
-    PagingResponse<HiddenLabel> labelList = conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE);
+    PagingResponse<HiddenLabel> labelList =
+        conceptService.listHiddenLabels(c1Key, null, DEFAULT_PAGE);
     assertEquals(1, labelList.getResults().size());
     assertEquals(labelKey, labelList.getResults().get(0).getKey());
     assertTrue(label.lenientEquals(labelList.getResults().get(0)));
+
+    // Test with query parameter
+    labelList = conceptService.listHiddenLabels(c1Key, "label", DEFAULT_PAGE);
+    assertEquals(1, labelList.getResults().size());
+    assertEquals(labelKey, labelList.getResults().get(0).getKey());
+
+    labelList = conceptService.listHiddenLabels(c1Key, "nonexistent", DEFAULT_PAGE);
+    assertEquals(0, labelList.getResults().size());
 
     // add another label
     HiddenLabel label2 = HiddenLabel.builder().value("label2").createdBy("test").build();
     long labelKey2 = conceptService.addHiddenLabel(c1Key, label2);
     assertTrue(labelKey2 > 0);
-    assertEquals(2, conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE).getResults().size());
+    assertEquals(2, conceptService.listHiddenLabels(c1Key, null, DEFAULT_PAGE).getResults().size());
+
+    // Test query with multiple labels
+    labelList = conceptService.listHiddenLabels(c1Key, "label", DEFAULT_PAGE);
+    assertEquals(2, labelList.getResults().size());
 
     // delete label
     conceptService.deleteHiddenLabel(c1Key, labelKey);
-    labelList = conceptService.listHiddenLabels(c1Key, DEFAULT_PAGE);
+    labelList = conceptService.listHiddenLabels(c1Key, null, DEFAULT_PAGE);
     assertEquals(1, labelList.getResults().size());
     assertEquals(labelKey2, labelList.getResults().get(0).getKey());
   }

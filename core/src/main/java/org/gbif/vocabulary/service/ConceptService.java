@@ -156,7 +156,16 @@ public interface ConceptService extends BaseService<Concept> {
 
   void deleteHiddenLabel(long entityKey, long key);
 
-  PagingResponse<HiddenLabel> listHiddenLabels(long entityKey, @Nullable Pageable page);
+  /**
+   * Lists all hidden labels of a concept.
+   *
+   * @param entityKey key of the concept
+   * @param query optional search term to filter hidden labels
+   * @param page paging parameters
+   * @return list of hidden labels
+   */
+  PagingResponse<HiddenLabel> listHiddenLabels(
+      long entityKey, @Nullable String query, @Nullable Pageable page);
 
   /**
    * Checks if the views of the latest release of a vocabulary exist. They should always exist
@@ -244,11 +253,11 @@ public interface ConceptService extends BaseService<Concept> {
       String vocabularyName);
 
   /**
-   * It works as {@link #listHiddenLabels(long, Pageable)} but it queries the latest release * of
-   * the vocabulary instead of the actual data.
+   * It works as {@link #listHiddenLabels(long, String, Pageable)} but it queries the latest release
+   * of the vocabulary instead of the actual data.
    */
   PagingResponse<HiddenLabel> listHiddenLabelsLatestRelease(
-      long entityKey, @Nullable Pageable page, String vocabularyName);
+      long entityKey, @Nullable String query, @Nullable Pageable page, String vocabularyName);
 
   /**
    * Lookups concepts that match the given value.

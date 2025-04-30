@@ -23,6 +23,7 @@ import org.gbif.vocabulary.api.DeprecateConceptAction;
 import org.gbif.vocabulary.model.*;
 import org.gbif.vocabulary.model.exception.EntityNotFoundException;
 import org.gbif.vocabulary.model.exception.EntityNotFoundException.EntityType;
+import org.gbif.vocabulary.model.normalizers.StringNormalizer;
 import org.gbif.vocabulary.model.search.ChildrenResult;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
 import org.gbif.vocabulary.model.search.LookupResult;
@@ -33,6 +34,10 @@ import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.TagService;
 import org.gbif.vocabulary.service.VocabularyService;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.LongFunction;
@@ -90,6 +95,8 @@ public class ConceptResource {
     this.wsConfig = wsConfig;
   }
 
+  @Target({ElementType.METHOD, ElementType.TYPE})
+  @Retention(RetentionPolicy.RUNTIME)
   @Parameters(
       value = {
         @Parameter(
@@ -631,11 +638,19 @@ public class ConceptResource {
   @Operation(
       operationId = "listConceptHiddenLabels",
       summary = "List all the hidden labels of the concept",
-      description = "Lists all hidden labels of the concept.",
+      description = "Lists all hidden labels of the concept. Optionally filters by search term.",
       extensions =
           @Extension(
               name = "Order",
               properties = @ExtensionProperty(name = "Order", value = "0700")))
+  @Parameters(
+      value = {
+        @Parameter(
+            name = "q",
+            description = "Search term to filter hidden labels",
+            schema = @Schema(implementation = String.class),
+            in = ParameterIn.QUERY)
+      })
   @Pageable.OffsetLimitParameters
   @Docs.ConceptPathParameters
   @Docs.DefaultSearchResponses
@@ -643,9 +658,11 @@ public class ConceptResource {
   public PagingResponse<HiddenLabel> listHiddenLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
+      @RequestParam(value = "q", required = false) String query,
       Pageable page) {
+    query = StringNormalizer.replaceNonAsciiCharactersWithEquivalents(query);
     return conceptService.listHiddenLabels(
-        getConceptWithCheck(conceptName, vocabularyName).getKey(), page);
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), query, page);
   }
 
   @Operation(
@@ -803,6 +820,7 @@ public class ConceptResource {
           @Extension(
               name = "Order",
               properties = @ExtensionProperty(name = "Order", value = "0800")))
+  @Parameter(name = "params", hidden = true)
   @ListCommonDocs
   @GetMapping(LATEST_RELEASE_PATH)
   public PagingResponse<ConceptView> listConceptsLatestRelease(
@@ -998,9 +1016,11 @@ public class ConceptResource {
   public PagingResponse<HiddenLabel> listHiddenLabelsFromLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
+      @RequestParam(value = "q", required = false) String query,
       Pageable page) {
+    query = StringNormalizer.replaceNonAsciiCharactersWithEquivalents(query);
     return conceptService.listHiddenLabelsLatestRelease(
-        getConceptWithCheck(conceptName, vocabularyName).getKey(), page, vocabularyName);
+        getConceptWithCheck(conceptName, vocabularyName).getKey(), query, page, vocabularyName);
   }
 
   @Operation(

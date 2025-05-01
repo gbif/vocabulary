@@ -1,67 +1,77 @@
 pipeline {
-  agent any
-  tools {
-    maven 'Maven 3.8.5'
-    jdk 'OpenJDK11'
-  }
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '20'))
-    timestamps()
-  }
-  parameters {
-    choice(name: 'ENV', choices: ['dev', 'uat', 'prod'], description: 'Choose environment')
-    choice(name: 'VERSION', choices: ['releases', 'snapshots'],
-            description: 'Snapshot versions should be used only for development purposes.')
-    string(name: 'VOCABULARY_NAME', defaultValue: '', description: 'Vocabulary name')
-    string(name: 'VOCABULARY_LABEL_EN', defaultValue: '', description: 'Vocabulary label EN')
-    string(name: 'VOCABULARY_DEFINITION_EN', defaultValue: '', description: 'Vocabulary definition EN')
-
-    string(name: 'CSV_DELIMITER', defaultValue: '', description: 'CSV delimiter. The comma(,) is used by default')
-    string(name: 'LIST_DELIMITER', defaultValue: '', description: 'List delimiter. The pipe(|) is used by default')
-    string(name: 'ENCODING', defaultValue: '', description: 'Encoding. UTF-8 is used by default')
-
-    file(name: 'CONCEPTS_FILE', description: 'Upload the file with the concepts')
-    file(name: 'HIDDEN_LABELS_FILE', description: 'Upload the file with the hidden labels')
-
-    booleanParam(name: 'MIGRATION', defaultValue: false, description: 'Migration')
-    booleanParam(name: 'IMPORT_HIDDEN_LABELS_ONLY', defaultValue: false, description: 'Import hidden labels only')
-    booleanParam(name: 'IMPORT_LABELS_AND_DEFINITIONS_ONLY', defaultValue: false, description: 'Import labels and definitions only')
-
-    string(name: 'API_URL', defaultValue: '', description: 'API URL')
-    string(name: 'API_USER', defaultValue: '', description: 'API User')
-    password(name: 'API_PASSWORD', defaultValue: '', description: 'API Password')
-    string(name: 'TARGET_API_URL', defaultValue: '', description: 'Target API URL')
-    string(name: 'TARGET_API_USER', defaultValue: '', description: 'Target API User')
-    password(name: 'TARGET_API_PASSWORD', defaultValue: '', description: 'Target API Password')
-  }
-  stages {
-    stage('Import') {
-      environment {
-        REPO_URL = "https://repository.gbif.org/service/rest/v1/search/assets/download?repository=${params.VERSION}" +
-                   "&group=org.gbif.vocabulary&name=vocabulary-importer&sort=version&direction=desc" +
-                   "&maven.classifier&maven.extension=jar"
-        CLI_ARGS = createCliArgs()
-      }
-      steps {
-          sh """
-           rm -rf *
-
-           if [[ $API_PASSWORD != '' ]]; then
-             EXPORT API_PASSWORD=$API_PASSWORD
-           fi
-
-           if [[ $TARGET_API_PASSWORD != '' ]]; then
-             EXPORT TARGET_API_PASSWORD=$TARGET_API_PASSWORD
-           fi
-
-           curl "${REPO_URL}" -L -o vocabulary-importer.jar
-           java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
-                -jar vocabulary-importer.jar \
-                ${CLI_ARGS} --conceptsPath $CONCEPTS_FILE
-          """
-      }
+    agent any
+    tools {
+        maven 'Maven 3.8.5'
+        jdk 'OpenJDK11'
     }
-  }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timestamps()
+    }
+    parameters {
+        choice(name: 'ENV', choices: ['dev', 'uat', 'prod'], description: 'Choose environment')
+        choice(name: 'VERSION', choices: ['releases', 'snapshots'],
+                description: 'Snapshot versions should be used only for development purposes.')
+
+        string(name: 'VOCABULARY_NAME', defaultValue: '', description: 'Vocabulary name')
+        string(name: 'VOCABULARY_LABEL_EN', defaultValue: '', description: 'Vocabulary label EN')
+        string(name: 'VOCABULARY_DEFINITION_EN', defaultValue: '', description: 'Vocabulary definition EN')
+
+        string(name: 'CSV_DELIMITER', defaultValue: '', description: 'CSV delimiter. The comma(,) is used by default')
+        string(name: 'LIST_DELIMITER', defaultValue: '', description: 'List delimiter. The pipe(|) is used by default')
+        string(name: 'ENCODING', defaultValue: '', description: 'Encoding. UTF-8 is used by default')
+
+        file(name: 'CONCEPTS_FILE', description: 'Upload the file with the concepts')
+        file(name: 'HIDDEN_LABELS_FILE', description: 'Upload the file with the hidden labels')
+
+        booleanParam(name: 'MIGRATION', defaultValue: false, description: 'Migrate one vocabulary to one env to another')
+        choice(name: 'MIGRATE_TO', choices: ['dev', 'uat', 'prod'], description: 'Migrate to the specified env')
+        booleanParam(name: 'IMPORT_HIDDEN_LABELS_ONLY', defaultValue: false, description: 'Import hidden labels only')
+        booleanParam(name: 'IMPORT_LABELS_AND_DEFINITIONS_ONLY', defaultValue: false, description: 'Import labels and definitions only')
+    }
+    stages {
+        stage('Import') {
+            environment {
+                REPO_URL = "https://repository.gbif.org/service/rest/v1/search/assets/download?repository=${params.VERSION}" +
+                        "&group=org.gbif.vocabulary&name=vocabulary-importer&sort=version&direction=desc" +
+                        "&maven.classifier&maven.extension=jar"
+                CLI_ARGS = createCliArgs()
+            }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'gbif-vocabulary-importer', usernameVariable: 'VOCAB_USER', passwordVariable: 'VOCAB_PWD')]) {
+                    sh """
+               rm -rf *
+
+               args=${CLI_ARGS}
+
+               EXPORT API_PASSWORD=${VOCAB_PWD}
+
+                args+="--apiUser " + ${VOCAB_USER}
+                args+="--apiPassword " + ${VOCAB_PWD}
+
+                if [[ $MIGRATION = true ]]; then
+                    EXPORT TARGET_API_PASSWORD=${VOCAB_PWD}
+                     args+="--targetApiUser " + ${VOCAB_USER}
+                     args+="--targetApiPassword " + ${VOCAB_PWD}
+                fi
+
+                if [[ $CONCEPTS_FILE != '' ]]; then
+                     args+="--conceptsPath " + ${CONCEPTS_FILE}
+                fi
+
+                if [[ $HIDDEN_LABELS_FILE != '' ]]; then
+                     args+="--hiddenLabelsPath " + ${HIDDEN_LABELS_FILE}
+                fi
+
+               curl "${REPO_URL}" -L -o vocabulary-importer.jar
+               java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
+                    -jar vocabulary-importer.jar \
+                    $args
+              """
+                }
+            }
+        }
+    }
 }
 
 def createCliArgs() {
@@ -99,9 +109,12 @@ def createCliArgs() {
     args += "--hiddenLabelsPath ${params.HIDDEN_LABELS_FILE} "
   }
 
-  if (params.MIGRATION != '') {
+  if (params.MIGRATION == true) {
     args += "--migration "
+    args += setApiUrl("targetApiUrl", params.MIGRATE_TO)
   }
+
+  args += setApiUrl("apiUrl", params.ENV)
 
   if (params.IMPORT_HIDDEN_LABELS_ONLY == true) {
     args += "--importHiddenLabelsOnly "
@@ -111,21 +124,18 @@ def createCliArgs() {
     args += "--importLabelsAndDefinitionsOnly "
   }
 
-  if (params.API_URL != '') {
-    args += "--apiUrl ${params.API_URL} "
-  }
-
-  if (params.API_USER != '') {
-    args += "--apiUser ${params.API_USER} "
-  }
-
-  if (params.TARGET_API_URL != '') {
-    args += "--targetApiUrl ${params.TARGET_API_URL} "
-  }
-
-  if (params.TARGET_API_USER != '') {
-    args += "--targetApiUser ${params.TARGET_API_USER} "
-  }
-
   return args
+}
+
+static def setApiUrl(paramName, env_param) {
+    def apiUrlArg = "--" + paramName + " "
+    if (env_param != 'prod') {
+        args += "https://api.gbif.org/v1/ "
+    } else if (env_param != 'uat') {
+        args += "https://api.gbif-uat.org/v1/ "
+    } else {
+        args += "https://api.gbif-dev.org/v1/ "
+    }
+
+    return apiUrlArg
 }

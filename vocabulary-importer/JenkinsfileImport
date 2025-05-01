@@ -57,7 +57,7 @@ pipeline {
            curl "${REPO_URL}" -L -o vocabulary-importer.jar
            java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
                 -jar vocabulary-importer.jar \
-                ${CLI_ARGS}
+                ${CLI_ARGS} --conceptsPath $CONCEPTS_FILE
           """
       }
     }

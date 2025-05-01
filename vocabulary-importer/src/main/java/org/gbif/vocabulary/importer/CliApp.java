@@ -204,14 +204,13 @@ public class CliApp {
 
     @Parameter(
         names = {"--apiPassword", "-ap"},
-        required = true,
         password = true)
-    private String apiPassword;
+    private String apiPassword = System.getenv("API_PASSWORD");
 
     @Parameter(
         names = {"--targetApiPassword", "-tap"},
         password = true)
-    private String targetApiPassword;
+    private String targetApiPassword = System.getenv("TARGET_API_PASSWORD");
 
     @Parameter(
         names = {"--vocabularyName", "-vn"},

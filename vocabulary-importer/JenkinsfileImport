@@ -29,14 +29,13 @@ pipeline {
 
     string(name: 'API_URL', defaultValue: '', description: 'API URL')
     string(name: 'API_USER', defaultValue: '', description: 'API User')
+    password(name: 'API_PASSWORD', defaultValue: '', description: 'API Password')
     string(name: 'TARGET_API_URL', defaultValue: '', description: 'Target API URL')
     string(name: 'TARGET_API_USER', defaultValue: '', description: 'Target API User')
-  }
-  triggers {
-    parameterizedCron('H 10 * * 3 %ENV=prod;VERSION=releases;DRY_RUN=false;SEND_NOTIFICATIONS=true')
+    password(name: 'TARGET_API_PASSWORD', defaultValue: '', description: 'Target API Password')
   }
   stages {
-    stage('Sync') {
+    stage('Import') {
       environment {
         REPO_URL = "https://repository.gbif.org/service/rest/v1/search/assets/download?repository=${params.VERSION}" +
                    "&group=org.gbif.vocabulary&name=vocabulary-importer&sort=version&direction=desc" +
@@ -46,6 +45,14 @@ pipeline {
       steps {
           sh """
            rm -rf *
+
+           if [[ $API_PASSWORD != '' ]]; then
+             EXPORT API_PASSWORD=$API_PASSWORD
+           fi
+
+           if [[ $TARGET_API_PASSWORD != '' ]]; then
+             EXPORT TARGET_API_PASSWORD=$TARGET_API_PASSWORD
+           fi
 
            curl "${REPO_URL}" -L -o vocabulary-importer.jar
            java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
@@ -84,11 +91,11 @@ def createCliArgs() {
     args += "--encoding ${params.ENCODING} "
   }
 
-  if (params.CONCEPTS_FILE != '') {
+  if (params.CONCEPTS_FILE != null) {
     args += "--conceptsPath ${params.CONCEPTS_FILE} "
   }
 
-  if (params.HIDDEN_LABELS_FILE != '') {
+  if (params.HIDDEN_LABELS_FILE != null) {
     args += "--hiddenLabelsPath ${params.HIDDEN_LABELS_FILE} "
   }
 
@@ -109,7 +116,7 @@ def createCliArgs() {
   }
 
   if (params.API_USER != '') {
-    args += "--apiUser ${params.API_USER} --apiPassword "
+    args += "--apiUser ${params.API_USER} "
   }
 
   if (params.TARGET_API_URL != '') {
@@ -117,7 +124,7 @@ def createCliArgs() {
   }
 
   if (params.TARGET_API_USER != '') {
-    args += "--targetApiUser ${params.TARGET_API_USER} --targetApiPassword "
+    args += "--targetApiUser ${params.TARGET_API_USER} "
   }
 
   return args

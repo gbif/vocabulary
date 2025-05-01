@@ -29,10 +29,12 @@ pipeline {
 
     string(name: 'API_URL', defaultValue: '', description: 'API URL')
     string(name: 'API_USER', defaultValue: '', description: 'API User')
-    //password(name: 'API_PASSWORD', defaultValue: '', description: 'API Password')
+    // TODO: change to password after testing
+    string(name: 'API_PASSWORD', defaultValue: '', description: 'API Password')
     string(name: 'TARGET_API_URL', defaultValue: '', description: 'Target API URL')
     string(name: 'TARGET_API_USER', defaultValue: '', description: 'Target API User')
-    //password(name: 'TARGET_API_PASSWORD', defaultValue: '', description: 'Target API Password')
+    // TODO: change to password after testing
+    string(name: 'TARGET_API_PASSWORD', defaultValue: '', description: 'Target API Password')
   }
   stages {
     stage('Import') {

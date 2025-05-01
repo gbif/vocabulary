@@ -103,11 +103,11 @@ def createCliArgs() {
     args += "--migration "
   }
 
-  if (params.IMPORT_HIDDEN_LABELS_ONLY != '') {
+  if (params.IMPORT_HIDDEN_LABELS_ONLY == true) {
     args += "--importHiddenLabelsOnly "
   }
 
-  if (params.IMPORT_LABELS_AND_DEFINITIONS_ONLY != '') {
+  if (params.IMPORT_LABELS_AND_DEFINITIONS_ONLY == true) {
     args += "--importLabelsAndDefinitionsOnly "
   }
 

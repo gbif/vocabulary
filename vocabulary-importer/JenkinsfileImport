@@ -16,9 +16,9 @@ pipeline {
     string(name: 'VOCABULARY_LABEL_EN', defaultValue: '', description: 'Vocabulary label EN')
     string(name: 'VOCABULARY_DEFINITION_EN', defaultValue: '', description: 'Vocabulary definition EN')
 
-    string(name: 'CSV_DELIMITER', defaultValue: '', description: 'CSV delimiter')
-    string(name: 'LIST_DELIMITER', defaultValue: '', description: 'List delimiter')
-    string(name: 'ENCODING', defaultValue: 'UTF-8', description: 'Encoding')
+    string(name: 'CSV_DELIMITER', defaultValue: '', description: 'CSV delimiter. The comma(,) is used by default')
+    string(name: 'LIST_DELIMITER', defaultValue: '', description: 'List delimiter. The pipe(|) is used by default')
+    string(name: 'ENCODING', defaultValue: '', description: 'Encoding. UTF-8 is used by default')
 
     file(name: 'CONCEPTS_FILE', description: 'Upload the file with the concepts')
     file(name: 'HIDDEN_LABELS_FILE', description: 'Upload the file with the hidden labels')
@@ -29,12 +29,10 @@ pipeline {
 
     string(name: 'API_URL', defaultValue: '', description: 'API URL')
     string(name: 'API_USER', defaultValue: '', description: 'API User')
-    // TODO: change to password after testing
-    string(name: 'API_PASSWORD', defaultValue: '', description: 'API Password')
+    password(name: 'API_PASSWORD', defaultValue: '', description: 'API Password')
     string(name: 'TARGET_API_URL', defaultValue: '', description: 'Target API URL')
     string(name: 'TARGET_API_USER', defaultValue: '', description: 'Target API User')
-    // TODO: change to password after testing
-    string(name: 'TARGET_API_PASSWORD', defaultValue: '', description: 'Target API Password')
+    password(name: 'TARGET_API_PASSWORD', defaultValue: '', description: 'Target API Password')
   }
   stages {
     stage('Import') {

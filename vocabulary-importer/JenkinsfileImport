@@ -130,11 +130,11 @@ def createCliArgs() {
 static def setApiUrl(paramName, env_param) {
     def apiUrlArg = "--" + paramName + " "
     if (env_param != 'prod') {
-        args+="https://api.gbif.org/v1/ "
+        apiUrlArg +="https://api.gbif.org/v1/ "
     } else if (env_param != 'uat') {
-        args+="https://api.gbif-uat.org/v1/ "
+        apiUrlArg +="https://api.gbif-uat.org/v1/ "
     } else {
-        args+="https://api.gbif-dev.org/v1/ "
+        apiUrlArg +="https://api.gbif-dev.org/v1/ "
     }
 
     return apiUrlArg

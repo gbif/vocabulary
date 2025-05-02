@@ -38,7 +38,9 @@ pipeline {
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'gbif-vocabulary-importer', usernameVariable: 'VOCAB_USER', passwordVariable: 'VOCAB_PWD')]) {
-                    def cliArgs = createCliArgs($VOCAB_USER)
+                    script {
+                        def cliArgs = createCliArgs($VOCAB_USER)
+                    }
                     sh '''
                        export API_PASSWORD=$VOCAB_PWD
                        export TARGET_API_PASSWORD=$VOCAB_PWD

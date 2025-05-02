@@ -39,7 +39,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'gbif-vocabulary-importer', usernameVariable: 'VOCAB_USER', passwordVariable: 'VOCAB_PWD')]) {
                     script {
-                        def cliArgs = createCliArgs($VOCAB_USER)
+                        CLI_ARGS = createCliArgs("${VOCAB_USER}")
                     }
                     sh '''
                        export API_PASSWORD=$VOCAB_PWD
@@ -48,7 +48,7 @@ pipeline {
                        curl "$REPO_URL" -L -o vocabulary-importer.jar
                        java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
                             -jar vocabulary-importer.jar \
-                            $cliArgs
+                            $CLI_ARGS
                     '''
                 }
             }
@@ -60,6 +60,7 @@ def createCliArgs(user) {
   def args = ""
 
   args+="--apiUser " + user + " "
+  args += setApiUrl("apiUrl", params.ENV)
 
   if (params.VOCABULARY_NAME != '') {
     args += "--vocabularyName ${params.VOCABULARY_NAME} "
@@ -85,12 +86,12 @@ def createCliArgs(user) {
     args += "--encoding ${params.ENCODING} "
   }
 
-  if (params.CONCEPTS_FILE != null) {
-    args += "--conceptsPath ${params.CONCEPTS_FILE} "
+  if (CONCEPTS_FILE != null) {
+    args += "--conceptsPath ${CONCEPTS_FILE} "
   }
 
-  if (params.HIDDEN_LABELS_FILE != null) {
-    args += "--hiddenLabelsPath ${params.HIDDEN_LABELS_FILE} "
+  if (HIDDEN_LABELS_FILE != null) {
+    args += "--hiddenLabelsPath ${HIDDEN_LABELS_FILE} "
   }
 
   if (params.MIGRATION == true) {
@@ -98,8 +99,6 @@ def createCliArgs(user) {
     args += setApiUrl("targetApiUrl", params.MIGRATE_TO)
     args += "--targetApiUser " + user + " "
   }
-
-  args += setApiUrl("apiUrl", params.ENV)
 
   if (params.IMPORT_HIDDEN_LABELS_ONLY == true) {
     args += "--importHiddenLabelsOnly "

@@ -41,12 +41,12 @@ pipeline {
                     script {
                         try {
                             unstash 'CONCEPTS_FILE'
-                        } catch (all) {
+                        } catch (Exception e) {
                             // do nothing
                         }
                         try {
                             unstash 'HIDDEN_LABELS_FILE'
-                        } catch (all) {
+                        } catch (Exception e) {
                         // do nothing
                         }
                         CLI_ARGS = createCliArgs("${VOCAB_USER}")
@@ -97,18 +97,18 @@ def createCliArgs(user) {
 
     try {
       if (CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
-          args += "--conceptsPath ${CONCEPTS_FILE} "
+          args += "--conceptsPath CONCEPTS_FILE "
       }
-    } catch (all) {
-      // do nothing
+    } catch (Exception e) {
+        echo 'Exception occurred: ' + e.toString()
     }
 
     try {
       if (HIDDEN_LABELS_FILE_FILENAME != null && HIDDEN_LABELS_FILE_FILENAME != '') {
-        args += "--hiddenLabelsPath ${HIDDEN_LABELS_FILE} "
+        args += "--hiddenLabelsPath HIDDEN_LABELS_FILE "
       }
-    } catch (all) {
-        // do nothing
+    } catch (Exception e) {
+        echo 'Exception occurred: ' + e.toString()
     }
 
     if (params.MIGRATION == true) {

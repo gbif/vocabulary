@@ -35,14 +35,24 @@ pipeline {
         stage('Copy') {
             steps {
                 script {
-                    // Copy file to workspace first
-                    echo "Workspace path: ${WORKSPACE}"
-                    sh "ls -la ${WORKSPACE}"
-                    sh "ls -la"
-                    writeFile file: 'uploaded_file',
-                            text: readFile(CONCEPTS_FILE)
-                    def newPath = "${WORKSPACE}/uploaded_file"
-                    sh "ls -la ${WORKSPACE}"
+                    script{
+                        // Get file using input step, will put it in build directory
+                        print "=================Please upload your property files ====================="
+                        def inputFile = input message: 'Upload file', parameters: [file(name: 'test.csv')]
+                        // Read contents and write to workspace
+                        writeFile(file: 'test.csv', text: inputFile.readToString())
+                        // Stash it for use in a different part of the pipeline
+                        stash name: 'data', includes: 'test.csv'
+                    }
+
+//                    // Copy file to workspace first
+//                    echo "Workspace path: ${WORKSPACE}"
+//                    sh "ls -la ${WORKSPACE}"
+//                    sh "ls -la"
+//                    writeFile file: 'uploaded_file',
+//                            text: readFile(CONCEPTS_FILE)
+//                    def newPath = "${WORKSPACE}/uploaded_file"
+//                    sh "ls -la ${WORKSPACE}"
                 }
             }
         }

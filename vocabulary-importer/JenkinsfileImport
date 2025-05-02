@@ -88,11 +88,11 @@ def createCliArgs(user) {
     args += "--encoding ${params.ENCODING} "
   }
 
-  if (CONCEPTS_FILE != null) {
+  if (CONCEPTS_FILE != null && CONCEPTS_FILE != '') {
     args += "--conceptsPath ${CONCEPTS_FILE} "
   }
 
-  if (HIDDEN_LABELS_FILE != null) {
+  if (HIDDEN_LABELS_FILE != null && HIDDEN_LABELS_FILE != '') {
     args += "--hiddenLabelsPath ${HIDDEN_LABELS_FILE} "
   }
 

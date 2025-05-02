@@ -97,7 +97,7 @@ def createCliArgs(user) {
 
     try {
       if (CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
-          args += "--conceptsPath ${CONCEPTS_FILE_FILENAME} "
+          args += "--conceptsPath ${CONCEPTS_FILE} "
       }
     } catch (all) {
       // do nothing
@@ -105,7 +105,7 @@ def createCliArgs(user) {
 
     try {
       if (HIDDEN_LABELS_FILE_FILENAME != null && HIDDEN_LABELS_FILE_FILENAME != '') {
-        args += "--hiddenLabelsPath ${HIDDEN_LABELS_FILE_FILENAME} "
+        args += "--hiddenLabelsPath ${HIDDEN_LABELS_FILE} "
       }
     } catch (all) {
         // do nothing

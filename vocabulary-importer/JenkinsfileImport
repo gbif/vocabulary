@@ -40,34 +40,34 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'gbif-vocabulary-importer', usernameVariable: 'VOCAB_USER', passwordVariable: 'VOCAB_PWD')]) {
                     sh """
-               rm -rf *
+                       rm -rf *
 
-               args=${CLI_ARGS}
+                       args=${CLI_ARGS}
 
-               EXPORT API_PASSWORD=${VOCAB_PWD}
+                       EXPORT API_PASSWORD=${VOCAB_PWD}
 
-                args+="--apiUser " + ${VOCAB_USER}
-                args+="--apiPassword " + ${VOCAB_PWD}
+                        args+="--apiUser " + ${VOCAB_USER}
+                        args+="--apiPassword " + ${VOCAB_PWD}
 
-                if [[ $MIGRATION = true ]]; then
-                    EXPORT TARGET_API_PASSWORD=${VOCAB_PWD}
-                     args+="--targetApiUser " + ${VOCAB_USER}
-                     args+="--targetApiPassword " + ${VOCAB_PWD}
-                fi
+                        if [[ $MIGRATION = true ]]; then
+                            EXPORT TARGET_API_PASSWORD=${VOCAB_PWD}
+                             args+="--targetApiUser " + ${VOCAB_USER}
+                             args+="--targetApiPassword " + ${VOCAB_PWD}
+                        fi
 
-                if [[ $CONCEPTS_FILE != '' ]]; then
-                     args+="--conceptsPath " + ${CONCEPTS_FILE}
-                fi
+                        if [[ $CONCEPTS_FILE != '' ]]; then
+                             args+="--conceptsPath " + ${CONCEPTS_FILE}
+                        fi
 
-                if [[ $HIDDEN_LABELS_FILE != '' ]]; then
-                     args+="--hiddenLabelsPath " + ${HIDDEN_LABELS_FILE}
-                fi
+                        if [[ $HIDDEN_LABELS_FILE != '' ]]; then
+                             args+="--hiddenLabelsPath " + ${HIDDEN_LABELS_FILE}
+                        fi
 
-               curl "${REPO_URL}" -L -o vocabulary-importer.jar
-               java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
-                    -jar vocabulary-importer.jar \
-                    $args
-              """
+                       curl "${REPO_URL}" -L -o vocabulary-importer.jar
+                       java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED \
+                            -jar vocabulary-importer.jar \
+                            $args
+                    """
                 }
             }
         }
@@ -130,11 +130,11 @@ def createCliArgs() {
 static def setApiUrl(paramName, env_param) {
     def apiUrlArg = "--" + paramName + " "
     if (env_param != 'prod') {
-        args += "https://api.gbif.org/v1/ "
+        args+="https://api.gbif.org/v1/ "
     } else if (env_param != 'uat') {
-        args += "https://api.gbif-uat.org/v1/ "
+        args+="https://api.gbif-uat.org/v1/ "
     } else {
-        args += "https://api.gbif-dev.org/v1/ "
+        args+="https://api.gbif-dev.org/v1/ "
     }
 
     return apiUrlArg

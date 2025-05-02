@@ -38,11 +38,18 @@ pipeline {
                         "&maven.classifier&maven.extension=jar"
             }
             steps {
+                script {
+                    // Copy file to workspace first
+                    writeFile file: 'uploaded_file',
+                            text: readFile(params.UPLOADED_FILE)
+                    def newPath = "${WORKSPACE}/uploaded_file"
+                }
                 withCredentials([usernamePassword(credentialsId: 'gbif-vocabulary-importer', usernameVariable: 'VOCAB_USER', passwordVariable: 'VOCAB_PWD')]) {
                     script {
                         CLI_ARGS = createCliArgs("${VOCAB_USER}")
                     }
                     sh """
+                        echo $newPath
                        export API_PASSWORD=$VOCAB_PWD
                        export TARGET_API_PASSWORD=$VOCAB_PWD
                        curl "$REPO_URL" -L -o vocabulary-importer.jar

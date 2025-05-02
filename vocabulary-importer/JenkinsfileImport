@@ -42,6 +42,7 @@ pipeline {
                     writeFile file: 'uploaded_file',
                             text: readFile(CONCEPTS_FILE)
                     def newPath = "${WORKSPACE}/uploaded_file"
+                    sh "ls -la ${WORKSPACE}"
                 }
             }
         }

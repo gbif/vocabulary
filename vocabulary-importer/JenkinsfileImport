@@ -21,15 +21,13 @@ pipeline {
         string(name: 'LIST_DELIMITER', defaultValue: '', description: 'List delimiter. The pipe(|) is used by default')
         string(name: 'ENCODING', defaultValue: '', description: 'Encoding. UTF-8 is used by default')
 
-        file(name: 'CONCEPTS_FILE', description: 'Upload the file with the concepts')
-        file(name: 'HIDDEN_LABELS_FILE', description: 'Upload the file with the hidden labels')
+        stashedFile 'CONCEPTS_FILE'
+        stashedFile 'HIDDEN_LABELS_FILE'
 
         booleanParam(name: 'MIGRATION', defaultValue: false, description: 'Migrate one vocabulary to one env to another')
         choice(name: 'MIGRATE_TO', choices: ['dev', 'uat', 'prod'], description: 'Migrate to the specified env')
         booleanParam(name: 'IMPORT_HIDDEN_LABELS_ONLY', defaultValue: false, description: 'Import hidden labels only')
         booleanParam(name: 'IMPORT_LABELS_AND_DEFINITIONS_ONLY', defaultValue: false, description: 'Import labels and definitions only')
-
-        stashedFile 'large'
     }
     stages {
         stage('Import') {
@@ -41,12 +39,12 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'gbif-vocabulary-importer', usernameVariable: 'VOCAB_USER', passwordVariable: 'VOCAB_PWD')]) {
                     script {
-                        unstash 'large'
-                        sh 'cat large'
+                        if (CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
+                            unstash 'CONCEPTS_FILE'
+                        }
                         CLI_ARGS = createCliArgs("${VOCAB_USER}")
                     }
                     sh """
-                        echo $newPath
                        export API_PASSWORD=$VOCAB_PWD
                        export TARGET_API_PASSWORD=$VOCAB_PWD
                        curl "$REPO_URL" -L -o vocabulary-importer.jar
@@ -90,8 +88,8 @@ def createCliArgs(user) {
     args += "--encoding ${params.ENCODING} "
   }
 
-  if (CONCEPTS_FILE != null && CONCEPTS_FILE != '') {
-    args += "--conceptsPath ${CONCEPTS_FILE} "
+  if (CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
+    args += "--conceptsPath ${CONCEPTS_FILE_FILENAME} "
   }
 
   if (HIDDEN_LABELS_FILE != null && HIDDEN_LABELS_FILE != '') {

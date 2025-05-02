@@ -32,12 +32,7 @@ pipeline {
         booleanParam(name: 'IMPORT_LABELS_AND_DEFINITIONS_ONLY', defaultValue: false, description: 'Import labels and definitions only')
     }
     stages {
-        stage('Import') {
-            environment {
-                REPO_URL = "https://repository.gbif.org/service/rest/v1/search/assets/download?repository=${params.VERSION}" +
-                        "&group=org.gbif.vocabulary&name=vocabulary-importer&sort=version&direction=desc" +
-                        "&maven.classifier&maven.extension=jar"
-            }
+        stage('Copy') {
             steps {
                 script {
                     // Copy file to workspace first
@@ -48,6 +43,20 @@ pipeline {
                             text: readFile(CONCEPTS_FILE)
                     def newPath = "${WORKSPACE}/uploaded_file"
                 }
+            }
+        }
+        stage('Checkout') {
+            steps {
+                checkout scm  // Wipes workspace
+            }
+        }
+        stage('Import') {
+            environment {
+                REPO_URL = "https://repository.gbif.org/service/rest/v1/search/assets/download?repository=${params.VERSION}" +
+                        "&group=org.gbif.vocabulary&name=vocabulary-importer&sort=version&direction=desc" +
+                        "&maven.classifier&maven.extension=jar"
+            }
+            steps {
                 withCredentials([usernamePassword(credentialsId: 'gbif-vocabulary-importer', usernameVariable: 'VOCAB_USER', passwordVariable: 'VOCAB_PWD')]) {
                     script {
                         CLI_ARGS = createCliArgs("${VOCAB_USER}")

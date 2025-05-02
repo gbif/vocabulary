@@ -42,6 +42,9 @@ pipeline {
                         if (CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
                             unstash 'CONCEPTS_FILE'
                         }
+                        if (HIDDEN_LABELS_FILE_FILENAME != null && HIDDEN_LABELS_FILE_FILENAME != '') {
+                            unstash 'HIDDEN_LABELS_FILE'
+                        }
                         CLI_ARGS = createCliArgs("${VOCAB_USER}")
                     }
                     sh """

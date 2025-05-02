@@ -7,6 +7,7 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: '20'))
         timestamps()
+        preserveStashes(buildCount: 1) // Keep files between stages
     }
     parameters {
         choice(name: 'ENV', choices: ['dev', 'uat', 'prod'], description: 'Choose environment')

@@ -40,6 +40,9 @@ pipeline {
             steps {
                 script {
                     // Copy file to workspace first
+                    echo "Workspace path: ${WORKSPACE}"
+                    sh "ls -la ${WORKSPACE}"
+                    sh "ls -la"
                     writeFile file: 'uploaded_file',
                             text: readFile(CONCEPTS_FILE)
                     def newPath = "${WORKSPACE}/uploaded_file"

@@ -39,10 +39,10 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'gbif-vocabulary-importer', usernameVariable: 'VOCAB_USER', passwordVariable: 'VOCAB_PWD')]) {
                     script {
-                        if (CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
+                        if (CONCEPTS_FILE != null && CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
                             unstash 'CONCEPTS_FILE'
                         }
-                        if (HIDDEN_LABELS_FILE_FILENAME != null && HIDDEN_LABELS_FILE_FILENAME != '') {
+                        if (HIDDEN_LABELS_FILE != null && HIDDEN_LABELS_FILE_FILENAME != null && HIDDEN_LABELS_FILE_FILENAME != '') {
                             unstash 'HIDDEN_LABELS_FILE'
                         }
                         CLI_ARGS = createCliArgs("${VOCAB_USER}")
@@ -91,11 +91,11 @@ def createCliArgs(user) {
     args += "--encoding ${params.ENCODING} "
   }
 
-  if (CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
+  if (CONCEPTS_FILE != null && CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
     args += "--conceptsPath ${CONCEPTS_FILE_FILENAME} "
   }
 
-  if (HIDDEN_LABELS_FILE_FILENAME != null && HIDDEN_LABELS_FILE_FILENAME != '') {
+  if (HIDDEN_LABELS_FILE != null && HIDDEN_LABELS_FILE_FILENAME != null && HIDDEN_LABELS_FILE_FILENAME != '') {
     args += "--hiddenLabelsPath ${HIDDEN_LABELS_FILE_FILENAME} "
   }
 

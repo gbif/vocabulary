@@ -35,7 +35,7 @@
   <repositories>
     <repository>
       <id>gbif-all</id>
-      <url>http://repository.gbif.org/content/groups/gbif</url>
+      <url>https://repository.gbif.org/content/groups/gbif</url>
     </repository>
     <repository>
       <id>gbif-thirdparty</id>
@@ -110,8 +110,8 @@
     <curator-framework.version>5.5.0-disable-connectstr-updates</curator-framework.version>
 
     <!-- Hadoop -->
-    <hadoop.version>3.3.4</hadoop.version>
-    <hadoop-core.version>3.2.4</hadoop-core.version>
+    <hadoop.version>2.6.0-cdh5.16.2</hadoop.version>
+    <hadoop-core.version>2.6.0-mr1-cdh5.16.2</hadoop-core.version>
 
     <!-- logging -->
     <slf4j.version>1.7.30</slf4j.version>

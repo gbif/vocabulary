@@ -111,7 +111,7 @@
 
     <!-- Hadoop -->
     <hadoop.version>3.3.4</hadoop.version>
-    <hadoop-core.version>3.3.4</hadoop-core.version>
+    <hadoop-core.version>3.2.4</hadoop-core.version>
 
     <!-- logging -->
     <slf4j.version>1.7.30</slf4j.version>

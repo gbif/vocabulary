@@ -118,33 +118,38 @@ pipeline {
             }
             steps {
                 sshagent(['85f1747d-ea03-49ca-9e5d-aa9b7bc01c5f']) {
-                    sh '''
-                rm -rf *
-                git clone -b master git@github.com:gbif/gbif-configuration.git
-                git clone -b master git@github.com:gbif/c-deploy.git
-               '''
+                  sh '''
+                    rm -rf *
+                    git clone -b master git@github.com:gbif/gbif-configuration.git
+                    git clone -b master git@github.com:gbif/c-deploy.git
+                  '''
 
-                    createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")
-                    createHostsFile()
+                  createServiceFile("${env.WORKSPACE}/gbif-configuration/environments/dev/services.yml")
+                  createHostsFile()
 
-                    sh """
-                cd c-deploy/services
-                echo "Creating group_vars directory"
-                mkdir group_vars
+                  sh '''
+                    cd c-deploy/services
+                    echo "Creating group_vars directory"
+                    mkdir group_vars
 
-                # Configuration and services files are concatenated into a single file, that will contain the Ansible variables
-                cat ../../gbif-configuration/environments/dev/configuration.yml \
-                    ../../gbif-configuration/environments/dev/monitoring.yml \
-                    ${SERVICE_VOCABULARY} >> group_vars/${BUILD_ID}
+                    # Configuration and services files are concatenated into a single file, that will contain the Ansible variables
+                    cat ../../gbif-configuration/environments/dev/configuration.yml \
+                        ../../gbif-configuration/environments/dev/monitoring.yml \
+                        ${SERVICE_VOCABULARY} >> group_vars/${BUILD_ID}
 
-                # The default Ansible inventory file 'hosts' is concatenated with the input HOSTS file
-                cat ../../gbif-configuration/environments/dev/hosts \
-                    ${HOSTS_VOCABULARY} >> ${BUILD_HOSTS}
+                    # The default Ansible inventory file 'hosts' is concatenated with the input HOSTS file
+                    cat ../../gbif-configuration/environments/dev/hosts \
+                        ${HOSTS_VOCABULARY} >> ${BUILD_HOSTS}
 
-                # Executes the Ansible playbook
-                echo "Executing Ansible playbook"
-                ansible-playbook -vvv -i ${BUILD_HOSTS} services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=${GIT_CREDENTIALS}"
-              """
+                    # Executes the Ansible playbook
+                    echo "Executing Ansible playbook"
+                    ansible-playbook -vvv -i ${BUILD_HOSTS} services.yml --private-key=~/.ssh/id_rsa --extra-vars "git_credentials=${GIT_CREDENTIALS}"
+                  '''.toString()
+                     .replace('${SERVICE_VOCABULARY}', SERVICE_VOCABULARY)
+                     .replace('${BUILD_ID}', BUILD_ID)
+                     .replace('${HOSTS_VOCABULARY}', HOSTS_VOCABULARY)
+                     .replace('${BUILD_HOSTS}', BUILD_HOSTS)
+                     .replace('${GIT_CREDENTIALS}', GIT_CREDENTIALS)
                 }
             }
         }

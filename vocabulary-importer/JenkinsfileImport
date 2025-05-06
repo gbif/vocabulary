@@ -60,84 +60,84 @@ pipeline {
                                 ${CLI_ARGS}
                            '''.toString().replace('${CLI_ARGS}', CLI_ARGS)
                     }
+                }
             }
         }
     }
 }
-}
 
 def createCliArgs(user) {
-def args = ""
+    def args = ""
 
-args+="--apiUser " + user + " "
-args += setApiUrl("apiUrl", params.ENV)
+    args += "--apiUser " + user + " "
+    args += setApiUrl("apiUrl", params.ENV)
 
-if (params.VOCABULARY_NAME != '') {
-args += "--vocabularyName ${params.VOCABULARY_NAME} "
-}
+    if (params.VOCABULARY_NAME != '') {
+        args += "--vocabularyName ${params.VOCABULARY_NAME} "
+    }
 
-if (params.VOCABULARY_LABEL_EN != '') {
-args += "--vocabularyLabelEN ${params.VOCABULARY_LABEL_EN} "
-}
+    if (params.VOCABULARY_LABEL_EN != '') {
+        args += "--vocabularyLabelEN ${params.VOCABULARY_LABEL_EN} "
+    }
 
-if (params.VOCABULARY_DEFINITION_EN != '') {
-args += "--vocabularyDefinitionEN ${params.VOCABULARY_DEFINITION_EN} "
-}
+    if (params.VOCABULARY_DEFINITION_EN != '') {
+        args += "--vocabularyDefinitionEN ${params.VOCABULARY_DEFINITION_EN} "
+    }
 
-if (params.CSV_DELIMITER != '') {
-args += "--csvDelimiter ${params.CSV_DELIMITER} "
-}
+    if (params.CSV_DELIMITER != '') {
+        args += "--csvDelimiter ${params.CSV_DELIMITER} "
+    }
 
-if (params.LIST_DELIMITER != '') {
-args += "--listDelimiter ${params.LIST_DELIMITER} "
-}
+    if (params.LIST_DELIMITER != '') {
+        args += "--listDelimiter ${params.LIST_DELIMITER} "
+    }
 
-if (params.ENCODING != '') {
-args += "--encoding ${params.ENCODING} "
-}
+    if (params.ENCODING != '') {
+        args += "--encoding ${params.ENCODING} "
+    }
 
-try {
-  if (CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
-      args += "--conceptsPath CONCEPTS_FILE "
-  }
-} catch (Exception e) {
-    echo 'Exception occurred: ' + e.toString()
-}
+    try {
+        if (CONCEPTS_FILE_FILENAME != null && CONCEPTS_FILE_FILENAME != '') {
+            args += "--conceptsPath CONCEPTS_FILE "
+        }
+    } catch (Exception e) {
+        // do nothing
+    }
 
-try {
-  if (HIDDEN_LABELS_FILE_FILENAME != null && HIDDEN_LABELS_FILE_FILENAME != '') {
-    args += "--hiddenLabelsPath HIDDEN_LABELS_FILE "
-  }
-} catch (Exception e) {
-    echo 'Exception occurred: ' + e.toString()
-}
+    try {
+        if (HIDDEN_LABELS_FILE_FILENAME != null && HIDDEN_LABELS_FILE_FILENAME != '') {
+            args += "--hiddenLabelsPath HIDDEN_LABELS_FILE "
+        }
+    } catch (Exception e) {
+        // do nothing
+    }
 
-if (params.MIGRATION == true) {
-args += "--migration "
-args += setApiUrl("targetApiUrl", params.MIGRATE_TO)
-args += "--targetApiUser " + user + " "
-}
+    if (params.MIGRATION == true) {
+        args += "--migration "
+        args += setApiUrl("targetApiUrl", params.MIGRATE_TO)
+        args += "--targetApiUser " + user + " "
+    }
 
-if (params.IMPORT_HIDDEN_LABELS_ONLY == true) {
-args += "--importHiddenLabelsOnly "
-}
+    if (params.IMPORT_HIDDEN_LABELS_ONLY == true) {
+        args += "--importHiddenLabelsOnly "
+    }
 
-if (params.IMPORT_LABELS_AND_DEFINITIONS_ONLY == true) {
-args += "--importLabelsAndDefinitionsOnly "
-}
+    if (params.IMPORT_LABELS_AND_DEFINITIONS_ONLY == true) {
+        args += "--importLabelsAndDefinitionsOnly "
+    }
 
-return args
+    return args
 }
 
 static def setApiUrl(paramName, env_param) {
-def apiUrlArg = "--" + paramName + " "
-if (env_param == 'prod') {
-    apiUrlArg +="https://api.gbif.org/v1/ "
-} else if (env_param == 'uat') {
-    apiUrlArg +="https://api.gbif-uat.org/v1/ "
-} else {
-    apiUrlArg +="https://api.gbif-dev.org/v1/ "
-}
+    def apiUrlArg = "--" + paramName + " "
+    if (env_param == 'prod') {
+        apiUrlArg += "https://api.gbif.org/v1/ "
+    } else if (env_param == 'uat') {
+        apiUrlArg += "https://api.gbif-uat.org/v1/ "
+    } else {
+        apiUrlArg += "https://api.gbif-dev.org/v1/ "
+    }
 
-return apiUrlArg
+    return apiUrlArg
 }

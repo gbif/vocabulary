@@ -10,6 +10,9 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10'))
         timestamps()
     }
+    triggers {
+        snapshotDependencies()
+    }
     parameters {
         separator(name: "release_separator", sectionHeader: "Release Parameters")
         booleanParam(name: 'RELEASE',

@@ -38,7 +38,9 @@ pipeline {
                 configFileProvider([configFile(
                         fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                         variable: 'MAVEN_SETTINGS_XML')]) {
-                    sh 'mvn clean package dependency:analyze -U'
+                    withMaven {
+                        sh 'mvn clean package dependency:analyze -U'
+                    }
                 }
             }
         }

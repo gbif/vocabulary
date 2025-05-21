@@ -100,6 +100,9 @@
     <springdoc-openapi-ui.version>1.5.8</springdoc-openapi-ui.version>
     <swagger-annotations.version>2.2.0</swagger-annotations.version>
 
+    <!--metrics-->
+    <micrometer.version>1.12.2</micrometer.version>
+
     <!-- version limited by gbif-api -->
     <guava.version>27.0-jre</guava.version>
 
@@ -148,6 +151,12 @@
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-starter-openfeign</artifactId>
         <version>${spring-cloud-openfeign.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-prometheus</artifactId>
+        <version>${micrometer.version}</version>
+        <scope>runtime</scope>
       </dependency>
 
       <!-- GBIF -->

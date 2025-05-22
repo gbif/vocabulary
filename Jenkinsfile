@@ -87,7 +87,7 @@ pipeline {
                                 variable: 'MAVEN_SETTINGS_XML')]) {
                      withMaven (
                         traceability: true,
-                        options: [pipelineGraphPublisher(lifecycleThreshold: 'deploy')]
+                        options: [pipelineGraphPublisher(lifecycleThreshold: 'install')]
                      ){
                         sh 'mvn -s $MAVEN_SETTINGS_XML -B -DskipTests deploy'
                     }

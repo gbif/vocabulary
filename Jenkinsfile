@@ -92,7 +92,7 @@ pipeline {
                      globalMavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                          mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1396361652540',
                         traceability: true,
-                        options: [pipelineGraphPublisher(lifecycleThreshold: 'install')]
+                        options: [pipelineGraphPublisher(lifecycleThreshold: 'deploy')]
                      ){
                         sh 'mvn -s $MAVEN_SETTINGS_XML -B -DskipTests deploy'
                     }

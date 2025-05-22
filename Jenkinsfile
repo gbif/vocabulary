@@ -38,7 +38,7 @@ pipeline {
                 configFileProvider([configFile(
                         fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                         variable: 'MAVEN_SETTINGS_XML')]) {
-                    withMaven {
+                    withMaven (traceability: true){
                         sh 'mvn clean package install dependency:analyze -U'
                     }
                 }
@@ -86,6 +86,7 @@ pipeline {
                         [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                 variable: 'MAVEN_SETTINGS_XML')]) {
                      withMaven (
+                        traceability: true,
                         options: [pipelineGraphPublisher(lifecycleThreshold: 'deploy')]
                      ){
                         sh 'mvn -s $MAVEN_SETTINGS_XML -B -DskipTests deploy'

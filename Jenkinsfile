@@ -75,9 +75,9 @@ pipeline {
             when {
                 allOf {
                     not { expression { params.RELEASE } };
-                    anyOf {
-                        branch 'dev';
-                    }
+//                     anyOf {
+//                         branch 'dev';
+//                     }
                 }
             }
             steps {

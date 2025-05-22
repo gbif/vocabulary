@@ -35,9 +35,6 @@ pipeline {
                 }
             }
             steps {
-                configFileProvider([configFile(
-                        fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                        variable: 'MAVEN_SETTINGS_XML')]) {
                     withMaven (
                     globalMavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                         mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1396361652540',
@@ -45,7 +42,6 @@ pipeline {
                         sh 'mvn clean package install dependency:analyze -U'
                     }
                 }
-            }
         }
         stage('Integration tests') {
             when {
@@ -85,9 +81,6 @@ pipeline {
                 }
             }
             steps {
-                configFileProvider(
-                        [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                                variable: 'MAVEN_SETTINGS_XML')]) {
                      withMaven (
                      globalMavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                          mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1396361652540',
@@ -97,7 +90,6 @@ pipeline {
                         sh 'mvn -s $MAVEN_SETTINGS_XML -B -DskipTests deploy'
                     }
                 }
-            }
         }
         stage('Release version to nexus') {
             when {

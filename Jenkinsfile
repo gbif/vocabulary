@@ -87,7 +87,7 @@ pipeline {
                         traceability: true,
                         options: [pipelineGraphPublisher(lifecycleThreshold: 'deploy')]
                      ){
-                        sh 'mvn -s $MAVEN_SETTINGS_XML -B -DskipTests deploy'
+                        sh 'mvn -B -DskipTests deploy'
                     }
                 }
         }

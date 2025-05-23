@@ -3,7 +3,7 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven 3.8.5'
+        maven 'Maven 3.9.9'
         jdk 'OpenJDK11'
     }
     options {
@@ -35,10 +35,11 @@ pipeline {
                 }
             }
             steps {
-                configFileProvider([configFile(
-                        fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                        variable: 'MAVEN_SETTINGS_XML')]) {
-                    withMaven {
+                withMaven (
+                    maven: 'Maven 3.9.9',
+                    globalMavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                    mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1396361652540',
+                    traceability: true){
                         sh 'mvn clean package install dependency:analyze -U'
                     }
                 }
@@ -82,13 +83,13 @@ pipeline {
                 }
             }
             steps {
-                configFileProvider(
-                        [configFile(fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                                variable: 'MAVEN_SETTINGS_XML')]) {
-                     withMaven (
-                        options: [pipelineGraphPublisher(lifecycleThreshold: 'deploy')]
-                     ){
-                        sh 'mvn -s $MAVEN_SETTINGS_XML -B -DskipTests deploy'
+                withMaven (
+                    maven: 'Maven 3.9.9',
+                    globalMavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+                    mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1396361652540',
+                    traceability: true,
+                    options: [pipelineGraphPublisher(lifecycleThreshold: 'deploy')]){
+                        sh 'mvn -B -DskipTests deploy'
                     }
                 }
             }

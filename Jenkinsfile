@@ -42,7 +42,6 @@ pipeline {
                     traceability: true){
                         sh 'mvn clean package install dependency:analyze -U'
                     }
-                }
             }
         }
         stage('Integration tests') {

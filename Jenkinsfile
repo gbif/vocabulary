@@ -3,7 +3,7 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven 3.8.5'
+        maven 'Maven 3.9.9'
         jdk 'OpenJDK11'
     }
     options {
@@ -36,7 +36,7 @@ pipeline {
             }
             steps {
                     withMaven (
-                    maven: 'Maven 3.8.5',
+                    maven: 'Maven 3.9.9',
                     globalMavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                         mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1396361652540',
                     traceability: true){
@@ -83,6 +83,7 @@ pipeline {
             }
             steps {
                      withMaven (
+                     maven: 'Maven 3.9.9',
                      globalMavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                                          mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1396361652540'
                      ){

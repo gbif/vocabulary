@@ -91,7 +91,6 @@ pipeline {
                     options: [pipelineGraphPublisher(lifecycleThreshold: 'deploy')]){
                         sh 'mvn -B -DskipTests deploy'
                     }
-                }
             }
         }
         stage('Release version to nexus') {

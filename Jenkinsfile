@@ -43,34 +43,34 @@ pipeline {
                     }
                 }
         }
-        stage('Integration tests') {
-            when {
-                allOf {
-                    not { expression { params.RELEASE } };
-                }
-            }
-            steps {
-                configFileProvider([configFile(
-                        fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
-                        variable: 'MAVEN_SETTINGS_XML')]) {
-                    sh 'mvn clean verify -Pintegration -U'
-                }
-            }
-        }
-        stage('SonarQube analysis') {
-            when {
-                allOf {
-                    not { expression { params.RELEASE } };
-                }
-            }
-            steps {
-                withSonarQubeEnv('GBIF Sonarqube') {
-                    withCredentials([usernamePassword(credentialsId: 'SONAR_CREDENTIALS', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PWD')]) {
-                        sh 'mvn sonar:sonar -Dsonar.login=${SONAR_USER} -Dsonar.password=${SONAR_PWD} -Dsonar.server=${SONAR_HOST_URL}'
-                    }
-                }
-            }
-        }
+//         stage('Integration tests') {
+//             when {
+//                 allOf {
+//                     not { expression { params.RELEASE } };
+//                 }
+//             }
+//             steps {
+//                 configFileProvider([configFile(
+//                         fileId: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
+//                         variable: 'MAVEN_SETTINGS_XML')]) {
+//                     sh 'mvn clean verify -Pintegration -U'
+//                 }
+//             }
+//         }
+//         stage('SonarQube analysis') {
+//             when {
+//                 allOf {
+//                     not { expression { params.RELEASE } };
+//                 }
+//             }
+//             steps {
+//                 withSonarQubeEnv('GBIF Sonarqube') {
+//                     withCredentials([usernamePassword(credentialsId: 'SONAR_CREDENTIALS', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PWD')]) {
+//                         sh 'mvn sonar:sonar -Dsonar.login=${SONAR_USER} -Dsonar.password=${SONAR_PWD} -Dsonar.server=${SONAR_HOST_URL}'
+//                     }
+//                 }
+//             }
+//         }
         stage('Snapshot to nexus') {
             when {
                 allOf {

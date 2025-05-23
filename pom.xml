@@ -73,7 +73,7 @@
 
     <!-- gbif -->
     <gbif-api.version>2.1.8-SNAPSHOT</gbif-api.version>
-    <gbif.common-mybatis.version>1.4</gbif.common-mybatis.version>
+    <gbif.common-mybatis.version>2.0.1-SNAPSHOT</gbif.common-mybatis.version>
     <postal-service.version>1.8.0</postal-service.version>
     <gbif-cli.version>2.0.0</gbif-cli.version>
     <gbif-common-ws.version>2.0.3</gbif-common-ws.version>

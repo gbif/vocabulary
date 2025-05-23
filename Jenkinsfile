@@ -1,7 +1,11 @@
 @Library('gbif-common-jenkins-pipelines') _
 
 pipeline {
-    agent any
+    agent {
+        node {
+            label 'maven'
+        }
+    }
     tools {
         maven 'Maven 3.8.5'
         jdk 'OpenJDK11'

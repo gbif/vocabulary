@@ -37,7 +37,7 @@ public class ConfigPropertiesValidator implements Validator {
     } else if (target instanceof MessagingConfig) {
       MessagingConfig.validate((MessagingConfig) target, errors);
       if (true)
-        System.out.println("TEST2");
+        System.out.println("TEST2r");
     }
   }
 }

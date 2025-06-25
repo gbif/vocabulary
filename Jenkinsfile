@@ -26,26 +26,7 @@ pipeline {
         stage('Test dependencies') {
            steps {
                 script {
-                    def jenkins = Jenkins.get()
-                    def dao = jenkins.getExtensionList(PipelineMavenPluginDao.class).get(0)
-
-                    def dependentJobs = []
-
-                    // Use the DAO to find jobs that depend on the specified artifact
-                    def downstreamRelationships = dao.listDownstreamJobsByDependency(
-                        'org.gbif.vocabulary',
-                        'vocabulary-parent',
-                        '2.0.7-SNAPSHOT',
-                        null, // type
-                        null, // scope
-                        false // latestOnly - set to false to find all historical dependencies
-                    )
-
-                    if (downstreamRelationships.isEmpty()) {
-                        echo "No downstream found"
-                    } else {
-                        echo "Found ${downstreamRelationships.size()} downstream"
-                    }
+                    dependencies.findAndTriggerDownstreamProjects('org.gbif.vocabulary','vocabulary-parent','2.0.7-SNAPSHOT')
                 }
            }
         }

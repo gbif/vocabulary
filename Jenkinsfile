@@ -26,7 +26,7 @@ pipeline {
         stage('Test dependencies') {
            steps {
                 script {
-                    dependencies.findAndTriggerDownstreamProjects('registry/dev','77')
+                    dependencies.findAndTriggerDownstreamProjects('registry/dev', 77)
                 }
            }
         }

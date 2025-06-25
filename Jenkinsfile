@@ -23,6 +23,13 @@ pipeline {
         booleanParam(name: 'DRY_RUN_RELEASE', defaultValue: false, description: 'Dry Run Maven release')
     }
     stages {
+        stage('Test dependencies') {
+           steps {
+                script {
+                    dependencies.findAndTriggerDownstreamProjects('registry/dev','77')
+                }
+           }
+        }
         stage('Preconditions') {
             steps {
                 scmSkip(skipPattern: '.*(\\[maven-release-plugin\\] prepare release |Google Java Format).*')

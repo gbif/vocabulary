@@ -27,7 +27,7 @@ import javax.validation.constraints.NotNull;
 /**
  * Base interface for the services of {@link VocabularyEntity}.
  *
- * @param <T>
+ * @param <T> as the {@link VocabularyEntity}
  */
 public interface BaseService<T extends VocabularyEntity> {
 

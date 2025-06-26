@@ -1194,7 +1194,7 @@ public class ConceptResource {
     }
 
     // TODO: remove
-    System.out.println("Test Jenkins");
+    System.out.println("Test Jenkins2");
 
     return viewStream;
   }

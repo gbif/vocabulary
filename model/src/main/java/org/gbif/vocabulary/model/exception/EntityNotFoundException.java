@@ -16,7 +16,7 @@ package org.gbif.vocabulary.model.exception;
 import lombok.Getter;
 
 /**
- * Exception class to use when an entity is not found.
+ * Exception class to use when an entity is not found in the system.
  */
 public class EntityNotFoundException extends RuntimeException {
 

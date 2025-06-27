@@ -23,13 +23,6 @@ pipeline {
         booleanParam(name: 'DRY_RUN_RELEASE', defaultValue: false, description: 'Dry Run Maven release')
     }
     stages {
-        stage('Test dependencies') {
-           steps {
-                script {
-                    dependencies.findDownstreamJobsWithSnapshotDependencies(${BUILD_NAME}, ${BUILD_ID})
-                }
-           }
-        }
         stage('Preconditions') {
             steps {
                 scmSkip(skipPattern: '.*(\\[maven-release-plugin\\] prepare release |Google Java Format).*')
@@ -167,6 +160,15 @@ pipeline {
                      .replace('${GIT_CREDENTIALS}', GIT_CREDENTIALS)
                 }
             }
+        }
+        stage('Trigger downstream jobs') {
+           steps {
+                script {
+                    dependencies.findDownstreamJobsWithSnapshotDependencies("${env.JOB_NAME}", "${env.BUILD_ID}").each{
+                        j -> build job: j, wait: false, propagate: false
+                    }
+                }
+           }
         }
     }
     post {

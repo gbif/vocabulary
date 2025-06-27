@@ -160,18 +160,18 @@ pipeline {
                 }
             }
         }
-        stage('Trigger downstream jobs') {
-           steps {
-                script {
-                    dependencies.findDownstreamJobsWithSnapshotDependencies("${env.JOB_NAME}", "${env.BUILD_ID}").each{
-                        j -> {
-                            echo "Triggering downstream job: ${j}"
-                            build job: j, wait: false, propagate: false
-                           }
-                    }
-                }
-           }
-        }
+//         stage('Trigger downstream jobs') {
+//            steps {
+//                 script {
+//                     dependencies.findDownstreamJobsWithSnapshotDependencies("${env.JOB_NAME}", "${env.BUILD_ID}").each{
+//                         j -> {
+//                             echo "Triggering downstream job: ${j}"
+//                             build job: j, wait: false, propagate: false
+//                            }
+//                     }
+//                 }
+//            }
+//         }
     }
     post {
         failure {

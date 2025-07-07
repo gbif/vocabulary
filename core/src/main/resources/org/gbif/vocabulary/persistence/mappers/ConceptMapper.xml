@@ -423,8 +423,8 @@
     SELECT
     <include refid="CONCEPT_READ_FIELDS"/>
     FROM concept c INNER JOIN vocabulary v on v.key = c.vocabulary_key
-    WHERE c.name = #{name,jdbcType=VARCHAR} and
-    v.name = #{vocabularyName,jdbcType=VARCHAR}
+    WHERE normalize_name(c.name) = normalize_name(#{name,jdbcType=VARCHAR}) and
+    normalize_name(v.name) = normalize_name(#{vocabularyName,jdbcType=VARCHAR})
   </select>
 
   <update id="deprecate">
@@ -844,7 +844,7 @@
     SELECT
     <include refid="CONCEPT_READ_FIELDS"/>, #{vocabName} vocabName
     FROM concept_${vocabName}_latest_release_mv c
-    WHERE c.name = #{name,jdbcType=VARCHAR}
+    WHERE normalize_name(c.name) = normalize_name(#{name,jdbcType=VARCHAR})
   </select>
 
   <select id="listDefinitionsLatestRelease" resultMap="DEFINITION_RESULT_MAP">

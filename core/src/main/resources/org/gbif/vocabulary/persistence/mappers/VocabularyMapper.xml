@@ -93,13 +93,13 @@
     SELECT
     <include refid="VOCABULARY_READ_FIELDS"/>
     FROM vocabulary v
-    WHERE v.name = #{name,jdbcType=VARCHAR}
+    WHERE normalize_name(v.name) = normalize_name(#{name,jdbcType=VARCHAR})
   </select>
 
   <select id="getKeyByName" resultType="java.lang.Long">
     SELECT v.key
     FROM vocabulary v
-    WHERE v.name = #{name,jdbcType=VARCHAR}
+    WHERE normalize_name(v.name) = normalize_name(#{name,jdbcType=VARCHAR})
   </select>
 
   <select id="list" resultType="Vocabulary" resultMap="VOCABULARY_MAP">

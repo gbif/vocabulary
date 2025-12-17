@@ -121,7 +121,7 @@
     <slf4j.version>2.0.0</slf4j.version>
     <logback.version>1.5.21</logback.version>
     <janino.version>3.1.12</janino.version>
-    <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
+    <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
 
     <!-- testing -->
     <!-- Mockito version - using Spring Boot managed version (typically 5.11.x) -->
@@ -329,6 +329,7 @@
         <groupId>net.logstash.logback</groupId>
         <artifactId>logstash-logback-encoder</artifactId>
         <version>${logstash-logback-encoder.version}</version>
+        <scope>runtime</scope>
       </dependency>
 
       <!-- ZK -->

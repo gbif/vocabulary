@@ -1,7 +1,7 @@
-DELETE FROM concept_tag;
-DELETE FROM tag;
-DELETE FROM concept_definition;
-DELETE FROM concept_label;
-DELETE FROM concept_alternative_label;
-DELETE FROM concept_hidden_label;
-DELETE FROM concept;
+TRUNCATE TABLE concept_tag CASCADE;
+TRUNCATE TABLE tag CASCADE;
+TRUNCATE TABLE concept_definition CASCADE;
+TRUNCATE TABLE concept_label CASCADE;
+TRUNCATE TABLE concept_alternative_label CASCADE;
+TRUNCATE TABLE concept_hidden_label CASCADE;
+TRUNCATE TABLE concept RESTART IDENTITY CASCADE;

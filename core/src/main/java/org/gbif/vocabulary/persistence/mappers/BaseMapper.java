@@ -56,7 +56,7 @@ public interface BaseMapper<T extends VocabularyEntity> {
 
   List<Definition> listDefinitions(
       @Param("entityKey") long entityKey,
-      @Nullable @Param("langs") List<LanguageRegion> languageRegions);
+      @Nullable @Param("lang") List<LanguageRegion> languageRegions);
 
   Definition getDefinition(@Param("entityKey") long entityKey, @Param("key") long definitionKey);
 
@@ -66,5 +66,5 @@ public interface BaseMapper<T extends VocabularyEntity> {
 
   List<Label> listLabels(
       @Param("entityKey") long entityKey,
-      @Nullable @Param("langs") List<LanguageRegion> languageRegions);
+      @Nullable @Param("lang") List<LanguageRegion> languageRegions);
 }

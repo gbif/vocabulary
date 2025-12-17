@@ -384,9 +384,9 @@
     SELECT key, language, value, created_by, created, modified_by, modified
     FROM vocabulary_definition
     WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
+    <if test="lang != null">
       AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
+      <foreach item="item" collection="lang" open="(" separator="," close=")">
         #{item}
       </foreach>
     </if>
@@ -429,9 +429,9 @@
     SELECT <include refid="LABEL_FIELDS"/>
     FROM vocabulary_label
     WHERE vocabulary_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
+    <if test="lang != null">
       AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
+      <foreach item="item" collection="lang" open="(" separator="," close=")">
         #{item}
       </foreach>
     </if>

@@ -120,12 +120,12 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   List<Label> listAlternativeLabels(
       @Param("entityKey") long entityKey,
-      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
+      @Nullable @Param("lang") List<LanguageRegion> languageRegions,
       @Nullable @Param("page") Pageable page);
 
   long countAlternativeLabels(
       @Param("entityKey") long entityKey,
-      @Nullable @Param("langs") List<LanguageRegion> languageRegions);
+      @Nullable @Param("lang") List<LanguageRegion> languageRegions);
 
   void addHiddenLabel(@Param("entityKey") long entityKey, @Param("label") HiddenLabel label);
 
@@ -175,23 +175,23 @@ public interface ConceptMapper extends BaseMapper<Concept> {
 
   List<Definition> listDefinitionsLatestRelease(
       @Param("entityKey") long entityKey,
-      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
+      @Nullable @Param("lang") List<LanguageRegion> languageRegions,
       @Param("vocabName") String vocabularyName);
 
   List<Label> listLabelsLatestRelease(
       @Param("entityKey") long entityKey,
-      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
+      @Nullable @Param("lang") List<LanguageRegion> languageRegions,
       @Param("vocabName") String vocabularyName);
 
   List<Label> listAlternativeLabelsLatestRelease(
       @Param("entityKey") long entityKey,
-      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
+      @Nullable @Param("lang") List<LanguageRegion> languageRegions,
       @Nullable @Param("page") Pageable page,
       @Param("vocabName") String vocabularyName);
 
   long countAlternativeLabelsLatestRelease(
       @Param("entityKey") long entityKey,
-      @Nullable @Param("langs") List<LanguageRegion> languageRegions,
+      @Nullable @Param("lang") List<LanguageRegion> languageRegions,
       @Param("vocabName") String vocabularyName);
 
   List<HiddenLabel> listHiddenLabelsLatestRelease(

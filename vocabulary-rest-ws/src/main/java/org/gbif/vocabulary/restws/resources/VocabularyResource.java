@@ -496,7 +496,8 @@ public class VocabularyResource {
   @Docs.DefaultSearchResponses
   @GetMapping("{name}/definition")
   public List<Definition> listDefinitions(
-      @PathVariable("name") String vocabularyName, List<LanguageRegion> lang) {
+      @PathVariable("name") String vocabularyName, 
+      @RequestParam(value = "lang", required = false) List<LanguageRegion> lang) {
     return vocabularyService.listDefinitions(getVocabularyByName(vocabularyName).getKey(), lang);
   }
 
@@ -597,7 +598,8 @@ public class VocabularyResource {
   @Docs.DefaultSearchResponses
   @GetMapping("{name}/label")
   public List<Label> listLabels(
-      @PathVariable("name") String vocabularyName, List<LanguageRegion> lang) {
+      @PathVariable("name") String vocabularyName, 
+      @RequestParam(value = "lang", required = false) List<LanguageRegion> lang) {
     return vocabularyService.listLabels(getVocabularyByName(vocabularyName).getKey(), lang);
   }
 

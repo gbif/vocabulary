@@ -16,13 +16,13 @@
   <modules>
     <module>core</module>
     <module>model</module>
+    <module>api</module>
+    <module>tools</module>
+    <module>vocabulary-rest-ws-client</module>
     <module>vocabulary-rest-ws</module>
     <module>vocabulary-lookup</module>
     <module>vocabulary-importer</module>
     <module>vocabulary-cli</module>
-    <module>tools</module>
-    <module>vocabulary-rest-ws-client</module>
-    <module>api</module>
   </modules>
 
   <scm>
@@ -63,49 +63,50 @@
   </distributionManagement>
 
   <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-    <java.version>11</java.version>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <java.version>17</java.version>
 
-    <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
-    <spring-cloud-openfeign.version>2.2.10.RELEASE</spring-cloud-openfeign.version>
+    <spring-boot.version>3.5.7</spring-boot.version>
     <main.basedir>${project.basedir}</main.basedir>
 
     <!-- gbif -->
-    <gbif-api.version>2.1.9-SNAPSHOT</gbif-api.version>
-    <gbif.common-mybatis.version>1.4</gbif.common-mybatis.version>
-    <postal-service.version>1.8.0</postal-service.version>
+    <gbif-api.version>2.2.1</gbif-api.version>
+    <gbif.common-mybatis.version>2.0.0</gbif.common-mybatis.version>
+    <postal-service.version>1.8.1</postal-service.version>
     <gbif-cli.version>2.0.0</gbif-cli.version>
-    <gbif-common-ws.version>2.0.3</gbif-common-ws.version>
+    <gbif-common-ws.version>2.1.1-SNAPSHOT</gbif-common-ws.version>
 
     <!-- DB -->
-    <postgresql-testcontainers.version>1.19.8</postgresql-testcontainers.version>
-    <mybatis-spring-boot-starter.version>2.3.2</mybatis-spring-boot-starter.version>
-    <postgresql.version>42.2.23</postgresql.version>
-    <mybatis-spring-boot-starter-test.version>2.0.0</mybatis-spring-boot-starter-test.version>
+    <testcontainers.version>2.0.2</testcontainers.version>
+    <mybatis-spring-boot-starter.version>3.0.5</mybatis-spring-boot-starter.version>
+    <mybatis-spring-boot-starter-test.version>3.0.5</mybatis-spring-boot-starter-test.version>
 
     <!-- utils -->
-    <javax-validation.version>2.0.1.Final</javax-validation.version>
-    <okhttp.version>4.9.1</okhttp.version>
+    <jakarta-validation.version>3.0.2</jakarta-validation.version>
+    <okhttp.version>4.12.0</okhttp.version>
     <cache2k.version>2.0.0.Final</cache2k.version>
-    <lombok.version>1.18.28</lombok.version>
+    <lombok.version>1.18.42</lombok.version>
     <metainf-services.version>1.11</metainf-services.version>
     <jcommander.version>1.60</jcommander.version>
-    <spring-boot-admin.version>2.2.4</spring-boot-admin.version>
+    <spring-boot-admin.version>3.5.6</spring-boot-admin.version>
     <feign.version>10.11</feign.version>
-    <opencsv.version>5.7.1</opencsv.version>
+    <opencsv.version>5.12.0</opencsv.version>
     <kotlin.version>1.4.20</kotlin.version>
 
     <!-- documentation -->
-    <springdoc-openapi-ui.version>1.5.8</springdoc-openapi-ui.version>
-    <swagger-annotations.version>2.2.0</swagger-annotations.version>
+    <springdoc-openapi-ui.version>2.8.14</springdoc-openapi-ui.version>
+    <swagger-annotations.version>2.2.41</swagger-annotations.version>
 
     <!--metrics-->
     <micrometer.version>1.12.2</micrometer.version>
 
     <!-- version limited by gbif-api -->
-    <guava.version>27.0-jre</guava.version>
+    <guava.version>33.5.0-jre</guava.version>
 
+    <!-- Spring Cloud -->
+    <spring-cloud.version>2025.0.0</spring-cloud.version>
+    
     <!-- ZK -->
     <spring-cloud-zookeeper.version>2.2.5.RELEASE</spring-cloud-zookeeper.version>
     <zookeeper.version>3.8.1</zookeeper.version>
@@ -117,14 +118,15 @@
     <hadoop-core.version>2.6.0-mr1-cdh5.16.2</hadoop-core.version>
 
     <!-- logging -->
-    <slf4j.version>1.7.30</slf4j.version>
-    <logback.version>1.2.3</logback.version>
-    <janino.version>2.5.10</janino.version>
+    <slf4j.version>2.0.0</slf4j.version>
+    <logback.version>1.5.21</logback.version>
+    <janino.version>3.1.12</janino.version>
     <logstash-logback-encoder.version>5.3</logstash-logback-encoder.version>
 
     <!-- testing -->
-    <mockito.version>3.4.0</mockito.version>
-    <wiremock.version>2.21.0</wiremock.version>
+    <!-- Mockito version - using Spring Boot managed version (typically 5.11.x) -->
+    <mockito.version>5.11.0</mockito.version>
+    <wiremock.version>3.9.1</wiremock.version>
 
     <!-- JaCoCo & Sonar-->
     <sonar.projectName>GBIF Vocabulary</sonar.projectName>
@@ -149,8 +151,10 @@
       </dependency>
       <dependency>
         <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-starter-openfeign</artifactId>
-        <version>${spring-cloud-openfeign.version}</version>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>io.micrometer</groupId>
@@ -232,11 +236,7 @@
         <version>${mybatis-spring-boot-starter.version}</version>
       </dependency>
       <!-- DB -->
-      <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>${postgresql.version}</version>
-      </dependency>
+      <!-- PostgreSQL version is managed by Spring Boot BOM -->
 
       <!-- utils -->
       <dependency>
@@ -245,9 +245,9 @@
         <version>${guava.version}</version>
       </dependency>
       <dependency>
-        <groupId>javax.validation</groupId>
-        <artifactId>validation-api</artifactId>
-        <version>${javax-validation.version}</version>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${jakarta-validation.version}</version>
       </dependency>
       <dependency>
         <groupId>org.projectlombok</groupId>
@@ -299,7 +299,7 @@
       <!-- documentation -->
       <dependency>
         <groupId>org.springdoc</groupId>
-        <artifactId>springdoc-openapi-ui</artifactId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         <version>${springdoc-openapi-ui.version}</version>
       </dependency>
       <dependency>
@@ -320,7 +320,7 @@
         <version>${logback.version}</version>
       </dependency>
       <dependency>
-        <groupId>janino</groupId>
+        <groupId>org.codehaus.janino</groupId>
         <artifactId>janino</artifactId>
         <version>${janino.version}</version>
         <scope>runtime</scope>
@@ -446,25 +446,20 @@
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>${postgresql-testcontainers.version}</version>
+        <artifactId>testcontainers-postgresql</artifactId>
+        <version>${testcontainers.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>com.github.tomakehurst</groupId>
-        <artifactId>wiremock</artifactId>
+        <groupId>org.wiremock</groupId>
+        <artifactId>wiremock-standalone</artifactId>
         <version>${wiremock.version}</version>
         <scope>test</scope>
       </dependency>
+      <!-- Mockito versions -->
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>${mockito.version}</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-inline</artifactId>
         <version>${mockito.version}</version>
         <scope>test</scope>
       </dependency>

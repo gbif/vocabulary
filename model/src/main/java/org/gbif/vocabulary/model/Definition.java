@@ -18,7 +18,7 @@ import org.gbif.vocabulary.model.utils.LenientEquals;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.Builder;
 import lombok.Data;

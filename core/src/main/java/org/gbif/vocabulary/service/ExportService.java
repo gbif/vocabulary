@@ -21,8 +21,8 @@ import org.gbif.vocabulary.model.export.ExportParams;
 
 import java.nio.file.Path;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotBlank;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotBlank;
 
 /** Service to create exports of the vocabularies. */
 public interface ExportService {

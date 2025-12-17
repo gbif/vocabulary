@@ -34,9 +34,9 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -67,8 +67,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** Tests the {@link VocabularyResource} using mocks for the server and service layers. */
 public class VocabularyResourceTest extends BaseResourceTest<Vocabulary> {
 
-  @MockBean private VocabularyService vocabularyService;
-  @MockBean private ExportService exportService;
+  @MockitoBean private VocabularyService vocabularyService;
+  @MockitoBean private ExportService exportService;
 
   @Test
   public void listVocabulariesTest() throws Exception {

@@ -20,7 +20,7 @@ import org.gbif.vocabulary.model.VocabularyEntity;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.apache.ibatis.annotations.Param;
 

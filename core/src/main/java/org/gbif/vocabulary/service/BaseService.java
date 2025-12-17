@@ -20,9 +20,9 @@ import org.gbif.vocabulary.model.VocabularyEntity;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Base interface for the services of {@link VocabularyEntity}.

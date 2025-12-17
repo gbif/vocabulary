@@ -55,7 +55,9 @@
   </sql>
 
   <sql id="FULL_TEXT">
-    JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(quote_literal(#{params.query}))),'\s+',':*&amp;')||':*') AS query ON query @@ fulltext_search
+    JOIN to_tsquery('english_nostop', CASE WHEN regexp_replace(unaccent(trim(#{params.query})), '[^A-Za-z0-9@.\-\s]+', '', 'g') = '' THEN 'false'
+    ELSE regexp_replace(regexp_replace(unaccent(trim(#{params.query})), '[^A-Za-z0-9@.\-\s]+', '', 'g'), '\s+', ':* &amp; ', 'g') || ':*' END)
+    AS query ON query @@ v.fulltext_search
     OR EXISTS(
     SELECT vd.key
     FROM vocabulary_definition vd

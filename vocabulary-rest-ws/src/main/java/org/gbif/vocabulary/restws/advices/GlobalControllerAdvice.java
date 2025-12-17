@@ -20,11 +20,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -109,7 +110,7 @@ public class GlobalControllerAdvice {
       WebRequest request, HttpStatus status, String error, String message) {
     Objects.requireNonNull(status);
 
-    Map<String, Object> body = errorAttributes.getErrorAttributes(request, false);
+    Map<String, Object> body = errorAttributes.getErrorAttributes(request, ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE, ErrorAttributeOptions.Include.BINDING_ERRORS));
     body.put("status", status.value());
     Optional.ofNullable(message).ifPresent(m -> body.put("message", m));
     Optional.ofNullable(error).ifPresent(e -> body.put("error", e));

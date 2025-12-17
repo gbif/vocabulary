@@ -67,7 +67,7 @@
       <artifactId>logback-classic</artifactId>
     </dependency>
     <dependency>
-      <groupId>janino</groupId>
+      <groupId>org.codehaus.janino</groupId>
       <artifactId>janino</artifactId>
     </dependency>
     <dependency>
@@ -81,8 +81,8 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -104,7 +104,7 @@
     <!-- documentation -->
     <dependency>
       <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-ui</artifactId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
     </dependency>
     <dependency>
       <groupId>io.swagger.core.v3</groupId>
@@ -140,8 +140,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock</artifactId>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-standalone</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -161,11 +161,6 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-inline</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

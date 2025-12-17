@@ -44,11 +44,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.Base64Utils;
+import java.util.Base64;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,6 +71,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@Import(TestConfig.class)
 abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
 
   protected static final ObjectMapper OBJECT_MAPPER =
@@ -91,7 +93,7 @@ abstract class BaseResourceIT<T extends VocabularyEntity & LenientEquals<T>> {
   static final Function<TestCredentials, String> BASIC_AUTH_HEADER =
       testCredentials ->
           "Basic "
-              + Base64Utils.encodeToString(
+              + Base64.getEncoder().encodeToString(
                   (testCredentials.getUsername() + ":" + testCredentials.getPassword())
                       .getBytes(StandardCharsets.UTF_8));
 

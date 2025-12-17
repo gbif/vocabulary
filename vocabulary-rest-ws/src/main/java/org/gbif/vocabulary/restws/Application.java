@@ -47,12 +47,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -101,7 +105,7 @@ public class Application {
 
   @Bean
   @ConditionalOnProperty(value = "messaging.enabled", havingValue = "true")
-  @Autowired
+  //@Autowired
   public MessagePublisher messagePublisher(MessagingConfig config) throws IOException {
     return new DefaultMessagePublisher(
         new ConnectionParameters(
@@ -119,33 +123,29 @@ public class Application {
 
   @Configuration
   @Order(10)
-  static class ActuatorSecurityConfig extends WebSecurityConfigurerAdapter {
+  @EnableWebSecurity
+  static class ActuatorSecurityConfig {
 
     @Autowired private SecurityConfig securityConfig;
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      http.antMatcher("/actuator/**")
-          .authorizeRequests()
-          .anyRequest()
-          .authenticated()
-          .and()
-          .httpBasic()
-          .and()
-          .csrf()
-          .disable()
-          .cors()
-          .and()
-          .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    @Bean
+    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+      http.securityMatcher("/actuator/**")
+          .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+          .httpBasic(httpBasic -> {})
+          .csrf(csrf -> csrf.disable())
+          .cors(cors -> {})
+          .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+      return http.build();
     }
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-      auth.inMemoryAuthentication()
-          .withUser(securityConfig.getActuatorUser())
+    @Bean
+    public UserDetailsService actuatorUserDetailsService() {
+      UserDetails user = User.withUsername(securityConfig.getActuatorUser())
           .password(passwordEncoder().encode(securityConfig.getActuatorSecret()))
-          .roles("ACTUATOR");
+          .roles("ACTUATOR")
+          .build();
+      return new InMemoryUserDetailsManager(user);
     }
 
     @Bean
@@ -160,7 +160,7 @@ public class Application {
 
     public SpringSecurityConfig(
         ApplicationContext applicationContext, RemoteAuthClient remoteAuthClient) {
-      super(applicationContext, remoteAuthClient);
+      super();
     }
   }
 }

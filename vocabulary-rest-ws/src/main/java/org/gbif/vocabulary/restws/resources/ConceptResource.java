@@ -428,7 +428,7 @@ public class ConceptResource {
   public List<Definition> listDefinitions(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      List<LanguageRegion> lang) {
+      @RequestParam(value = "lang", required = false) List<LanguageRegion> lang) {
     return conceptService.listDefinitions(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), lang);
   }
@@ -605,7 +605,7 @@ public class ConceptResource {
   public List<Label> listLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      List<LanguageRegion> lang) {
+      @RequestParam(value = "lang", required = false) List<LanguageRegion> lang) {
     return conceptService.listLabels(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), lang);
   }
@@ -626,7 +626,7 @@ public class ConceptResource {
   public PagingResponse<Label> listAlternativeLabels(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      List<LanguageRegion> lang,
+      @RequestParam(value = "lang", required = false) List<LanguageRegion> lang,
       Pageable page) {
     return conceptService.listAlternativeLabels(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, page);
@@ -947,7 +947,7 @@ public class ConceptResource {
   public List<Definition> listDefinitionsFromLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      List<LanguageRegion> lang) {
+      @RequestParam(value = "lang", required = false) List<LanguageRegion> lang) {
     return conceptService.listDefinitionsLatestRelease(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, vocabularyName);
   }
@@ -967,7 +967,7 @@ public class ConceptResource {
   public List<Label> listLabelsFromLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      List<LanguageRegion> lang) {
+      @RequestParam(value = "lang", required = false) List<LanguageRegion> lang) {
     return conceptService.listLabelsLatestRelease(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, vocabularyName);
   }
@@ -990,7 +990,7 @@ public class ConceptResource {
   public PagingResponse<Label> listAlternativeLabelsFromLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @PathVariable("name") String conceptName,
-      List<LanguageRegion> lang,
+      @RequestParam(value = "lang", required = false) List<LanguageRegion> lang,
       Pageable page) {
     return conceptService.listAlternativeLabelsLatestRelease(
         getConceptWithCheck(conceptName, vocabularyName).getKey(), lang, page, vocabularyName);

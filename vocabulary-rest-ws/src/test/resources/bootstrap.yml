@@ -1,5 +1,7 @@
 # Add default properties here
 spring:
+  config:
+    import: "optional:zookeeper:"
   cloud:
     zookeeper:
       enabled: false

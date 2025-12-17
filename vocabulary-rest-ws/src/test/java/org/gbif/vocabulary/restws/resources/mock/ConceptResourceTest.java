@@ -35,9 +35,9 @@ import java.util.UUID;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -71,8 +71,8 @@ public class ConceptResourceTest extends BaseResourceTest<Concept> {
   private static final String TEST_VOCABULARY_NAME = "v1";
   private static final long TEST_VOCABULARY_KEY = 1;
 
-  @MockBean private ConceptService conceptService;
-  @MockBean private VocabularyService vocabularyService;
+  @MockitoBean private ConceptService conceptService;
+  @MockitoBean private VocabularyService vocabularyService;
 
   @Test
   public void listConceptsTest() throws Exception {

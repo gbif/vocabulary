@@ -11,22 +11,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.restws.security;
+package org.gbif.vocabulary.restws.resources;
 
-import jakarta.validation.constraints.NotBlank;
+import org.gbif.common.messaging.api.MessagePublisher;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+@TestConfiguration
+public class TestConfig {
 
-import lombok.Getter;
-import lombok.Setter;
-
-@ConfigurationProperties(prefix = "security")
-@Validated
-@Getter
-@Setter
-public class SecurityConfig {
-  @NotBlank private String loginApiBasePath;
-  @NotBlank private String actuatorUser;
-  @NotBlank private String actuatorSecret;
+  @Bean
+  @Primary
+  public MessagePublisher messagePublisher() {
+    return Mockito.mock(MessagePublisher.class);
+  }
 }
+

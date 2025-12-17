@@ -20,9 +20,9 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 
 /** Defines the minimum fields that an vocabulary entity must have. */
 public interface VocabularyEntity extends Auditable, Deprecable, Serializable {

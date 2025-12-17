@@ -24,11 +24,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.access.vote.RoleVoter;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+import java.util.List;
 
 /**
  * This class contains the necessary spring configuration to use this module. This configuration
@@ -71,21 +73,24 @@ public class SpringConfig {
   }
 
   @Configuration
-  @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
-  public static class RegistryMethodSecurityConfiguration
-      extends GlobalMethodSecurityConfiguration {
+  @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
+  public static class RegistryMethodSecurityConfiguration {
 
-    @Override
-    protected AccessDecisionManager accessDecisionManager() {
-      AffirmativeBased accessDecisionManager = (AffirmativeBased) super.accessDecisionManager();
+    @Bean
+    static MethodSecurityExpressionHandler methodSecurityExpressionHandler() {
+      // Use the default handler provided by Spring Security 6+
+      DefaultMethodSecurityExpressionHandler expressionHandler =
+          new DefaultMethodSecurityExpressionHandler();
+      expressionHandler.setDefaultRolePrefix("");
+      return expressionHandler;
+    }
 
-      // Remove the ROLE_ prefix from RoleVoter for @Secured and hasRole checks on methods
-      accessDecisionManager.getDecisionVoters().stream()
-          .filter(RoleVoter.class::isInstance)
-          .map(RoleVoter.class::cast)
-          .forEach(it -> it.setRolePrefix(""));
-
-      return accessDecisionManager;
+    @Bean
+    static AccessDecisionManager accessDecisionManager() {
+      // Custom AccessDecisionManager with RoleVoter without ROLE_ prefix for @Secured
+      RoleVoter roleVoter = new RoleVoter();
+      roleVoter.setRolePrefix("");
+      return new AffirmativeBased(List.of(roleVoter));
     }
   }
 }

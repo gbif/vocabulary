@@ -22,8 +22,8 @@ import org.gbif.vocabulary.model.search.VocabularySearchParams;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotBlank;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotBlank;
 
 /** Services for a {@link Vocabulary}. */
 public interface VocabularyService extends BaseService<Vocabulary> {

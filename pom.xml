@@ -67,14 +67,14 @@
     <maven.compiler.target>17</maven.compiler.target>
     <java.version>17</java.version>
 
-    <spring-boot.version>3.5.7</spring-boot.version>
+    <spring-boot.version>3.5.8</spring-boot.version>
     <main.basedir>${project.basedir}</main.basedir>
 
     <!-- gbif -->
-    <gbif-api.version>2.2.1</gbif-api.version>
+    <gbif-api.version>2.2.1-SNAPSHOT</gbif-api.version>
     <gbif.common-mybatis.version>2.0.0</gbif.common-mybatis.version>
-    <postal-service.version>1.8.1</postal-service.version>
-    <gbif-cli.version>2.0.0</gbif-cli.version>
+    <postal-service.version>2.1.4-SNAPSHOT</postal-service.version>
+    <gbif-cli.version>3.0.1-SNAPSHOT</gbif-cli.version>
     <gbif-common-ws.version>2.1.1-SNAPSHOT</gbif-common-ws.version>
 
     <!-- DB -->
@@ -83,23 +83,23 @@
     <mybatis-spring-boot-starter-test.version>3.0.5</mybatis-spring-boot-starter-test.version>
 
     <!-- utils -->
-    <jakarta-validation.version>3.0.2</jakarta-validation.version>
+    <jakarta-validation.version>3.1.1</jakarta-validation.version>
     <okhttp.version>4.12.0</okhttp.version>
-    <cache2k.version>2.0.0.Final</cache2k.version>
+    <cache2k.version>2.6.1.Final</cache2k.version>
     <lombok.version>1.18.42</lombok.version>
     <metainf-services.version>1.11</metainf-services.version>
     <jcommander.version>1.60</jcommander.version>
     <spring-boot-admin.version>3.5.6</spring-boot-admin.version>
-    <feign.version>10.11</feign.version>
+    <feign.version>13.6</feign.version>
     <opencsv.version>5.12.0</opencsv.version>
-    <kotlin.version>1.4.20</kotlin.version>
+    <kotlin.version>1.9.10</kotlin.version>
 
     <!-- documentation -->
     <springdoc-openapi-ui.version>2.8.14</springdoc-openapi-ui.version>
     <swagger-annotations.version>2.2.41</swagger-annotations.version>
 
     <!--metrics-->
-    <micrometer.version>1.12.2</micrometer.version>
+    <micrometer.version>1.15.6</micrometer.version>
 
     <!-- version limited by gbif-api -->
     <guava.version>33.5.0-jre</guava.version>
@@ -108,25 +108,24 @@
     <spring-cloud.version>2025.0.0</spring-cloud.version>
     
     <!-- ZK -->
-    <spring-cloud-zookeeper.version>2.2.5.RELEASE</spring-cloud-zookeeper.version>
+    <spring-cloud-zookeeper.version>4.3.0</spring-cloud-zookeeper.version>
     <zookeeper.version>3.8.1</zookeeper.version>
     <curator.version>5.5.0</curator.version>
     <curator-framework.version>5.5.0-disable-connectstr-updates</curator-framework.version>
 
     <!-- Hadoop -->
-    <hadoop.version>2.6.0-cdh5.16.2</hadoop.version>
-    <hadoop-core.version>2.6.0-mr1-cdh5.16.2</hadoop-core.version>
+    <hadoop.version>3.3.5</hadoop.version>
 
     <!-- logging -->
     <slf4j.version>2.0.17</slf4j.version>
     <logback.version>1.5.21</logback.version>
     <janino.version>3.1.12</janino.version>
-    <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
+    <logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
 
     <!-- testing -->
     <!-- Mockito version - using Spring Boot managed version (typically 5.11.x) -->
-    <mockito.version>5.11.0</mockito.version>
-    <wiremock.version>3.9.1</wiremock.version>
+    <mockito.version>5.20.0</mockito.version>
+    <wiremock.version>3.13.2</wiremock.version>
 
     <!-- JaCoCo & Sonar-->
     <sonar.projectName>GBIF Vocabulary</sonar.projectName>
@@ -414,11 +413,6 @@
         <groupId>org.apache.hadoop</groupId>
         <artifactId>hadoop-hdfs</artifactId>
         <version>${hadoop.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.hadoop</groupId>
-        <artifactId>hadoop-core</artifactId>
-        <version>${hadoop-core.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.hadoop</groupId>

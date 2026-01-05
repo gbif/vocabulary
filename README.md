@@ -11,10 +11,10 @@ The code formatting follows the [Google Java format](https://github.com/google/g
 
 ## How to run the project
 
-To run the tests Docker has to be installed and running in the machine. You can find instructions about how to install 
+To run the tests Docker has to be installed and running in the machine. You can find instructions about how to install
 Docker on Mac on https://docs.docker.com/docker-for-mac/ (see other platforms in the menu).
 
-To compile the project just run 
+To compile the project just run:
 ```
 mvn clean compile
 ```

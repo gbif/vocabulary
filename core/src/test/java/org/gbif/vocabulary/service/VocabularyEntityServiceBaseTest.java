@@ -19,7 +19,7 @@ import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 
 import java.time.ZonedDateTime;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;

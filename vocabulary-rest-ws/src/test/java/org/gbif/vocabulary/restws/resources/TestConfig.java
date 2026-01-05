@@ -11,25 +11,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.model.exception;
+package org.gbif.vocabulary.restws.resources;
 
-import lombok.Getter;
+import org.gbif.common.messaging.api.MessagePublisher;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
-/**
- * Exception class to use when an entity is not found.
- */
-public class EntityNotFoundException extends RuntimeException {
+@TestConfiguration
+public class TestConfig {
 
-  @Getter private final EntityType entityType;
-
-  public EntityNotFoundException(EntityType entityType, String message) {
-    super(message);
-    this.entityType = entityType;
-  }
-
-  public enum EntityType {
-    VOCABULARY,
-    CONCEPT,
-    RELEASE;
+  @Bean
+  @Primary
+  public MessagePublisher messagePublisher() {
+    return Mockito.mock(MessagePublisher.class);
   }
 }
+

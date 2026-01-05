@@ -21,9 +21,9 @@ import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.persistence.mappers.TagMapper;
 import org.gbif.vocabulary.service.TagService;
 
-import javax.annotation.Nullable;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;

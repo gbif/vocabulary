@@ -18,9 +18,9 @@ import org.gbif.vocabulary.model.utils.PrePersist;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 
 /** Model entities whose main purpose is to store a string value. */
 public interface ValueEntity extends Serializable {

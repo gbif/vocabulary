@@ -4,7 +4,7 @@ pipeline {
     agent any
     tools {
         maven 'Maven 3.9.9'
-        jdk 'OpenJDK11'
+        jdk 'OpenJDK17'
     }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -67,7 +67,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('GBIF Sonarqube') {
                     withCredentials([usernamePassword(credentialsId: 'SONAR_CREDENTIALS', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PWD')]) {
-                        sh 'mvn sonar:sonar -Dsonar.login=${SONAR_USER} -Dsonar.password=${SONAR_PWD} -Dsonar.server=${SONAR_HOST_URL}'
+                        sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.login=${SONAR_USER} -Dsonar.password=${SONAR_PWD} -Dsonar.server=${SONAR_HOST_URL}'
                     }
                 }
             }
@@ -86,8 +86,7 @@ pipeline {
                     maven: 'Maven 3.9.9',
                     globalMavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.GlobalMavenSettingsConfig1387378707709',
                     mavenSettingsConfig: 'org.jenkinsci.plugins.configfiles.maven.MavenSettingsConfig1396361652540',
-                    traceability: true,
-                    options: [pipelineGraphPublisher(lifecycleThreshold: 'deploy')]){
+                    traceability: true){
                         sh 'mvn -B -DskipTests deploy'
                     }
             }

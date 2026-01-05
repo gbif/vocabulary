@@ -4,6 +4,13 @@ spring:
     enabled: true
   application.name: vocabulary-rest-ws
   jackson.default-property-inclusion: NON_EMPTY
+  cloud:
+    zookeeper:
+      enabled: false
+      discovery:
+        enabled: false
+      config:
+        enabled: false
 
 management:
   server.port: 8081

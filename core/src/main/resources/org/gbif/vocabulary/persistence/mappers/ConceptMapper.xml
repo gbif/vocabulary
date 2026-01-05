@@ -77,8 +77,9 @@
   </sql>
 
   <sql id="FULL_TEXT">
-    JOIN to_tsquery('english_nostop',regexp_replace(unaccent(trim(quote_literal(#{params.query}))),'\s+',':*&amp;')||':*') AS query
-    ON query @@ fulltext_search
+    JOIN to_tsquery('english_nostop', CASE WHEN regexp_replace(unaccent(trim(#{params.query})), '[^A-Za-z0-9@.\-\s]+', '', 'g') = '' THEN 'false'
+    ELSE regexp_replace(regexp_replace(unaccent(trim(#{params.query})), '[^A-Za-z0-9@.\-\s]+', '', 'g'), '\s+', ':* &amp; ', 'g') || ':*' END) AS query
+    ON query @@ c.fulltext_search
     OR EXISTS(
       SELECT cd.key
       FROM concept_definition${table_suffix} cd
@@ -329,9 +330,9 @@
     SELECT key, language, value, created_by, created, modified_by, modified
     FROM concept_definition${table_suffix}
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
+    <if test="lang != null">
       AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
+      <foreach item="item" collection="lang" open="(" separator="," close=")">
         #{item}
       </foreach>
     </if>
@@ -342,9 +343,9 @@
     SELECT <include refid="LABEL_FIELDS"/>
     FROM concept_label${table_suffix}
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
+    <if test="lang != null">
       AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
+      <foreach item="item" collection="lang" open="(" separator="," close=")">
         #{item}
       </foreach>
     </if>
@@ -355,9 +356,9 @@
     SELECT <include refid="LABEL_FIELDS"/>
     FROM concept_alternative_label${table_suffix}
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
+    <if test="lang != null">
       AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
+      <foreach item="item" collection="lang" open="(" separator="," close=")">
         #{item}
       </foreach>
     </if>
@@ -384,9 +385,9 @@
     SELECT COUNT(DISTINCT key)
     FROM concept_alternative_label${table_suffix}
     WHERE concept_key = #{entityKey,jdbcType=BIGINT}
-    <if test="langs != null">
+    <if test="lang != null">
       AND language IN
-      <foreach item="item" collection="langs" open="(" separator="," close=")">
+      <foreach item="item" collection="lang" open="(" separator="," close=")">
         #{item}
       </foreach>
     </if>

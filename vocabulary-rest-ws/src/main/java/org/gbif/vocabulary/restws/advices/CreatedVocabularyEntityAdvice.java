@@ -18,8 +18,8 @@ import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.ValueEntity;
 import org.gbif.vocabulary.model.VocabularyEntity;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;

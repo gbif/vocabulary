@@ -22,14 +22,14 @@ import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,13 +40,13 @@ public class VocabularyServiceTest extends VocabularyEntityServiceBaseTest<Vocab
 
   @Autowired private VocabularyService vocabularyService;
 
-  @MockBean(name = "vocabularyMapper")
+  @MockitoBean(name = "vocabularyMapper")
   private VocabularyMapper vocabularyMapper;
 
-  @MockBean(name = "conceptMapper")
+  @MockitoBean(name = "conceptMapper")
   private ConceptMapper conceptMapper;
 
-  @MockBean(name = "vocabularyReleaseMapper")
+  @MockitoBean(name = "vocabularyReleaseMapper")
   private VocabularyReleaseMapper vocabularyReleaseMapper;
 
   @WithMockUser(authorities = UserRoles.VOCABULARY_ADMIN)

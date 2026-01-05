@@ -22,13 +22,13 @@ import org.gbif.vocabulary.persistence.mappers.BaseMapper;
 import org.gbif.vocabulary.persistence.mappers.ConceptMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,10 +36,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /** Tests the {@link ConceptService}. */
 public class ConceptServiceTest extends VocabularyEntityServiceBaseTest<Concept> {
 
-  @MockBean(name = "conceptMapper")
+  @MockitoBean(name = "conceptMapper")
   private ConceptMapper conceptMapper;
 
-  @MockBean(name = "vocabularyMapper")
+  @MockitoBean(name = "vocabularyMapper")
   private VocabularyMapper vocabularyMapper;
 
   @Autowired private ConceptService conceptService;

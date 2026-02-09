@@ -41,14 +41,6 @@
       <id>gbif-thirdparty</id>
       <url>https://repository.gbif.org/content/repositories/thirdparty</url>
     </repository>
-    <repository>
-      <id>gbif-mirror</id>
-      <url>https://repository.gbif.org/content/groups/public/</url>
-    </repository>
-    <repository>
-      <id>cloudera-release</id>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-    </repository>
   </repositories>
 
   <distributionManagement>
@@ -106,7 +98,7 @@
 
     <!-- Spring Cloud -->
     <spring-cloud.version>2025.0.0</spring-cloud.version>
-    
+
     <!-- ZK -->
     <spring-cloud-zookeeper.version>4.3.0</spring-cloud-zookeeper.version>
     <zookeeper.version>3.8.1</zookeeper.version>

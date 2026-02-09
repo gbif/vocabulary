@@ -26,7 +26,7 @@ export:
   releaseEnabled: false
 ```
 
-Also, we need a bootstrap.yml file to disable the zookeeper registration in local development:
+Also, we need to add this to application.yml file to disable the zookeeper registration in local development:
 ```
 spring:
   cloud:
@@ -41,5 +41,5 @@ The DB scheme can be recreated by using the [Liquibase files](core/src/main/reso
 After that, you can run the project with this command and by using your IDE:
 
 ```
-java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-{your-version}.jar --spring.config.location=your_path/application.yml --spring.cloud.bootstrap.location=your_path/bootstrap.yml
+java -jar vocabulary-rest-ws/target/vocabulary-rest-ws-{your-version}.jar --spring.config.location=your_path/application.yml
 ```

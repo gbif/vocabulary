@@ -193,7 +193,6 @@
           <excludes>
             <!-- Excluding config files -->
             <exclude>**/application.properties</exclude>
-            <exclude>**/bootstrap.yml</exclude>
           </excludes>
         </configuration>
       </plugin>

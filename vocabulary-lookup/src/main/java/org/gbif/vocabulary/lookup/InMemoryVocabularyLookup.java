@@ -226,7 +226,7 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
       }
     }
 
-    log.info("Couldn't find any match for {}", value);
+    log.info("Couldn't find any match in vocabulary {} for {}", value);
     return Optional.empty();
   }
 

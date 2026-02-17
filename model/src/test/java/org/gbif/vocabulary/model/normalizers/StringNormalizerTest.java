@@ -43,9 +43,12 @@ public class StringNormalizerTest {
   @Test
   public void validNameTest() {
     assertTrue(StringNormalizer.isValidName("name"));
+    assertTrue(StringNormalizer.isValidName("name_2"));
     assertTrue(StringNormalizer.isValidName("Name"));
     assertTrue(StringNormalizer.isValidName("NaMe1"));
     assertTrue(StringNormalizer.isValidName("1NaMe1"));
-    assertFalse(StringNormalizer.isValidName("NaM_e1"));
+    assertTrue(StringNormalizer.isValidName("NaM_e1"));
+    assertFalse(StringNormalizer.isValidName("_NaMe1"));
+    assertFalse(StringNormalizer.isValidName("Na_Me1_"));
   }
 }

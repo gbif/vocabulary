@@ -58,20 +58,6 @@ pipeline {
                 }
             }
         }
-        stage('SonarQube analysis') {
-            when {
-                allOf {
-                    not { expression { params.RELEASE } };
-                }
-            }
-            steps {
-                withSonarQubeEnv('GBIF Sonarqube') {
-                    withCredentials([usernamePassword(credentialsId: 'SONAR_CREDENTIALS', usernameVariable: 'SONAR_USER', passwordVariable: 'SONAR_PWD')]) {
-                        sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.login=${SONAR_USER} -Dsonar.password=${SONAR_PWD} -Dsonar.server=${SONAR_HOST_URL}'
-                    }
-                }
-            }
-        }
         stage('Snapshot to nexus') {
             when {
                 allOf {

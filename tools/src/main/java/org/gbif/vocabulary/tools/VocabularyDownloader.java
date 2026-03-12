@@ -13,8 +13,8 @@
  */
 package org.gbif.vocabulary.tools;
 
-import org.gbif.vocabulary.model.VocabularyRelease;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -27,10 +27,6 @@ import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +34,7 @@ import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.gbif.vocabulary.model.VocabularyRelease;
 
 /**
  * Utility class to download the latest version of a Vocabulary. It reuses the same http client for
@@ -100,14 +97,13 @@ public class VocabularyDownloader {
       apiUrl += SLASH;
     }
 
-    try {
-      // request to get the latest release version of the vocabulary
-      Request request =
-          new Request.Builder()
-              .url(apiUrl + VOCABULARIES_PATH + vocabularyName + LATEST_RELEASE_PATH)
-              .build();
+    // request to get the latest release version of the vocabulary
+    Request request =
+        new Request.Builder()
+            .url(apiUrl + VOCABULARIES_PATH + vocabularyName + LATEST_RELEASE_PATH)
+            .build();
 
-      Response response = HTTP_CLIENT.newCall(request).execute();
+    try (Response response = HTTP_CLIENT.newCall(request).execute()) {
 
       if (!response.isSuccessful()) {
         throw new IllegalArgumentException(
@@ -146,10 +142,9 @@ public class VocabularyDownloader {
   }
 
   public static Path downloadVocabularyFile(String url) {
-    try {
-      // request to download the latest release that we've found before
-      Request request = new Request.Builder().url(url).build();
-      Response response = HTTP_CLIENT.newCall(request).execute();
+    // request to download the latest release that we've found before
+    Request request = new Request.Builder().url(url).build();
+    try (Response response = HTTP_CLIENT.newCall(request).execute()) {
 
       // the response returns a zip file
       Path downloadedFile =

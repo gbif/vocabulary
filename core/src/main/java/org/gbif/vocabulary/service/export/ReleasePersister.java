@@ -13,8 +13,6 @@
  */
 package org.gbif.vocabulary.service.export;
 
-import org.gbif.vocabulary.model.export.ExportParams;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,9 +22,6 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import org.springframework.stereotype.Component;
-
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Credentials;
@@ -35,6 +30,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.gbif.vocabulary.model.export.ExportParams;
+import org.springframework.stereotype.Component;
 
 /**
  * Utility class that allows us to decouple the upload of a vocabulary release to an external system
@@ -81,15 +78,22 @@ public class ReleasePersister {
                 Credentials.basic(exportParams.getDeployUser(), exportParams.getDeployPassword()))
             .build();
 
-    Response response = HTTP_CLIENT.newCall(request).execute();
+    try (Response response = HTTP_CLIENT.newCall(request).execute()) {
+      boolean deleted = zipFile.toFile().delete();
+      if (!deleted) {
+        log.warn("Couldn't delete export file: {}", zipFile.getFileName().toString());
+      }
 
-    boolean deleted = zipFile.toFile().delete();
-    if (!deleted) {
-      log.warn("Couldn't delete export file: {}", zipFile.getFileName().toString());
-    }
-
-    if (!response.isSuccessful()) {
-      throw new IllegalStateException("Couldn't upload to nexus: " + repositoryUrl);
+      if (!response.isSuccessful()) {
+        response.close();
+        throw new IllegalStateException(
+            "Couldn't upload to nexus: "
+                + repositoryUrl
+                + " with error code "
+                + response.code()
+                + " and message "
+                + response.message());
+      }
     }
 
     return repositoryUrl;

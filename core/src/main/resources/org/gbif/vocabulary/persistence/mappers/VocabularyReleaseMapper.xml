@@ -70,7 +70,7 @@
   </select>
 
   <select id="getVocabularyReleaseWithExportFile" resultType="VocabularyRelease">
-    SELECT VOCABULARY_RELEASE_READ_FIELDS_WITH_FILE
+    SELECT <include refid="VOCABULARY_RELEASE_READ_FIELDS_WITH_FILE"/>
     FROM vocabulary_release vr
     WHERE vr.vocabulary_key = #{vocabularyKey,jdbcType=BIGINT}
     <if test="version != null">

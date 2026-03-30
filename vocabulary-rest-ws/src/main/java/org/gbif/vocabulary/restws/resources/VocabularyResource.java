@@ -13,6 +13,28 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARY_RELEASES_PATH;
+
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.enums.Explode;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.extensions.Extension;
+import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.gbif.api.documentation.CommonParameters;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
@@ -27,20 +49,9 @@ import org.gbif.vocabulary.model.exception.EntityNotFoundException;
 import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.model.search.SuggestResult;
 import org.gbif.vocabulary.model.search.VocabularySearchParams;
-import org.gbif.vocabulary.restws.config.ExportConfig;
 import org.gbif.vocabulary.restws.documentation.Docs;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
-import org.gbif.vocabulary.tools.VocabularyDownloader;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -50,23 +61,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import io.swagger.v3.oas.annotations.*;
-import io.swagger.v3.oas.annotations.enums.Explode;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.extensions.Extension;
-import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.servers.Server;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARIES_PATH;
-import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARY_RELEASES_PATH;
 
 /** Controller for {@link org.gbif.vocabulary.model.Vocabulary} entities. */
 @OpenAPIDefinition(
@@ -101,17 +95,14 @@ public class VocabularyResource {
 
   private final VocabularyService vocabularyService;
   private final ExportService exportService;
-  private final ExportConfig exportConfig;
   private final MessagePublisher messagePublisher;
 
   VocabularyResource(
       VocabularyService vocabularyService,
       ExportService exportService,
-      ExportConfig exportConfig,
       @Autowired(required = false) MessagePublisher messagePublisher) {
     this.vocabularyService = vocabularyService;
     this.exportService = exportService;
-    this.exportConfig = exportConfig;
     this.messagePublisher = messagePublisher;
   }
 
@@ -325,10 +316,6 @@ public class VocabularyResource {
   public VocabularyRelease releaseVocabularyVersion(
       String vocabularyName, VocabularyReleaseParams params) throws IOException {
 
-    if (!exportConfig.isReleaseEnabled()) {
-      throw new UnsupportedOperationException("Vocabulary releases are not enabled");
-    }
-
     // release the vocabulary and return
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     VocabularyRelease release =
@@ -338,10 +325,6 @@ public class VocabularyResource {
                 .version(params.getVersion())
                 .user(authentication.getName())
                 .comment(params.getComment())
-                .deployRepository(exportConfig.getDeployRepository())
-                .deployUser(exportConfig.getDeployUser())
-                .deployPassword(exportConfig.getDeployPassword())
-                .skipUpload(exportConfig.isSkipUpload())
                 .build());
 
     if (messagePublisher != null) {
@@ -434,18 +417,7 @@ public class VocabularyResource {
 
   @SneakyThrows
   public byte[] getReleaseExport(String vocabularyName, String version) {
-    PagingRequest page = new PagingRequest(0, 1);
-    PagingResponse<VocabularyRelease> releases =
-        exportService.listReleases(vocabularyName, version, page);
-    VocabularyRelease release =
-        releases.getResults().isEmpty() ? null : releases.getResults().get(0);
-
-    if (release == null) {
-      return new byte[0];
-    }
-
-    Path exportPath = VocabularyDownloader.downloadVocabularyExport(release.getExportUrl());
-    return Files.readAllBytes(exportPath);
+    return exportService.getExportFile(vocabularyName, version);
   }
 
   @Operation(
@@ -473,7 +445,8 @@ public class VocabularyResource {
   @SneakyThrows
   public ResponseEntity<Resource> getReleasedExport(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
-    ByteArrayResource resource = new ByteArrayResource(getReleaseExport(vocabularyName, version));
+    byte[] exportBytes = getReleaseExport(vocabularyName, version);
+    ByteArrayResource resource = new ByteArrayResource(exportBytes);
     return ResponseEntity.ok().header("Content-Disposition", "inline").body(resource);
   }
 
@@ -496,7 +469,7 @@ public class VocabularyResource {
   @Docs.DefaultSearchResponses
   @GetMapping("{name}/definition")
   public List<Definition> listDefinitions(
-      @PathVariable("name") String vocabularyName, 
+      @PathVariable("name") String vocabularyName,
       @RequestParam(value = "lang", required = false) List<LanguageRegion> lang) {
     return vocabularyService.listDefinitions(getVocabularyByName(vocabularyName).getKey(), lang);
   }
@@ -598,7 +571,7 @@ public class VocabularyResource {
   @Docs.DefaultSearchResponses
   @GetMapping("{name}/label")
   public List<Label> listLabels(
-      @PathVariable("name") String vocabularyName, 
+      @PathVariable("name") String vocabularyName,
       @RequestParam(value = "lang", required = false) List<LanguageRegion> lang) {
     return vocabularyService.listLabels(getVocabularyByName(vocabularyName).getKey(), lang);
   }

@@ -13,6 +13,12 @@
  */
 package org.gbif.vocabulary.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.IOException;
+import java.util.List;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.TestUtils;
@@ -22,17 +28,11 @@ import org.gbif.vocabulary.model.VocabularyRelease;
 import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.persistence.mappers.VocabularyMapper;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
-import org.gbif.vocabulary.service.export.ReleasePersister;
-
-import java.io.IOException;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -40,12 +40,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
 
 /** Integration tests for the {@link ExportService}. */
 @ExtendWith(SpringExtension.class)
@@ -59,7 +53,6 @@ public class ExportServiceIT {
   private final VocabularyReleaseMapper vocabularyReleaseMapper;
   private final ExportService exportService;
   private final VocabularyMapper vocabularyMapper;
-  @MockBean private ReleasePersister releasePersister;
 
   @Autowired
   ExportServiceIT(
@@ -150,7 +143,6 @@ public class ExportServiceIT {
     vocabularyMapper.create(vocabulary);
 
     String exportUrl = "http://test.com";
-    when(releasePersister.uploadToNexus(any(), any())).thenReturn(exportUrl);
 
     ExportParams exportParams =
         ExportParams.builder()

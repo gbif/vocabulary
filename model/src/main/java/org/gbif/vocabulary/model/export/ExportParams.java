@@ -29,13 +29,4 @@ public class ExportParams implements Serializable {
   @NotNull private final String version;
   @NotNull private final String user;
   @NotNull private final String comment;
-  @NotNull private final String deployRepository;
-  @NotNull private final String deployUser;
-  @NotNull private final String deployPassword;
-
-  /**
-   * Set this to true to test it in non-production environments so we don't make the repository
-   * dirty.
-   */
-  @NotNull private final boolean skipUpload;
 }

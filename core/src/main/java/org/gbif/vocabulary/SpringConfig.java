@@ -13,10 +13,11 @@
  */
 package org.gbif.vocabulary;
 
+
+import java.util.List;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.mybatis.type.StringArrayTypeHandler;
 import org.gbif.mybatis.type.UriArrayTypeHandler;
-
 import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,6 @@ import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
-import java.util.List;
 
 /**
  * This class contains the necessary spring configuration to use this module. This configuration

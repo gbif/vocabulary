@@ -7,11 +7,15 @@
   </resultMap>
 
   <sql id="VOCABULARY_RELEASE_INSERT_FIELDS">
-    vocabulary_key, version, export_url, created_by, created, comment
+    vocabulary_key, version, export_url, created_by, created, comment, export_file
   </sql>
 
   <sql id="VOCABULARY_RELEASE_READ_FIELDS">
     vr.key, vr.vocabulary_key, vr.version, vr.export_url, vr.created_by, vr.created, vr.comment
+  </sql>
+
+  <sql id="VOCABULARY_RELEASE_READ_FIELDS_WITH_FILE">
+    vr.key, vr.vocabulary_key, vr.version, vr.export_url, vr.created_by, vr.created, vr.comment, vr.export_file
   </sql>
 
   <sql id="VOCABULARY_RELEASE_INSERT_PARAMS">
@@ -20,7 +24,8 @@
     #{exportUrl,jdbcType=VARCHAR},
     #{createdBy,jdbcType=VARCHAR},
     now(), <!-- created -->
-    #{comment,jdbcType=VARCHAR}
+    #{comment,jdbcType=VARCHAR},
+    #{exportFile,jdbcType=BINARY}
   </sql>
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
@@ -62,6 +67,15 @@
       AND vr.version = #{version}
     </if>
   </where>
+  </select>
+
+  <select id="getVocabularyReleaseWithExportFile" resultType="VocabularyRelease">
+    SELECT VOCABULARY_RELEASE_READ_FIELDS_WITH_FILE
+    FROM vocabulary_release vr
+    WHERE vr.vocabulary_key = #{vocabularyKey,jdbcType=BIGINT}
+    <if test="version != null">
+      AND vr.version = #{version,jdbcType=VARCHAR}
+    </if>
   </select>
 
 </mapper>

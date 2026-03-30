@@ -13,6 +13,31 @@
  */
 package org.gbif.vocabulary.service.impl;
 
+import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARY_EXPORT_PATH;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotBlank;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -30,43 +55,16 @@ import org.gbif.vocabulary.model.export.ExportMetadata;
 import org.gbif.vocabulary.model.export.ExportParams;
 import org.gbif.vocabulary.model.export.VocabularyExportView;
 import org.gbif.vocabulary.model.search.ConceptSearchParams;
+import org.gbif.vocabulary.model.utils.PathUtils;
 import org.gbif.vocabulary.persistence.mappers.VocabularyReleaseMapper;
 import org.gbif.vocabulary.service.ConceptService;
 import org.gbif.vocabulary.service.ExportService;
 import org.gbif.vocabulary.service.VocabularyService;
-import org.gbif.vocabulary.service.export.ReleasePersister;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
 /** Default implementation for {@link ExportService}. */
 @Service
@@ -88,18 +86,18 @@ public class DefaultExportService implements ExportService {
   private final VocabularyService vocabularyService;
   private final ConceptService conceptService;
   private final VocabularyReleaseMapper vocabularyReleaseMapper;
-  private final ReleasePersister releasePersister;
+  private final String apiUrl;
 
   @Autowired
   public DefaultExportService(
       VocabularyService vocabularyService,
       ConceptService conceptService,
       VocabularyReleaseMapper vocabularyReleaseMapper,
-      ReleasePersister releasePersister) {
+      @Value("${ws.apiUrl}") String apiUrl) {
     this.vocabularyService = vocabularyService;
     this.conceptService = conceptService;
     this.vocabularyReleaseMapper = vocabularyReleaseMapper;
-    this.releasePersister = releasePersister;
+    this.apiUrl = apiUrl;
   }
 
   @Override
@@ -165,21 +163,17 @@ public class DefaultExportService implements ExportService {
     // check that the version is greater than the latest
     checkVersionNumber(exportParams.getVersion(), vocabulary.getKey());
 
+    // export the vocabulary to a file first
+    Path vocabularyExport =
+        exportVocabulary(exportParams.getVocabularyName(), exportParams.getVersion());
+
     VocabularyRelease release = new VocabularyRelease();
     release.setVersion(exportParams.getVersion());
     release.setCreatedBy(exportParams.getUser());
     release.setVocabularyKey(vocabulary.getKey());
     release.setComment(exportParams.getComment());
-
-    if (!exportParams.isSkipUpload()) {
-      // export the vocabulary first
-      Path vocabularyExport =
-          exportVocabulary(exportParams.getVocabularyName(), exportParams.getVersion());
-
-      // upload to nexus
-      String repositoryUrl = releasePersister.uploadToNexus(exportParams, vocabularyExport);
-      release.setExportUrl(repositoryUrl);
-    }
+    release.setExportFile(Files.readAllBytes(vocabularyExport));
+    release.setExportUrl(getExportUrl(exportParams.getVocabularyName(), exportParams.getVersion()));
 
     // we store the release in the DB
     vocabularyReleaseMapper.create(release);
@@ -192,6 +186,20 @@ public class DefaultExportService implements ExportService {
     }
 
     return vocabularyReleaseMapper.get(release.getKey());
+  }
+
+  private String getExportUrl(String vocabularyName, String version) {
+    String baseUrl = apiUrl.endsWith("/") ? apiUrl : apiUrl + "/";
+    return baseUrl
+        + PathUtils.VOCABULARIES_PATH
+        + "/"
+        + vocabularyName
+        + "/"
+        + PathUtils.VOCABULARY_RELEASES_PATH
+        + "/"
+        + version
+        + "/"
+        + VOCABULARY_EXPORT_PATH;
   }
 
   @Override
@@ -212,6 +220,19 @@ public class DefaultExportService implements ExportService {
           vocabularyReleaseMapper.count(vocabulary.getKey(), version),
           vocabularyReleaseMapper.list(vocabulary.getKey(), version, page));
     }
+  }
+
+  @Override
+  public byte[] getExportFile(String vocabularyName, @Nullable String version) {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(vocabularyName));
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(version));
+
+    Vocabulary vocabulary = vocabularyService.getByName(vocabularyName);
+    Preconditions.checkArgument(vocabulary != null, "Vocabulary not found: " + vocabularyName);
+
+    VocabularyRelease release =
+        vocabularyReleaseMapper.getVocabularyReleaseWithExportFile(vocabulary.getKey(), version);
+    return release == null ? null : release.getExportFile();
   }
 
   private Path createExportFile(String vocabularyName) {

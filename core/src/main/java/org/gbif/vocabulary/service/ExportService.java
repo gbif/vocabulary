@@ -65,4 +65,13 @@ public interface ExportService {
    */
   PagingResponse<VocabularyRelease> listReleases(
       @NotBlank String vocabularyName, @Nullable String version, @Nullable Pageable page);
+
+  /**
+   * Retrieves the binary export file of a release.
+   *
+   * @param vocabularyName name of the vocabulary
+   * @param version version to retrieve
+   * @return export file bytes for the resolved release
+   */
+  byte[] getExportFile(@NotBlank String vocabularyName, @Nullable String version);
 }

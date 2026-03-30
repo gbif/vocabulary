@@ -72,10 +72,7 @@
   <select id="getVocabularyReleaseWithExportFile" resultType="VocabularyRelease">
     SELECT <include refid="VOCABULARY_RELEASE_READ_FIELDS_WITH_FILE"/>
     FROM vocabulary_release vr
-    WHERE vr.vocabulary_key = #{vocabularyKey,jdbcType=BIGINT}
-    <if test="version != null">
-      AND vr.version = #{version,jdbcType=VARCHAR}
-    </if>
+    WHERE vr.vocabulary_key = #{vocabularyKey,jdbcType=BIGINT} AND vr.version = #{version,jdbcType=VARCHAR}
   </select>
 
 </mapper>

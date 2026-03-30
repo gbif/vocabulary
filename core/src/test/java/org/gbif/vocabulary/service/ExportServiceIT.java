@@ -142,8 +142,6 @@ public class ExportServiceIT {
     vocabulary.setModifiedBy("test");
     vocabularyMapper.create(vocabulary);
 
-    String exportUrl = "http://test.com";
-
     ExportParams exportParams =
         ExportParams.builder()
             .vocabularyName(vocabulary.getName())
@@ -155,7 +153,9 @@ public class ExportServiceIT {
     VocabularyRelease release = exportService.releaseVocabulary(exportParams);
 
     assertNotNull(release.getKey());
-    assertEquals(exportUrl, release.getExportUrl());
+    assertEquals(
+        "https://test.com/vocabularies/" + vocabulary.getName() + "/releases/1.0.0/export",
+        release.getExportUrl());
     assertEquals(exportParams.getComment(), release.getComment());
     assertEquals(exportParams.getVersion(), release.getVersion());
     assertEquals(exportParams.getUser(), release.getCreatedBy());

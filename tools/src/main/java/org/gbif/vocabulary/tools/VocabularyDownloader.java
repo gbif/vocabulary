@@ -117,7 +117,6 @@ public class VocabularyDownloader {
             "Couldn't find any release for the vocabulary: " + vocabularyName);
       }
 
-      // inside the zip file there is a json file with the vocabulary export
       Path vocabularyJsonFile = downloadVocabularyFile(release.getExportUrl());
 
       return vocabularyJsonFile != null ? Files.newInputStream(vocabularyJsonFile) : null;
@@ -142,12 +141,12 @@ public class VocabularyDownloader {
     Request request = new Request.Builder().url(url).build();
     try (Response response = HTTP_CLIENT.newCall(request).execute()) {
 
-      // the response returns a zip file
+      // the response returns a json file
       Path downloadedFile =
           Files.createTempFile("download-" + Instant.now().toEpochMilli(), ".json");
       Files.copy(response.body().byteStream(), downloadedFile, StandardCopyOption.REPLACE_EXISTING);
 
-      // return the json file with the vocabulary export which is inside the zip file
+      // return the json file with the vocabulary export
       return downloadedFile;
     } catch (IOException e) {
       log.error("Couldn't copy vocabulary to hdfs", e);

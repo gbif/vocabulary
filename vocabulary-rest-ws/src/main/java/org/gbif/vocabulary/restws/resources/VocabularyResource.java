@@ -447,6 +447,9 @@ public class VocabularyResource {
   public ResponseEntity<Resource> getReleasedExport(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {
     byte[] exportBytes = getReleaseExport(vocabularyName, version);
+    if (exportBytes == null) {
+      return ResponseEntity.notFound().build();
+    }
     ByteArrayResource resource = new ByteArrayResource(exportBytes);
     return ResponseEntity.ok().header("Content-Disposition", "inline").body(resource);
   }

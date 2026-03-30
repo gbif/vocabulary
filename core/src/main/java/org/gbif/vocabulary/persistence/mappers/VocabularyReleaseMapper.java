@@ -36,6 +36,5 @@ public interface VocabularyReleaseMapper {
       @Nullable @Param("version") String version);
 
   VocabularyRelease getVocabularyReleaseWithExportFile(
-      @Param("vocabularyKey") long key, @Nullable @Param("version") String version);
-
+      @Param("vocabularyKey") long key, @Param("version") String version);
 }

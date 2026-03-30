@@ -18,5 +18,6 @@
   <include file="liquibase/012-updated-constraint-names-format.xml" />
   <include file="liquibase/013-suggest-normalize-function.xml" />
   <include file="liquibase/014-ascii-normalize-function.xml" />
+  <include file="liquibase/015-update-name-constraints.xml" />
   <include file="liquibase/016-export-file-column.xml" />
 </databaseChangeLog>

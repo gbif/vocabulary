@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.gbif.api.model.common.paging.Pageable;
@@ -178,6 +180,8 @@ public class DefaultExportService implements ExportService {
     // we store the release in the DB
     vocabularyReleaseMapper.create(release);
 
+    Files.deleteIfExists(vocabularyExport);
+
     // create or update the views
     if (conceptService.existsLatestReleaseView(vocabulary.getName())) {
       conceptService.updateLatestReleaseView(vocabulary.getName());
@@ -223,7 +227,7 @@ public class DefaultExportService implements ExportService {
   }
 
   @Override
-  public byte[] getExportFile(String vocabularyName, @Nullable String version) {
+  public byte[] getExportFile(@NotBlank String vocabularyName, @NotBlank String version) {
     Preconditions.checkArgument(!Strings.isNullOrEmpty(vocabularyName));
     Preconditions.checkArgument(!Strings.isNullOrEmpty(version));
 

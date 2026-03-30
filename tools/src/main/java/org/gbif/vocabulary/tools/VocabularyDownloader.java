@@ -16,8 +16,6 @@ package org.gbif.vocabulary.tools;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -25,8 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -148,11 +144,11 @@ public class VocabularyDownloader {
 
       // the response returns a zip file
       Path downloadedFile =
-          Files.createTempFile("download-" + Instant.now().toEpochMilli(), ".zip");
+          Files.createTempFile("download-" + Instant.now().toEpochMilli(), ".json");
       Files.copy(response.body().byteStream(), downloadedFile, StandardCopyOption.REPLACE_EXISTING);
 
       // return the json file with the vocabulary export which is inside the zip file
-      return unzipVocabularyRelease(downloadedFile);
+      return downloadedFile;
     } catch (IOException e) {
       log.error("Couldn't copy vocabulary to hdfs", e);
       throw new IllegalArgumentException("Couldn't download vocabulary from " + url, e);
@@ -177,25 +173,5 @@ public class VocabularyDownloader {
       throw new IllegalStateException(
           "Cannot run without the ability to create temporary cache directory", e);
     }
-  }
-
-  private static Path unzipVocabularyRelease(Path zipFile) throws IOException {
-    Path unzipFile = null;
-    byte[] buffer = new byte[1024];
-    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile.toFile()))) {
-      ZipEntry zipEntry = zis.getNextEntry();
-      if (zipEntry != null) {
-        unzipFile = Files.createTempFile(zipEntry.getName(), ".json");
-        try (FileOutputStream fos = new FileOutputStream(unzipFile.toFile())) {
-          int len;
-          while ((len = zis.read(buffer)) > 0) {
-            fos.write(buffer, 0, len);
-          }
-        }
-      }
-      zis.closeEntry();
-    }
-
-    return unzipFile;
   }
 }

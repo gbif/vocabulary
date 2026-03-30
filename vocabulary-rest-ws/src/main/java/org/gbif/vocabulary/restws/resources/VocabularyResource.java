@@ -15,6 +15,7 @@ package org.gbif.vocabulary.restws.resources;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARIES_PATH;
+import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARY_EXPORT_PATH;
 import static org.gbif.vocabulary.model.utils.PathUtils.VOCABULARY_RELEASES_PATH;
 
 import io.swagger.v3.oas.annotations.*;
@@ -441,7 +442,7 @@ public class VocabularyResource {
   @Docs.VocabularyNamePathParameter
   @ApiResponse(responseCode = "200", description = "Release export found and returned")
   @Docs.DefaultUnsuccessfulReadResponses
-  @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}/export")
+  @GetMapping(value = "{name}/" + VOCABULARY_RELEASES_PATH + "/{version}/" + VOCABULARY_EXPORT_PATH)
   @SneakyThrows
   public ResponseEntity<Resource> getReleasedExport(
       @PathVariable("name") String vocabularyName, @PathVariable("version") String version) {

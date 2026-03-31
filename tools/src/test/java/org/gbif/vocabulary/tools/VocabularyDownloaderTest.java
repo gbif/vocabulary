@@ -13,18 +13,22 @@
  */
 package org.gbif.vocabulary.tools;
 
-import org.gbif.vocabulary.model.export.Export;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import org.gbif.vocabulary.model.export.Export;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class VocabularyDownloaderTest {
 
@@ -36,7 +40,28 @@ public class VocabularyDownloaderTest {
             "http://api.gbif-dev.org/v1/", "LifeStage");
 
     Export export =
-        new ObjectMapper().registerModule(new JavaTimeModule()).readValue(in, Export.class);
+        new ObjectMapper()
+            .registerModule(
+                new JavaTimeModule()
+                    .addDeserializer(ZonedDateTime.class, new ZonedDateTimeDeserializer()))
+            .readValue(in, Export.class);
     assertNotNull(export);
+  }
+
+  private static class ZonedDateTimeDeserializer extends JsonDeserializer<ZonedDateTime> {
+
+    private final LocalDateTimeDeserializer localDateTimeDeserializer =
+        new LocalDateTimeDeserializer(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+    @Override
+    public ZonedDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+
+      // try first with timezone, otherwise without it
+      try {
+        return ZonedDateTime.parse(p.getText(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+      } catch (Exception ex) {
+        return localDateTimeDeserializer.deserialize(p, ctxt).atZone(ZoneId.systemDefault());
+      }
+    }
   }
 }

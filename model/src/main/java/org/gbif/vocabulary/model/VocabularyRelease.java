@@ -32,6 +32,7 @@ public class VocabularyRelease implements LenientEquals<VocabularyRelease> {
   ZonedDateTime created;
   @NotBlank String createdBy;
   @NotBlank String comment;
+  private byte[] exportFile;
 
   @Override
   public boolean lenientEquals(VocabularyRelease other) {

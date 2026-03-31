@@ -13,6 +13,8 @@
  */
 package org.gbif.vocabulary.service;
 
+import jakarta.validation.constraints.NotNull;
+
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.VocabularyRelease;
@@ -65,4 +67,13 @@ public interface ExportService {
    */
   PagingResponse<VocabularyRelease> listReleases(
       @NotBlank String vocabularyName, @Nullable String version, @Nullable Pageable page);
+
+  /**
+   * Retrieves the binary export file of a release.
+   *
+   * @param vocabularyName name of the vocabulary
+   * @param version version to retrieve
+   * @return export file bytes for the resolved release
+   */
+  byte[] getExportFile(@NotBlank String vocabularyName, @NotBlank String version);
 }

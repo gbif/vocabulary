@@ -13,11 +13,15 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import lombok.SneakyThrows;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.TestUtils;
 import org.gbif.vocabulary.model.Vocabulary;
 import org.gbif.vocabulary.model.VocabularyRelease;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,13 +32,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.springframework.util.StreamUtils;
 
 /**
  * Tests the {@link VocabularyReleaseMapper}.
@@ -77,6 +80,7 @@ public class VocabularyReleaseMapperTest {
     vocabularyKey = vocabulary.getKey();
   }
 
+  @SneakyThrows
   @Test
   public void createAndGetTest() {
     VocabularyRelease vocabularyRelease = new VocabularyRelease();
@@ -86,9 +90,18 @@ public class VocabularyReleaseMapperTest {
     vocabularyRelease.setExportUrl("dummy url");
     vocabularyRelease.setComment("test comment");
 
+    Resource exportFile = new ClassPathResource("LifeStage_export.json");
+    vocabularyRelease.setExportFile(StreamUtils.copyToByteArray(exportFile.getInputStream()));
+
     // create release
     vocabularyReleaseMapper.create(vocabularyRelease);
     assertNotNull(vocabularyRelease.getKey());
+
+    VocabularyRelease storedFile =
+        vocabularyReleaseMapper.getVocabularyReleaseWithExportFile(
+            vocabularyKey, vocabularyRelease.getVersion());
+    assertNotNull(storedFile);
+    assertNotNull(storedFile.getExportFile());
 
     // get release
     VocabularyRelease stored = vocabularyReleaseMapper.get(vocabularyRelease.getKey());

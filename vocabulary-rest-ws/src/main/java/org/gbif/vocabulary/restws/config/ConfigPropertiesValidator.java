@@ -26,15 +26,12 @@ public class ConfigPropertiesValidator implements Validator {
 
   @Override
   public boolean supports(Class<?> clazz) {
-    return ExportConfig.class.isAssignableFrom(clazz)
-        || MessagingConfig.class.isAssignableFrom(clazz);
+    return MessagingConfig.class.isAssignableFrom(clazz);
   }
 
   @Override
   public void validate(Object target, Errors errors) {
-    if (target instanceof ExportConfig) {
-      ExportConfig.validate((ExportConfig) target, errors);
-    } else if (target instanceof MessagingConfig) {
+    if (target instanceof MessagingConfig) {
       MessagingConfig.validate((MessagingConfig) target, errors);
     }
   }

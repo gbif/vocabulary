@@ -13,14 +13,11 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
+import jakarta.annotation.Nullable;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.vocabulary.model.VocabularyRelease;
-
-import java.util.List;
-
-import jakarta.annotation.Nullable;
-
-import org.apache.ibatis.annotations.Param;
 
 /** Mapper for {@link VocabularyRelease}. */
 public interface VocabularyReleaseMapper {
@@ -37,4 +34,7 @@ public interface VocabularyReleaseMapper {
   long count(
       @Nullable @Param("vocabularyKey") Long vocabularyKey,
       @Nullable @Param("version") String version);
+
+  VocabularyRelease getVocabularyReleaseWithExportFile(
+      @Param("vocabularyKey") long key, @Param("version") String version);
 }

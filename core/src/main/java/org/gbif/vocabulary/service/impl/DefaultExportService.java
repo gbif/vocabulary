@@ -180,8 +180,6 @@ public class DefaultExportService implements ExportService {
     // we store the release in the DB
     vocabularyReleaseMapper.create(release);
 
-    Files.deleteIfExists(vocabularyExport);
-
     // create or update the views
     if (conceptService.existsLatestReleaseView(vocabulary.getName())) {
       conceptService.updateLatestReleaseView(vocabulary.getName());

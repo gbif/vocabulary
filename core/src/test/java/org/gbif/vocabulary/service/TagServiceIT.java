@@ -13,15 +13,18 @@
  */
 package org.gbif.vocabulary.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import jakarta.validation.ConstraintViolationException;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.PostgresDBExtension;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.service.impl.DefaultTagService;
-
-import jakarta.validation.ConstraintViolationException;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -36,11 +39,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Integration tests for the {@link ConceptService}. */
 @ExtendWith(SpringExtension.class)
@@ -80,12 +78,28 @@ public class TagServiceIT {
     createdTag = tagService.get(key);
     assertEquals("birds 2", createdTag.getName());
 
-    PagingResponse<Tag> tags = tagService.list(new PagingRequest(0, 5));
+    PagingResponse<Tag> tags = tagService.list(null, null, null, new PagingRequest(0, 5));
+    assertEquals(1, tags.getResults().size());
+    assertEquals(1, tags.getCount());
+
+    tags = tagService.list("birds", null, null, new PagingRequest(0, 5));
+    assertEquals(0, tags.getResults().size());
+    assertEquals(0, tags.getCount());
+
+    tags = tagService.list(null, "bir", null, new PagingRequest(0, 5));
+    assertEquals(1, tags.getResults().size());
+    assertEquals(1, tags.getCount());
+
+    tags = tagService.list("birds 2", null, true, new PagingRequest(0, 5));
+    assertEquals(0, tags.getResults().size());
+    assertEquals(0, tags.getCount());
+
+    tags = tagService.list("birds 2", null, false, new PagingRequest(0, 5));
     assertEquals(1, tags.getResults().size());
     assertEquals(1, tags.getCount());
 
     tagService.delete(createdTag.getKey());
-    tags = tagService.list(new PagingRequest(0, 5));
+    tags = tagService.list(null, null, null, new PagingRequest(0, 5));
     assertEquals(0, tags.getResults().size());
   }
 

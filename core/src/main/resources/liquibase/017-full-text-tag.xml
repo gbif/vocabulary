@@ -1,0 +1,28 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+  <changeSet id="17" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+        ALTER TABLE tag ADD COLUMN fulltext_search tsvector;
+
+        CREATE OR REPLACE FUNCTION tag_change_trigger()
+         RETURNS TRIGGER AS
+            $tagchange$
+              BEGIN
+               NEW.fulltext_search :=
+                 TO_TSVECTOR('english_nostop', unaccent(COALESCE(NEW.name,'')));
+                RETURN NEW;
+              END;
+            $tagchange$
+        LANGUAGE plpgsql;
+
+        CREATE TRIGGER tag_fulltext_update
+          BEFORE INSERT OR UPDATE ON tag
+          FOR EACH ROW EXECUTE PROCEDURE tag_change_trigger();
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>

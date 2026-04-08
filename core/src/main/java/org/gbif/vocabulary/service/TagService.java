@@ -13,13 +13,12 @@
  */
 package org.gbif.vocabulary.service;
 
-import org.gbif.api.model.common.paging.Pageable;
-import org.gbif.api.model.common.paging.PagingResponse;
-import org.gbif.vocabulary.model.Tag;
-
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.api.model.common.paging.PagingResponse;
+import org.gbif.vocabulary.model.Tag;
 
 /** Services for a {@link Tag}. */
 public interface TagService {
@@ -58,10 +57,17 @@ public interface TagService {
   /**
    * Retrieves pages of {@link Tag}.
    *
+   * @param name name of the tag to filter by. Useful to use with the isInUse param
+   * @param query full-text search
+   * @param isInUse indicates if the tag is currently used in any concept
    * @param page paging parameters
    * @return a list of {@link Tag} ordered by name.
    */
-  PagingResponse<Tag> list(@Nullable Pageable page);
+  PagingResponse<Tag> list(
+      @Nullable String name,
+      @Nullable String query,
+      @Nullable Boolean isInUse,
+      @Nullable Pageable page);
 
   /**
    * Deletes a tag.

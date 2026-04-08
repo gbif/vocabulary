@@ -25,6 +25,11 @@
   </sql>
 
   <!-- QUERIES FROM HERE -->
+  <sql id="FULL_TEXT">
+    JOIN to_tsquery('english_nostop', CASE WHEN regexp_replace(unaccent(trim(#{query})), '[^A-Za-z0-9@.\-\s]+', '', 'g') = '' THEN 'false'
+    ELSE regexp_replace(regexp_replace(unaccent(trim(#{query})), '[^A-Za-z0-9@.\-\s]+', '', 'g'), '\s+', ':* &amp; ', 'g') || ':*' END)
+    AS query ON query @@ t.fulltext_search
+  </sql>
 
   <insert id="create" useGeneratedKeys="true" keyProperty="key" keyColumn="key">
     INSERT INTO tag(<include refid="TAG_INSERT_FIELDS"/>) VALUES(<include refid="TAG_INSERT_PARAMS"/>)
@@ -42,17 +47,45 @@
     FROM tag t WHERE t.name = #{name,jdbcType=VARCHAR}
   </select>
 
+  <sql id="LIST_COMMON">
+    FROM tag t
+    <if test="query != null">
+      <include refid="FULL_TEXT"/>
+    </if>
+    <where>
+      <if test="name != null">
+        t.name = #{name,jdbcType=VARCHAR}
+      </if>
+      <if test="isInUse != null">
+        <choose>
+          <when test="isInUse">
+            AND EXISTS (
+             SELECT 1 FROM concept_tag ct WHERE ct.tag_key = t.key
+            )
+          </when>
+          <otherwise>
+            AND NOT EXISTS (
+             SELECT 1 FROM concept_tag ct WHERE ct.tag_key = t.key
+            )
+          </otherwise>
+        </choose>
+      </if>
+    </where>
+  </sql>
+
   <select id="list" resultMap="TAG_MAP">
-    SELECT
+    SELECT DISTINCT ON (<if test="query != null">ts_rank_cd(t.fulltext_search, query),</if> t.name)
     <include refid="TAG_READ_FIELDS"/>
-    FROM tag t ORDER BY t.name
+    <include refid="LIST_COMMON"/>
+    ORDER BY <if test="query != null">ts_rank_cd(t.fulltext_search, query) DESC,</if> t.name
     <if test="page != null">
       LIMIT #{page.limit} OFFSET #{page.offset}
     </if>
   </select>
 
   <select id="count" resultType="Long">
-    SELECT COUNT(*) FROM tag t
+    SELECT COUNT(*)
+    <include refid="LIST_COMMON"/>
   </select>
 
   <update id="update">

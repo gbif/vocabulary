@@ -13,13 +13,24 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static org.gbif.vocabulary.model.utils.PathUtils.TAGS_PATH;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.Explode;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.extensions.Extension;
+import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.gbif.api.annotation.Trim;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.restws.documentation.Docs;
 import org.gbif.vocabulary.service.TagService;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,15 +39,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.extensions.Extension;
-import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static org.gbif.vocabulary.model.utils.PathUtils.TAGS_PATH;
 
 @io.swagger.v3.oas.annotations.tags.Tag(
     name = "Tags",
@@ -63,11 +67,37 @@ public class TagResource {
           @Extension(
               name = "Order",
               properties = @ExtensionProperty(name = "Order", value = "0100")))
+  @Parameters(
+      value = {
+        @Parameter(
+            name = "q",
+            description = "Query for full-text search.",
+            schema = @Schema(implementation = String.class),
+            in = ParameterIn.QUERY,
+            explode = Explode.FALSE),
+        @Parameter(
+            name = "name",
+            description = "The name of the tag. Useful to use with the isInUse parameter.",
+            schema = @Schema(implementation = String.class),
+            in = ParameterIn.QUERY,
+            explode = Explode.FALSE),
+        @Parameter(
+            name = "isInUse",
+            description =
+                "If true it searches for tags that are currently being used in at least one concept.",
+            schema = @Schema(implementation = Boolean.class),
+            in = ParameterIn.QUERY,
+            explode = Explode.FALSE)
+      })
   @Pageable.OffsetLimitParameters
   @Docs.DefaultSearchResponses
   @GetMapping
-  public PagingResponse<Tag> listTags(Pageable page) {
-    return tagService.list(page);
+  public PagingResponse<Tag> listTags(
+      @RequestParam(required = false, value = "q") String query,
+      @RequestParam(required = false, value = "name") String name,
+      @RequestParam(required = false, value = "isInUse") Boolean isInUse,
+      Pageable page) {
+    return tagService.list(name, query, isInUse, page);
   }
 
   @Operation(

@@ -13,6 +13,14 @@
  */
 package org.gbif.vocabulary.service.impl;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Strings;
+import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
@@ -20,11 +28,6 @@ import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.model.UserRoles;
 import org.gbif.vocabulary.persistence.mappers.TagMapper;
 import org.gbif.vocabulary.service.TagService;
-
-import jakarta.annotation.Nullable;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
@@ -32,11 +35,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.base.Strings;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
 
 @Service
 @Validated
@@ -97,10 +95,19 @@ public class DefaultTagService implements TagService {
   }
 
   @Override
-  public PagingResponse<Tag> list(@Nullable Pageable page) {
+  public PagingResponse<Tag> list(
+      @Nullable String name,
+      @Nullable String query,
+      @Nullable Boolean isInUse,
+      @Nullable Pageable page) {
     page = page != null ? page : new PagingRequest();
+    String normalizedQuery =
+        query != null ? Strings.emptyToNull(CharMatcher.whitespace().trimFrom(query)) : query;
 
-    return new PagingResponse<>(page, tagMapper.count(), tagMapper.list(page));
+    return new PagingResponse<>(
+        page,
+        tagMapper.count(name, normalizedQuery, isInUse),
+        tagMapper.list(name, normalizedQuery, isInUse, page));
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN})

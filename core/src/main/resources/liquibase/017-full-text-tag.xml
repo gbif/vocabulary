@@ -8,6 +8,8 @@
       <![CDATA[
         ALTER TABLE tag ADD COLUMN fulltext_search tsvector;
 
+        CREATE INDEX tag_fulltext_search_idx ON tag USING gin(fulltext_search);
+
         CREATE OR REPLACE FUNCTION tag_change_trigger()
          RETURNS TRIGGER AS
             $tagchange$
@@ -17,7 +19,8 @@
                 RETURN NEW;
               END;
             $tagchange$
-        LANGUAGE plpgsql;
+        LANGUAGE plpgsql
+        SET search_path = public, pg_catalog;
 
         CREATE TRIGGER tag_fulltext_update
           BEFORE INSERT OR UPDATE ON tag

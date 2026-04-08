@@ -95,7 +95,7 @@ public class TagResource {
   public PagingResponse<Tag> listTags(
       @RequestParam(required = false, value = "q") String query,
       @RequestParam(required = false, value = "name") String name,
-      @RequestParam(required = false, value = "isInUse", defaultValue = "false") Boolean isInUse,
+      @RequestParam(required = false, value = "isInUse") Boolean isInUse,
       Pageable page) {
     return tagService.list(name, query, isInUse, page);
   }

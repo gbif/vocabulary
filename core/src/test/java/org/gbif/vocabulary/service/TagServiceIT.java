@@ -40,7 +40,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-/** Integration tests for the {@link ConceptService}. */
+/** Integration tests for the {@link TagService}. */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ContextConfiguration(initializers = {TagServiceIT.ContextInitializer.class})

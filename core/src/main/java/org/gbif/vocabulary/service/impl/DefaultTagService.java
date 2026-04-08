@@ -16,6 +16,7 @@ package org.gbif.vocabulary.service.impl;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
@@ -100,9 +101,13 @@ public class DefaultTagService implements TagService {
       @Nullable Boolean isInUse,
       @Nullable Pageable page) {
     page = page != null ? page : new PagingRequest();
+    String normalizedQuery =
+        query != null ? Strings.emptyToNull(CharMatcher.whitespace().trimFrom(query)) : query;
 
     return new PagingResponse<>(
-        page, tagMapper.count(name, query, isInUse), tagMapper.list(name, query, isInUse, page));
+        page,
+        tagMapper.count(name, normalizedQuery, isInUse),
+        tagMapper.list(name, normalizedQuery, isInUse, page));
   }
 
   @Secured({UserRoles.VOCABULARY_ADMIN})

@@ -12,6 +12,7 @@
 
   <properties>
     <main.basedir>${project.parent.basedir}</main.basedir>
+    <jena.version>5.1.0</jena.version>
   </properties>
 
   <dependencies>
@@ -69,6 +70,11 @@
     <dependency>
       <groupId>com.opencsv</groupId>
       <artifactId>opencsv</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-arq</artifactId>
+      <version>${jena.version}</version>
     </dependency>
 
     <!-- test -->

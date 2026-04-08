@@ -189,3 +189,20 @@ java --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang
 ```
 
 Note that you will be prompted to enter 2 passwords for each of the users.
+
+## Reading and traversing the ICS chart Turtle file
+
+The module also contains a small entry point to read a Turtle RDF/SKOS document and iterate through all detected resources.
+
+It accepts either a local file path, a `file:` URI, a raw HTTP(S) URL, or a GitHub `.../blob/...` URL such as the ICS chart.
+
+Example:
+
+```bash
+java -cp vocabulary-importer/target/vocabulary-importer-2.0.10-SNAPSHOT.jar \
+  org.gbif.vocabulary.importer.GeologicalContextImporter \
+  "https://github.com/i-c-stratigraphy/chart/blob/main/chart.ttl"
+```
+
+The reader is implemented in `org.gbif.vocabulary.importer.rdf.SkosTurtleReader` and the traversal logic in `org.gbif.vocabulary.importer.rdf.SkosTraversalService`.
+

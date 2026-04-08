@@ -1,0 +1,30 @@
+@prefix cs: <http://resource.geosciml.org/classifier/ics/ischart> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ischart: <http://resource.geosciml.org/classifier/ics/ischart/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+cs:
+  a skos:ConceptScheme ;
+  skos:prefLabel "ICS Chart"@en .
+
+ischart:Ages
+  a skos:Collection ;
+  skos:inScheme cs: ;
+  skos:member ischart:Ordovician ;
+  skos:prefLabel "Ages"@en .
+
+ischart:Ordovician
+  a skos:Concept ;
+  skos:inScheme cs: ;
+  skos:prefLabel "Ordovician"@en ;
+  skos:definition "A geologic period of the Paleozoic era"@en .
+
+ischart:Darriwilian
+  a skos:Concept ;
+  skos:broader ischart:Ordovician ;
+  skos:inScheme cs: ;
+  skos:prefLabel "Darriwilian"@en .
+
+dcterms:created
+  skos:prefLabel "International Commission on Stratigraphy"@en .
+

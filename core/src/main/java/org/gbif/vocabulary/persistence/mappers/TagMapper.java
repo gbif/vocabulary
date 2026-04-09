@@ -13,15 +13,12 @@
  */
 package org.gbif.vocabulary.persistence.mappers;
 
-import org.gbif.api.model.common.paging.Pageable;
-import org.gbif.vocabulary.model.Tag;
-
-import java.util.List;
-
 import jakarta.annotation.Nullable;
-
+import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.gbif.api.model.common.paging.Pageable;
+import org.gbif.vocabulary.model.Tag;
 
 @Mapper
 public interface TagMapper {
@@ -36,7 +33,14 @@ public interface TagMapper {
 
   void delete(@Param("key") int key);
 
-  List<Tag> list(@Nullable @Param("page") Pageable page);
+  List<Tag> list(
+      @Nullable @Param("name") String name,
+      @Nullable @Param("query") String query,
+      @Nullable @Param("isInUse") Boolean isInUse,
+      @Nullable @Param("page") Pageable page);
 
-  long count();
+  long count(
+      @Nullable @Param("name") String name,
+      @Nullable @Param("query") String query,
+      @Nullable @Param("isInUse") Boolean isInUse);
 }

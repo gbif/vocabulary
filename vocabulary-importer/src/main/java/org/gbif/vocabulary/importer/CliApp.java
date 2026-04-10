@@ -184,7 +184,7 @@ public class CliApp {
     private String csvDelimiter = ",";
 
     @Parameter(names = {"--listDelimiter", "-ld"})
-    private String listDelimiter = "\\|";
+    private String listDelimiter = "|";
 
     @Parameter(
         names = {"--apiUrl", "-a"},

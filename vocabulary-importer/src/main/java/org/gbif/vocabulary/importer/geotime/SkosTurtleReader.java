@@ -62,7 +62,6 @@ public class SkosTurtleReader {
         URLConnection conn = URI.create(source).toURL().openConnection();
         conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
         conn.setReadTimeout(READ_TIMEOUT_MS);
-        conn.connect();
         return new OpenedSource(conn.getInputStream(), source);
       }
 

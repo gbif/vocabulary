@@ -28,6 +28,9 @@ import org.apache.jena.riot.RDFDataMgr;
 
 public class SkosTurtleReader {
 
+  private static final int CONNECTION_TIMEOUT_MS = 30_000;
+  private static final int READ_TIMEOUT_MS = 60_000;
+
   public Model read(String source) {
     String normalizedSource = normalizeSource(source);
     OpenedSource openedSource = openSource(normalizedSource);
@@ -56,7 +59,10 @@ public class SkosTurtleReader {
   private OpenedSource openSource(String source) {
     try {
       if (source.startsWith("https://") || source.startsWith("http://")) {
-        return new OpenedSource(URI.create(source).toURL().openStream(), source);
+        URLConnection conn = URI.create(source).toURL().openConnection();
+        conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
+        conn.setReadTimeout(READ_TIMEOUT_MS);
+        return new OpenedSource(conn.getInputStream(), source);
       }
 
       Path path = source.startsWith("file:") ? Path.of(URI.create(source)) : Path.of(source);
@@ -68,4 +74,3 @@ public class SkosTurtleReader {
 
   private record OpenedSource(InputStream inputStream, String baseUri) {}
 }
-

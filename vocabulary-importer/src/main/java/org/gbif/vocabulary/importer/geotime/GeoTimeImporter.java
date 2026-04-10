@@ -16,10 +16,12 @@ package org.gbif.vocabulary.importer.geotime;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -104,7 +106,19 @@ public class GeoTimeImporter {
             } else {
               Concept concept = geoTimeConceptsByName.get(conceptName);
               if (concept != null) {
-                // Validate that SkosElement properties match concept tags
+                // add uri
+                Set<URI> uniqueURIs = new HashSet<>(concept.getSameAsUris());
+                URI elementUri = URI.create(element.getUri());
+                if (!uniqueURIs.contains(elementUri)) {
+                  concept.getSameAsUris().add(elementUri);
+                  try {
+                    conceptClient.update(GEOTIME_VOCABULARY_NAME, concept);
+                  } catch (Exception ex) {
+                    errorAndPersistClientCall(
+                        "Unable to update concept '{}': {}", conceptName, ex.getMessage());
+                  }
+                }
+
                 syncConceptTags(conceptName, element, concept, conceptClient, tagClient);
                 syncConceptDefinitions(conceptName, element, concept, conceptClient);
                 syncConceptLabels(conceptName, element, concept, conceptClient);
@@ -119,6 +133,7 @@ public class GeoTimeImporter {
     try {
       Concept concept = new Concept();
       concept.setName(conceptName);
+      concept.setSameAsUris(List.of(URI.create(element.getUri())));
       concept.setVocabularyKey(GEOTIME_VOCABULARY_KEY);
 
       ConceptView created = conceptClient.create(GEOTIME_VOCABULARY_NAME, concept);
@@ -142,8 +157,7 @@ public class GeoTimeImporter {
 
   private static void removeTag(
       String conceptName, Tag tag, ConceptClient conceptClient, TagClient tagClient) {
-    conceptClient.removeTag(
-        GeoTimeImporter.GEOTIME_VOCABULARY_NAME, conceptName, tag.getName());
+    conceptClient.removeTag(GeoTimeImporter.GEOTIME_VOCABULARY_NAME, conceptName, tag.getName());
 
     PagingResponse<Tag> unusedTag =
         tagClient.listTags(null, tag.getName(), false, new PagingRequest());

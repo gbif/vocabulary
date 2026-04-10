@@ -199,7 +199,7 @@ It accepts either a local file path, a `file:` URI, a raw HTTP(S) URL, or a GitH
 Example:
 
 ```bash
-java -cp vocabulary-importer/target/vocabulary-importer-2.0.10-SNAPSHOT.jar \
+java -cp vocabulary-importer/target/vocabulary-importer-{version}.jar \
   org.gbif.vocabulary.importer.geotime.GeoTimeImporter \
   https://api.gbif-dev.org/v1/ username passwd
 ```

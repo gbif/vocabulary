@@ -23,6 +23,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
@@ -32,6 +33,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SKOS;
 
+@Slf4j
 public class SkosTraversalService {
 
   public List<SkosElement> readElements(String source) {
@@ -146,13 +148,13 @@ public class SkosTraversalService {
 
     // Handle time:hasBeginning predicate
     if ("hasBeginning".equals(localName) && object.isAnon()) {
-      element.hasBeginning = parseTimeInterval(object.asResource(), model);
+      element.hasBeginning = parseTimeInterval(object.asResource());
       return;
     }
 
     // Handle time:hasEnd predicate
     if ("hasEnd".equals(localName) && object.isAnon()) {
-      element.hasEnd = parseTimeInterval(object.asResource(), model);
+      element.hasEnd = parseTimeInterval(object.asResource());
       return;
     }
   }
@@ -161,7 +163,7 @@ public class SkosTraversalService {
     valuesByLanguage.putIfAbsent(literal.getLanguage(), literal.getString());
   }
 
-  private SkosElement.TimeInterval parseTimeInterval(Resource resource, Model model) {
+  private SkosElement.TimeInterval parseTimeInterval(Resource resource) {
     Double inMYA = null;
     Double marginOfError = null;
 
@@ -177,6 +179,7 @@ public class SkosTraversalService {
           inMYA = Double.parseDouble(myaNode.asLiteral().getString());
         } catch (NumberFormatException e) {
           // Handle parsing error
+          log.warn("Couldn't parse mya time interval {}", myaNode.asLiteral().getString(), e);
         }
       }
     }
@@ -193,6 +196,7 @@ public class SkosTraversalService {
           marginOfError = Double.parseDouble(marginNode.asLiteral().getString());
         } catch (NumberFormatException e) {
           // Handle parsing error
+          log.warn("Couldn't parse marginOfError {}", marginNode.asLiteral().getString(), e);
         }
       }
     }

@@ -200,9 +200,9 @@ Example:
 
 ```bash
 java -cp vocabulary-importer/target/vocabulary-importer-2.0.10-SNAPSHOT.jar \
-  org.gbif.vocabulary.importer.GeologicalContextImporter \
-  "https://github.com/i-c-stratigraphy/chart/blob/main/chart.ttl"
+  org.gbif.vocabulary.importer.geotime.GeoTimeImporter \
+  https://api.gbif-dev.org/v1/ username passwd
 ```
 
-The reader is implemented in `org.gbif.vocabulary.importer.rdf.SkosTurtleReader` and the traversal logic in `org.gbif.vocabulary.importer.rdf.SkosTraversalService`.
+The reader is implemented in `org.gbif.vocabulary.importer.geotime.SkosTurtleReader` and the traversal logic in `org.gbif.vocabulary.importer.geotime.SkosTraversalService`.
 

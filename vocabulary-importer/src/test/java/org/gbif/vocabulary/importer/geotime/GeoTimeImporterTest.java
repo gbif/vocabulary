@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.importer;
+package org.gbif.vocabulary.importer.geotime;
 
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.LanguageRegion;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class GeologicalContextImporterTest {
+class GeoTimeImporterTest {
 
   @Test
   void shouldExtractTagValueFromColonSeparatedName() {
@@ -102,7 +102,7 @@ class GeologicalContextImporterTest {
   private static String extractTagValueFromName(Concept concept, String expectedTagName) {
     try {
       Method method =
-          GeologicalContextImporter.class.getDeclaredMethod(
+          GeoTimeImporter.class.getDeclaredMethod(
               "extractTagValueFromName", Concept.class, String.class);
       method.setAccessible(true);
       return (String) method.invoke(null, concept, expectedTagName);
@@ -114,7 +114,7 @@ class GeologicalContextImporterTest {
   private static boolean matchesNumericValue(Double expectedValue, String actualValue) {
     try {
       Method method =
-          GeologicalContextImporter.class.getDeclaredMethod(
+          GeoTimeImporter.class.getDeclaredMethod(
               "matchesNumericValue", Double.class, String.class);
       method.setAccessible(true);
       return (boolean) method.invoke(null, expectedValue, actualValue);
@@ -126,7 +126,7 @@ class GeologicalContextImporterTest {
   private static LanguageRegion resolveLanguageRegion(String rawLanguage) {
     try {
       Method method =
-          GeologicalContextImporter.class.getDeclaredMethod("resolveLanguageRegion", String.class);
+          GeoTimeImporter.class.getDeclaredMethod("resolveLanguageRegion", String.class);
       method.setAccessible(true);
       return (LanguageRegion) method.invoke(null, rawLanguage);
     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

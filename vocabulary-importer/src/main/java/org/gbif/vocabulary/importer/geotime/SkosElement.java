@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.importer.rdf;
+package org.gbif.vocabulary.importer.geotime;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -75,16 +75,6 @@ public class SkosElement {
 
   public Optional<String> getPrefLabel(String language) {
     return Optional.ofNullable(prefLabels.get(language));
-  }
-
-  public Optional<String> getDisplayLabel() {
-    if (prefLabels.containsKey("en")) {
-      return Optional.of(prefLabels.get("en"));
-    }
-    if (prefLabels.containsKey("")) {
-      return Optional.of(prefLabels.get(""));
-    }
-    return prefLabels.values().stream().findFirst();
   }
 
   public record TimeInterval(Double inMYA, Double marginOfError) {}

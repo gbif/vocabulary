@@ -11,16 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.importer.rdf;
-
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.SKOS;
+package org.gbif.vocabulary.importer.geotime;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -32,6 +23,14 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.SKOS;
 
 public class SkosTraversalService {
 
@@ -42,18 +41,19 @@ public class SkosTraversalService {
   public List<SkosElement> extractElements(Model model) {
     Map<String, MutableSkosElement> elementsByUri = new TreeMap<>();
 
-    model.listStatements().forEachRemaining(statement -> collectStatement(statement, elementsByUri, model));
+    model
+        .listStatements()
+        .forEachRemaining(statement -> collectStatement(statement, elementsByUri, model));
 
     return elementsByUri.values().stream().map(MutableSkosElement::toImmutable).toList();
   }
 
-  public void walk(Model model, BiConsumer<Integer, SkosElement> visitor) {
-    walk(extractElements(model), visitor);
-  }
-
   public void walk(Collection<SkosElement> elements, BiConsumer<Integer, SkosElement> visitor) {
     Map<String, SkosElement> elementsByUri =
-        elements.stream().collect(Collectors.toMap(SkosElement::getUri, element -> element, (a, b) -> a, LinkedHashMap::new));
+        elements.stream()
+            .collect(
+                Collectors.toMap(
+                    SkosElement::getUri, element -> element, (a, b) -> a, LinkedHashMap::new));
 
     Map<String, Set<String>> childrenByUri = buildChildrenIndex(elementsByUri);
     Set<String> children =
@@ -77,20 +77,15 @@ public class SkosTraversalService {
         .forEach(uri -> depthFirstWalk(uri, 0, elementsByUri, childrenByUri, visited, visitor));
   }
 
-  public void walkConcepts(Model model, BiConsumer<Integer, SkosElement> visitor) {
-    walkConcepts(extractElements(model), visitor);
-  }
-
-  public void walkConcepts(Collection<SkosElement> elements, BiConsumer<Integer, SkosElement> visitor) {
-    walk(elements, (depth, element) -> {
-      if (element.isConcept()) {
-        visitor.accept(depth, element);
-      }
-    });
-  }
-
-  public List<SkosElement> listConcepts(Model model) {
-    return listConcepts(extractElements(model));
+  public void walkConcepts(
+      Collection<SkosElement> elements, BiConsumer<Integer, SkosElement> visitor) {
+    walk(
+        elements,
+        (depth, element) -> {
+          if (element.isConcept()) {
+            visitor.accept(depth, element);
+          }
+        });
   }
 
   public List<SkosElement> listConcepts(Collection<SkosElement> elements) {
@@ -99,7 +94,8 @@ public class SkosTraversalService {
     return concepts;
   }
 
-  private void collectStatement(Statement statement, Map<String, MutableSkosElement> elementsByUri, Model model) {
+  private void collectStatement(
+      Statement statement, Map<String, MutableSkosElement> elementsByUri, Model model) {
     if (!statement.getSubject().isURIResource()) {
       return;
     }
@@ -170,9 +166,10 @@ public class SkosTraversalService {
     Double marginOfError = null;
 
     // Extract inMYA value - find the property with local name "inMYA"
-    List<Statement> myaStatements = resource.listProperties().toList().stream()
-        .filter(stmt -> "inMYA".equals(stmt.getPredicate().getLocalName()))
-        .toList();
+    List<Statement> myaStatements =
+        resource.listProperties().toList().stream()
+            .filter(stmt -> "inMYA".equals(stmt.getPredicate().getLocalName()))
+            .toList();
     if (!myaStatements.isEmpty()) {
       RDFNode myaNode = myaStatements.get(0).getObject();
       if (myaNode.isLiteral()) {
@@ -185,9 +182,10 @@ public class SkosTraversalService {
     }
 
     // Extract marginOfError value - find the property with local name "marginOfError"
-    List<Statement> marginStatements = resource.listProperties().toList().stream()
-        .filter(stmt -> "marginOfError".equals(stmt.getPredicate().getLocalName()))
-        .toList();
+    List<Statement> marginStatements =
+        resource.listProperties().toList().stream()
+            .filter(stmt -> "marginOfError".equals(stmt.getPredicate().getLocalName()))
+            .toList();
     if (!marginStatements.isEmpty()) {
       RDFNode marginNode = marginStatements.get(0).getObject();
       if (marginNode.isLiteral()) {
@@ -208,7 +206,9 @@ public class SkosTraversalService {
   private Map<String, Set<String>> buildChildrenIndex(Map<String, SkosElement> elementsByUri) {
     Map<String, Set<String>> childrenByUri = new TreeMap<>();
 
-    elementsByUri.values().forEach(element -> childrenByUri.putIfAbsent(element.getUri(), new TreeSet<>()));
+    elementsByUri
+        .values()
+        .forEach(element -> childrenByUri.putIfAbsent(element.getUri(), new TreeSet<>()));
 
     for (SkosElement element : elementsByUri.values()) {
       for (String schemeUri : element.getInSchemeUris()) {
@@ -316,4 +316,3 @@ public class SkosTraversalService {
     }
   }
 }
-

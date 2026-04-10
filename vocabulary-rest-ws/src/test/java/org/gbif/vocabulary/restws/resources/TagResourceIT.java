@@ -13,6 +13,11 @@
  */
 package org.gbif.vocabulary.restws.resources;
 
+import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.client.TagClient;
@@ -20,7 +25,6 @@ import org.gbif.vocabulary.model.Tag;
 import org.gbif.vocabulary.restws.LoginServerExtension;
 import org.gbif.vocabulary.restws.PostgresDBExtension;
 import org.gbif.ws.client.ClientBuilder;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -32,12 +36,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import static org.gbif.vocabulary.restws.TestCredentials.ADMIN;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ContextConfiguration(initializers = {TagResourceIT.ContextInitializer.class})
 @ExtendWith(SpringExtension.class)
@@ -76,13 +74,13 @@ public class TagResourceIT {
     Tag updatedTag = tagClient.update(createdTag);
     assertEquals(createdTag.getColor(), updatedTag.getColor());
 
-    PagingResponse<Tag> tags = tagClient.listTags(new PagingRequest(0, 5));
+    PagingResponse<Tag> tags = tagClient.listTags(null, null, null, new PagingRequest(0, 5));
     assertEquals(1, tags.getCount());
     assertEquals(1, tags.getResults().size());
 
     tagClient.delete(updatedTag.getName());
 
-    tags = tagClient.listTags(new PagingRequest(0, 5));
+    tags = tagClient.listTags(null, null, null, new PagingRequest(0, 5));
     assertEquals(0, tags.getCount());
     assertEquals(0, tags.getResults().size());
   }

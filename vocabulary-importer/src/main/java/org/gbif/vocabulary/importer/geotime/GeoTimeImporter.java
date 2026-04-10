@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gbif.vocabulary.importer;
+package org.gbif.vocabulary.importer.geotime;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,14 +27,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.gbif.api.model.common.paging.PagingRequest;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.api.AddTagAction;
 import org.gbif.vocabulary.api.ConceptListParams;
 import org.gbif.vocabulary.api.ConceptView;
 import org.gbif.vocabulary.client.ConceptClient;
 import org.gbif.vocabulary.client.TagClient;
-import org.gbif.vocabulary.importer.rdf.SkosElement;
-import org.gbif.vocabulary.importer.rdf.SkosTraversalService;
 import org.gbif.vocabulary.model.Concept;
 import org.gbif.vocabulary.model.Definition;
 import org.gbif.vocabulary.model.Label;
@@ -44,18 +43,19 @@ import org.gbif.ws.client.ClientBuilder;
 import org.slf4j.helpers.MessageFormatter;
 
 @Slf4j
-public class GeologicalContextImporter {
+public class GeoTimeImporter {
 
-  static final String DEFAULT_CHART_SOURCE =
+  static final String ICS_CHART_SOURCE =
       "https://github.com/i-c-stratigraphy/chart/blob/main/chart.ttl";
-  static final String GEOTIME_API_URL = "https://api.gbif-dev.org/v1/";
+  static final String DEFAULT_GEOTIME_API_URL = "https://api.gbif-dev.org/v1/";
   static final String GEOTIME_VOCABULARY_NAME = "GeoTime";
   static final long GEOTIME_VOCABULARY_KEY = 165;
   private static final int PAGE_SIZE = 100;
-  private static final Path WARNINGS_REPORT_PATH = Path.of("geotime-validation-warnings.log");
+  private static final Path WARNINGS_REPORT_PATH = Path.of("geotime-changes.log");
+  private static final Path CLIENT_ERRORS_REPORT_PATH = Path.of("geotime-client-errors.log");
 
   public static void main(String[] args) {
-    String icsSource = args.length > 0 ? args[0] : DEFAULT_CHART_SOURCE;
+    String apiUrl = args.length > 0 ? args[0] : DEFAULT_GEOTIME_API_URL;
     String apiUsername = args.length > 1 ? args[1] : null;
     String apiPassword = args.length > 2 ? args[2] : null;
 
@@ -64,11 +64,11 @@ public class GeologicalContextImporter {
           "If credentials are provided, both username and password must be passed as args");
     }
 
-    initializeWarningsReport();
+    initializeReports();
     ObjectMapper mapper = createMapper();
     ClientBuilder clientBuilder =
         new ClientBuilder()
-            .withUrl(GEOTIME_API_URL)
+            .withUrl(apiUrl)
             .withExponentialBackoffRetry(Duration.ofMillis(1000), 2, 4)
             .withObjectMapper(mapper);
     if (apiUsername != null
@@ -84,9 +84,10 @@ public class GeologicalContextImporter {
     Map<String, Concept> geoTimeConceptsByName = loadGeoTimeConcepts(conceptClient);
     log.info("Loaded {} GeoTime API concepts in memory", geoTimeConceptsByName.size());
     log.info("Writing validation warnings to {}", WARNINGS_REPORT_PATH.toAbsolutePath());
+    log.info("Writing client call errors to {}", CLIENT_ERRORS_REPORT_PATH.toAbsolutePath());
 
     SkosTraversalService traversalService = new SkosTraversalService();
-    List<SkosElement> elements = traversalService.readElements(icsSource);
+    List<SkosElement> elements = traversalService.readElements(ICS_CHART_SOURCE);
 
     traversalService.walkConcepts(
         elements,
@@ -94,9 +95,9 @@ public class GeologicalContextImporter {
           String conceptName = element.getConceptName();
           if (conceptName != null && !conceptName.isBlank()) {
             if (!geoTimeConceptsByName.containsKey(conceptName)) {
-              warnAndPersist(
-                  "Concept '{}' (uri={}) is missing in GeoTime API", conceptName, element.getUri());
-              Concept createdConcept = createConcept(conceptName, element, conceptClient);
+              warnAndPersist("Concept '{}' is missing in GeoTime API", conceptName);
+              Concept createdConcept =
+                  createConcept(conceptName, element, conceptClient, tagClient);
               if (createdConcept != null) {
                 geoTimeConceptsByName.put(conceptName, createdConcept);
               }
@@ -104,8 +105,9 @@ public class GeologicalContextImporter {
               Concept concept = geoTimeConceptsByName.get(conceptName);
               if (concept != null) {
                 // Validate that SkosElement properties match concept tags
-                validateConceptTags(conceptName, element, concept);
-                validateConceptTexts(conceptName, element, concept);
+                syncConceptTags(conceptName, element, concept, conceptClient, tagClient);
+                syncConceptDefinitions(conceptName, element, concept, conceptClient);
+                syncConceptLabels(conceptName, element, concept, conceptClient);
               }
             }
           }
@@ -124,35 +126,44 @@ public class GeologicalContextImporter {
       addConceptLabels(conceptName, element, conceptClient);
 
       String rankTag = "rank: " + element.getRank();
-      addTag(GEOTIME_VOCABULARY_NAME, conceptName, Tag.of(rankTag), conceptClient, tagClient);
+      addTag(conceptName, Tag.of(rankTag), conceptClient, tagClient);
       String startAgeTag = "startAge: " + element.getHasBeginning().inMYA();
-      addTag(GEOTIME_VOCABULARY_NAME, conceptName, Tag.of(startAgeTag), conceptClient, tagClient);
+      addTag(conceptName, Tag.of(startAgeTag), conceptClient, tagClient);
       String endAgeTag = "endAge: " + element.getHasEnd().inMYA();
-      addTag(GEOTIME_VOCABULARY_NAME, conceptName, Tag.of(endAgeTag), conceptClient, tagClient);
+      addTag(conceptName, Tag.of(endAgeTag), conceptClient, tagClient);
 
       return created != null ? created.getConcept() : null;
     } catch (Exception ex) {
-      warnAndPersist(
+      errorAndPersistClientCall(
           "Unable to create concept '{}' in GeoTime API: {}", conceptName, ex.getMessage());
       return null;
     }
   }
 
+  private static void removeTag(
+      String conceptName, Tag tag, ConceptClient conceptClient, TagClient tagClient) {
+    conceptClient.removeTag(
+        GeoTimeImporter.GEOTIME_VOCABULARY_NAME, conceptName, tag.getName());
+
+    PagingResponse<Tag> unusedTag =
+        tagClient.listTags(null, tag.getName(), false, new PagingRequest());
+    unusedTag.getResults().forEach(r -> tagClient.delete(r.getName()));
+  }
+
   private static void addTag(
-      String vocabName,
-      String conceptName,
-      Tag tag,
-      ConceptClient conceptClient,
-      TagClient tagClient) {
+      String conceptName, Tag tag, ConceptClient conceptClient, TagClient tagClient) {
     try {
       Tag existingTag = tagClient.getTag(tag.getName());
       if (existingTag == null) {
         tag.setKey(null);
         existingTag = tagClient.create(tag);
       }
-      conceptClient.addTag(vocabName, conceptName, new AddTagAction(existingTag.getName()));
+      conceptClient.addTag(
+          GeoTimeImporter.GEOTIME_VOCABULARY_NAME,
+          conceptName,
+          new AddTagAction(existingTag.getName()));
     } catch (Exception ex) {
-      warnAndPersist(
+      errorAndPersistClientCall(
           "Couldn't add tag {} to concept {}: {}", tag.getName(), conceptName, ex.getMessage());
     }
   }
@@ -177,7 +188,7 @@ public class GeologicalContextImporter {
                     conceptName,
                     Definition.builder().language(language).value(def).build());
               } catch (Exception ex) {
-                warnAndPersist(
+                errorAndPersistClientCall(
                     "Unable to create definition for concept '{}' and language '{}': {}",
                     conceptName,
                     language.getLocale(),
@@ -206,7 +217,7 @@ public class GeologicalContextImporter {
                     conceptName,
                     Label.builder().language(language).value(label).build());
               } catch (Exception ex) {
-                warnAndPersist(
+                errorAndPersistClientCall(
                     "Unable to create label for concept '{}' and language '{}': {}",
                     conceptName,
                     language.getLocale(),
@@ -215,56 +226,136 @@ public class GeologicalContextImporter {
             });
   }
 
-  private static void validateConceptTexts(
-      String conceptName, SkosElement element, Concept concept) {
-    Map<LanguageRegion, String> skosLabelsByLanguage =
-        mapSkosTextsByLanguageRegion(conceptName, "label", element.getPrefLabels());
-    Map<LanguageRegion, String> conceptLabelsByLanguage = mapConceptLabelsByLanguageRegion(concept);
-    validateLocalizedValues(
-        conceptName, "label", skosLabelsByLanguage, conceptLabelsByLanguage, element.getUri());
-
+  private static void syncConceptDefinitions(
+      String conceptName, SkosElement element, Concept concept, ConceptClient conceptClient) {
     Map<LanguageRegion, String> skosDefinitionsByLanguage =
         mapSkosTextsByLanguageRegion(conceptName, "definition", element.getDefinitions());
-    Map<LanguageRegion, String> conceptDefinitionsByLanguage =
+    Map<LanguageRegion, Definition> conceptDefinitionsByLanguage =
         mapConceptDefinitionsByLanguageRegion(concept);
-    validateLocalizedValues(
-        conceptName,
-        "definition",
-        skosDefinitionsByLanguage,
-        conceptDefinitionsByLanguage,
-        element.getUri());
-  }
 
-  private static void validateLocalizedValues(
-      String conceptName,
-      String valueType,
-      Map<LanguageRegion, String> skosValues,
-      Map<LanguageRegion, String> conceptValues,
-      String conceptUri) {
-    for (Map.Entry<LanguageRegion, String> skosEntry : skosValues.entrySet()) {
+    for (Map.Entry<LanguageRegion, String> skosEntry : skosDefinitionsByLanguage.entrySet()) {
       LanguageRegion language = skosEntry.getKey();
       String skosValue = skosEntry.getValue();
-      String conceptValue = conceptValues.get(language);
+      Definition conceptDefinition = conceptDefinitionsByLanguage.get(language);
 
-      if (conceptValue == null) {
+      if (conceptDefinition == null) {
         warnAndPersist(
-            "Concept '{}' (uri={}) is missing {} for language '{}': SkosElement={}",
+            "Concept '{}' is missing definition for language '{}': SkosElement={}",
             conceptName,
-            conceptUri,
-            valueType,
             language.getLocale(),
             skosValue);
+        try {
+          conceptClient.addDefinition(
+              GEOTIME_VOCABULARY_NAME,
+              conceptName,
+              Definition.builder().language(skosEntry.getKey()).value(skosValue).build());
+        } catch (Exception ex) {
+          errorAndPersistClientCall(
+              "Unable to add missing definition for concept '{}' and language '{}': {}",
+              conceptName,
+              language.getLocale(),
+              ex.getMessage());
+        }
         continue;
       }
 
-      if (!Objects.equals(normalizeText(skosValue), normalizeText(conceptValue))) {
+      if (!Objects.equals(normalizeText(skosValue), normalizeText(conceptDefinition.getValue()))) {
         warnAndPersist(
-            "Concept '{}' has mismatched {} for language '{}': SkosElement={}, Concept={}",
+            "Concept '{}' has mismatched definition for language '{}': SkosElement={}, Concept={}",
             conceptName,
-            valueType,
             language.getLocale(),
             skosValue,
-            conceptValue);
+            conceptDefinition.getValue());
+
+        try {
+          conceptClient.deleteDefinition(
+              GEOTIME_VOCABULARY_NAME, conceptName, conceptDefinition.getKey());
+        } catch (Exception ex) {
+          errorAndPersistClientCall(
+              "Unable to delete outdated definition for concept '{}' and language '{}': {}",
+              conceptName,
+              language.getLocale(),
+              ex.getMessage());
+        }
+
+        try {
+          conceptClient.addDefinition(
+              GEOTIME_VOCABULARY_NAME,
+              conceptName,
+              Definition.builder().language(skosEntry.getKey()).value(skosValue).build());
+        } catch (Exception ex) {
+          errorAndPersistClientCall(
+              "Unable to add updated definition for concept '{}' and language '{}': {}",
+              conceptName,
+              language.getLocale(),
+              ex.getMessage());
+        }
+      }
+    }
+  }
+
+  private static void syncConceptLabels(
+      String conceptName, SkosElement element, Concept concept, ConceptClient conceptClient) {
+    Map<LanguageRegion, String> skosLabelsByLanguage =
+        mapSkosTextsByLanguageRegion(conceptName, "label", element.getPrefLabels());
+    Map<LanguageRegion, Label> conceptLabelsByLanguage = mapConceptLabelsByLanguageRegion(concept);
+
+    for (Map.Entry<LanguageRegion, String> skosEntry : skosLabelsByLanguage.entrySet()) {
+      LanguageRegion language = skosEntry.getKey();
+      String skosValue = skosEntry.getValue();
+      Label conceptLabel = conceptLabelsByLanguage.get(language);
+
+      if (conceptLabel == null) {
+        warnAndPersist(
+            "Concept '{}' is missing label for language '{}': SkosElement={}",
+            conceptName,
+            language.getLocale(),
+            skosValue);
+        try {
+          conceptClient.addLabel(
+              GEOTIME_VOCABULARY_NAME,
+              conceptName,
+              Label.builder().language(skosEntry.getKey()).value(skosValue).build());
+        } catch (Exception ex) {
+          errorAndPersistClientCall(
+              "Unable to add missing label for concept '{}' and language '{}': {}",
+              conceptName,
+              language.getLocale(),
+              ex.getMessage());
+        }
+        continue;
+      }
+
+      if (!Objects.equals(normalizeText(skosValue), normalizeText(conceptLabel.getValue()))) {
+        warnAndPersist(
+            "Concept '{}' has mismatched label for language '{}': SkosElement={}, Concept={}",
+            conceptName,
+            language.getLocale(),
+            skosValue,
+            conceptLabel.getValue());
+
+        try {
+          conceptClient.deleteLabel(GEOTIME_VOCABULARY_NAME, conceptName, conceptLabel.getKey());
+        } catch (Exception ex) {
+          errorAndPersistClientCall(
+              "Unable to delete outdated label for concept '{}' and language '{}': {}",
+              conceptName,
+              language.getLocale(),
+              ex.getMessage());
+        }
+
+        try {
+          conceptClient.addLabel(
+              GEOTIME_VOCABULARY_NAME,
+              conceptName,
+              Label.builder().language(skosEntry.getKey()).value(skosValue).build());
+        } catch (Exception ex) {
+          errorAndPersistClientCall(
+              "Unable to add updated label for concept '{}' and language '{}': {}",
+              conceptName,
+              language.getLocale(),
+              ex.getMessage());
+        }
       }
     }
   }
@@ -300,8 +391,8 @@ public class GeologicalContextImporter {
     return result;
   }
 
-  private static Map<LanguageRegion, String> mapConceptLabelsByLanguageRegion(Concept concept) {
-    Map<LanguageRegion, String> result = new LinkedHashMap<>();
+  private static Map<LanguageRegion, Label> mapConceptLabelsByLanguageRegion(Concept concept) {
+    Map<LanguageRegion, Label> result = new LinkedHashMap<>();
     if (concept.getLabel() == null) {
       return result;
     }
@@ -310,14 +401,14 @@ public class GeologicalContextImporter {
       if (label.getLanguage() == null || label.getValue() == null || label.getValue().isBlank()) {
         continue;
       }
-      result.put(label.getLanguage(), label.getValue());
+      result.put(label.getLanguage(), label);
     }
     return result;
   }
 
-  private static Map<LanguageRegion, String> mapConceptDefinitionsByLanguageRegion(
+  private static Map<LanguageRegion, Definition> mapConceptDefinitionsByLanguageRegion(
       Concept concept) {
-    Map<LanguageRegion, String> result = new LinkedHashMap<>();
+    Map<LanguageRegion, Definition> result = new LinkedHashMap<>();
     if (concept.getDefinition() == null) {
       return result;
     }
@@ -328,7 +419,7 @@ public class GeologicalContextImporter {
           || definition.getValue().isBlank()) {
         continue;
       }
-      result.put(definition.getLanguage(), definition.getValue());
+      result.put(definition.getLanguage(), definition);
     }
     return result;
   }
@@ -381,8 +472,12 @@ public class GeologicalContextImporter {
     return value.trim().replaceAll("\\s+", " ");
   }
 
-  private static void validateConceptTags(
-      String conceptName, SkosElement element, Concept concept) {
+  private static void syncConceptTags(
+      String conceptName,
+      SkosElement element,
+      Concept concept,
+      ConceptClient conceptClient,
+      TagClient tagClient) {
     if (concept.getTags() == null || concept.getTags().isEmpty()) {
       return;
     }
@@ -396,6 +491,19 @@ public class GeologicalContextImporter {
             conceptName,
             element.getRank(),
             rankValue != null ? rankValue : "missing");
+
+        try {
+          if (rankValue != null && !rankValue.isBlank()) {
+            removeTag(conceptName, Tag.of("rank: " + rankValue), conceptClient, tagClient);
+          }
+        } catch (Exception ex) {
+          errorAndPersistClientCall(
+              "Unable to remove previous rank tag from concept '{}': {}",
+              conceptName,
+              ex.getMessage());
+        }
+
+        addTag(conceptName, Tag.of("rank: " + element.getRank()), conceptClient, tagClient);
       }
     }
 
@@ -409,6 +517,19 @@ public class GeologicalContextImporter {
             conceptName,
             expectedStartAge,
             startAgeValue != null ? startAgeValue : "missing");
+
+        try {
+          if (startAgeValue != null && !startAgeValue.isBlank()) {
+            removeTag(conceptName, Tag.of("startAge: " + startAgeValue), conceptClient, tagClient);
+          }
+        } catch (Exception ex) {
+          errorAndPersistClientCall(
+              "Unable to remove previous startAge tag from concept '{}': {}",
+              conceptName,
+              ex.getMessage());
+        }
+
+        addTag(conceptName, Tag.of("startAge: " + expectedStartAge), conceptClient, tagClient);
       }
     }
 
@@ -422,39 +543,60 @@ public class GeologicalContextImporter {
             conceptName,
             expectedEndAge,
             endAgeValue != null ? endAgeValue : "missing");
+
+        try {
+          if (endAgeValue != null && !endAgeValue.isBlank()) {
+            removeTag(conceptName, Tag.of("endAge: " + endAgeValue), conceptClient, tagClient);
+          }
+        } catch (Exception ex) {
+          errorAndPersistClientCall(
+              "Unable to remove previous endAge tag from concept '{}': {}",
+              conceptName,
+              ex.getMessage());
+        }
+
+        addTag(conceptName, Tag.of("endAge: " + expectedEndAge), conceptClient, tagClient);
       }
     }
+  }
+
+  private static void errorAndPersistClientCall(String messageTemplate, Object... args) {
+    log.error(messageTemplate, args);
+    String resolvedMessage = MessageFormatter.arrayFormat(messageTemplate, args).getMessage();
+    appendLineToReport(CLIENT_ERRORS_REPORT_PATH, resolvedMessage);
   }
 
   private static void warnAndPersist(String messageTemplate, Object... args) {
     log.warn(messageTemplate, args);
     String resolvedMessage = MessageFormatter.arrayFormat(messageTemplate, args).getMessage();
-    appendWarningToReport(resolvedMessage);
+    appendLineToReport(WARNINGS_REPORT_PATH, resolvedMessage);
   }
 
-  private static void initializeWarningsReport() {
+  private static void initializeReports() {
+    initializeReport(WARNINGS_REPORT_PATH);
+    initializeReport(CLIENT_ERRORS_REPORT_PATH);
+  }
+
+  private static void initializeReport(Path reportPath) {
     try {
       Files.writeString(
-          WARNINGS_REPORT_PATH,
-          "",
-          StandardOpenOption.CREATE,
-          StandardOpenOption.TRUNCATE_EXISTING);
+          reportPath, "", StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     } catch (IOException e) {
       throw new IllegalStateException(
-          "Unable to initialize warnings report at " + WARNINGS_REPORT_PATH.toAbsolutePath(), e);
+          "Unable to initialize report at " + reportPath.toAbsolutePath(), e);
     }
   }
 
-  private static synchronized void appendWarningToReport(String message) {
+  private static synchronized void appendLineToReport(Path reportPath, String message) {
     try {
       Files.writeString(
-          WARNINGS_REPORT_PATH,
+          reportPath,
           message + System.lineSeparator(),
           StandardOpenOption.CREATE,
           StandardOpenOption.APPEND);
     } catch (IOException e) {
       throw new IllegalStateException(
-          "Unable to write warnings report to " + WARNINGS_REPORT_PATH.toAbsolutePath(), e);
+          "Unable to write report to " + reportPath.toAbsolutePath(), e);
     }
   }
 

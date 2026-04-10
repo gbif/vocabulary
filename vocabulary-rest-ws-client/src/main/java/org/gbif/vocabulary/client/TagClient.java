@@ -16,7 +16,6 @@ package org.gbif.vocabulary.client;
 import org.gbif.api.model.common.paging.Pageable;
 import org.gbif.api.model.common.paging.PagingResponse;
 import org.gbif.vocabulary.model.Tag;
-
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,12 +25,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RequestMapping("vocabularyTags")
 public interface TagClient {
 
   @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-  PagingResponse<Tag> listTags(@SpringQueryMap Pageable page);
+  PagingResponse<Tag> listTags(
+      @RequestParam(required = false, value = "q") String query,
+      @RequestParam(required = false, value = "name") String name,
+      @RequestParam(required = false, value = "isInUse") Boolean isInUse,
+      @SpringQueryMap Pageable page);
 
   @GetMapping(value = "{name}", produces = MediaType.APPLICATION_JSON_VALUE)
   Tag getTag(@PathVariable("name") String tagName);

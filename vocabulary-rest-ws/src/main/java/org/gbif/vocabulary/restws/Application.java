@@ -22,7 +22,7 @@ import org.gbif.vocabulary.SpringConfig;
 import org.gbif.vocabulary.restws.config.ConfigPropertiesValidator;
 import org.gbif.vocabulary.restws.config.MessagingConfig;
 import org.gbif.vocabulary.restws.config.WsConfig;
-import org.gbif.vocabulary.restws.resolvers.LanguageRegionHandlerMethodArgumentResolver;
+import org.gbif.vocabulary.restws.resolvers.StringToLanguageRegionConverter;
 import org.gbif.vocabulary.restws.security.SecurityConfig;
 import org.gbif.ws.remoteauth.RemoteAuthClient;
 import org.gbif.ws.remoteauth.RemoteAuthWebSecurityConfigurer;
@@ -54,6 +54,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -88,7 +89,11 @@ public class Application {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
       argumentResolvers.add(new PageableHandlerMethodArgumentResolver());
-      argumentResolvers.add(new LanguageRegionHandlerMethodArgumentResolver());
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+      registry.addConverter(new StringToLanguageRegionConverter());
     }
   }
 

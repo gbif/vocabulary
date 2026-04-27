@@ -350,8 +350,8 @@ public class ConceptResource {
   public List<SuggestResult> suggest(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
-      LanguageRegion locale,
-      LanguageRegion fallbackLocale,
+      @RequestParam(value = "locale", required = false) LanguageRegion locale,
+      @RequestParam(value = "fallbackLocale", required = false) LanguageRegion fallbackLocale,
       @RequestParam(value = "limit", required = false) Integer limit) {
     if (fallbackLocale != null && locale == null) {
       throw new IllegalArgumentException("Locale is required if the fallback locale is set");
@@ -904,8 +904,8 @@ public class ConceptResource {
   public List<SuggestResult> suggestLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam(value = "q", required = false) String query,
-      LanguageRegion locale,
-      LanguageRegion fallbackLocale,
+      @RequestParam(value = "locale", required = false) LanguageRegion locale,
+      @RequestParam(value = "fallbackLocale", required = false) LanguageRegion fallbackLocale,
       @RequestParam(value = "limit", required = false) Integer limit) {
 
     Supplier<String> cacheKey =
@@ -1046,7 +1046,7 @@ public class ConceptResource {
   public List<LookupResult> lookup(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam("q") String q,
-      LanguageRegion lang) {
+      @RequestParam(value = "lang", required = false) LanguageRegion lang) {
     getVocabularyWithCheck(vocabularyName);
     return conceptService.lookup(q, vocabularyName, lang);
   }
@@ -1078,7 +1078,7 @@ public class ConceptResource {
   public List<LookupResult> lookupInLatestRelease(
       @PathVariable("vocabularyName") String vocabularyName,
       @RequestParam("q") String q,
-      LanguageRegion lang) {
+      @RequestParam(value = "lang", required = false) LanguageRegion lang) {
     getVocabularyWithCheck(vocabularyName);
     return conceptService.lookupLatestRelease(q, vocabularyName, lang);
   }

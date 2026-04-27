@@ -237,8 +237,8 @@ public class VocabularyResource {
   @GetMapping("suggest")
   public List<SuggestResult> suggest(
       @RequestParam(value = "q", required = false) String query,
-      LanguageRegion locale,
-      LanguageRegion fallbackLocale,
+      @RequestParam(value = "locale", required = false) LanguageRegion locale,
+      @RequestParam(value = "fallbackLocale", required = false) LanguageRegion fallbackLocale,
       @RequestParam(value = "limit", required = false) Integer limit) {
     return vocabularyService.suggest(query, locale, fallbackLocale, limit);
   }

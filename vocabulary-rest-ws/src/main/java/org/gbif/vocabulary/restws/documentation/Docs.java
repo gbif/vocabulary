@@ -137,13 +137,6 @@ public class Docs {
   @Parameters(
       value = {
         @Parameter(
-          name = "locale",
-          description =
-            "Filter to return results only in the specified locale.",
-          schema = @Schema(implementation = LanguageRegion.class),
-          in = ParameterIn.QUERY,
-          explode = Explode.FALSE),
-        @Parameter(
             name = "fallbackLocale",
             description =
                 "The locale to fall back when there are no results in the locale specified.",

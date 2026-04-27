@@ -134,6 +134,8 @@ public class Docs {
   })
   public @interface DefaultSearchResponses {}
 
+  @Target({ElementType.METHOD, ElementType.TYPE})
+  @Retention(RetentionPolicy.RUNTIME)
   @Parameters(
       value = {
         @Parameter(

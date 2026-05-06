@@ -21,4 +21,5 @@
   <include file="liquibase/015-update-name-constraints.xml" />
   <include file="liquibase/016-export-file-column.xml" />
   <include file="liquibase/017-full-text-tag.xml" />
+  <include file="liquibase/018-language-constraints.xml" />
 </databaseChangeLog>

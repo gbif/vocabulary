@@ -194,6 +194,7 @@ public class GeoTimeImporter {
                     "Concept '{}' has definition with unsupported language '{}': unable to map to LanguageRegion",
                     conceptName,
                     lang);
+                return;
               }
 
               try {
@@ -223,6 +224,7 @@ public class GeoTimeImporter {
                     "Concept '{}' has label with unsupported language '{}': unable to map to LanguageRegion",
                     conceptName,
                     lang);
+                return;
               }
 
               try {
@@ -249,6 +251,11 @@ public class GeoTimeImporter {
 
     for (Map.Entry<LanguageRegion, String> skosEntry : skosDefinitionsByLanguage.entrySet()) {
       LanguageRegion language = skosEntry.getKey();
+
+      if (language == LanguageRegion.UNKNOWN) {
+        continue;
+      }
+
       String skosValue = skosEntry.getValue();
       Definition conceptDefinition = conceptDefinitionsByLanguage.get(language);
 
@@ -262,7 +269,7 @@ public class GeoTimeImporter {
           conceptClient.addDefinition(
               GEOTIME_VOCABULARY_NAME,
               conceptName,
-              Definition.builder().language(skosEntry.getKey()).value(skosValue).build());
+              Definition.builder().language(language).value(skosValue).build());
         } catch (Exception ex) {
           errorAndPersistClientCall(
               "Unable to add missing definition for concept '{}' and language '{}': {}",
@@ -296,7 +303,7 @@ public class GeoTimeImporter {
           conceptClient.addDefinition(
               GEOTIME_VOCABULARY_NAME,
               conceptName,
-              Definition.builder().language(skosEntry.getKey()).value(skosValue).build());
+              Definition.builder().language(language).value(skosValue).build());
         } catch (Exception ex) {
           errorAndPersistClientCall(
               "Unable to add updated definition for concept '{}' and language '{}': {}",

@@ -1,0 +1,17 @@
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+  <changeSet id="18" author="mlopez">
+    <sql splitStatements="false" stripComments="false">
+      <![CDATA[
+        ALTER TABLE vocabulary_definition ADD CONSTRAINT vocabulary_definition_non_empty_language CHECK (assert_min_length(language, 1));
+        ALTER TABLE concept_definition ADD CONSTRAINT concept_definition_non_empty_language CHECK (assert_min_length(language, 1));
+        ALTER TABLE vocabulary_label ADD CONSTRAINT vocabulary_label_non_empty_language CHECK (assert_min_length(language, 1));
+        ALTER TABLE concept_label ADD CONSTRAINT concept_label_non_empty_language CHECK (assert_min_length(language, 1));
+        ALTER TABLE concept_alternative_label ADD CONSTRAINT concept_alternative_label_non_empty_language CHECK (assert_min_length(language, 1));
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>

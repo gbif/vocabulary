@@ -48,7 +48,7 @@ public class VocabularyReleaseToHdfsCallback
         .toString()
         .contains(
             vocabularyReleasedMessage.getVocabularyName()
-                + "/"
+                + "/releases/"
                 + vocabularyReleasedMessage.getVersion())) {
       log.error("Invalid message for a vocabulary release: {}", vocabularyReleasedMessage);
       return;

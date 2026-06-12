@@ -69,31 +69,31 @@ pipeline {
 def createCliArgs(user) {
     def args = ""
 
-    args += "--apiUser " + user + " "
+    args += "--apiUser " + quoteCliValue(user) + " "
     args += setApiUrl("apiUrl", params.ENV)
 
     if (params.VOCABULARY_NAME != '') {
-        args += "--vocabularyName ${params.VOCABULARY_NAME} "
+        args += "--vocabularyName " + quoteCliValue(params.VOCABULARY_NAME) + " "
     }
 
     if (params.VOCABULARY_LABEL_EN != '') {
-        args += "--vocabularyLabelEN ${params.VOCABULARY_LABEL_EN} "
+        args += "--vocabularyLabelEN " + quoteCliValue(params.VOCABULARY_LABEL_EN) + " "
     }
 
     if (params.VOCABULARY_DEFINITION_EN != '') {
-        args += "--vocabularyDefinitionEN ${params.VOCABULARY_DEFINITION_EN} "
+        args += "--vocabularyDefinitionEN " + quoteCliValue(params.VOCABULARY_DEFINITION_EN) + " "
     }
 
     if (params.CSV_DELIMITER != '') {
-        args += "--csvDelimiter ${params.CSV_DELIMITER} "
+        args += "--csvDelimiter " + quoteCliValue(params.CSV_DELIMITER) + " "
     }
 
     if (params.LIST_DELIMITER != '') {
-        args += "--listDelimiter ${params.LIST_DELIMITER} "
+        args += "--listDelimiter " + quoteCliValue(params.LIST_DELIMITER) + " "
     }
 
     if (params.ENCODING != '') {
-        args += "--encoding ${params.ENCODING} "
+        args += "--encoding " + quoteCliValue(params.ENCODING) + " "
     }
 
     try {
@@ -115,7 +115,7 @@ def createCliArgs(user) {
     if (params.MIGRATION == true) {
         args += "--migration "
         args += setApiUrl("targetApiUrl", params.MIGRATE_TO)
-        args += "--targetApiUser " + user + " "
+        args += "--targetApiUser " + quoteCliValue(user) + " "
     }
 
     if (params.IMPORT_HIDDEN_LABELS_ONLY == true) {
@@ -127,6 +127,11 @@ def createCliArgs(user) {
     }
 
     return args
+}
+
+static def quoteCliValue(value) {
+    // Single-quote argument values to preserve spaces/special chars in shell.
+    return "'" + value.toString().replace("'", "'\\''") + "'"
 }
 
 static def setApiUrl(paramName, env_param) {

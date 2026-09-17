@@ -129,6 +129,62 @@
       "alternativeLabels": {},
       "hiddenLabels": [],
       "sameAsUris": []
+    },
+    {
+      "key": 4,
+      "name": "Hornung",
+      "label": {
+        "en": "Hornung"
+      },
+      "definition": {},
+      "externalDefinitions": [],
+      "editorialNotes": [],
+      "replacedByKey": 2,
+      "deprecated": "2020-01-01T00:00:00",
+      "deprecatedBy": "test",
+      "vocabularyKey": null,
+      "parentKey": null,
+      "alternativeLabels": {},
+      "hiddenLabels": [
+        "hornung month"
+      ],
+      "sameAsUris": []
+    },
+    {
+      "key": 5,
+      "name": "OldHornung",
+      "label": {
+        "en": "OldHornung"
+      },
+      "definition": {},
+      "externalDefinitions": [],
+      "editorialNotes": [],
+      "replacedByKey": 4,
+      "deprecated": "2020-01-01T00:00:00",
+      "deprecatedBy": "test",
+      "vocabularyKey": null,
+      "parentKey": null,
+      "alternativeLabels": {},
+      "hiddenLabels": [],
+      "sameAsUris": []
+    },
+    {
+      "key": 6,
+      "name": "Undecimber",
+      "label": {
+        "en": "Undecimber"
+      },
+      "definition": {},
+      "externalDefinitions": [],
+      "editorialNotes": [],
+      "replacedByKey": null,
+      "deprecated": "2020-01-01T00:00:00",
+      "deprecatedBy": "test",
+      "vocabularyKey": null,
+      "parentKey": null,
+      "alternativeLabels": {},
+      "hiddenLabels": [],
+      "sameAsUris": []
     }
   ]
 }

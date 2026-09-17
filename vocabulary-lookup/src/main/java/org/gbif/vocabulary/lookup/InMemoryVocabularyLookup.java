@@ -364,6 +364,9 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
   }
 
   private LookupConcept toLookupConcept(ConceptExportView conceptExportView) {
+    // if the matched concept is deprecated we return its replacement instead
+    conceptExportView = resolveReplacement(conceptExportView);
+
     // find parents
     List<LookupConcept.Parent> parents = new ArrayList<>();
     Long parentKey = conceptExportView.getConcept().getParentKey();
@@ -386,6 +389,32 @@ public class InMemoryVocabularyLookup implements VocabularyLookup {
 
     return LookupConcept.of(
         conceptExportView.getConcept(), parents, new ArrayList<>(conceptExportView.getTags()));
+  }
+
+  /**
+   * Follows the replacedBy chain of a deprecated concept until it reaches a non-deprecated one. If
+   * the concept is not deprecated, has no replacement or the replacement is not found in the
+   * export, the concept is returned as-is.
+   */
+  private ConceptExportView resolveReplacement(ConceptExportView conceptExportView) {
+    Set<Long> visitedKeys = new HashSet<>();
+    while (conceptExportView.getConcept().getDeprecated() != null
+        && conceptExportView.getConcept().getReplacedByKey() != null
+        && visitedKeys.add(conceptExportView.getConcept().getKey())) {
+      ConceptExportView replacement =
+          conceptsByKeyCache.get(conceptExportView.getConcept().getReplacedByKey());
+
+      if (replacement == null) {
+        break;
+      }
+
+      log.debug(
+          "Concept {} is deprecated, resolved to its replacement {}",
+          conceptExportView.getConcept().getName(),
+          replacement.getConcept().getName());
+      conceptExportView = replacement;
+    }
+    return conceptExportView;
   }
 
   private static class LabelMatch {

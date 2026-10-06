@@ -108,6 +108,12 @@ public class VocabularyReleaseToHdfsCallback
   private static Configuration getHdfsConfiguration(String hdfsSiteConfig) {
     Configuration config = new Configuration();
 
+    // Don't rely on META-INF/services discovery alone: shaded jars often lose or
+    // overwrite the FileSystem SPI entries and then fail with
+    // "No FileSystem for scheme \"hdfs\"".
+    config.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+    config.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+
     // check if the hdfs-site.xml is provided
     if (!Strings.isNullOrEmpty(hdfsSiteConfig)) {
       File hdfsSite = new File(hdfsSiteConfig);

@@ -98,6 +98,37 @@ public class VocabularyLookupTest {
   }
 
   @Test
+  void lookupDeprecatedConceptResolvesReplacementTest() {
+    InMemoryVocabularyLookup vocabulary =
+        InMemoryVocabularyLookup.newBuilder()
+            .from(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(TEST_VOCAB_FILE))
+            .build();
+
+    // name match on a deprecated concept resolves to its replacement
+    Optional<LookupConcept> concept = vocabulary.lookup("Hornung");
+    assertTrue(concept.isPresent());
+    assertEquals("February", concept.get().getConcept().getName());
+    assertEquals(1, concept.get().getParents().size());
+    assertEquals("January", concept.get().getParents().get(0).getName());
+
+    // hidden label match on a deprecated concept also resolves to the replacement
+    concept = vocabulary.lookup("hornung month");
+    assertTrue(concept.isPresent());
+    assertEquals("February", concept.get().getConcept().getName());
+
+    // replacement chains are followed until a non-deprecated concept
+    concept = vocabulary.lookup("OldHornung");
+    assertTrue(concept.isPresent());
+    assertEquals("February", concept.get().getConcept().getName());
+
+    // deprecated without replacement is returned as-is
+    concept = vocabulary.lookup("Undecimber");
+    assertTrue(concept.isPresent());
+    assertEquals("Undecimber", concept.get().getConcept().getName());
+  }
+
+  @Test
   public void lookupWithPrefiltersTest() {
     InMemoryVocabularyLookup lookup =
         InMemoryVocabularyLookup.newBuilder()

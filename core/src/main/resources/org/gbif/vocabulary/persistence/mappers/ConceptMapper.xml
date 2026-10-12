@@ -922,31 +922,52 @@
   </select>
 
   <sql id="LOOKUP_COMMON">
-    SELECT DISTINCT ON (key) matches.*
-    FROM (
-      SELECT c.key, c.name, null AS label, null AS label_lang, null AS alt_label, null AS alt_label_lang, null AS hidden_label
+    <!-- ponytail: depth cap 10 stops a runaway replaced_by chain; raise it if a vocabulary needs a longer path -->
+    WITH RECURSIVE matches AS (
+      SELECT c.key, null AS label, null AS label_lang, null AS alt_label, null AS alt_label_lang, null AS hidden_label
       FROM concept${table_suffix} c
-      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      WHERE c.vocabulary_key = #{vocabularyKey}
       AND normalize_name(c.name) = normalize_name(#{value,jdbcType=VARCHAR})
     UNION ALL
-      SELECT c.key, c.name, cl.value  AS label, cl."language" AS label_lang, null AS alt_label, null AS alt_label_lang, null AS hidden_label
+      SELECT c.key, cl.value AS label, cl."language" AS label_lang, null AS alt_label, null AS alt_label_lang, null AS hidden_label
       FROM concept${table_suffix} c
       INNER JOIN concept_label${table_suffix} cl ON cl.concept_key = c.key
-      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      WHERE c.vocabulary_key = #{vocabularyKey}
       AND cl.normalized_value = normalize_label(#{value,jdbcType=VARCHAR})
     UNION ALL
-      SELECT c.key, c.name, null AS label, null AS label_lang, cal.value AS alt_label, cal."language" AS alt_label_lang, null AS hidden_label
+      SELECT c.key, null AS label, null AS label_lang, cal.value AS alt_label, cal."language" AS alt_label_lang, null AS hidden_label
       FROM concept${table_suffix} c
       INNER JOIN concept_alternative_label${table_suffix} cal ON cal.concept_key = c.key
-      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      WHERE c.vocabulary_key = #{vocabularyKey}
       AND cal.normalized_value = normalize_label(#{value,jdbcType=VARCHAR})
     UNION ALL
-      SELECT c.key, c.name, null AS label, null AS label_lang, null AS alt_label, null AS alt_label_lang, chl.value AS hidden_label
+      SELECT c.key, null AS label, null AS label_lang, null AS alt_label, null AS alt_label_lang, chl.value AS hidden_label
       FROM concept${table_suffix} c
       INNER JOIN concept_hidden_label${table_suffix} chl ON chl.concept_key = c.key
-      WHERE c.vocabulary_key = #{vocabularyKey} AND c.deprecated IS NULL
+      WHERE c.vocabulary_key = #{vocabularyKey}
       AND chl.normalized_value = normalize_label(#{value,jdbcType=VARCHAR})
-    ) AS matches
+    ),
+    chain AS (
+      SELECT m.key AS origin_key, c.key, c.name, c.replaced_by_key, c.deprecated, ARRAY[c.key] AS visited,
+             m.label, m.label_lang, m.alt_label, m.alt_label_lang, m.hidden_label, 0 AS depth
+      FROM matches m
+      JOIN concept${table_suffix} c ON c.key = m.key
+    UNION ALL
+      SELECT chain.origin_key, c.key, c.name, c.replaced_by_key, c.deprecated, chain.visited || c.key,
+             chain.label, chain.label_lang, chain.alt_label, chain.alt_label_lang, chain.hidden_label, chain.depth + 1
+      FROM chain
+      JOIN concept${table_suffix} c ON c.key = chain.replaced_by_key
+      WHERE chain.deprecated IS NOT NULL
+      AND chain.replaced_by_key IS NOT NULL
+      AND NOT c.key = ANY (chain.visited)
+      AND chain.depth &lt; 10
+    )
+    SELECT DISTINCT ON (key) key, name, label, label_lang, alt_label, alt_label_lang, hidden_label
+    FROM (
+      SELECT DISTINCT ON (origin_key) key, name, label, label_lang, alt_label, alt_label_lang, hidden_label
+      FROM chain
+      ORDER BY origin_key, depth DESC
+    ) resolved
   </sql>
 
 </mapper>

@@ -1078,6 +1078,49 @@ public class ConceptServiceIT {
     assertEquals(LanguageRegion.ENGLISH, results.get(0).getMatchedLabelLanguage());
   }
 
+  @Test
+  public void lookupDeprecatedConceptResolvesReplacementTest() {
+    Concept absent = createBasicConcept(vocabularies[0].getKey());
+    long absentKey = conceptService.create(absent);
+    Concept middle = createBasicConcept(vocabularies[0].getKey());
+    long middleKey = conceptService.create(middle);
+    Concept detected = createBasicConcept(vocabularies[0].getKey());
+    long detectedKey = conceptService.create(detected);
+    Concept orphan = createBasicConcept(vocabularies[0].getKey());
+    long orphanKey = conceptService.create(orphan);
+
+    conceptService.deprecate(middleKey, DEPRECATED_BY, detectedKey, false);
+    conceptService.deprecate(absentKey, DEPRECATED_BY, middleKey, false);
+    conceptService.deprecateWithoutReplacement(orphanKey, DEPRECATED_BY, false);
+    conceptService.addLabel(
+        absentKey,
+        Label.builder()
+            .value("absent label")
+            .language(LanguageRegion.ENGLISH)
+            .createdBy("test")
+            .build());
+
+    String vocabName = vocabularies[0].getName();
+
+    List<LookupResult> results = conceptService.lookup(middle.getName(), vocabName, null);
+    assertEquals(1, results.size());
+    assertEquals(detected.getName(), results.get(0).getConceptName());
+
+    results = conceptService.lookup(absent.getName(), vocabName, null);
+    assertEquals(1, results.size());
+    assertEquals(detected.getName(), results.get(0).getConceptName());
+
+    results = conceptService.lookup("absent label", vocabName, null);
+    assertEquals(1, results.size());
+    assertEquals(detected.getName(), results.get(0).getConceptName());
+    assertEquals("absent label", results.get(0).getMatchedLabel());
+    assertEquals(LanguageRegion.ENGLISH, results.get(0).getMatchedLabelLanguage());
+
+    results = conceptService.lookup(orphan.getName(), vocabName, null);
+    assertEquals(1, results.size());
+    assertEquals(orphan.getName(), results.get(0).getConceptName());
+  }
+
   static class ContexInitializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
